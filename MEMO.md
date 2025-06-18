@@ -136,94 +136,79 @@ Simple format with nodes and edges:
 
 ## Operation Tagging Strategy
 
-### CRITICAL TAGGING RULES
-1. **Single Tag Only**: Each operation gets exactly ONE tag - the most specific transformers class module
-2. **No Parent Path Tags**: Do NOT tag operations with parent module paths 
-3. **Transformers Classes Only**: Only tag with transformers library classes (BertSdpaSelfAttention, BertAttention, etc.)
-4. **No torch.nn Classes**: Do NOT tag with torch.nn classes (Linear, LayerNorm, Dropout, etc.)
+### FINALIZED TAGGING RULES (Option B: Usage-Based)
 
-### Examples
-**CORRECT**: 
-```json
-{
-  "/encoder/layer.0/attention/self/Mul_1": {
-    "op_type": "Mul",
-    "tags": ["/BertModel/BertEncoder/ModuleList.0/BertAttention/BertSdpaSelfAttention"]
-  }
-}
+#### Core Principles
+1. **Multiple Tags Allowed**: Operations can have multiple tags when genuinely shared across modules during execution
+2. **Usage-Based Only**: Tag operations ONLY when they are traced/used during forward pass  
+3. **Recursive Propagation**: Operations that produce inputs for tagged operations also get tagged
+4. **Universal Approach**: NO hardcoded model architectures, node names, or class filtering
+5. **Stack-Based Context**: Tag operations based on module execution stack during forward hooks
+
+#### Implementation Pseudo Code
+```python
+# Stack-based tagging during forward pass:
+tag_stack = []
+
+def forward_hook(module, inputs, output):
+    # 1. Push current module to stack
+    current_tag = f"/{module.__class__.__module__}.{module.__class__.__name__}"
+    tag_stack.push(current_tag)
+    
+    # 2. Tag all operations executed in this context
+    for operation in get_operations_in_current_context():
+        operation.tags.append(current_tag)
+        
+        # 3. Recursively tag operations that produced our inputs
+        for input_tensor in operation.inputs:
+            recursively_tag_producers(input_tensor, current_tag)
+    
+    # 4. Pop when leaving module scope
+    tag_stack.pop()
 ```
 
-**INCORRECT** (multiple tags, includes torch.nn class, includes parents):
+#### Examples
+
+**Single Module Usage**:
 ```json
 {
-  "/encoder/layer.0/attention/self/Mul_1": {
-    "op_type": "Mul", 
-    "tags": [
-      "/BertModel/BertEncoder/ModuleList.0/BertAttention/BertSdpaSelfAttention/Linear",
-      "/BertModel",
-      "/BertModel/BertEncoder/ModuleList.0/BertAttention", 
-      "/BertModel/BertEncoder/ModuleList.0",
-      "/BertModel/BertEncoder"
-    ]
-  }
-}
-```
-
-### Tag Selection Algorithm
-1. Find all modules in execution path
-2. Filter to only transformers library classes (exclude torch.nn classes)
-3. Select the most specific (deepest) transformers class
-4. Use only that ONE tag
-
-### Examples
-
-**Single tag (operation executes in one module):**
-```json
-{
-  "MatMul_QK": {
+  "MatMul_query": {
     "op_type": "MatMul",
-    "tags": ["/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSelfAttention"]
+    "tags": ["/transformers.models.bert.BertSelfAttention"]
   }
 }
 ```
 
-**Multiple tags (shared parameter/operation):**
+**Shared Across Multiple Modules** (e.g., attention mask):
 ```json
 {
-  "word_embeddings.weight": {
-    "op_type": "Initializer", 
+  "extended_attention_mask_creation": {
+    "op_type": "Unsqueeze", 
     "tags": [
-      "/BertModel/BertEmbeddings",
-      "/BertModel/BertPredictionHead"
+      "/transformers.models.bert.BertSelfAttention.0",
+      "/transformers.models.bert.BertSelfAttention.1"
     ]
   }
 }
 ```
 
-**Shared input across layers:**
+**Unused Operations** (no tags):
 ```json
 {
-  "Mul_attention_mask": {
-    "op_type": "Mul",
-    "tags": [
-      "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSelfAttention",
-      "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSelfAttention"
-    ]
+  "unused_computation": {
+    "op_type": "Add",
+    "tags": []
   }
 }
 ```
 
 ## What Gets Tagged
 
-### Operations
-- **Parameter-based ops**: Use model weights/biases (MatMul, Conv, etc.)
-- **Execution-based ops**: Generated during module's forward() (Add, Reshape, etc.)
-- **Control flow ops**: Execute during forward() (If, Loop, Scan) ✅
-- **Initializers**: Used during forward() execution ✅
-
-### Exclusions
-- **Input/Output ops**: Model inputs, intermediate inputs/outputs between modules ❌
-- **Constant nodes**: Constants should remain embedded, not extracted as separate nodes ❌
+### Universal Tagging Rules
+- **All Operations**: Any ONNX operation that gets traced during forward pass
+- **Usage-Driven**: Operations only get tagged when actually used/connected in the graph
+- **No Exclusions**: No hardcoded exclusions based on operation type or naming
+- **Context-Based**: Tag based on module execution context, not operation characteristics
 
 ### Constant Handling Strategy
 **IMPORTANT**: We distinguish between two types of constants:
