@@ -1,0 +1,7244 @@
+{
+  "embeddings": {
+    "file": "bert_component_embeddings.onnx",
+    "total_nodes": 34,
+    "operation_counts": {
+      "Constant": 10,
+      "Unsqueeze": 2,
+      "Concat": 1,
+      "Reshape": 1,
+      "Shape": 1,
+      "ConstantOfShape": 1,
+      "Mul": 2,
+      "Equal": 1,
+      "Where": 1,
+      "Expand": 1,
+      "Gather": 3,
+      "Add": 4,
+      "ReduceMean": 2,
+      "Sub": 1,
+      "Pow": 1,
+      "Sqrt": 1,
+      "Div": 1
+    },
+    "operations": [
+      {
+        "index": 0,
+        "name": "/comp/Constant",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_output_0"
+        ]
+      },
+      {
+        "index": 1,
+        "name": "/comp/Constant_1",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_1_output_0"
+        ]
+      },
+      {
+        "index": 2,
+        "name": "/comp/Constant_2",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_2_output_0"
+        ]
+      },
+      {
+        "index": 3,
+        "name": "/comp/Constant_3",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_3_output_0"
+        ]
+      },
+      {
+        "index": 4,
+        "name": "/comp/Constant_4",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_4_output_0"
+        ]
+      },
+      {
+        "index": 5,
+        "name": "/comp/Unsqueeze",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_output_0",
+          "/comp/Constant_4_output_0"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_output_0"
+        ]
+      },
+      {
+        "index": 6,
+        "name": "/comp/Constant_5",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_5_output_0"
+        ]
+      },
+      {
+        "index": 7,
+        "name": "/comp/Unsqueeze_1",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_1_output_0",
+          "/comp/Constant_5_output_0"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_1_output_0"
+        ]
+      },
+      {
+        "index": 8,
+        "name": "/comp/Concat",
+        "op_type": "Concat",
+        "inputs": [
+          "/comp/Unsqueeze_output_0",
+          "/comp/Unsqueeze_1_output_0"
+        ],
+        "outputs": [
+          "/comp/Concat_output_0"
+        ]
+      },
+      {
+        "index": 9,
+        "name": "/comp/Constant_6",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_6_output_0"
+        ]
+      },
+      {
+        "index": 10,
+        "name": "/comp/Reshape",
+        "op_type": "Reshape",
+        "inputs": [
+          "/comp/Concat_output_0",
+          "/comp/Constant_6_output_0"
+        ],
+        "outputs": [
+          "/comp/Reshape_output_0"
+        ]
+      },
+      {
+        "index": 11,
+        "name": "/comp/Shape",
+        "op_type": "Shape",
+        "inputs": [
+          "/comp/Reshape_output_0"
+        ],
+        "outputs": [
+          "/comp/Shape_output_0"
+        ]
+      },
+      {
+        "index": 12,
+        "name": "/comp/ConstantOfShape",
+        "op_type": "ConstantOfShape",
+        "inputs": [
+          "/comp/Shape_output_0"
+        ],
+        "outputs": [
+          "/comp/ConstantOfShape_output_0"
+        ]
+      },
+      {
+        "index": 13,
+        "name": "/comp/Constant_7",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_7_output_0"
+        ]
+      },
+      {
+        "index": 14,
+        "name": "/comp/Mul",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/ConstantOfShape_output_0",
+          "/comp/Constant_7_output_0"
+        ],
+        "outputs": [
+          "/comp/Mul_output_0"
+        ]
+      },
+      {
+        "index": 15,
+        "name": "/comp/Equal",
+        "op_type": "Equal",
+        "inputs": [
+          "/comp/Reshape_output_0",
+          "/comp/Mul_output_0"
+        ],
+        "outputs": [
+          "/comp/Equal_output_0"
+        ]
+      },
+      {
+        "index": 16,
+        "name": "/comp/Where",
+        "op_type": "Where",
+        "inputs": [
+          "/comp/Equal_output_0",
+          "/comp/ConstantOfShape_output_0",
+          "/comp/Reshape_output_0"
+        ],
+        "outputs": [
+          "/comp/Where_output_0"
+        ]
+      },
+      {
+        "index": 17,
+        "name": "/comp/Expand",
+        "op_type": "Expand",
+        "inputs": [
+          "/comp/Constant_3_output_0",
+          "/comp/Where_output_0"
+        ],
+        "outputs": [
+          "/comp/Expand_output_0"
+        ]
+      },
+      {
+        "index": 18,
+        "name": "/comp/word_embeddings/Gather",
+        "op_type": "Gather",
+        "inputs": [
+          "comp.word_embeddings.weight",
+          "input.1"
+        ],
+        "outputs": [
+          "/comp/word_embeddings/Gather_output_0"
+        ]
+      },
+      {
+        "index": 19,
+        "name": "/comp/token_type_embeddings/Gather",
+        "op_type": "Gather",
+        "inputs": [
+          "comp.token_type_embeddings.weight",
+          "/comp/Expand_output_0"
+        ],
+        "outputs": [
+          "/comp/token_type_embeddings/Gather_output_0"
+        ]
+      },
+      {
+        "index": 20,
+        "name": "/comp/Add",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/word_embeddings/Gather_output_0",
+          "/comp/token_type_embeddings/Gather_output_0"
+        ],
+        "outputs": [
+          "/comp/Add_output_0"
+        ]
+      },
+      {
+        "index": 21,
+        "name": "/comp/position_embeddings/Gather",
+        "op_type": "Gather",
+        "inputs": [
+          "comp.position_embeddings.weight",
+          "/comp/Constant_2_output_0"
+        ],
+        "outputs": [
+          "/comp/position_embeddings/Gather_output_0"
+        ]
+      },
+      {
+        "index": 22,
+        "name": "/comp/Add_1",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/Add_output_0",
+          "/comp/position_embeddings/Gather_output_0"
+        ],
+        "outputs": [
+          "/comp/Add_1_output_0"
+        ]
+      },
+      {
+        "index": 23,
+        "name": "/comp/LayerNorm/ReduceMean",
+        "op_type": "ReduceMean",
+        "inputs": [
+          "/comp/Add_1_output_0"
+        ],
+        "outputs": [
+          "/comp/LayerNorm/ReduceMean_output_0"
+        ]
+      },
+      {
+        "index": 24,
+        "name": "/comp/LayerNorm/Sub",
+        "op_type": "Sub",
+        "inputs": [
+          "/comp/Add_1_output_0",
+          "/comp/LayerNorm/ReduceMean_output_0"
+        ],
+        "outputs": [
+          "/comp/LayerNorm/Sub_output_0"
+        ]
+      },
+      {
+        "index": 25,
+        "name": "/comp/LayerNorm/Constant",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/LayerNorm/Constant_output_0"
+        ]
+      },
+      {
+        "index": 26,
+        "name": "/comp/LayerNorm/Pow",
+        "op_type": "Pow",
+        "inputs": [
+          "/comp/LayerNorm/Sub_output_0",
+          "/comp/LayerNorm/Constant_output_0"
+        ],
+        "outputs": [
+          "/comp/LayerNorm/Pow_output_0"
+        ]
+      },
+      {
+        "index": 27,
+        "name": "/comp/LayerNorm/ReduceMean_1",
+        "op_type": "ReduceMean",
+        "inputs": [
+          "/comp/LayerNorm/Pow_output_0"
+        ],
+        "outputs": [
+          "/comp/LayerNorm/ReduceMean_1_output_0"
+        ]
+      },
+      {
+        "index": 28,
+        "name": "/comp/LayerNorm/Constant_1",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/LayerNorm/Constant_1_output_0"
+        ]
+      },
+      {
+        "index": 29,
+        "name": "/comp/LayerNorm/Add",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/LayerNorm/ReduceMean_1_output_0",
+          "/comp/LayerNorm/Constant_1_output_0"
+        ],
+        "outputs": [
+          "/comp/LayerNorm/Add_output_0"
+        ]
+      },
+      {
+        "index": 30,
+        "name": "/comp/LayerNorm/Sqrt",
+        "op_type": "Sqrt",
+        "inputs": [
+          "/comp/LayerNorm/Add_output_0"
+        ],
+        "outputs": [
+          "/comp/LayerNorm/Sqrt_output_0"
+        ]
+      },
+      {
+        "index": 31,
+        "name": "/comp/LayerNorm/Div",
+        "op_type": "Div",
+        "inputs": [
+          "/comp/LayerNorm/Sub_output_0",
+          "/comp/LayerNorm/Sqrt_output_0"
+        ],
+        "outputs": [
+          "/comp/LayerNorm/Div_output_0"
+        ]
+      },
+      {
+        "index": 32,
+        "name": "/comp/LayerNorm/Mul",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/LayerNorm/Div_output_0",
+          "comp.LayerNorm.weight"
+        ],
+        "outputs": [
+          "/comp/LayerNorm/Mul_output_0"
+        ]
+      },
+      {
+        "index": 33,
+        "name": "/comp/LayerNorm/Add_1",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/LayerNorm/Mul_output_0",
+          "comp.LayerNorm.bias"
+        ],
+        "outputs": [
+          "input.8"
+        ]
+      }
+    ]
+  },
+  "encoder_layer_0": {
+    "file": "bert_component_encoder_layer_0.onnx",
+    "total_nodes": 119,
+    "operation_counts": {
+      "Constant": 36,
+      "Transpose": 10,
+      "MatMul": 8,
+      "Add": 13,
+      "Unsqueeze": 15,
+      "Concat": 4,
+      "Reshape": 4,
+      "Shape": 1,
+      "Slice": 1,
+      "Cast": 2,
+      "Sqrt": 5,
+      "Div": 4,
+      "Mul": 6,
+      "Softmax": 1,
+      "ReduceMean": 4,
+      "Sub": 2,
+      "Pow": 2,
+      "Erf": 1
+    },
+    "operations": [
+      {
+        "index": 0,
+        "name": "/comp/attention/self/Constant",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_output_0"
+        ]
+      },
+      {
+        "index": 1,
+        "name": "/comp/attention/self/Constant_1",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_1_output_0"
+        ]
+      },
+      {
+        "index": 2,
+        "name": "/comp/attention/self/query/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.attention.self.query.weight"
+        ],
+        "outputs": [
+          "/comp/attention/self/query/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 3,
+        "name": "/comp/attention/self/query/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "onnx::MatMul_0",
+          "/comp/attention/self/query/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/query/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 4,
+        "name": "/comp/attention/self/query/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.attention.self.query.bias",
+          "/comp/attention/self/query/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/query/Add_output_0"
+        ]
+      },
+      {
+        "index": 5,
+        "name": "/comp/attention/self/Constant_2",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_2_output_0"
+        ]
+      },
+      {
+        "index": 6,
+        "name": "/comp/attention/self/Constant_3",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_3_output_0"
+        ]
+      },
+      {
+        "index": 7,
+        "name": "/comp/attention/self/Constant_4",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_4_output_0"
+        ]
+      },
+      {
+        "index": 8,
+        "name": "/comp/attention/self/Constant_5",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_5_output_0"
+        ]
+      },
+      {
+        "index": 9,
+        "name": "Constant_45",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_26"
+        ]
+      },
+      {
+        "index": 10,
+        "name": "/comp/attention/self/Unsqueeze",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_2_output_0",
+          "onnx::Unsqueeze_26"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_output_0"
+        ]
+      },
+      {
+        "index": 11,
+        "name": "Constant_47",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_28"
+        ]
+      },
+      {
+        "index": 12,
+        "name": "/comp/attention/self/Unsqueeze_1",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_3_output_0",
+          "onnx::Unsqueeze_28"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_1_output_0"
+        ]
+      },
+      {
+        "index": 13,
+        "name": "Constant_49",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_30"
+        ]
+      },
+      {
+        "index": 14,
+        "name": "/comp/attention/self/Unsqueeze_2",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_4_output_0",
+          "onnx::Unsqueeze_30"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_2_output_0"
+        ]
+      },
+      {
+        "index": 15,
+        "name": "Constant_51",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_32"
+        ]
+      },
+      {
+        "index": 16,
+        "name": "/comp/attention/self/Unsqueeze_3",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_5_output_0",
+          "onnx::Unsqueeze_32"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_3_output_0"
+        ]
+      },
+      {
+        "index": 17,
+        "name": "/comp/attention/self/Concat",
+        "op_type": "Concat",
+        "inputs": [
+          "/comp/attention/self/Unsqueeze_output_0",
+          "/comp/attention/self/Unsqueeze_1_output_0",
+          "/comp/attention/self/Unsqueeze_2_output_0",
+          "/comp/attention/self/Unsqueeze_3_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Concat_output_0"
+        ]
+      },
+      {
+        "index": 18,
+        "name": "/comp/attention/self/Reshape",
+        "op_type": "Reshape",
+        "inputs": [
+          "/comp/attention/self/query/Add_output_0",
+          "/comp/attention/self/Concat_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Reshape_output_0"
+        ]
+      },
+      {
+        "index": 19,
+        "name": "/comp/attention/self/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "/comp/attention/self/Reshape_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 20,
+        "name": "/comp/attention/self/key/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.attention.self.key.weight"
+        ],
+        "outputs": [
+          "/comp/attention/self/key/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 21,
+        "name": "/comp/attention/self/key/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "onnx::MatMul_0",
+          "/comp/attention/self/key/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/key/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 22,
+        "name": "/comp/attention/self/key/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.attention.self.key.bias",
+          "/comp/attention/self/key/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/key/Add_output_0"
+        ]
+      },
+      {
+        "index": 23,
+        "name": "/comp/attention/self/Constant_6",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_6_output_0"
+        ]
+      },
+      {
+        "index": 24,
+        "name": "/comp/attention/self/Constant_7",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_7_output_0"
+        ]
+      },
+      {
+        "index": 25,
+        "name": "Constant_61",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_42"
+        ]
+      },
+      {
+        "index": 26,
+        "name": "/comp/attention/self/Unsqueeze_4",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_6_output_0",
+          "onnx::Unsqueeze_42"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_4_output_0"
+        ]
+      },
+      {
+        "index": 27,
+        "name": "Constant_63",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_44"
+        ]
+      },
+      {
+        "index": 28,
+        "name": "/comp/attention/self/Unsqueeze_5",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_7_output_0",
+          "onnx::Unsqueeze_44"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_5_output_0"
+        ]
+      },
+      {
+        "index": 29,
+        "name": "Constant_65",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_46"
+        ]
+      },
+      {
+        "index": 30,
+        "name": "/comp/attention/self/Unsqueeze_6",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_4_output_0",
+          "onnx::Unsqueeze_46"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_6_output_0"
+        ]
+      },
+      {
+        "index": 31,
+        "name": "Constant_67",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_48"
+        ]
+      },
+      {
+        "index": 32,
+        "name": "/comp/attention/self/Unsqueeze_7",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_5_output_0",
+          "onnx::Unsqueeze_48"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_7_output_0"
+        ]
+      },
+      {
+        "index": 33,
+        "name": "/comp/attention/self/Concat_1",
+        "op_type": "Concat",
+        "inputs": [
+          "/comp/attention/self/Unsqueeze_4_output_0",
+          "/comp/attention/self/Unsqueeze_5_output_0",
+          "/comp/attention/self/Unsqueeze_6_output_0",
+          "/comp/attention/self/Unsqueeze_7_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Concat_1_output_0"
+        ]
+      },
+      {
+        "index": 34,
+        "name": "/comp/attention/self/Reshape_1",
+        "op_type": "Reshape",
+        "inputs": [
+          "/comp/attention/self/key/Add_output_0",
+          "/comp/attention/self/Concat_1_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Reshape_1_output_0"
+        ]
+      },
+      {
+        "index": 35,
+        "name": "/comp/attention/self/value/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.attention.self.value.weight"
+        ],
+        "outputs": [
+          "/comp/attention/self/value/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 36,
+        "name": "/comp/attention/self/value/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "onnx::MatMul_0",
+          "/comp/attention/self/value/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/value/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 37,
+        "name": "/comp/attention/self/value/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.attention.self.value.bias",
+          "/comp/attention/self/value/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/value/Add_output_0"
+        ]
+      },
+      {
+        "index": 38,
+        "name": "/comp/attention/self/Constant_8",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_8_output_0"
+        ]
+      },
+      {
+        "index": 39,
+        "name": "/comp/attention/self/Constant_9",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_9_output_0"
+        ]
+      },
+      {
+        "index": 40,
+        "name": "Constant_76",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_57"
+        ]
+      },
+      {
+        "index": 41,
+        "name": "/comp/attention/self/Unsqueeze_8",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_8_output_0",
+          "onnx::Unsqueeze_57"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_8_output_0"
+        ]
+      },
+      {
+        "index": 42,
+        "name": "Constant_78",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_59"
+        ]
+      },
+      {
+        "index": 43,
+        "name": "/comp/attention/self/Unsqueeze_9",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_9_output_0",
+          "onnx::Unsqueeze_59"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_9_output_0"
+        ]
+      },
+      {
+        "index": 44,
+        "name": "Constant_80",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_61"
+        ]
+      },
+      {
+        "index": 45,
+        "name": "/comp/attention/self/Unsqueeze_10",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_4_output_0",
+          "onnx::Unsqueeze_61"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_10_output_0"
+        ]
+      },
+      {
+        "index": 46,
+        "name": "Constant_82",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_63"
+        ]
+      },
+      {
+        "index": 47,
+        "name": "/comp/attention/self/Unsqueeze_11",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_5_output_0",
+          "onnx::Unsqueeze_63"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_11_output_0"
+        ]
+      },
+      {
+        "index": 48,
+        "name": "/comp/attention/self/Concat_2",
+        "op_type": "Concat",
+        "inputs": [
+          "/comp/attention/self/Unsqueeze_8_output_0",
+          "/comp/attention/self/Unsqueeze_9_output_0",
+          "/comp/attention/self/Unsqueeze_10_output_0",
+          "/comp/attention/self/Unsqueeze_11_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Concat_2_output_0"
+        ]
+      },
+      {
+        "index": 49,
+        "name": "/comp/attention/self/Reshape_2",
+        "op_type": "Reshape",
+        "inputs": [
+          "/comp/attention/self/value/Add_output_0",
+          "/comp/attention/self/Concat_2_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Reshape_2_output_0"
+        ]
+      },
+      {
+        "index": 50,
+        "name": "/comp/attention/self/Transpose_1",
+        "op_type": "Transpose",
+        "inputs": [
+          "/comp/attention/self/Reshape_2_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Transpose_1_output_0"
+        ]
+      },
+      {
+        "index": 51,
+        "name": "/comp/attention/self/Shape",
+        "op_type": "Shape",
+        "inputs": [
+          "/comp/attention/self/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Shape_output_0"
+        ]
+      },
+      {
+        "index": 52,
+        "name": "/comp/attention/self/Constant_10",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_10_output_0"
+        ]
+      },
+      {
+        "index": 53,
+        "name": "/comp/attention/self/Constant_11",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_11_output_0"
+        ]
+      },
+      {
+        "index": 54,
+        "name": "/comp/attention/self/Slice",
+        "op_type": "Slice",
+        "inputs": [
+          "/comp/attention/self/Shape_output_0",
+          "/comp/attention/self/Constant_10_output_0",
+          "/comp/attention/self/Constant_11_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Slice_output_0"
+        ]
+      },
+      {
+        "index": 55,
+        "name": "/comp/attention/self/Cast",
+        "op_type": "Cast",
+        "inputs": [
+          "/comp/attention/self/Slice_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Cast_output_0"
+        ]
+      },
+      {
+        "index": 56,
+        "name": "/comp/attention/self/Sqrt",
+        "op_type": "Sqrt",
+        "inputs": [
+          "/comp/attention/self/Cast_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Sqrt_output_0"
+        ]
+      },
+      {
+        "index": 57,
+        "name": "/comp/attention/self/Constant_12",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_12_output_0"
+        ]
+      },
+      {
+        "index": 58,
+        "name": "/comp/attention/self/Div",
+        "op_type": "Div",
+        "inputs": [
+          "/comp/attention/self/Constant_12_output_0",
+          "/comp/attention/self/Sqrt_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Div_output_0"
+        ]
+      },
+      {
+        "index": 59,
+        "name": "/comp/attention/self/Cast_1",
+        "op_type": "Cast",
+        "inputs": [
+          "/comp/attention/self/Div_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Cast_1_output_0"
+        ]
+      },
+      {
+        "index": 60,
+        "name": "/comp/attention/self/Transpose_2",
+        "op_type": "Transpose",
+        "inputs": [
+          "/comp/attention/self/Reshape_1_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Transpose_2_output_0"
+        ]
+      },
+      {
+        "index": 61,
+        "name": "/comp/attention/self/Sqrt_1",
+        "op_type": "Sqrt",
+        "inputs": [
+          "/comp/attention/self/Cast_1_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Sqrt_1_output_0"
+        ]
+      },
+      {
+        "index": 62,
+        "name": "/comp/attention/self/Mul",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/attention/self/Transpose_output_0",
+          "/comp/attention/self/Sqrt_1_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Mul_output_0"
+        ]
+      },
+      {
+        "index": 63,
+        "name": "/comp/attention/self/Sqrt_2",
+        "op_type": "Sqrt",
+        "inputs": [
+          "/comp/attention/self/Cast_1_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Sqrt_2_output_0"
+        ]
+      },
+      {
+        "index": 64,
+        "name": "/comp/attention/self/Mul_1",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/attention/self/Transpose_2_output_0",
+          "/comp/attention/self/Sqrt_2_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Mul_1_output_0"
+        ]
+      },
+      {
+        "index": 65,
+        "name": "/comp/attention/self/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "/comp/attention/self/Mul_output_0",
+          "/comp/attention/self/Mul_1_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 66,
+        "name": "/comp/attention/self/Softmax",
+        "op_type": "Softmax",
+        "inputs": [
+          "/comp/attention/self/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Softmax_output_0"
+        ]
+      },
+      {
+        "index": 67,
+        "name": "/comp/attention/self/MatMul_1",
+        "op_type": "MatMul",
+        "inputs": [
+          "/comp/attention/self/Softmax_output_0",
+          "/comp/attention/self/Transpose_1_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/MatMul_1_output_0"
+        ]
+      },
+      {
+        "index": 68,
+        "name": "/comp/attention/self/Transpose_3",
+        "op_type": "Transpose",
+        "inputs": [
+          "/comp/attention/self/MatMul_1_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Transpose_3_output_0"
+        ]
+      },
+      {
+        "index": 69,
+        "name": "/comp/attention/self/Constant_13",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_13_output_0"
+        ]
+      },
+      {
+        "index": 70,
+        "name": "Constant_106",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_87"
+        ]
+      },
+      {
+        "index": 71,
+        "name": "/comp/attention/self/Unsqueeze_12",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_output_0",
+          "onnx::Unsqueeze_87"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_12_output_0"
+        ]
+      },
+      {
+        "index": 72,
+        "name": "Constant_108",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_89"
+        ]
+      },
+      {
+        "index": 73,
+        "name": "/comp/attention/self/Unsqueeze_13",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_1_output_0",
+          "onnx::Unsqueeze_89"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_13_output_0"
+        ]
+      },
+      {
+        "index": 74,
+        "name": "Constant_110",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_91"
+        ]
+      },
+      {
+        "index": 75,
+        "name": "/comp/attention/self/Unsqueeze_14",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_13_output_0",
+          "onnx::Unsqueeze_91"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_14_output_0"
+        ]
+      },
+      {
+        "index": 76,
+        "name": "/comp/attention/self/Concat_3",
+        "op_type": "Concat",
+        "inputs": [
+          "/comp/attention/self/Unsqueeze_12_output_0",
+          "/comp/attention/self/Unsqueeze_13_output_0",
+          "/comp/attention/self/Unsqueeze_14_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Concat_3_output_0"
+        ]
+      },
+      {
+        "index": 77,
+        "name": "/comp/attention/self/Reshape_3",
+        "op_type": "Reshape",
+        "inputs": [
+          "/comp/attention/self/Transpose_3_output_0",
+          "/comp/attention/self/Concat_3_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Reshape_3_output_0"
+        ]
+      },
+      {
+        "index": 78,
+        "name": "/comp/attention/output/dense/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.attention.output.dense.weight"
+        ],
+        "outputs": [
+          "/comp/attention/output/dense/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 79,
+        "name": "/comp/attention/output/dense/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "/comp/attention/self/Reshape_3_output_0",
+          "/comp/attention/output/dense/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/output/dense/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 80,
+        "name": "/comp/attention/output/dense/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.attention.output.dense.bias",
+          "/comp/attention/output/dense/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/output/dense/Add_output_0"
+        ]
+      },
+      {
+        "index": 81,
+        "name": "/comp/attention/output/Add",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/attention/output/dense/Add_output_0",
+          "onnx::MatMul_0"
+        ],
+        "outputs": [
+          "/comp/attention/output/Add_output_0"
+        ]
+      },
+      {
+        "index": 82,
+        "name": "/comp/attention/output/LayerNorm/ReduceMean",
+        "op_type": "ReduceMean",
+        "inputs": [
+          "/comp/attention/output/Add_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/output/LayerNorm/ReduceMean_output_0"
+        ]
+      },
+      {
+        "index": 83,
+        "name": "/comp/attention/output/LayerNorm/Sub",
+        "op_type": "Sub",
+        "inputs": [
+          "/comp/attention/output/Add_output_0",
+          "/comp/attention/output/LayerNorm/ReduceMean_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/output/LayerNorm/Sub_output_0"
+        ]
+      },
+      {
+        "index": 84,
+        "name": "/comp/attention/output/LayerNorm/Constant",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/output/LayerNorm/Constant_output_0"
+        ]
+      },
+      {
+        "index": 85,
+        "name": "/comp/attention/output/LayerNorm/Pow",
+        "op_type": "Pow",
+        "inputs": [
+          "/comp/attention/output/LayerNorm/Sub_output_0",
+          "/comp/attention/output/LayerNorm/Constant_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/output/LayerNorm/Pow_output_0"
+        ]
+      },
+      {
+        "index": 86,
+        "name": "/comp/attention/output/LayerNorm/ReduceMean_1",
+        "op_type": "ReduceMean",
+        "inputs": [
+          "/comp/attention/output/LayerNorm/Pow_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/output/LayerNorm/ReduceMean_1_output_0"
+        ]
+      },
+      {
+        "index": 87,
+        "name": "/comp/attention/output/LayerNorm/Constant_1",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/output/LayerNorm/Constant_1_output_0"
+        ]
+      },
+      {
+        "index": 88,
+        "name": "/comp/attention/output/LayerNorm/Add",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/attention/output/LayerNorm/ReduceMean_1_output_0",
+          "/comp/attention/output/LayerNorm/Constant_1_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/output/LayerNorm/Add_output_0"
+        ]
+      },
+      {
+        "index": 89,
+        "name": "/comp/attention/output/LayerNorm/Sqrt",
+        "op_type": "Sqrt",
+        "inputs": [
+          "/comp/attention/output/LayerNorm/Add_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/output/LayerNorm/Sqrt_output_0"
+        ]
+      },
+      {
+        "index": 90,
+        "name": "/comp/attention/output/LayerNorm/Div",
+        "op_type": "Div",
+        "inputs": [
+          "/comp/attention/output/LayerNorm/Sub_output_0",
+          "/comp/attention/output/LayerNorm/Sqrt_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/output/LayerNorm/Div_output_0"
+        ]
+      },
+      {
+        "index": 91,
+        "name": "/comp/attention/output/LayerNorm/Mul",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/attention/output/LayerNorm/Div_output_0",
+          "comp.attention.output.LayerNorm.weight"
+        ],
+        "outputs": [
+          "/comp/attention/output/LayerNorm/Mul_output_0"
+        ]
+      },
+      {
+        "index": 92,
+        "name": "/comp/attention/output/LayerNorm/Add_1",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/attention/output/LayerNorm/Mul_output_0",
+          "comp.attention.output.LayerNorm.bias"
+        ],
+        "outputs": [
+          "/comp/attention/output/LayerNorm/Add_1_output_0"
+        ]
+      },
+      {
+        "index": 93,
+        "name": "/comp/intermediate/dense/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.intermediate.dense.weight"
+        ],
+        "outputs": [
+          "/comp/intermediate/dense/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 94,
+        "name": "/comp/intermediate/dense/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "/comp/attention/output/LayerNorm/Add_1_output_0",
+          "/comp/intermediate/dense/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/intermediate/dense/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 95,
+        "name": "/comp/intermediate/dense/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.intermediate.dense.bias",
+          "/comp/intermediate/dense/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/intermediate/dense/Add_output_0"
+        ]
+      },
+      {
+        "index": 96,
+        "name": "/comp/intermediate/intermediate_act_fn/Constant",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/intermediate/intermediate_act_fn/Constant_output_0"
+        ]
+      },
+      {
+        "index": 97,
+        "name": "/comp/intermediate/intermediate_act_fn/Div",
+        "op_type": "Div",
+        "inputs": [
+          "/comp/intermediate/dense/Add_output_0",
+          "/comp/intermediate/intermediate_act_fn/Constant_output_0"
+        ],
+        "outputs": [
+          "/comp/intermediate/intermediate_act_fn/Div_output_0"
+        ]
+      },
+      {
+        "index": 98,
+        "name": "/comp/intermediate/intermediate_act_fn/Erf",
+        "op_type": "Erf",
+        "inputs": [
+          "/comp/intermediate/intermediate_act_fn/Div_output_0"
+        ],
+        "outputs": [
+          "/comp/intermediate/intermediate_act_fn/Erf_output_0"
+        ]
+      },
+      {
+        "index": 99,
+        "name": "/comp/intermediate/intermediate_act_fn/Constant_1",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/intermediate/intermediate_act_fn/Constant_1_output_0"
+        ]
+      },
+      {
+        "index": 100,
+        "name": "/comp/intermediate/intermediate_act_fn/Add",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/intermediate/intermediate_act_fn/Erf_output_0",
+          "/comp/intermediate/intermediate_act_fn/Constant_1_output_0"
+        ],
+        "outputs": [
+          "/comp/intermediate/intermediate_act_fn/Add_output_0"
+        ]
+      },
+      {
+        "index": 101,
+        "name": "/comp/intermediate/intermediate_act_fn/Mul",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/intermediate/dense/Add_output_0",
+          "/comp/intermediate/intermediate_act_fn/Add_output_0"
+        ],
+        "outputs": [
+          "/comp/intermediate/intermediate_act_fn/Mul_output_0"
+        ]
+      },
+      {
+        "index": 102,
+        "name": "/comp/intermediate/intermediate_act_fn/Constant_2",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/intermediate/intermediate_act_fn/Constant_2_output_0"
+        ]
+      },
+      {
+        "index": 103,
+        "name": "/comp/intermediate/intermediate_act_fn/Mul_1",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/intermediate/intermediate_act_fn/Mul_output_0",
+          "/comp/intermediate/intermediate_act_fn/Constant_2_output_0"
+        ],
+        "outputs": [
+          "/comp/intermediate/intermediate_act_fn/Mul_1_output_0"
+        ]
+      },
+      {
+        "index": 104,
+        "name": "/comp/output/dense/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.output.dense.weight"
+        ],
+        "outputs": [
+          "/comp/output/dense/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 105,
+        "name": "/comp/output/dense/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "/comp/intermediate/intermediate_act_fn/Mul_1_output_0",
+          "/comp/output/dense/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/output/dense/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 106,
+        "name": "/comp/output/dense/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.output.dense.bias",
+          "/comp/output/dense/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/output/dense/Add_output_0"
+        ]
+      },
+      {
+        "index": 107,
+        "name": "/comp/output/Add",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/output/dense/Add_output_0",
+          "/comp/attention/output/LayerNorm/Add_1_output_0"
+        ],
+        "outputs": [
+          "/comp/output/Add_output_0"
+        ]
+      },
+      {
+        "index": 108,
+        "name": "/comp/output/LayerNorm/ReduceMean",
+        "op_type": "ReduceMean",
+        "inputs": [
+          "/comp/output/Add_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/ReduceMean_output_0"
+        ]
+      },
+      {
+        "index": 109,
+        "name": "/comp/output/LayerNorm/Sub",
+        "op_type": "Sub",
+        "inputs": [
+          "/comp/output/Add_output_0",
+          "/comp/output/LayerNorm/ReduceMean_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/Sub_output_0"
+        ]
+      },
+      {
+        "index": 110,
+        "name": "/comp/output/LayerNorm/Constant",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/output/LayerNorm/Constant_output_0"
+        ]
+      },
+      {
+        "index": 111,
+        "name": "/comp/output/LayerNorm/Pow",
+        "op_type": "Pow",
+        "inputs": [
+          "/comp/output/LayerNorm/Sub_output_0",
+          "/comp/output/LayerNorm/Constant_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/Pow_output_0"
+        ]
+      },
+      {
+        "index": 112,
+        "name": "/comp/output/LayerNorm/ReduceMean_1",
+        "op_type": "ReduceMean",
+        "inputs": [
+          "/comp/output/LayerNorm/Pow_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/ReduceMean_1_output_0"
+        ]
+      },
+      {
+        "index": 113,
+        "name": "/comp/output/LayerNorm/Constant_1",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/output/LayerNorm/Constant_1_output_0"
+        ]
+      },
+      {
+        "index": 114,
+        "name": "/comp/output/LayerNorm/Add",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/output/LayerNorm/ReduceMean_1_output_0",
+          "/comp/output/LayerNorm/Constant_1_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/Add_output_0"
+        ]
+      },
+      {
+        "index": 115,
+        "name": "/comp/output/LayerNorm/Sqrt",
+        "op_type": "Sqrt",
+        "inputs": [
+          "/comp/output/LayerNorm/Add_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/Sqrt_output_0"
+        ]
+      },
+      {
+        "index": 116,
+        "name": "/comp/output/LayerNorm/Div",
+        "op_type": "Div",
+        "inputs": [
+          "/comp/output/LayerNorm/Sub_output_0",
+          "/comp/output/LayerNorm/Sqrt_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/Div_output_0"
+        ]
+      },
+      {
+        "index": 117,
+        "name": "/comp/output/LayerNorm/Mul",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/output/LayerNorm/Div_output_0",
+          "comp.output.LayerNorm.weight"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/Mul_output_0"
+        ]
+      },
+      {
+        "index": 118,
+        "name": "/comp/output/LayerNorm/Add_1",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/output/LayerNorm/Mul_output_0",
+          "comp.output.LayerNorm.bias"
+        ],
+        "outputs": [
+          "135"
+        ]
+      }
+    ]
+  },
+  "encoder_layer_0_attention": {
+    "file": "bert_component_encoder_layer_0_attention.onnx",
+    "total_nodes": 94,
+    "operation_counts": {
+      "Constant": 31,
+      "Transpose": 8,
+      "MatMul": 6,
+      "Add": 8,
+      "Unsqueeze": 15,
+      "Concat": 4,
+      "Reshape": 4,
+      "Shape": 1,
+      "Slice": 1,
+      "Cast": 2,
+      "Sqrt": 4,
+      "Div": 2,
+      "Mul": 3,
+      "Softmax": 1,
+      "ReduceMean": 2,
+      "Sub": 1,
+      "Pow": 1
+    },
+    "operations": [
+      {
+        "index": 0,
+        "name": "/comp/self/Constant",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_output_0"
+        ]
+      },
+      {
+        "index": 1,
+        "name": "/comp/self/Constant_1",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_1_output_0"
+        ]
+      },
+      {
+        "index": 2,
+        "name": "/comp/self/query/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.self.query.weight"
+        ],
+        "outputs": [
+          "/comp/self/query/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 3,
+        "name": "/comp/self/query/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "onnx::MatMul_0",
+          "/comp/self/query/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/self/query/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 4,
+        "name": "/comp/self/query/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.self.query.bias",
+          "/comp/self/query/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/self/query/Add_output_0"
+        ]
+      },
+      {
+        "index": 5,
+        "name": "/comp/self/Constant_2",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_2_output_0"
+        ]
+      },
+      {
+        "index": 6,
+        "name": "/comp/self/Constant_3",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_3_output_0"
+        ]
+      },
+      {
+        "index": 7,
+        "name": "/comp/self/Constant_4",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_4_output_0"
+        ]
+      },
+      {
+        "index": 8,
+        "name": "/comp/self/Constant_5",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_5_output_0"
+        ]
+      },
+      {
+        "index": 9,
+        "name": "Constant_40",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_21"
+        ]
+      },
+      {
+        "index": 10,
+        "name": "/comp/self/Unsqueeze",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_2_output_0",
+          "onnx::Unsqueeze_21"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_output_0"
+        ]
+      },
+      {
+        "index": 11,
+        "name": "Constant_42",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_23"
+        ]
+      },
+      {
+        "index": 12,
+        "name": "/comp/self/Unsqueeze_1",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_3_output_0",
+          "onnx::Unsqueeze_23"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_1_output_0"
+        ]
+      },
+      {
+        "index": 13,
+        "name": "Constant_44",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_25"
+        ]
+      },
+      {
+        "index": 14,
+        "name": "/comp/self/Unsqueeze_2",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_4_output_0",
+          "onnx::Unsqueeze_25"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_2_output_0"
+        ]
+      },
+      {
+        "index": 15,
+        "name": "Constant_46",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_27"
+        ]
+      },
+      {
+        "index": 16,
+        "name": "/comp/self/Unsqueeze_3",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_5_output_0",
+          "onnx::Unsqueeze_27"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_3_output_0"
+        ]
+      },
+      {
+        "index": 17,
+        "name": "/comp/self/Concat",
+        "op_type": "Concat",
+        "inputs": [
+          "/comp/self/Unsqueeze_output_0",
+          "/comp/self/Unsqueeze_1_output_0",
+          "/comp/self/Unsqueeze_2_output_0",
+          "/comp/self/Unsqueeze_3_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Concat_output_0"
+        ]
+      },
+      {
+        "index": 18,
+        "name": "/comp/self/Reshape",
+        "op_type": "Reshape",
+        "inputs": [
+          "/comp/self/query/Add_output_0",
+          "/comp/self/Concat_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Reshape_output_0"
+        ]
+      },
+      {
+        "index": 19,
+        "name": "/comp/self/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "/comp/self/Reshape_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 20,
+        "name": "/comp/self/key/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.self.key.weight"
+        ],
+        "outputs": [
+          "/comp/self/key/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 21,
+        "name": "/comp/self/key/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "onnx::MatMul_0",
+          "/comp/self/key/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/self/key/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 22,
+        "name": "/comp/self/key/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.self.key.bias",
+          "/comp/self/key/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/self/key/Add_output_0"
+        ]
+      },
+      {
+        "index": 23,
+        "name": "/comp/self/Constant_6",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_6_output_0"
+        ]
+      },
+      {
+        "index": 24,
+        "name": "/comp/self/Constant_7",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_7_output_0"
+        ]
+      },
+      {
+        "index": 25,
+        "name": "Constant_56",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_37"
+        ]
+      },
+      {
+        "index": 26,
+        "name": "/comp/self/Unsqueeze_4",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_6_output_0",
+          "onnx::Unsqueeze_37"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_4_output_0"
+        ]
+      },
+      {
+        "index": 27,
+        "name": "Constant_58",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_39"
+        ]
+      },
+      {
+        "index": 28,
+        "name": "/comp/self/Unsqueeze_5",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_7_output_0",
+          "onnx::Unsqueeze_39"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_5_output_0"
+        ]
+      },
+      {
+        "index": 29,
+        "name": "Constant_60",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_41"
+        ]
+      },
+      {
+        "index": 30,
+        "name": "/comp/self/Unsqueeze_6",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_4_output_0",
+          "onnx::Unsqueeze_41"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_6_output_0"
+        ]
+      },
+      {
+        "index": 31,
+        "name": "Constant_62",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_43"
+        ]
+      },
+      {
+        "index": 32,
+        "name": "/comp/self/Unsqueeze_7",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_5_output_0",
+          "onnx::Unsqueeze_43"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_7_output_0"
+        ]
+      },
+      {
+        "index": 33,
+        "name": "/comp/self/Concat_1",
+        "op_type": "Concat",
+        "inputs": [
+          "/comp/self/Unsqueeze_4_output_0",
+          "/comp/self/Unsqueeze_5_output_0",
+          "/comp/self/Unsqueeze_6_output_0",
+          "/comp/self/Unsqueeze_7_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Concat_1_output_0"
+        ]
+      },
+      {
+        "index": 34,
+        "name": "/comp/self/Reshape_1",
+        "op_type": "Reshape",
+        "inputs": [
+          "/comp/self/key/Add_output_0",
+          "/comp/self/Concat_1_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Reshape_1_output_0"
+        ]
+      },
+      {
+        "index": 35,
+        "name": "/comp/self/value/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.self.value.weight"
+        ],
+        "outputs": [
+          "/comp/self/value/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 36,
+        "name": "/comp/self/value/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "onnx::MatMul_0",
+          "/comp/self/value/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/self/value/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 37,
+        "name": "/comp/self/value/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.self.value.bias",
+          "/comp/self/value/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/self/value/Add_output_0"
+        ]
+      },
+      {
+        "index": 38,
+        "name": "/comp/self/Constant_8",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_8_output_0"
+        ]
+      },
+      {
+        "index": 39,
+        "name": "/comp/self/Constant_9",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_9_output_0"
+        ]
+      },
+      {
+        "index": 40,
+        "name": "Constant_71",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_52"
+        ]
+      },
+      {
+        "index": 41,
+        "name": "/comp/self/Unsqueeze_8",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_8_output_0",
+          "onnx::Unsqueeze_52"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_8_output_0"
+        ]
+      },
+      {
+        "index": 42,
+        "name": "Constant_73",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_54"
+        ]
+      },
+      {
+        "index": 43,
+        "name": "/comp/self/Unsqueeze_9",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_9_output_0",
+          "onnx::Unsqueeze_54"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_9_output_0"
+        ]
+      },
+      {
+        "index": 44,
+        "name": "Constant_75",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_56"
+        ]
+      },
+      {
+        "index": 45,
+        "name": "/comp/self/Unsqueeze_10",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_4_output_0",
+          "onnx::Unsqueeze_56"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_10_output_0"
+        ]
+      },
+      {
+        "index": 46,
+        "name": "Constant_77",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_58"
+        ]
+      },
+      {
+        "index": 47,
+        "name": "/comp/self/Unsqueeze_11",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_5_output_0",
+          "onnx::Unsqueeze_58"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_11_output_0"
+        ]
+      },
+      {
+        "index": 48,
+        "name": "/comp/self/Concat_2",
+        "op_type": "Concat",
+        "inputs": [
+          "/comp/self/Unsqueeze_8_output_0",
+          "/comp/self/Unsqueeze_9_output_0",
+          "/comp/self/Unsqueeze_10_output_0",
+          "/comp/self/Unsqueeze_11_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Concat_2_output_0"
+        ]
+      },
+      {
+        "index": 49,
+        "name": "/comp/self/Reshape_2",
+        "op_type": "Reshape",
+        "inputs": [
+          "/comp/self/value/Add_output_0",
+          "/comp/self/Concat_2_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Reshape_2_output_0"
+        ]
+      },
+      {
+        "index": 50,
+        "name": "/comp/self/Transpose_1",
+        "op_type": "Transpose",
+        "inputs": [
+          "/comp/self/Reshape_2_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Transpose_1_output_0"
+        ]
+      },
+      {
+        "index": 51,
+        "name": "/comp/self/Shape",
+        "op_type": "Shape",
+        "inputs": [
+          "/comp/self/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Shape_output_0"
+        ]
+      },
+      {
+        "index": 52,
+        "name": "/comp/self/Constant_10",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_10_output_0"
+        ]
+      },
+      {
+        "index": 53,
+        "name": "/comp/self/Constant_11",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_11_output_0"
+        ]
+      },
+      {
+        "index": 54,
+        "name": "/comp/self/Slice",
+        "op_type": "Slice",
+        "inputs": [
+          "/comp/self/Shape_output_0",
+          "/comp/self/Constant_10_output_0",
+          "/comp/self/Constant_11_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Slice_output_0"
+        ]
+      },
+      {
+        "index": 55,
+        "name": "/comp/self/Cast",
+        "op_type": "Cast",
+        "inputs": [
+          "/comp/self/Slice_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Cast_output_0"
+        ]
+      },
+      {
+        "index": 56,
+        "name": "/comp/self/Sqrt",
+        "op_type": "Sqrt",
+        "inputs": [
+          "/comp/self/Cast_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Sqrt_output_0"
+        ]
+      },
+      {
+        "index": 57,
+        "name": "/comp/self/Constant_12",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_12_output_0"
+        ]
+      },
+      {
+        "index": 58,
+        "name": "/comp/self/Div",
+        "op_type": "Div",
+        "inputs": [
+          "/comp/self/Constant_12_output_0",
+          "/comp/self/Sqrt_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Div_output_0"
+        ]
+      },
+      {
+        "index": 59,
+        "name": "/comp/self/Cast_1",
+        "op_type": "Cast",
+        "inputs": [
+          "/comp/self/Div_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Cast_1_output_0"
+        ]
+      },
+      {
+        "index": 60,
+        "name": "/comp/self/Transpose_2",
+        "op_type": "Transpose",
+        "inputs": [
+          "/comp/self/Reshape_1_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Transpose_2_output_0"
+        ]
+      },
+      {
+        "index": 61,
+        "name": "/comp/self/Sqrt_1",
+        "op_type": "Sqrt",
+        "inputs": [
+          "/comp/self/Cast_1_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Sqrt_1_output_0"
+        ]
+      },
+      {
+        "index": 62,
+        "name": "/comp/self/Mul",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/self/Transpose_output_0",
+          "/comp/self/Sqrt_1_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Mul_output_0"
+        ]
+      },
+      {
+        "index": 63,
+        "name": "/comp/self/Sqrt_2",
+        "op_type": "Sqrt",
+        "inputs": [
+          "/comp/self/Cast_1_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Sqrt_2_output_0"
+        ]
+      },
+      {
+        "index": 64,
+        "name": "/comp/self/Mul_1",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/self/Transpose_2_output_0",
+          "/comp/self/Sqrt_2_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Mul_1_output_0"
+        ]
+      },
+      {
+        "index": 65,
+        "name": "/comp/self/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "/comp/self/Mul_output_0",
+          "/comp/self/Mul_1_output_0"
+        ],
+        "outputs": [
+          "/comp/self/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 66,
+        "name": "/comp/self/Add",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/self/MatMul_output_0",
+          "onnx::Add_1"
+        ],
+        "outputs": [
+          "/comp/self/Add_output_0"
+        ]
+      },
+      {
+        "index": 67,
+        "name": "/comp/self/Softmax",
+        "op_type": "Softmax",
+        "inputs": [
+          "/comp/self/Add_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Softmax_output_0"
+        ]
+      },
+      {
+        "index": 68,
+        "name": "/comp/self/MatMul_1",
+        "op_type": "MatMul",
+        "inputs": [
+          "/comp/self/Softmax_output_0",
+          "/comp/self/Transpose_1_output_0"
+        ],
+        "outputs": [
+          "/comp/self/MatMul_1_output_0"
+        ]
+      },
+      {
+        "index": 69,
+        "name": "/comp/self/Transpose_3",
+        "op_type": "Transpose",
+        "inputs": [
+          "/comp/self/MatMul_1_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Transpose_3_output_0"
+        ]
+      },
+      {
+        "index": 70,
+        "name": "/comp/self/Constant_13",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_13_output_0"
+        ]
+      },
+      {
+        "index": 71,
+        "name": "Constant_102",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_83"
+        ]
+      },
+      {
+        "index": 72,
+        "name": "/comp/self/Unsqueeze_12",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_output_0",
+          "onnx::Unsqueeze_83"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_12_output_0"
+        ]
+      },
+      {
+        "index": 73,
+        "name": "Constant_104",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_85"
+        ]
+      },
+      {
+        "index": 74,
+        "name": "/comp/self/Unsqueeze_13",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_1_output_0",
+          "onnx::Unsqueeze_85"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_13_output_0"
+        ]
+      },
+      {
+        "index": 75,
+        "name": "Constant_106",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_87"
+        ]
+      },
+      {
+        "index": 76,
+        "name": "/comp/self/Unsqueeze_14",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_13_output_0",
+          "onnx::Unsqueeze_87"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_14_output_0"
+        ]
+      },
+      {
+        "index": 77,
+        "name": "/comp/self/Concat_3",
+        "op_type": "Concat",
+        "inputs": [
+          "/comp/self/Unsqueeze_12_output_0",
+          "/comp/self/Unsqueeze_13_output_0",
+          "/comp/self/Unsqueeze_14_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Concat_3_output_0"
+        ]
+      },
+      {
+        "index": 78,
+        "name": "/comp/self/Reshape_3",
+        "op_type": "Reshape",
+        "inputs": [
+          "/comp/self/Transpose_3_output_0",
+          "/comp/self/Concat_3_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Reshape_3_output_0"
+        ]
+      },
+      {
+        "index": 79,
+        "name": "/comp/output/dense/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.output.dense.weight"
+        ],
+        "outputs": [
+          "/comp/output/dense/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 80,
+        "name": "/comp/output/dense/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "/comp/self/Reshape_3_output_0",
+          "/comp/output/dense/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/output/dense/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 81,
+        "name": "/comp/output/dense/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.output.dense.bias",
+          "/comp/output/dense/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/output/dense/Add_output_0"
+        ]
+      },
+      {
+        "index": 82,
+        "name": "/comp/output/Add",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/output/dense/Add_output_0",
+          "onnx::MatMul_0"
+        ],
+        "outputs": [
+          "/comp/output/Add_output_0"
+        ]
+      },
+      {
+        "index": 83,
+        "name": "/comp/output/LayerNorm/ReduceMean",
+        "op_type": "ReduceMean",
+        "inputs": [
+          "/comp/output/Add_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/ReduceMean_output_0"
+        ]
+      },
+      {
+        "index": 84,
+        "name": "/comp/output/LayerNorm/Sub",
+        "op_type": "Sub",
+        "inputs": [
+          "/comp/output/Add_output_0",
+          "/comp/output/LayerNorm/ReduceMean_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/Sub_output_0"
+        ]
+      },
+      {
+        "index": 85,
+        "name": "/comp/output/LayerNorm/Constant",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/output/LayerNorm/Constant_output_0"
+        ]
+      },
+      {
+        "index": 86,
+        "name": "/comp/output/LayerNorm/Pow",
+        "op_type": "Pow",
+        "inputs": [
+          "/comp/output/LayerNorm/Sub_output_0",
+          "/comp/output/LayerNorm/Constant_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/Pow_output_0"
+        ]
+      },
+      {
+        "index": 87,
+        "name": "/comp/output/LayerNorm/ReduceMean_1",
+        "op_type": "ReduceMean",
+        "inputs": [
+          "/comp/output/LayerNorm/Pow_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/ReduceMean_1_output_0"
+        ]
+      },
+      {
+        "index": 88,
+        "name": "/comp/output/LayerNorm/Constant_1",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/output/LayerNorm/Constant_1_output_0"
+        ]
+      },
+      {
+        "index": 89,
+        "name": "/comp/output/LayerNorm/Add",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/output/LayerNorm/ReduceMean_1_output_0",
+          "/comp/output/LayerNorm/Constant_1_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/Add_output_0"
+        ]
+      },
+      {
+        "index": 90,
+        "name": "/comp/output/LayerNorm/Sqrt",
+        "op_type": "Sqrt",
+        "inputs": [
+          "/comp/output/LayerNorm/Add_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/Sqrt_output_0"
+        ]
+      },
+      {
+        "index": 91,
+        "name": "/comp/output/LayerNorm/Div",
+        "op_type": "Div",
+        "inputs": [
+          "/comp/output/LayerNorm/Sub_output_0",
+          "/comp/output/LayerNorm/Sqrt_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/Div_output_0"
+        ]
+      },
+      {
+        "index": 92,
+        "name": "/comp/output/LayerNorm/Mul",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/output/LayerNorm/Div_output_0",
+          "comp.output.LayerNorm.weight"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/Mul_output_0"
+        ]
+      },
+      {
+        "index": 93,
+        "name": "/comp/output/LayerNorm/Add_1",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/output/LayerNorm/Mul_output_0",
+          "comp.output.LayerNorm.bias"
+        ],
+        "outputs": [
+          "105"
+        ]
+      }
+    ]
+  },
+  "encoder_layer_0_attention_self": {
+    "file": "bert_component_encoder_layer_0_attention_self.onnx",
+    "total_nodes": 79,
+    "operation_counts": {
+      "Constant": 29,
+      "Transpose": 7,
+      "MatMul": 5,
+      "Add": 4,
+      "Unsqueeze": 15,
+      "Concat": 4,
+      "Reshape": 4,
+      "Shape": 1,
+      "Slice": 1,
+      "Cast": 2,
+      "Sqrt": 3,
+      "Div": 1,
+      "Mul": 2,
+      "Softmax": 1
+    },
+    "operations": [
+      {
+        "index": 0,
+        "name": "/comp/Constant",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_output_0"
+        ]
+      },
+      {
+        "index": 1,
+        "name": "/comp/Constant_1",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_1_output_0"
+        ]
+      },
+      {
+        "index": 2,
+        "name": "/comp/query/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.query.weight"
+        ],
+        "outputs": [
+          "/comp/query/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 3,
+        "name": "/comp/query/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "onnx::MatMul_0",
+          "/comp/query/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/query/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 4,
+        "name": "/comp/query/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.query.bias",
+          "/comp/query/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/query/Add_output_0"
+        ]
+      },
+      {
+        "index": 5,
+        "name": "/comp/Constant_2",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_2_output_0"
+        ]
+      },
+      {
+        "index": 6,
+        "name": "/comp/Constant_3",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_3_output_0"
+        ]
+      },
+      {
+        "index": 7,
+        "name": "/comp/Constant_4",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_4_output_0"
+        ]
+      },
+      {
+        "index": 8,
+        "name": "/comp/Constant_5",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_5_output_0"
+        ]
+      },
+      {
+        "index": 9,
+        "name": "Constant_38",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_17"
+        ]
+      },
+      {
+        "index": 10,
+        "name": "/comp/Unsqueeze",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_2_output_0",
+          "onnx::Unsqueeze_17"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_output_0"
+        ]
+      },
+      {
+        "index": 11,
+        "name": "Constant_40",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_19"
+        ]
+      },
+      {
+        "index": 12,
+        "name": "/comp/Unsqueeze_1",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_3_output_0",
+          "onnx::Unsqueeze_19"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_1_output_0"
+        ]
+      },
+      {
+        "index": 13,
+        "name": "Constant_42",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_21"
+        ]
+      },
+      {
+        "index": 14,
+        "name": "/comp/Unsqueeze_2",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_4_output_0",
+          "onnx::Unsqueeze_21"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_2_output_0"
+        ]
+      },
+      {
+        "index": 15,
+        "name": "Constant_44",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_23"
+        ]
+      },
+      {
+        "index": 16,
+        "name": "/comp/Unsqueeze_3",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_5_output_0",
+          "onnx::Unsqueeze_23"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_3_output_0"
+        ]
+      },
+      {
+        "index": 17,
+        "name": "/comp/Concat",
+        "op_type": "Concat",
+        "inputs": [
+          "/comp/Unsqueeze_output_0",
+          "/comp/Unsqueeze_1_output_0",
+          "/comp/Unsqueeze_2_output_0",
+          "/comp/Unsqueeze_3_output_0"
+        ],
+        "outputs": [
+          "/comp/Concat_output_0"
+        ]
+      },
+      {
+        "index": 18,
+        "name": "/comp/Reshape",
+        "op_type": "Reshape",
+        "inputs": [
+          "/comp/query/Add_output_0",
+          "/comp/Concat_output_0"
+        ],
+        "outputs": [
+          "/comp/Reshape_output_0"
+        ]
+      },
+      {
+        "index": 19,
+        "name": "/comp/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "/comp/Reshape_output_0"
+        ],
+        "outputs": [
+          "/comp/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 20,
+        "name": "/comp/key/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.key.weight"
+        ],
+        "outputs": [
+          "/comp/key/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 21,
+        "name": "/comp/key/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "onnx::MatMul_0",
+          "/comp/key/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/key/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 22,
+        "name": "/comp/key/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.key.bias",
+          "/comp/key/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/key/Add_output_0"
+        ]
+      },
+      {
+        "index": 23,
+        "name": "/comp/Constant_6",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_6_output_0"
+        ]
+      },
+      {
+        "index": 24,
+        "name": "/comp/Constant_7",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_7_output_0"
+        ]
+      },
+      {
+        "index": 25,
+        "name": "Constant_54",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_33"
+        ]
+      },
+      {
+        "index": 26,
+        "name": "/comp/Unsqueeze_4",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_6_output_0",
+          "onnx::Unsqueeze_33"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_4_output_0"
+        ]
+      },
+      {
+        "index": 27,
+        "name": "Constant_56",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_35"
+        ]
+      },
+      {
+        "index": 28,
+        "name": "/comp/Unsqueeze_5",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_7_output_0",
+          "onnx::Unsqueeze_35"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_5_output_0"
+        ]
+      },
+      {
+        "index": 29,
+        "name": "Constant_58",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_37"
+        ]
+      },
+      {
+        "index": 30,
+        "name": "/comp/Unsqueeze_6",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_4_output_0",
+          "onnx::Unsqueeze_37"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_6_output_0"
+        ]
+      },
+      {
+        "index": 31,
+        "name": "Constant_60",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_39"
+        ]
+      },
+      {
+        "index": 32,
+        "name": "/comp/Unsqueeze_7",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_5_output_0",
+          "onnx::Unsqueeze_39"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_7_output_0"
+        ]
+      },
+      {
+        "index": 33,
+        "name": "/comp/Concat_1",
+        "op_type": "Concat",
+        "inputs": [
+          "/comp/Unsqueeze_4_output_0",
+          "/comp/Unsqueeze_5_output_0",
+          "/comp/Unsqueeze_6_output_0",
+          "/comp/Unsqueeze_7_output_0"
+        ],
+        "outputs": [
+          "/comp/Concat_1_output_0"
+        ]
+      },
+      {
+        "index": 34,
+        "name": "/comp/Reshape_1",
+        "op_type": "Reshape",
+        "inputs": [
+          "/comp/key/Add_output_0",
+          "/comp/Concat_1_output_0"
+        ],
+        "outputs": [
+          "/comp/Reshape_1_output_0"
+        ]
+      },
+      {
+        "index": 35,
+        "name": "/comp/value/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.value.weight"
+        ],
+        "outputs": [
+          "/comp/value/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 36,
+        "name": "/comp/value/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "onnx::MatMul_0",
+          "/comp/value/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/value/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 37,
+        "name": "/comp/value/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.value.bias",
+          "/comp/value/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/value/Add_output_0"
+        ]
+      },
+      {
+        "index": 38,
+        "name": "/comp/Constant_8",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_8_output_0"
+        ]
+      },
+      {
+        "index": 39,
+        "name": "/comp/Constant_9",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_9_output_0"
+        ]
+      },
+      {
+        "index": 40,
+        "name": "Constant_69",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_48"
+        ]
+      },
+      {
+        "index": 41,
+        "name": "/comp/Unsqueeze_8",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_8_output_0",
+          "onnx::Unsqueeze_48"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_8_output_0"
+        ]
+      },
+      {
+        "index": 42,
+        "name": "Constant_71",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_50"
+        ]
+      },
+      {
+        "index": 43,
+        "name": "/comp/Unsqueeze_9",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_9_output_0",
+          "onnx::Unsqueeze_50"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_9_output_0"
+        ]
+      },
+      {
+        "index": 44,
+        "name": "Constant_73",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_52"
+        ]
+      },
+      {
+        "index": 45,
+        "name": "/comp/Unsqueeze_10",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_4_output_0",
+          "onnx::Unsqueeze_52"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_10_output_0"
+        ]
+      },
+      {
+        "index": 46,
+        "name": "Constant_75",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_54"
+        ]
+      },
+      {
+        "index": 47,
+        "name": "/comp/Unsqueeze_11",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_5_output_0",
+          "onnx::Unsqueeze_54"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_11_output_0"
+        ]
+      },
+      {
+        "index": 48,
+        "name": "/comp/Concat_2",
+        "op_type": "Concat",
+        "inputs": [
+          "/comp/Unsqueeze_8_output_0",
+          "/comp/Unsqueeze_9_output_0",
+          "/comp/Unsqueeze_10_output_0",
+          "/comp/Unsqueeze_11_output_0"
+        ],
+        "outputs": [
+          "/comp/Concat_2_output_0"
+        ]
+      },
+      {
+        "index": 49,
+        "name": "/comp/Reshape_2",
+        "op_type": "Reshape",
+        "inputs": [
+          "/comp/value/Add_output_0",
+          "/comp/Concat_2_output_0"
+        ],
+        "outputs": [
+          "/comp/Reshape_2_output_0"
+        ]
+      },
+      {
+        "index": 50,
+        "name": "/comp/Transpose_1",
+        "op_type": "Transpose",
+        "inputs": [
+          "/comp/Reshape_2_output_0"
+        ],
+        "outputs": [
+          "/comp/Transpose_1_output_0"
+        ]
+      },
+      {
+        "index": 51,
+        "name": "/comp/Shape",
+        "op_type": "Shape",
+        "inputs": [
+          "/comp/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/Shape_output_0"
+        ]
+      },
+      {
+        "index": 52,
+        "name": "/comp/Constant_10",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_10_output_0"
+        ]
+      },
+      {
+        "index": 53,
+        "name": "/comp/Constant_11",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_11_output_0"
+        ]
+      },
+      {
+        "index": 54,
+        "name": "/comp/Slice",
+        "op_type": "Slice",
+        "inputs": [
+          "/comp/Shape_output_0",
+          "/comp/Constant_10_output_0",
+          "/comp/Constant_11_output_0"
+        ],
+        "outputs": [
+          "/comp/Slice_output_0"
+        ]
+      },
+      {
+        "index": 55,
+        "name": "/comp/Cast",
+        "op_type": "Cast",
+        "inputs": [
+          "/comp/Slice_output_0"
+        ],
+        "outputs": [
+          "/comp/Cast_output_0"
+        ]
+      },
+      {
+        "index": 56,
+        "name": "/comp/Sqrt",
+        "op_type": "Sqrt",
+        "inputs": [
+          "/comp/Cast_output_0"
+        ],
+        "outputs": [
+          "/comp/Sqrt_output_0"
+        ]
+      },
+      {
+        "index": 57,
+        "name": "/comp/Constant_12",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_12_output_0"
+        ]
+      },
+      {
+        "index": 58,
+        "name": "/comp/Div",
+        "op_type": "Div",
+        "inputs": [
+          "/comp/Constant_12_output_0",
+          "/comp/Sqrt_output_0"
+        ],
+        "outputs": [
+          "/comp/Div_output_0"
+        ]
+      },
+      {
+        "index": 59,
+        "name": "/comp/Cast_1",
+        "op_type": "Cast",
+        "inputs": [
+          "/comp/Div_output_0"
+        ],
+        "outputs": [
+          "/comp/Cast_1_output_0"
+        ]
+      },
+      {
+        "index": 60,
+        "name": "/comp/Transpose_2",
+        "op_type": "Transpose",
+        "inputs": [
+          "/comp/Reshape_1_output_0"
+        ],
+        "outputs": [
+          "/comp/Transpose_2_output_0"
+        ]
+      },
+      {
+        "index": 61,
+        "name": "/comp/Sqrt_1",
+        "op_type": "Sqrt",
+        "inputs": [
+          "/comp/Cast_1_output_0"
+        ],
+        "outputs": [
+          "/comp/Sqrt_1_output_0"
+        ]
+      },
+      {
+        "index": 62,
+        "name": "/comp/Mul",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/Transpose_output_0",
+          "/comp/Sqrt_1_output_0"
+        ],
+        "outputs": [
+          "/comp/Mul_output_0"
+        ]
+      },
+      {
+        "index": 63,
+        "name": "/comp/Sqrt_2",
+        "op_type": "Sqrt",
+        "inputs": [
+          "/comp/Cast_1_output_0"
+        ],
+        "outputs": [
+          "/comp/Sqrt_2_output_0"
+        ]
+      },
+      {
+        "index": 64,
+        "name": "/comp/Mul_1",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/Transpose_2_output_0",
+          "/comp/Sqrt_2_output_0"
+        ],
+        "outputs": [
+          "/comp/Mul_1_output_0"
+        ]
+      },
+      {
+        "index": 65,
+        "name": "/comp/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "/comp/Mul_output_0",
+          "/comp/Mul_1_output_0"
+        ],
+        "outputs": [
+          "/comp/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 66,
+        "name": "/comp/Add",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/MatMul_output_0",
+          "onnx::Add_1"
+        ],
+        "outputs": [
+          "/comp/Add_output_0"
+        ]
+      },
+      {
+        "index": 67,
+        "name": "/comp/Softmax",
+        "op_type": "Softmax",
+        "inputs": [
+          "/comp/Add_output_0"
+        ],
+        "outputs": [
+          "/comp/Softmax_output_0"
+        ]
+      },
+      {
+        "index": 68,
+        "name": "/comp/MatMul_1",
+        "op_type": "MatMul",
+        "inputs": [
+          "/comp/Softmax_output_0",
+          "/comp/Transpose_1_output_0"
+        ],
+        "outputs": [
+          "/comp/MatMul_1_output_0"
+        ]
+      },
+      {
+        "index": 69,
+        "name": "/comp/Transpose_3",
+        "op_type": "Transpose",
+        "inputs": [
+          "/comp/MatMul_1_output_0"
+        ],
+        "outputs": [
+          "/comp/Transpose_3_output_0"
+        ]
+      },
+      {
+        "index": 70,
+        "name": "/comp/Constant_13",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_13_output_0"
+        ]
+      },
+      {
+        "index": 71,
+        "name": "Constant_100",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_79"
+        ]
+      },
+      {
+        "index": 72,
+        "name": "/comp/Unsqueeze_12",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_output_0",
+          "onnx::Unsqueeze_79"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_12_output_0"
+        ]
+      },
+      {
+        "index": 73,
+        "name": "Constant_102",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_81"
+        ]
+      },
+      {
+        "index": 74,
+        "name": "/comp/Unsqueeze_13",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_1_output_0",
+          "onnx::Unsqueeze_81"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_13_output_0"
+        ]
+      },
+      {
+        "index": 75,
+        "name": "Constant_104",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_83"
+        ]
+      },
+      {
+        "index": 76,
+        "name": "/comp/Unsqueeze_14",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_13_output_0",
+          "onnx::Unsqueeze_83"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_14_output_0"
+        ]
+      },
+      {
+        "index": 77,
+        "name": "/comp/Concat_3",
+        "op_type": "Concat",
+        "inputs": [
+          "/comp/Unsqueeze_12_output_0",
+          "/comp/Unsqueeze_13_output_0",
+          "/comp/Unsqueeze_14_output_0"
+        ],
+        "outputs": [
+          "/comp/Concat_3_output_0"
+        ]
+      },
+      {
+        "index": 78,
+        "name": "/comp/Reshape_3",
+        "op_type": "Reshape",
+        "inputs": [
+          "/comp/Transpose_3_output_0",
+          "/comp/Concat_3_output_0"
+        ],
+        "outputs": [
+          "86"
+        ]
+      }
+    ]
+  },
+  "encoder_layer_0_intermediate": {
+    "file": "bert_component_encoder_layer_0_intermediate.onnx",
+    "total_nodes": 11,
+    "operation_counts": {
+      "Transpose": 1,
+      "MatMul": 1,
+      "Add": 2,
+      "Constant": 3,
+      "Div": 1,
+      "Erf": 1,
+      "Mul": 2
+    },
+    "operations": [
+      {
+        "index": 0,
+        "name": "/comp/dense/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.dense.weight"
+        ],
+        "outputs": [
+          "/comp/dense/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 1,
+        "name": "/comp/dense/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "onnx::MatMul_0",
+          "/comp/dense/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/dense/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 2,
+        "name": "/comp/dense/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.dense.bias",
+          "/comp/dense/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/dense/Add_output_0"
+        ]
+      },
+      {
+        "index": 3,
+        "name": "/comp/intermediate_act_fn/Constant",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/intermediate_act_fn/Constant_output_0"
+        ]
+      },
+      {
+        "index": 4,
+        "name": "/comp/intermediate_act_fn/Div",
+        "op_type": "Div",
+        "inputs": [
+          "/comp/dense/Add_output_0",
+          "/comp/intermediate_act_fn/Constant_output_0"
+        ],
+        "outputs": [
+          "/comp/intermediate_act_fn/Div_output_0"
+        ]
+      },
+      {
+        "index": 5,
+        "name": "/comp/intermediate_act_fn/Erf",
+        "op_type": "Erf",
+        "inputs": [
+          "/comp/intermediate_act_fn/Div_output_0"
+        ],
+        "outputs": [
+          "/comp/intermediate_act_fn/Erf_output_0"
+        ]
+      },
+      {
+        "index": 6,
+        "name": "/comp/intermediate_act_fn/Constant_1",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/intermediate_act_fn/Constant_1_output_0"
+        ]
+      },
+      {
+        "index": 7,
+        "name": "/comp/intermediate_act_fn/Add",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/intermediate_act_fn/Erf_output_0",
+          "/comp/intermediate_act_fn/Constant_1_output_0"
+        ],
+        "outputs": [
+          "/comp/intermediate_act_fn/Add_output_0"
+        ]
+      },
+      {
+        "index": 8,
+        "name": "/comp/intermediate_act_fn/Mul",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/dense/Add_output_0",
+          "/comp/intermediate_act_fn/Add_output_0"
+        ],
+        "outputs": [
+          "/comp/intermediate_act_fn/Mul_output_0"
+        ]
+      },
+      {
+        "index": 9,
+        "name": "/comp/intermediate_act_fn/Constant_2",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/intermediate_act_fn/Constant_2_output_0"
+        ]
+      },
+      {
+        "index": 10,
+        "name": "/comp/intermediate_act_fn/Mul_1",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/intermediate_act_fn/Mul_output_0",
+          "/comp/intermediate_act_fn/Constant_2_output_0"
+        ],
+        "outputs": [
+          "13"
+        ]
+      }
+    ]
+  },
+  "encoder_layer_1": {
+    "file": "bert_component_encoder_layer_1.onnx",
+    "total_nodes": 119,
+    "operation_counts": {
+      "Constant": 36,
+      "Transpose": 10,
+      "MatMul": 8,
+      "Add": 13,
+      "Unsqueeze": 15,
+      "Concat": 4,
+      "Reshape": 4,
+      "Shape": 1,
+      "Slice": 1,
+      "Cast": 2,
+      "Sqrt": 5,
+      "Div": 4,
+      "Mul": 6,
+      "Softmax": 1,
+      "ReduceMean": 4,
+      "Sub": 2,
+      "Pow": 2,
+      "Erf": 1
+    },
+    "operations": [
+      {
+        "index": 0,
+        "name": "/comp/attention/self/Constant",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_output_0"
+        ]
+      },
+      {
+        "index": 1,
+        "name": "/comp/attention/self/Constant_1",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_1_output_0"
+        ]
+      },
+      {
+        "index": 2,
+        "name": "/comp/attention/self/query/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.attention.self.query.weight"
+        ],
+        "outputs": [
+          "/comp/attention/self/query/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 3,
+        "name": "/comp/attention/self/query/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "onnx::MatMul_0",
+          "/comp/attention/self/query/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/query/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 4,
+        "name": "/comp/attention/self/query/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.attention.self.query.bias",
+          "/comp/attention/self/query/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/query/Add_output_0"
+        ]
+      },
+      {
+        "index": 5,
+        "name": "/comp/attention/self/Constant_2",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_2_output_0"
+        ]
+      },
+      {
+        "index": 6,
+        "name": "/comp/attention/self/Constant_3",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_3_output_0"
+        ]
+      },
+      {
+        "index": 7,
+        "name": "/comp/attention/self/Constant_4",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_4_output_0"
+        ]
+      },
+      {
+        "index": 8,
+        "name": "/comp/attention/self/Constant_5",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_5_output_0"
+        ]
+      },
+      {
+        "index": 9,
+        "name": "Constant_45",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_26"
+        ]
+      },
+      {
+        "index": 10,
+        "name": "/comp/attention/self/Unsqueeze",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_2_output_0",
+          "onnx::Unsqueeze_26"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_output_0"
+        ]
+      },
+      {
+        "index": 11,
+        "name": "Constant_47",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_28"
+        ]
+      },
+      {
+        "index": 12,
+        "name": "/comp/attention/self/Unsqueeze_1",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_3_output_0",
+          "onnx::Unsqueeze_28"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_1_output_0"
+        ]
+      },
+      {
+        "index": 13,
+        "name": "Constant_49",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_30"
+        ]
+      },
+      {
+        "index": 14,
+        "name": "/comp/attention/self/Unsqueeze_2",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_4_output_0",
+          "onnx::Unsqueeze_30"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_2_output_0"
+        ]
+      },
+      {
+        "index": 15,
+        "name": "Constant_51",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_32"
+        ]
+      },
+      {
+        "index": 16,
+        "name": "/comp/attention/self/Unsqueeze_3",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_5_output_0",
+          "onnx::Unsqueeze_32"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_3_output_0"
+        ]
+      },
+      {
+        "index": 17,
+        "name": "/comp/attention/self/Concat",
+        "op_type": "Concat",
+        "inputs": [
+          "/comp/attention/self/Unsqueeze_output_0",
+          "/comp/attention/self/Unsqueeze_1_output_0",
+          "/comp/attention/self/Unsqueeze_2_output_0",
+          "/comp/attention/self/Unsqueeze_3_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Concat_output_0"
+        ]
+      },
+      {
+        "index": 18,
+        "name": "/comp/attention/self/Reshape",
+        "op_type": "Reshape",
+        "inputs": [
+          "/comp/attention/self/query/Add_output_0",
+          "/comp/attention/self/Concat_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Reshape_output_0"
+        ]
+      },
+      {
+        "index": 19,
+        "name": "/comp/attention/self/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "/comp/attention/self/Reshape_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 20,
+        "name": "/comp/attention/self/key/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.attention.self.key.weight"
+        ],
+        "outputs": [
+          "/comp/attention/self/key/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 21,
+        "name": "/comp/attention/self/key/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "onnx::MatMul_0",
+          "/comp/attention/self/key/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/key/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 22,
+        "name": "/comp/attention/self/key/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.attention.self.key.bias",
+          "/comp/attention/self/key/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/key/Add_output_0"
+        ]
+      },
+      {
+        "index": 23,
+        "name": "/comp/attention/self/Constant_6",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_6_output_0"
+        ]
+      },
+      {
+        "index": 24,
+        "name": "/comp/attention/self/Constant_7",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_7_output_0"
+        ]
+      },
+      {
+        "index": 25,
+        "name": "Constant_61",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_42"
+        ]
+      },
+      {
+        "index": 26,
+        "name": "/comp/attention/self/Unsqueeze_4",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_6_output_0",
+          "onnx::Unsqueeze_42"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_4_output_0"
+        ]
+      },
+      {
+        "index": 27,
+        "name": "Constant_63",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_44"
+        ]
+      },
+      {
+        "index": 28,
+        "name": "/comp/attention/self/Unsqueeze_5",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_7_output_0",
+          "onnx::Unsqueeze_44"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_5_output_0"
+        ]
+      },
+      {
+        "index": 29,
+        "name": "Constant_65",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_46"
+        ]
+      },
+      {
+        "index": 30,
+        "name": "/comp/attention/self/Unsqueeze_6",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_4_output_0",
+          "onnx::Unsqueeze_46"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_6_output_0"
+        ]
+      },
+      {
+        "index": 31,
+        "name": "Constant_67",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_48"
+        ]
+      },
+      {
+        "index": 32,
+        "name": "/comp/attention/self/Unsqueeze_7",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_5_output_0",
+          "onnx::Unsqueeze_48"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_7_output_0"
+        ]
+      },
+      {
+        "index": 33,
+        "name": "/comp/attention/self/Concat_1",
+        "op_type": "Concat",
+        "inputs": [
+          "/comp/attention/self/Unsqueeze_4_output_0",
+          "/comp/attention/self/Unsqueeze_5_output_0",
+          "/comp/attention/self/Unsqueeze_6_output_0",
+          "/comp/attention/self/Unsqueeze_7_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Concat_1_output_0"
+        ]
+      },
+      {
+        "index": 34,
+        "name": "/comp/attention/self/Reshape_1",
+        "op_type": "Reshape",
+        "inputs": [
+          "/comp/attention/self/key/Add_output_0",
+          "/comp/attention/self/Concat_1_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Reshape_1_output_0"
+        ]
+      },
+      {
+        "index": 35,
+        "name": "/comp/attention/self/value/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.attention.self.value.weight"
+        ],
+        "outputs": [
+          "/comp/attention/self/value/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 36,
+        "name": "/comp/attention/self/value/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "onnx::MatMul_0",
+          "/comp/attention/self/value/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/value/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 37,
+        "name": "/comp/attention/self/value/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.attention.self.value.bias",
+          "/comp/attention/self/value/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/value/Add_output_0"
+        ]
+      },
+      {
+        "index": 38,
+        "name": "/comp/attention/self/Constant_8",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_8_output_0"
+        ]
+      },
+      {
+        "index": 39,
+        "name": "/comp/attention/self/Constant_9",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_9_output_0"
+        ]
+      },
+      {
+        "index": 40,
+        "name": "Constant_76",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_57"
+        ]
+      },
+      {
+        "index": 41,
+        "name": "/comp/attention/self/Unsqueeze_8",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_8_output_0",
+          "onnx::Unsqueeze_57"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_8_output_0"
+        ]
+      },
+      {
+        "index": 42,
+        "name": "Constant_78",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_59"
+        ]
+      },
+      {
+        "index": 43,
+        "name": "/comp/attention/self/Unsqueeze_9",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_9_output_0",
+          "onnx::Unsqueeze_59"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_9_output_0"
+        ]
+      },
+      {
+        "index": 44,
+        "name": "Constant_80",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_61"
+        ]
+      },
+      {
+        "index": 45,
+        "name": "/comp/attention/self/Unsqueeze_10",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_4_output_0",
+          "onnx::Unsqueeze_61"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_10_output_0"
+        ]
+      },
+      {
+        "index": 46,
+        "name": "Constant_82",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_63"
+        ]
+      },
+      {
+        "index": 47,
+        "name": "/comp/attention/self/Unsqueeze_11",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_5_output_0",
+          "onnx::Unsqueeze_63"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_11_output_0"
+        ]
+      },
+      {
+        "index": 48,
+        "name": "/comp/attention/self/Concat_2",
+        "op_type": "Concat",
+        "inputs": [
+          "/comp/attention/self/Unsqueeze_8_output_0",
+          "/comp/attention/self/Unsqueeze_9_output_0",
+          "/comp/attention/self/Unsqueeze_10_output_0",
+          "/comp/attention/self/Unsqueeze_11_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Concat_2_output_0"
+        ]
+      },
+      {
+        "index": 49,
+        "name": "/comp/attention/self/Reshape_2",
+        "op_type": "Reshape",
+        "inputs": [
+          "/comp/attention/self/value/Add_output_0",
+          "/comp/attention/self/Concat_2_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Reshape_2_output_0"
+        ]
+      },
+      {
+        "index": 50,
+        "name": "/comp/attention/self/Transpose_1",
+        "op_type": "Transpose",
+        "inputs": [
+          "/comp/attention/self/Reshape_2_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Transpose_1_output_0"
+        ]
+      },
+      {
+        "index": 51,
+        "name": "/comp/attention/self/Shape",
+        "op_type": "Shape",
+        "inputs": [
+          "/comp/attention/self/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Shape_output_0"
+        ]
+      },
+      {
+        "index": 52,
+        "name": "/comp/attention/self/Constant_10",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_10_output_0"
+        ]
+      },
+      {
+        "index": 53,
+        "name": "/comp/attention/self/Constant_11",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_11_output_0"
+        ]
+      },
+      {
+        "index": 54,
+        "name": "/comp/attention/self/Slice",
+        "op_type": "Slice",
+        "inputs": [
+          "/comp/attention/self/Shape_output_0",
+          "/comp/attention/self/Constant_10_output_0",
+          "/comp/attention/self/Constant_11_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Slice_output_0"
+        ]
+      },
+      {
+        "index": 55,
+        "name": "/comp/attention/self/Cast",
+        "op_type": "Cast",
+        "inputs": [
+          "/comp/attention/self/Slice_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Cast_output_0"
+        ]
+      },
+      {
+        "index": 56,
+        "name": "/comp/attention/self/Sqrt",
+        "op_type": "Sqrt",
+        "inputs": [
+          "/comp/attention/self/Cast_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Sqrt_output_0"
+        ]
+      },
+      {
+        "index": 57,
+        "name": "/comp/attention/self/Constant_12",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_12_output_0"
+        ]
+      },
+      {
+        "index": 58,
+        "name": "/comp/attention/self/Div",
+        "op_type": "Div",
+        "inputs": [
+          "/comp/attention/self/Constant_12_output_0",
+          "/comp/attention/self/Sqrt_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Div_output_0"
+        ]
+      },
+      {
+        "index": 59,
+        "name": "/comp/attention/self/Cast_1",
+        "op_type": "Cast",
+        "inputs": [
+          "/comp/attention/self/Div_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Cast_1_output_0"
+        ]
+      },
+      {
+        "index": 60,
+        "name": "/comp/attention/self/Transpose_2",
+        "op_type": "Transpose",
+        "inputs": [
+          "/comp/attention/self/Reshape_1_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Transpose_2_output_0"
+        ]
+      },
+      {
+        "index": 61,
+        "name": "/comp/attention/self/Sqrt_1",
+        "op_type": "Sqrt",
+        "inputs": [
+          "/comp/attention/self/Cast_1_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Sqrt_1_output_0"
+        ]
+      },
+      {
+        "index": 62,
+        "name": "/comp/attention/self/Mul",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/attention/self/Transpose_output_0",
+          "/comp/attention/self/Sqrt_1_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Mul_output_0"
+        ]
+      },
+      {
+        "index": 63,
+        "name": "/comp/attention/self/Sqrt_2",
+        "op_type": "Sqrt",
+        "inputs": [
+          "/comp/attention/self/Cast_1_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Sqrt_2_output_0"
+        ]
+      },
+      {
+        "index": 64,
+        "name": "/comp/attention/self/Mul_1",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/attention/self/Transpose_2_output_0",
+          "/comp/attention/self/Sqrt_2_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Mul_1_output_0"
+        ]
+      },
+      {
+        "index": 65,
+        "name": "/comp/attention/self/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "/comp/attention/self/Mul_output_0",
+          "/comp/attention/self/Mul_1_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 66,
+        "name": "/comp/attention/self/Softmax",
+        "op_type": "Softmax",
+        "inputs": [
+          "/comp/attention/self/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Softmax_output_0"
+        ]
+      },
+      {
+        "index": 67,
+        "name": "/comp/attention/self/MatMul_1",
+        "op_type": "MatMul",
+        "inputs": [
+          "/comp/attention/self/Softmax_output_0",
+          "/comp/attention/self/Transpose_1_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/MatMul_1_output_0"
+        ]
+      },
+      {
+        "index": 68,
+        "name": "/comp/attention/self/Transpose_3",
+        "op_type": "Transpose",
+        "inputs": [
+          "/comp/attention/self/MatMul_1_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Transpose_3_output_0"
+        ]
+      },
+      {
+        "index": 69,
+        "name": "/comp/attention/self/Constant_13",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/self/Constant_13_output_0"
+        ]
+      },
+      {
+        "index": 70,
+        "name": "Constant_106",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_87"
+        ]
+      },
+      {
+        "index": 71,
+        "name": "/comp/attention/self/Unsqueeze_12",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_output_0",
+          "onnx::Unsqueeze_87"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_12_output_0"
+        ]
+      },
+      {
+        "index": 72,
+        "name": "Constant_108",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_89"
+        ]
+      },
+      {
+        "index": 73,
+        "name": "/comp/attention/self/Unsqueeze_13",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_1_output_0",
+          "onnx::Unsqueeze_89"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_13_output_0"
+        ]
+      },
+      {
+        "index": 74,
+        "name": "Constant_110",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_91"
+        ]
+      },
+      {
+        "index": 75,
+        "name": "/comp/attention/self/Unsqueeze_14",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/attention/self/Constant_13_output_0",
+          "onnx::Unsqueeze_91"
+        ],
+        "outputs": [
+          "/comp/attention/self/Unsqueeze_14_output_0"
+        ]
+      },
+      {
+        "index": 76,
+        "name": "/comp/attention/self/Concat_3",
+        "op_type": "Concat",
+        "inputs": [
+          "/comp/attention/self/Unsqueeze_12_output_0",
+          "/comp/attention/self/Unsqueeze_13_output_0",
+          "/comp/attention/self/Unsqueeze_14_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Concat_3_output_0"
+        ]
+      },
+      {
+        "index": 77,
+        "name": "/comp/attention/self/Reshape_3",
+        "op_type": "Reshape",
+        "inputs": [
+          "/comp/attention/self/Transpose_3_output_0",
+          "/comp/attention/self/Concat_3_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/self/Reshape_3_output_0"
+        ]
+      },
+      {
+        "index": 78,
+        "name": "/comp/attention/output/dense/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.attention.output.dense.weight"
+        ],
+        "outputs": [
+          "/comp/attention/output/dense/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 79,
+        "name": "/comp/attention/output/dense/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "/comp/attention/self/Reshape_3_output_0",
+          "/comp/attention/output/dense/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/output/dense/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 80,
+        "name": "/comp/attention/output/dense/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.attention.output.dense.bias",
+          "/comp/attention/output/dense/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/output/dense/Add_output_0"
+        ]
+      },
+      {
+        "index": 81,
+        "name": "/comp/attention/output/Add",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/attention/output/dense/Add_output_0",
+          "onnx::MatMul_0"
+        ],
+        "outputs": [
+          "/comp/attention/output/Add_output_0"
+        ]
+      },
+      {
+        "index": 82,
+        "name": "/comp/attention/output/LayerNorm/ReduceMean",
+        "op_type": "ReduceMean",
+        "inputs": [
+          "/comp/attention/output/Add_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/output/LayerNorm/ReduceMean_output_0"
+        ]
+      },
+      {
+        "index": 83,
+        "name": "/comp/attention/output/LayerNorm/Sub",
+        "op_type": "Sub",
+        "inputs": [
+          "/comp/attention/output/Add_output_0",
+          "/comp/attention/output/LayerNorm/ReduceMean_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/output/LayerNorm/Sub_output_0"
+        ]
+      },
+      {
+        "index": 84,
+        "name": "/comp/attention/output/LayerNorm/Constant",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/output/LayerNorm/Constant_output_0"
+        ]
+      },
+      {
+        "index": 85,
+        "name": "/comp/attention/output/LayerNorm/Pow",
+        "op_type": "Pow",
+        "inputs": [
+          "/comp/attention/output/LayerNorm/Sub_output_0",
+          "/comp/attention/output/LayerNorm/Constant_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/output/LayerNorm/Pow_output_0"
+        ]
+      },
+      {
+        "index": 86,
+        "name": "/comp/attention/output/LayerNorm/ReduceMean_1",
+        "op_type": "ReduceMean",
+        "inputs": [
+          "/comp/attention/output/LayerNorm/Pow_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/output/LayerNorm/ReduceMean_1_output_0"
+        ]
+      },
+      {
+        "index": 87,
+        "name": "/comp/attention/output/LayerNorm/Constant_1",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/attention/output/LayerNorm/Constant_1_output_0"
+        ]
+      },
+      {
+        "index": 88,
+        "name": "/comp/attention/output/LayerNorm/Add",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/attention/output/LayerNorm/ReduceMean_1_output_0",
+          "/comp/attention/output/LayerNorm/Constant_1_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/output/LayerNorm/Add_output_0"
+        ]
+      },
+      {
+        "index": 89,
+        "name": "/comp/attention/output/LayerNorm/Sqrt",
+        "op_type": "Sqrt",
+        "inputs": [
+          "/comp/attention/output/LayerNorm/Add_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/output/LayerNorm/Sqrt_output_0"
+        ]
+      },
+      {
+        "index": 90,
+        "name": "/comp/attention/output/LayerNorm/Div",
+        "op_type": "Div",
+        "inputs": [
+          "/comp/attention/output/LayerNorm/Sub_output_0",
+          "/comp/attention/output/LayerNorm/Sqrt_output_0"
+        ],
+        "outputs": [
+          "/comp/attention/output/LayerNorm/Div_output_0"
+        ]
+      },
+      {
+        "index": 91,
+        "name": "/comp/attention/output/LayerNorm/Mul",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/attention/output/LayerNorm/Div_output_0",
+          "comp.attention.output.LayerNorm.weight"
+        ],
+        "outputs": [
+          "/comp/attention/output/LayerNorm/Mul_output_0"
+        ]
+      },
+      {
+        "index": 92,
+        "name": "/comp/attention/output/LayerNorm/Add_1",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/attention/output/LayerNorm/Mul_output_0",
+          "comp.attention.output.LayerNorm.bias"
+        ],
+        "outputs": [
+          "/comp/attention/output/LayerNorm/Add_1_output_0"
+        ]
+      },
+      {
+        "index": 93,
+        "name": "/comp/intermediate/dense/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.intermediate.dense.weight"
+        ],
+        "outputs": [
+          "/comp/intermediate/dense/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 94,
+        "name": "/comp/intermediate/dense/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "/comp/attention/output/LayerNorm/Add_1_output_0",
+          "/comp/intermediate/dense/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/intermediate/dense/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 95,
+        "name": "/comp/intermediate/dense/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.intermediate.dense.bias",
+          "/comp/intermediate/dense/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/intermediate/dense/Add_output_0"
+        ]
+      },
+      {
+        "index": 96,
+        "name": "/comp/intermediate/intermediate_act_fn/Constant",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/intermediate/intermediate_act_fn/Constant_output_0"
+        ]
+      },
+      {
+        "index": 97,
+        "name": "/comp/intermediate/intermediate_act_fn/Div",
+        "op_type": "Div",
+        "inputs": [
+          "/comp/intermediate/dense/Add_output_0",
+          "/comp/intermediate/intermediate_act_fn/Constant_output_0"
+        ],
+        "outputs": [
+          "/comp/intermediate/intermediate_act_fn/Div_output_0"
+        ]
+      },
+      {
+        "index": 98,
+        "name": "/comp/intermediate/intermediate_act_fn/Erf",
+        "op_type": "Erf",
+        "inputs": [
+          "/comp/intermediate/intermediate_act_fn/Div_output_0"
+        ],
+        "outputs": [
+          "/comp/intermediate/intermediate_act_fn/Erf_output_0"
+        ]
+      },
+      {
+        "index": 99,
+        "name": "/comp/intermediate/intermediate_act_fn/Constant_1",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/intermediate/intermediate_act_fn/Constant_1_output_0"
+        ]
+      },
+      {
+        "index": 100,
+        "name": "/comp/intermediate/intermediate_act_fn/Add",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/intermediate/intermediate_act_fn/Erf_output_0",
+          "/comp/intermediate/intermediate_act_fn/Constant_1_output_0"
+        ],
+        "outputs": [
+          "/comp/intermediate/intermediate_act_fn/Add_output_0"
+        ]
+      },
+      {
+        "index": 101,
+        "name": "/comp/intermediate/intermediate_act_fn/Mul",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/intermediate/dense/Add_output_0",
+          "/comp/intermediate/intermediate_act_fn/Add_output_0"
+        ],
+        "outputs": [
+          "/comp/intermediate/intermediate_act_fn/Mul_output_0"
+        ]
+      },
+      {
+        "index": 102,
+        "name": "/comp/intermediate/intermediate_act_fn/Constant_2",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/intermediate/intermediate_act_fn/Constant_2_output_0"
+        ]
+      },
+      {
+        "index": 103,
+        "name": "/comp/intermediate/intermediate_act_fn/Mul_1",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/intermediate/intermediate_act_fn/Mul_output_0",
+          "/comp/intermediate/intermediate_act_fn/Constant_2_output_0"
+        ],
+        "outputs": [
+          "/comp/intermediate/intermediate_act_fn/Mul_1_output_0"
+        ]
+      },
+      {
+        "index": 104,
+        "name": "/comp/output/dense/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.output.dense.weight"
+        ],
+        "outputs": [
+          "/comp/output/dense/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 105,
+        "name": "/comp/output/dense/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "/comp/intermediate/intermediate_act_fn/Mul_1_output_0",
+          "/comp/output/dense/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/output/dense/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 106,
+        "name": "/comp/output/dense/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.output.dense.bias",
+          "/comp/output/dense/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/output/dense/Add_output_0"
+        ]
+      },
+      {
+        "index": 107,
+        "name": "/comp/output/Add",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/output/dense/Add_output_0",
+          "/comp/attention/output/LayerNorm/Add_1_output_0"
+        ],
+        "outputs": [
+          "/comp/output/Add_output_0"
+        ]
+      },
+      {
+        "index": 108,
+        "name": "/comp/output/LayerNorm/ReduceMean",
+        "op_type": "ReduceMean",
+        "inputs": [
+          "/comp/output/Add_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/ReduceMean_output_0"
+        ]
+      },
+      {
+        "index": 109,
+        "name": "/comp/output/LayerNorm/Sub",
+        "op_type": "Sub",
+        "inputs": [
+          "/comp/output/Add_output_0",
+          "/comp/output/LayerNorm/ReduceMean_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/Sub_output_0"
+        ]
+      },
+      {
+        "index": 110,
+        "name": "/comp/output/LayerNorm/Constant",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/output/LayerNorm/Constant_output_0"
+        ]
+      },
+      {
+        "index": 111,
+        "name": "/comp/output/LayerNorm/Pow",
+        "op_type": "Pow",
+        "inputs": [
+          "/comp/output/LayerNorm/Sub_output_0",
+          "/comp/output/LayerNorm/Constant_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/Pow_output_0"
+        ]
+      },
+      {
+        "index": 112,
+        "name": "/comp/output/LayerNorm/ReduceMean_1",
+        "op_type": "ReduceMean",
+        "inputs": [
+          "/comp/output/LayerNorm/Pow_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/ReduceMean_1_output_0"
+        ]
+      },
+      {
+        "index": 113,
+        "name": "/comp/output/LayerNorm/Constant_1",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/output/LayerNorm/Constant_1_output_0"
+        ]
+      },
+      {
+        "index": 114,
+        "name": "/comp/output/LayerNorm/Add",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/output/LayerNorm/ReduceMean_1_output_0",
+          "/comp/output/LayerNorm/Constant_1_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/Add_output_0"
+        ]
+      },
+      {
+        "index": 115,
+        "name": "/comp/output/LayerNorm/Sqrt",
+        "op_type": "Sqrt",
+        "inputs": [
+          "/comp/output/LayerNorm/Add_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/Sqrt_output_0"
+        ]
+      },
+      {
+        "index": 116,
+        "name": "/comp/output/LayerNorm/Div",
+        "op_type": "Div",
+        "inputs": [
+          "/comp/output/LayerNorm/Sub_output_0",
+          "/comp/output/LayerNorm/Sqrt_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/Div_output_0"
+        ]
+      },
+      {
+        "index": 117,
+        "name": "/comp/output/LayerNorm/Mul",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/output/LayerNorm/Div_output_0",
+          "comp.output.LayerNorm.weight"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/Mul_output_0"
+        ]
+      },
+      {
+        "index": 118,
+        "name": "/comp/output/LayerNorm/Add_1",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/output/LayerNorm/Mul_output_0",
+          "comp.output.LayerNorm.bias"
+        ],
+        "outputs": [
+          "135"
+        ]
+      }
+    ]
+  },
+  "encoder_layer_1_attention": {
+    "file": "bert_component_encoder_layer_1_attention.onnx",
+    "total_nodes": 94,
+    "operation_counts": {
+      "Constant": 31,
+      "Transpose": 8,
+      "MatMul": 6,
+      "Add": 8,
+      "Unsqueeze": 15,
+      "Concat": 4,
+      "Reshape": 4,
+      "Shape": 1,
+      "Slice": 1,
+      "Cast": 2,
+      "Sqrt": 4,
+      "Div": 2,
+      "Mul": 3,
+      "Softmax": 1,
+      "ReduceMean": 2,
+      "Sub": 1,
+      "Pow": 1
+    },
+    "operations": [
+      {
+        "index": 0,
+        "name": "/comp/self/Constant",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_output_0"
+        ]
+      },
+      {
+        "index": 1,
+        "name": "/comp/self/Constant_1",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_1_output_0"
+        ]
+      },
+      {
+        "index": 2,
+        "name": "/comp/self/query/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.self.query.weight"
+        ],
+        "outputs": [
+          "/comp/self/query/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 3,
+        "name": "/comp/self/query/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "onnx::MatMul_0",
+          "/comp/self/query/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/self/query/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 4,
+        "name": "/comp/self/query/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.self.query.bias",
+          "/comp/self/query/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/self/query/Add_output_0"
+        ]
+      },
+      {
+        "index": 5,
+        "name": "/comp/self/Constant_2",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_2_output_0"
+        ]
+      },
+      {
+        "index": 6,
+        "name": "/comp/self/Constant_3",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_3_output_0"
+        ]
+      },
+      {
+        "index": 7,
+        "name": "/comp/self/Constant_4",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_4_output_0"
+        ]
+      },
+      {
+        "index": 8,
+        "name": "/comp/self/Constant_5",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_5_output_0"
+        ]
+      },
+      {
+        "index": 9,
+        "name": "Constant_40",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_21"
+        ]
+      },
+      {
+        "index": 10,
+        "name": "/comp/self/Unsqueeze",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_2_output_0",
+          "onnx::Unsqueeze_21"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_output_0"
+        ]
+      },
+      {
+        "index": 11,
+        "name": "Constant_42",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_23"
+        ]
+      },
+      {
+        "index": 12,
+        "name": "/comp/self/Unsqueeze_1",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_3_output_0",
+          "onnx::Unsqueeze_23"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_1_output_0"
+        ]
+      },
+      {
+        "index": 13,
+        "name": "Constant_44",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_25"
+        ]
+      },
+      {
+        "index": 14,
+        "name": "/comp/self/Unsqueeze_2",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_4_output_0",
+          "onnx::Unsqueeze_25"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_2_output_0"
+        ]
+      },
+      {
+        "index": 15,
+        "name": "Constant_46",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_27"
+        ]
+      },
+      {
+        "index": 16,
+        "name": "/comp/self/Unsqueeze_3",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_5_output_0",
+          "onnx::Unsqueeze_27"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_3_output_0"
+        ]
+      },
+      {
+        "index": 17,
+        "name": "/comp/self/Concat",
+        "op_type": "Concat",
+        "inputs": [
+          "/comp/self/Unsqueeze_output_0",
+          "/comp/self/Unsqueeze_1_output_0",
+          "/comp/self/Unsqueeze_2_output_0",
+          "/comp/self/Unsqueeze_3_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Concat_output_0"
+        ]
+      },
+      {
+        "index": 18,
+        "name": "/comp/self/Reshape",
+        "op_type": "Reshape",
+        "inputs": [
+          "/comp/self/query/Add_output_0",
+          "/comp/self/Concat_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Reshape_output_0"
+        ]
+      },
+      {
+        "index": 19,
+        "name": "/comp/self/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "/comp/self/Reshape_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 20,
+        "name": "/comp/self/key/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.self.key.weight"
+        ],
+        "outputs": [
+          "/comp/self/key/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 21,
+        "name": "/comp/self/key/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "onnx::MatMul_0",
+          "/comp/self/key/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/self/key/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 22,
+        "name": "/comp/self/key/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.self.key.bias",
+          "/comp/self/key/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/self/key/Add_output_0"
+        ]
+      },
+      {
+        "index": 23,
+        "name": "/comp/self/Constant_6",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_6_output_0"
+        ]
+      },
+      {
+        "index": 24,
+        "name": "/comp/self/Constant_7",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_7_output_0"
+        ]
+      },
+      {
+        "index": 25,
+        "name": "Constant_56",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_37"
+        ]
+      },
+      {
+        "index": 26,
+        "name": "/comp/self/Unsqueeze_4",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_6_output_0",
+          "onnx::Unsqueeze_37"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_4_output_0"
+        ]
+      },
+      {
+        "index": 27,
+        "name": "Constant_58",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_39"
+        ]
+      },
+      {
+        "index": 28,
+        "name": "/comp/self/Unsqueeze_5",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_7_output_0",
+          "onnx::Unsqueeze_39"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_5_output_0"
+        ]
+      },
+      {
+        "index": 29,
+        "name": "Constant_60",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_41"
+        ]
+      },
+      {
+        "index": 30,
+        "name": "/comp/self/Unsqueeze_6",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_4_output_0",
+          "onnx::Unsqueeze_41"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_6_output_0"
+        ]
+      },
+      {
+        "index": 31,
+        "name": "Constant_62",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_43"
+        ]
+      },
+      {
+        "index": 32,
+        "name": "/comp/self/Unsqueeze_7",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_5_output_0",
+          "onnx::Unsqueeze_43"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_7_output_0"
+        ]
+      },
+      {
+        "index": 33,
+        "name": "/comp/self/Concat_1",
+        "op_type": "Concat",
+        "inputs": [
+          "/comp/self/Unsqueeze_4_output_0",
+          "/comp/self/Unsqueeze_5_output_0",
+          "/comp/self/Unsqueeze_6_output_0",
+          "/comp/self/Unsqueeze_7_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Concat_1_output_0"
+        ]
+      },
+      {
+        "index": 34,
+        "name": "/comp/self/Reshape_1",
+        "op_type": "Reshape",
+        "inputs": [
+          "/comp/self/key/Add_output_0",
+          "/comp/self/Concat_1_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Reshape_1_output_0"
+        ]
+      },
+      {
+        "index": 35,
+        "name": "/comp/self/value/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.self.value.weight"
+        ],
+        "outputs": [
+          "/comp/self/value/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 36,
+        "name": "/comp/self/value/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "onnx::MatMul_0",
+          "/comp/self/value/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/self/value/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 37,
+        "name": "/comp/self/value/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.self.value.bias",
+          "/comp/self/value/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/self/value/Add_output_0"
+        ]
+      },
+      {
+        "index": 38,
+        "name": "/comp/self/Constant_8",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_8_output_0"
+        ]
+      },
+      {
+        "index": 39,
+        "name": "/comp/self/Constant_9",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_9_output_0"
+        ]
+      },
+      {
+        "index": 40,
+        "name": "Constant_71",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_52"
+        ]
+      },
+      {
+        "index": 41,
+        "name": "/comp/self/Unsqueeze_8",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_8_output_0",
+          "onnx::Unsqueeze_52"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_8_output_0"
+        ]
+      },
+      {
+        "index": 42,
+        "name": "Constant_73",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_54"
+        ]
+      },
+      {
+        "index": 43,
+        "name": "/comp/self/Unsqueeze_9",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_9_output_0",
+          "onnx::Unsqueeze_54"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_9_output_0"
+        ]
+      },
+      {
+        "index": 44,
+        "name": "Constant_75",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_56"
+        ]
+      },
+      {
+        "index": 45,
+        "name": "/comp/self/Unsqueeze_10",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_4_output_0",
+          "onnx::Unsqueeze_56"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_10_output_0"
+        ]
+      },
+      {
+        "index": 46,
+        "name": "Constant_77",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_58"
+        ]
+      },
+      {
+        "index": 47,
+        "name": "/comp/self/Unsqueeze_11",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_5_output_0",
+          "onnx::Unsqueeze_58"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_11_output_0"
+        ]
+      },
+      {
+        "index": 48,
+        "name": "/comp/self/Concat_2",
+        "op_type": "Concat",
+        "inputs": [
+          "/comp/self/Unsqueeze_8_output_0",
+          "/comp/self/Unsqueeze_9_output_0",
+          "/comp/self/Unsqueeze_10_output_0",
+          "/comp/self/Unsqueeze_11_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Concat_2_output_0"
+        ]
+      },
+      {
+        "index": 49,
+        "name": "/comp/self/Reshape_2",
+        "op_type": "Reshape",
+        "inputs": [
+          "/comp/self/value/Add_output_0",
+          "/comp/self/Concat_2_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Reshape_2_output_0"
+        ]
+      },
+      {
+        "index": 50,
+        "name": "/comp/self/Transpose_1",
+        "op_type": "Transpose",
+        "inputs": [
+          "/comp/self/Reshape_2_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Transpose_1_output_0"
+        ]
+      },
+      {
+        "index": 51,
+        "name": "/comp/self/Shape",
+        "op_type": "Shape",
+        "inputs": [
+          "/comp/self/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Shape_output_0"
+        ]
+      },
+      {
+        "index": 52,
+        "name": "/comp/self/Constant_10",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_10_output_0"
+        ]
+      },
+      {
+        "index": 53,
+        "name": "/comp/self/Constant_11",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_11_output_0"
+        ]
+      },
+      {
+        "index": 54,
+        "name": "/comp/self/Slice",
+        "op_type": "Slice",
+        "inputs": [
+          "/comp/self/Shape_output_0",
+          "/comp/self/Constant_10_output_0",
+          "/comp/self/Constant_11_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Slice_output_0"
+        ]
+      },
+      {
+        "index": 55,
+        "name": "/comp/self/Cast",
+        "op_type": "Cast",
+        "inputs": [
+          "/comp/self/Slice_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Cast_output_0"
+        ]
+      },
+      {
+        "index": 56,
+        "name": "/comp/self/Sqrt",
+        "op_type": "Sqrt",
+        "inputs": [
+          "/comp/self/Cast_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Sqrt_output_0"
+        ]
+      },
+      {
+        "index": 57,
+        "name": "/comp/self/Constant_12",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_12_output_0"
+        ]
+      },
+      {
+        "index": 58,
+        "name": "/comp/self/Div",
+        "op_type": "Div",
+        "inputs": [
+          "/comp/self/Constant_12_output_0",
+          "/comp/self/Sqrt_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Div_output_0"
+        ]
+      },
+      {
+        "index": 59,
+        "name": "/comp/self/Cast_1",
+        "op_type": "Cast",
+        "inputs": [
+          "/comp/self/Div_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Cast_1_output_0"
+        ]
+      },
+      {
+        "index": 60,
+        "name": "/comp/self/Transpose_2",
+        "op_type": "Transpose",
+        "inputs": [
+          "/comp/self/Reshape_1_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Transpose_2_output_0"
+        ]
+      },
+      {
+        "index": 61,
+        "name": "/comp/self/Sqrt_1",
+        "op_type": "Sqrt",
+        "inputs": [
+          "/comp/self/Cast_1_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Sqrt_1_output_0"
+        ]
+      },
+      {
+        "index": 62,
+        "name": "/comp/self/Mul",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/self/Transpose_output_0",
+          "/comp/self/Sqrt_1_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Mul_output_0"
+        ]
+      },
+      {
+        "index": 63,
+        "name": "/comp/self/Sqrt_2",
+        "op_type": "Sqrt",
+        "inputs": [
+          "/comp/self/Cast_1_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Sqrt_2_output_0"
+        ]
+      },
+      {
+        "index": 64,
+        "name": "/comp/self/Mul_1",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/self/Transpose_2_output_0",
+          "/comp/self/Sqrt_2_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Mul_1_output_0"
+        ]
+      },
+      {
+        "index": 65,
+        "name": "/comp/self/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "/comp/self/Mul_output_0",
+          "/comp/self/Mul_1_output_0"
+        ],
+        "outputs": [
+          "/comp/self/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 66,
+        "name": "/comp/self/Add",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/self/MatMul_output_0",
+          "onnx::Add_1"
+        ],
+        "outputs": [
+          "/comp/self/Add_output_0"
+        ]
+      },
+      {
+        "index": 67,
+        "name": "/comp/self/Softmax",
+        "op_type": "Softmax",
+        "inputs": [
+          "/comp/self/Add_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Softmax_output_0"
+        ]
+      },
+      {
+        "index": 68,
+        "name": "/comp/self/MatMul_1",
+        "op_type": "MatMul",
+        "inputs": [
+          "/comp/self/Softmax_output_0",
+          "/comp/self/Transpose_1_output_0"
+        ],
+        "outputs": [
+          "/comp/self/MatMul_1_output_0"
+        ]
+      },
+      {
+        "index": 69,
+        "name": "/comp/self/Transpose_3",
+        "op_type": "Transpose",
+        "inputs": [
+          "/comp/self/MatMul_1_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Transpose_3_output_0"
+        ]
+      },
+      {
+        "index": 70,
+        "name": "/comp/self/Constant_13",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/self/Constant_13_output_0"
+        ]
+      },
+      {
+        "index": 71,
+        "name": "Constant_102",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_83"
+        ]
+      },
+      {
+        "index": 72,
+        "name": "/comp/self/Unsqueeze_12",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_output_0",
+          "onnx::Unsqueeze_83"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_12_output_0"
+        ]
+      },
+      {
+        "index": 73,
+        "name": "Constant_104",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_85"
+        ]
+      },
+      {
+        "index": 74,
+        "name": "/comp/self/Unsqueeze_13",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_1_output_0",
+          "onnx::Unsqueeze_85"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_13_output_0"
+        ]
+      },
+      {
+        "index": 75,
+        "name": "Constant_106",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_87"
+        ]
+      },
+      {
+        "index": 76,
+        "name": "/comp/self/Unsqueeze_14",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/self/Constant_13_output_0",
+          "onnx::Unsqueeze_87"
+        ],
+        "outputs": [
+          "/comp/self/Unsqueeze_14_output_0"
+        ]
+      },
+      {
+        "index": 77,
+        "name": "/comp/self/Concat_3",
+        "op_type": "Concat",
+        "inputs": [
+          "/comp/self/Unsqueeze_12_output_0",
+          "/comp/self/Unsqueeze_13_output_0",
+          "/comp/self/Unsqueeze_14_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Concat_3_output_0"
+        ]
+      },
+      {
+        "index": 78,
+        "name": "/comp/self/Reshape_3",
+        "op_type": "Reshape",
+        "inputs": [
+          "/comp/self/Transpose_3_output_0",
+          "/comp/self/Concat_3_output_0"
+        ],
+        "outputs": [
+          "/comp/self/Reshape_3_output_0"
+        ]
+      },
+      {
+        "index": 79,
+        "name": "/comp/output/dense/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.output.dense.weight"
+        ],
+        "outputs": [
+          "/comp/output/dense/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 80,
+        "name": "/comp/output/dense/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "/comp/self/Reshape_3_output_0",
+          "/comp/output/dense/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/output/dense/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 81,
+        "name": "/comp/output/dense/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.output.dense.bias",
+          "/comp/output/dense/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/output/dense/Add_output_0"
+        ]
+      },
+      {
+        "index": 82,
+        "name": "/comp/output/Add",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/output/dense/Add_output_0",
+          "onnx::MatMul_0"
+        ],
+        "outputs": [
+          "/comp/output/Add_output_0"
+        ]
+      },
+      {
+        "index": 83,
+        "name": "/comp/output/LayerNorm/ReduceMean",
+        "op_type": "ReduceMean",
+        "inputs": [
+          "/comp/output/Add_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/ReduceMean_output_0"
+        ]
+      },
+      {
+        "index": 84,
+        "name": "/comp/output/LayerNorm/Sub",
+        "op_type": "Sub",
+        "inputs": [
+          "/comp/output/Add_output_0",
+          "/comp/output/LayerNorm/ReduceMean_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/Sub_output_0"
+        ]
+      },
+      {
+        "index": 85,
+        "name": "/comp/output/LayerNorm/Constant",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/output/LayerNorm/Constant_output_0"
+        ]
+      },
+      {
+        "index": 86,
+        "name": "/comp/output/LayerNorm/Pow",
+        "op_type": "Pow",
+        "inputs": [
+          "/comp/output/LayerNorm/Sub_output_0",
+          "/comp/output/LayerNorm/Constant_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/Pow_output_0"
+        ]
+      },
+      {
+        "index": 87,
+        "name": "/comp/output/LayerNorm/ReduceMean_1",
+        "op_type": "ReduceMean",
+        "inputs": [
+          "/comp/output/LayerNorm/Pow_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/ReduceMean_1_output_0"
+        ]
+      },
+      {
+        "index": 88,
+        "name": "/comp/output/LayerNorm/Constant_1",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/output/LayerNorm/Constant_1_output_0"
+        ]
+      },
+      {
+        "index": 89,
+        "name": "/comp/output/LayerNorm/Add",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/output/LayerNorm/ReduceMean_1_output_0",
+          "/comp/output/LayerNorm/Constant_1_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/Add_output_0"
+        ]
+      },
+      {
+        "index": 90,
+        "name": "/comp/output/LayerNorm/Sqrt",
+        "op_type": "Sqrt",
+        "inputs": [
+          "/comp/output/LayerNorm/Add_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/Sqrt_output_0"
+        ]
+      },
+      {
+        "index": 91,
+        "name": "/comp/output/LayerNorm/Div",
+        "op_type": "Div",
+        "inputs": [
+          "/comp/output/LayerNorm/Sub_output_0",
+          "/comp/output/LayerNorm/Sqrt_output_0"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/Div_output_0"
+        ]
+      },
+      {
+        "index": 92,
+        "name": "/comp/output/LayerNorm/Mul",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/output/LayerNorm/Div_output_0",
+          "comp.output.LayerNorm.weight"
+        ],
+        "outputs": [
+          "/comp/output/LayerNorm/Mul_output_0"
+        ]
+      },
+      {
+        "index": 93,
+        "name": "/comp/output/LayerNorm/Add_1",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/output/LayerNorm/Mul_output_0",
+          "comp.output.LayerNorm.bias"
+        ],
+        "outputs": [
+          "105"
+        ]
+      }
+    ]
+  },
+  "encoder_layer_1_attention_self": {
+    "file": "bert_component_encoder_layer_1_attention_self.onnx",
+    "total_nodes": 79,
+    "operation_counts": {
+      "Constant": 29,
+      "Transpose": 7,
+      "MatMul": 5,
+      "Add": 4,
+      "Unsqueeze": 15,
+      "Concat": 4,
+      "Reshape": 4,
+      "Shape": 1,
+      "Slice": 1,
+      "Cast": 2,
+      "Sqrt": 3,
+      "Div": 1,
+      "Mul": 2,
+      "Softmax": 1
+    },
+    "operations": [
+      {
+        "index": 0,
+        "name": "/comp/Constant",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_output_0"
+        ]
+      },
+      {
+        "index": 1,
+        "name": "/comp/Constant_1",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_1_output_0"
+        ]
+      },
+      {
+        "index": 2,
+        "name": "/comp/query/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.query.weight"
+        ],
+        "outputs": [
+          "/comp/query/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 3,
+        "name": "/comp/query/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "onnx::MatMul_0",
+          "/comp/query/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/query/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 4,
+        "name": "/comp/query/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.query.bias",
+          "/comp/query/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/query/Add_output_0"
+        ]
+      },
+      {
+        "index": 5,
+        "name": "/comp/Constant_2",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_2_output_0"
+        ]
+      },
+      {
+        "index": 6,
+        "name": "/comp/Constant_3",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_3_output_0"
+        ]
+      },
+      {
+        "index": 7,
+        "name": "/comp/Constant_4",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_4_output_0"
+        ]
+      },
+      {
+        "index": 8,
+        "name": "/comp/Constant_5",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_5_output_0"
+        ]
+      },
+      {
+        "index": 9,
+        "name": "Constant_38",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_17"
+        ]
+      },
+      {
+        "index": 10,
+        "name": "/comp/Unsqueeze",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_2_output_0",
+          "onnx::Unsqueeze_17"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_output_0"
+        ]
+      },
+      {
+        "index": 11,
+        "name": "Constant_40",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_19"
+        ]
+      },
+      {
+        "index": 12,
+        "name": "/comp/Unsqueeze_1",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_3_output_0",
+          "onnx::Unsqueeze_19"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_1_output_0"
+        ]
+      },
+      {
+        "index": 13,
+        "name": "Constant_42",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_21"
+        ]
+      },
+      {
+        "index": 14,
+        "name": "/comp/Unsqueeze_2",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_4_output_0",
+          "onnx::Unsqueeze_21"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_2_output_0"
+        ]
+      },
+      {
+        "index": 15,
+        "name": "Constant_44",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_23"
+        ]
+      },
+      {
+        "index": 16,
+        "name": "/comp/Unsqueeze_3",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_5_output_0",
+          "onnx::Unsqueeze_23"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_3_output_0"
+        ]
+      },
+      {
+        "index": 17,
+        "name": "/comp/Concat",
+        "op_type": "Concat",
+        "inputs": [
+          "/comp/Unsqueeze_output_0",
+          "/comp/Unsqueeze_1_output_0",
+          "/comp/Unsqueeze_2_output_0",
+          "/comp/Unsqueeze_3_output_0"
+        ],
+        "outputs": [
+          "/comp/Concat_output_0"
+        ]
+      },
+      {
+        "index": 18,
+        "name": "/comp/Reshape",
+        "op_type": "Reshape",
+        "inputs": [
+          "/comp/query/Add_output_0",
+          "/comp/Concat_output_0"
+        ],
+        "outputs": [
+          "/comp/Reshape_output_0"
+        ]
+      },
+      {
+        "index": 19,
+        "name": "/comp/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "/comp/Reshape_output_0"
+        ],
+        "outputs": [
+          "/comp/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 20,
+        "name": "/comp/key/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.key.weight"
+        ],
+        "outputs": [
+          "/comp/key/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 21,
+        "name": "/comp/key/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "onnx::MatMul_0",
+          "/comp/key/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/key/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 22,
+        "name": "/comp/key/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.key.bias",
+          "/comp/key/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/key/Add_output_0"
+        ]
+      },
+      {
+        "index": 23,
+        "name": "/comp/Constant_6",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_6_output_0"
+        ]
+      },
+      {
+        "index": 24,
+        "name": "/comp/Constant_7",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_7_output_0"
+        ]
+      },
+      {
+        "index": 25,
+        "name": "Constant_54",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_33"
+        ]
+      },
+      {
+        "index": 26,
+        "name": "/comp/Unsqueeze_4",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_6_output_0",
+          "onnx::Unsqueeze_33"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_4_output_0"
+        ]
+      },
+      {
+        "index": 27,
+        "name": "Constant_56",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_35"
+        ]
+      },
+      {
+        "index": 28,
+        "name": "/comp/Unsqueeze_5",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_7_output_0",
+          "onnx::Unsqueeze_35"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_5_output_0"
+        ]
+      },
+      {
+        "index": 29,
+        "name": "Constant_58",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_37"
+        ]
+      },
+      {
+        "index": 30,
+        "name": "/comp/Unsqueeze_6",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_4_output_0",
+          "onnx::Unsqueeze_37"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_6_output_0"
+        ]
+      },
+      {
+        "index": 31,
+        "name": "Constant_60",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_39"
+        ]
+      },
+      {
+        "index": 32,
+        "name": "/comp/Unsqueeze_7",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_5_output_0",
+          "onnx::Unsqueeze_39"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_7_output_0"
+        ]
+      },
+      {
+        "index": 33,
+        "name": "/comp/Concat_1",
+        "op_type": "Concat",
+        "inputs": [
+          "/comp/Unsqueeze_4_output_0",
+          "/comp/Unsqueeze_5_output_0",
+          "/comp/Unsqueeze_6_output_0",
+          "/comp/Unsqueeze_7_output_0"
+        ],
+        "outputs": [
+          "/comp/Concat_1_output_0"
+        ]
+      },
+      {
+        "index": 34,
+        "name": "/comp/Reshape_1",
+        "op_type": "Reshape",
+        "inputs": [
+          "/comp/key/Add_output_0",
+          "/comp/Concat_1_output_0"
+        ],
+        "outputs": [
+          "/comp/Reshape_1_output_0"
+        ]
+      },
+      {
+        "index": 35,
+        "name": "/comp/value/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.value.weight"
+        ],
+        "outputs": [
+          "/comp/value/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 36,
+        "name": "/comp/value/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "onnx::MatMul_0",
+          "/comp/value/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/value/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 37,
+        "name": "/comp/value/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.value.bias",
+          "/comp/value/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/value/Add_output_0"
+        ]
+      },
+      {
+        "index": 38,
+        "name": "/comp/Constant_8",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_8_output_0"
+        ]
+      },
+      {
+        "index": 39,
+        "name": "/comp/Constant_9",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_9_output_0"
+        ]
+      },
+      {
+        "index": 40,
+        "name": "Constant_69",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_48"
+        ]
+      },
+      {
+        "index": 41,
+        "name": "/comp/Unsqueeze_8",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_8_output_0",
+          "onnx::Unsqueeze_48"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_8_output_0"
+        ]
+      },
+      {
+        "index": 42,
+        "name": "Constant_71",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_50"
+        ]
+      },
+      {
+        "index": 43,
+        "name": "/comp/Unsqueeze_9",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_9_output_0",
+          "onnx::Unsqueeze_50"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_9_output_0"
+        ]
+      },
+      {
+        "index": 44,
+        "name": "Constant_73",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_52"
+        ]
+      },
+      {
+        "index": 45,
+        "name": "/comp/Unsqueeze_10",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_4_output_0",
+          "onnx::Unsqueeze_52"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_10_output_0"
+        ]
+      },
+      {
+        "index": 46,
+        "name": "Constant_75",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_54"
+        ]
+      },
+      {
+        "index": 47,
+        "name": "/comp/Unsqueeze_11",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_5_output_0",
+          "onnx::Unsqueeze_54"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_11_output_0"
+        ]
+      },
+      {
+        "index": 48,
+        "name": "/comp/Concat_2",
+        "op_type": "Concat",
+        "inputs": [
+          "/comp/Unsqueeze_8_output_0",
+          "/comp/Unsqueeze_9_output_0",
+          "/comp/Unsqueeze_10_output_0",
+          "/comp/Unsqueeze_11_output_0"
+        ],
+        "outputs": [
+          "/comp/Concat_2_output_0"
+        ]
+      },
+      {
+        "index": 49,
+        "name": "/comp/Reshape_2",
+        "op_type": "Reshape",
+        "inputs": [
+          "/comp/value/Add_output_0",
+          "/comp/Concat_2_output_0"
+        ],
+        "outputs": [
+          "/comp/Reshape_2_output_0"
+        ]
+      },
+      {
+        "index": 50,
+        "name": "/comp/Transpose_1",
+        "op_type": "Transpose",
+        "inputs": [
+          "/comp/Reshape_2_output_0"
+        ],
+        "outputs": [
+          "/comp/Transpose_1_output_0"
+        ]
+      },
+      {
+        "index": 51,
+        "name": "/comp/Shape",
+        "op_type": "Shape",
+        "inputs": [
+          "/comp/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/Shape_output_0"
+        ]
+      },
+      {
+        "index": 52,
+        "name": "/comp/Constant_10",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_10_output_0"
+        ]
+      },
+      {
+        "index": 53,
+        "name": "/comp/Constant_11",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_11_output_0"
+        ]
+      },
+      {
+        "index": 54,
+        "name": "/comp/Slice",
+        "op_type": "Slice",
+        "inputs": [
+          "/comp/Shape_output_0",
+          "/comp/Constant_10_output_0",
+          "/comp/Constant_11_output_0"
+        ],
+        "outputs": [
+          "/comp/Slice_output_0"
+        ]
+      },
+      {
+        "index": 55,
+        "name": "/comp/Cast",
+        "op_type": "Cast",
+        "inputs": [
+          "/comp/Slice_output_0"
+        ],
+        "outputs": [
+          "/comp/Cast_output_0"
+        ]
+      },
+      {
+        "index": 56,
+        "name": "/comp/Sqrt",
+        "op_type": "Sqrt",
+        "inputs": [
+          "/comp/Cast_output_0"
+        ],
+        "outputs": [
+          "/comp/Sqrt_output_0"
+        ]
+      },
+      {
+        "index": 57,
+        "name": "/comp/Constant_12",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_12_output_0"
+        ]
+      },
+      {
+        "index": 58,
+        "name": "/comp/Div",
+        "op_type": "Div",
+        "inputs": [
+          "/comp/Constant_12_output_0",
+          "/comp/Sqrt_output_0"
+        ],
+        "outputs": [
+          "/comp/Div_output_0"
+        ]
+      },
+      {
+        "index": 59,
+        "name": "/comp/Cast_1",
+        "op_type": "Cast",
+        "inputs": [
+          "/comp/Div_output_0"
+        ],
+        "outputs": [
+          "/comp/Cast_1_output_0"
+        ]
+      },
+      {
+        "index": 60,
+        "name": "/comp/Transpose_2",
+        "op_type": "Transpose",
+        "inputs": [
+          "/comp/Reshape_1_output_0"
+        ],
+        "outputs": [
+          "/comp/Transpose_2_output_0"
+        ]
+      },
+      {
+        "index": 61,
+        "name": "/comp/Sqrt_1",
+        "op_type": "Sqrt",
+        "inputs": [
+          "/comp/Cast_1_output_0"
+        ],
+        "outputs": [
+          "/comp/Sqrt_1_output_0"
+        ]
+      },
+      {
+        "index": 62,
+        "name": "/comp/Mul",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/Transpose_output_0",
+          "/comp/Sqrt_1_output_0"
+        ],
+        "outputs": [
+          "/comp/Mul_output_0"
+        ]
+      },
+      {
+        "index": 63,
+        "name": "/comp/Sqrt_2",
+        "op_type": "Sqrt",
+        "inputs": [
+          "/comp/Cast_1_output_0"
+        ],
+        "outputs": [
+          "/comp/Sqrt_2_output_0"
+        ]
+      },
+      {
+        "index": 64,
+        "name": "/comp/Mul_1",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/Transpose_2_output_0",
+          "/comp/Sqrt_2_output_0"
+        ],
+        "outputs": [
+          "/comp/Mul_1_output_0"
+        ]
+      },
+      {
+        "index": 65,
+        "name": "/comp/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "/comp/Mul_output_0",
+          "/comp/Mul_1_output_0"
+        ],
+        "outputs": [
+          "/comp/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 66,
+        "name": "/comp/Add",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/MatMul_output_0",
+          "onnx::Add_1"
+        ],
+        "outputs": [
+          "/comp/Add_output_0"
+        ]
+      },
+      {
+        "index": 67,
+        "name": "/comp/Softmax",
+        "op_type": "Softmax",
+        "inputs": [
+          "/comp/Add_output_0"
+        ],
+        "outputs": [
+          "/comp/Softmax_output_0"
+        ]
+      },
+      {
+        "index": 68,
+        "name": "/comp/MatMul_1",
+        "op_type": "MatMul",
+        "inputs": [
+          "/comp/Softmax_output_0",
+          "/comp/Transpose_1_output_0"
+        ],
+        "outputs": [
+          "/comp/MatMul_1_output_0"
+        ]
+      },
+      {
+        "index": 69,
+        "name": "/comp/Transpose_3",
+        "op_type": "Transpose",
+        "inputs": [
+          "/comp/MatMul_1_output_0"
+        ],
+        "outputs": [
+          "/comp/Transpose_3_output_0"
+        ]
+      },
+      {
+        "index": 70,
+        "name": "/comp/Constant_13",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_13_output_0"
+        ]
+      },
+      {
+        "index": 71,
+        "name": "Constant_100",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_79"
+        ]
+      },
+      {
+        "index": 72,
+        "name": "/comp/Unsqueeze_12",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_output_0",
+          "onnx::Unsqueeze_79"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_12_output_0"
+        ]
+      },
+      {
+        "index": 73,
+        "name": "Constant_102",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_81"
+        ]
+      },
+      {
+        "index": 74,
+        "name": "/comp/Unsqueeze_13",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_1_output_0",
+          "onnx::Unsqueeze_81"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_13_output_0"
+        ]
+      },
+      {
+        "index": 75,
+        "name": "Constant_104",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "onnx::Unsqueeze_83"
+        ]
+      },
+      {
+        "index": 76,
+        "name": "/comp/Unsqueeze_14",
+        "op_type": "Unsqueeze",
+        "inputs": [
+          "/comp/Constant_13_output_0",
+          "onnx::Unsqueeze_83"
+        ],
+        "outputs": [
+          "/comp/Unsqueeze_14_output_0"
+        ]
+      },
+      {
+        "index": 77,
+        "name": "/comp/Concat_3",
+        "op_type": "Concat",
+        "inputs": [
+          "/comp/Unsqueeze_12_output_0",
+          "/comp/Unsqueeze_13_output_0",
+          "/comp/Unsqueeze_14_output_0"
+        ],
+        "outputs": [
+          "/comp/Concat_3_output_0"
+        ]
+      },
+      {
+        "index": 78,
+        "name": "/comp/Reshape_3",
+        "op_type": "Reshape",
+        "inputs": [
+          "/comp/Transpose_3_output_0",
+          "/comp/Concat_3_output_0"
+        ],
+        "outputs": [
+          "86"
+        ]
+      }
+    ]
+  },
+  "encoder_layer_1_intermediate": {
+    "file": "bert_component_encoder_layer_1_intermediate.onnx",
+    "total_nodes": 11,
+    "operation_counts": {
+      "Transpose": 1,
+      "MatMul": 1,
+      "Add": 2,
+      "Constant": 3,
+      "Div": 1,
+      "Erf": 1,
+      "Mul": 2
+    },
+    "operations": [
+      {
+        "index": 0,
+        "name": "/comp/dense/Transpose",
+        "op_type": "Transpose",
+        "inputs": [
+          "comp.dense.weight"
+        ],
+        "outputs": [
+          "/comp/dense/Transpose_output_0"
+        ]
+      },
+      {
+        "index": 1,
+        "name": "/comp/dense/MatMul",
+        "op_type": "MatMul",
+        "inputs": [
+          "onnx::MatMul_0",
+          "/comp/dense/Transpose_output_0"
+        ],
+        "outputs": [
+          "/comp/dense/MatMul_output_0"
+        ]
+      },
+      {
+        "index": 2,
+        "name": "/comp/dense/Add",
+        "op_type": "Add",
+        "inputs": [
+          "comp.dense.bias",
+          "/comp/dense/MatMul_output_0"
+        ],
+        "outputs": [
+          "/comp/dense/Add_output_0"
+        ]
+      },
+      {
+        "index": 3,
+        "name": "/comp/intermediate_act_fn/Constant",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/intermediate_act_fn/Constant_output_0"
+        ]
+      },
+      {
+        "index": 4,
+        "name": "/comp/intermediate_act_fn/Div",
+        "op_type": "Div",
+        "inputs": [
+          "/comp/dense/Add_output_0",
+          "/comp/intermediate_act_fn/Constant_output_0"
+        ],
+        "outputs": [
+          "/comp/intermediate_act_fn/Div_output_0"
+        ]
+      },
+      {
+        "index": 5,
+        "name": "/comp/intermediate_act_fn/Erf",
+        "op_type": "Erf",
+        "inputs": [
+          "/comp/intermediate_act_fn/Div_output_0"
+        ],
+        "outputs": [
+          "/comp/intermediate_act_fn/Erf_output_0"
+        ]
+      },
+      {
+        "index": 6,
+        "name": "/comp/intermediate_act_fn/Constant_1",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/intermediate_act_fn/Constant_1_output_0"
+        ]
+      },
+      {
+        "index": 7,
+        "name": "/comp/intermediate_act_fn/Add",
+        "op_type": "Add",
+        "inputs": [
+          "/comp/intermediate_act_fn/Erf_output_0",
+          "/comp/intermediate_act_fn/Constant_1_output_0"
+        ],
+        "outputs": [
+          "/comp/intermediate_act_fn/Add_output_0"
+        ]
+      },
+      {
+        "index": 8,
+        "name": "/comp/intermediate_act_fn/Mul",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/dense/Add_output_0",
+          "/comp/intermediate_act_fn/Add_output_0"
+        ],
+        "outputs": [
+          "/comp/intermediate_act_fn/Mul_output_0"
+        ]
+      },
+      {
+        "index": 9,
+        "name": "/comp/intermediate_act_fn/Constant_2",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/intermediate_act_fn/Constant_2_output_0"
+        ]
+      },
+      {
+        "index": 10,
+        "name": "/comp/intermediate_act_fn/Mul_1",
+        "op_type": "Mul",
+        "inputs": [
+          "/comp/intermediate_act_fn/Mul_output_0",
+          "/comp/intermediate_act_fn/Constant_2_output_0"
+        ],
+        "outputs": [
+          "13"
+        ]
+      }
+    ]
+  },
+  "pooler": {
+    "file": "bert_component_pooler.onnx",
+    "total_nodes": 4,
+    "operation_counts": {
+      "Constant": 1,
+      "Gather": 1,
+      "Gemm": 1,
+      "Tanh": 1
+    },
+    "operations": [
+      {
+        "index": 0,
+        "name": "/comp/Constant",
+        "op_type": "Constant",
+        "inputs": [],
+        "outputs": [
+          "/comp/Constant_output_0"
+        ]
+      },
+      {
+        "index": 1,
+        "name": "/comp/Gather",
+        "op_type": "Gather",
+        "inputs": [
+          "onnx::Gather_0",
+          "/comp/Constant_output_0"
+        ],
+        "outputs": [
+          "/comp/Gather_output_0"
+        ]
+      },
+      {
+        "index": 2,
+        "name": "/comp/dense/Gemm",
+        "op_type": "Gemm",
+        "inputs": [
+          "/comp/Gather_output_0",
+          "comp.dense.weight",
+          "comp.dense.bias"
+        ],
+        "outputs": [
+          "/comp/dense/Gemm_output_0"
+        ]
+      },
+      {
+        "index": 3,
+        "name": "/comp/activation/Tanh",
+        "op_type": "Tanh",
+        "inputs": [
+          "/comp/dense/Gemm_output_0"
+        ],
+        "outputs": [
+          "6"
+        ]
+      }
+    ]
+  }
+}

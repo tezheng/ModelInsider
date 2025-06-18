@@ -1,0 +1,1290 @@
+{
+  "model_info": {
+    "total_nodes": 291,
+    "inputs": 3,
+    "outputs": 2,
+    "operation_counts": {
+      "Constant": 87,
+      "Gather": 4,
+      "Add": 32,
+      "ReduceMean": 10,
+      "Sub": 6,
+      "Pow": 5,
+      "Sqrt": 11,
+      "Div": 9,
+      "Mul": 14,
+      "Unsqueeze": 36,
+      "Concat": 9,
+      "Reshape": 9,
+      "Shape": 3,
+      "ConstantOfShape": 1,
+      "Equal": 1,
+      "Where": 2,
+      "Expand": 1,
+      "Cast": 7,
+      "Transpose": 20,
+      "MatMul": 16,
+      "Slice": 2,
+      "Softmax": 2,
+      "Erf": 2,
+      "Gemm": 1,
+      "Tanh": 1
+    }
+  },
+  "hierarchy": {
+    "embeddings": {
+      "type": "BertEmbeddings",
+      "depth": 1,
+      "parent": "root",
+      "is_leaf": false,
+      "parameter_count": 0,
+      "children": [
+        "word_embeddings",
+        "position_embeddings",
+        "token_type_embeddings",
+        "LayerNorm",
+        "dropout"
+      ]
+    },
+    "embeddings.word_embeddings": {
+      "type": "Embedding",
+      "depth": 2,
+      "parent": "embeddings",
+      "is_leaf": true,
+      "parameter_count": 3906816,
+      "children": []
+    },
+    "embeddings.position_embeddings": {
+      "type": "Embedding",
+      "depth": 2,
+      "parent": "embeddings",
+      "is_leaf": true,
+      "parameter_count": 65536,
+      "children": []
+    },
+    "embeddings.token_type_embeddings": {
+      "type": "Embedding",
+      "depth": 2,
+      "parent": "embeddings",
+      "is_leaf": true,
+      "parameter_count": 256,
+      "children": []
+    },
+    "embeddings.LayerNorm": {
+      "type": "LayerNorm",
+      "depth": 2,
+      "parent": "embeddings",
+      "is_leaf": true,
+      "parameter_count": 256,
+      "children": []
+    },
+    "embeddings.dropout": {
+      "type": "Dropout",
+      "depth": 2,
+      "parent": "embeddings",
+      "is_leaf": true,
+      "parameter_count": 0,
+      "children": []
+    },
+    "encoder": {
+      "type": "BertEncoder",
+      "depth": 1,
+      "parent": "root",
+      "is_leaf": false,
+      "parameter_count": 0,
+      "children": [
+        "layer"
+      ]
+    },
+    "encoder.layer": {
+      "type": "ModuleList",
+      "depth": 2,
+      "parent": "encoder",
+      "is_leaf": false,
+      "parameter_count": 0,
+      "children": [
+        "0",
+        "1"
+      ]
+    },
+    "encoder.layer.0": {
+      "type": "BertLayer",
+      "depth": 3,
+      "parent": "encoder.layer",
+      "is_leaf": false,
+      "parameter_count": 0,
+      "children": [
+        "attention",
+        "intermediate",
+        "output"
+      ]
+    },
+    "encoder.layer.0.attention": {
+      "type": "BertAttention",
+      "depth": 4,
+      "parent": "encoder.layer.0",
+      "is_leaf": false,
+      "parameter_count": 0,
+      "children": [
+        "self",
+        "output"
+      ]
+    },
+    "encoder.layer.0.attention.self": {
+      "type": "BertSdpaSelfAttention",
+      "depth": 5,
+      "parent": "encoder.layer.0.attention",
+      "is_leaf": false,
+      "parameter_count": 0,
+      "children": [
+        "query",
+        "key",
+        "value",
+        "dropout"
+      ]
+    },
+    "encoder.layer.0.attention.self.query": {
+      "type": "Linear",
+      "depth": 6,
+      "parent": "encoder.layer.0.attention.self",
+      "is_leaf": true,
+      "parameter_count": 16512,
+      "children": []
+    },
+    "encoder.layer.0.attention.self.key": {
+      "type": "Linear",
+      "depth": 6,
+      "parent": "encoder.layer.0.attention.self",
+      "is_leaf": true,
+      "parameter_count": 16512,
+      "children": []
+    },
+    "encoder.layer.0.attention.self.value": {
+      "type": "Linear",
+      "depth": 6,
+      "parent": "encoder.layer.0.attention.self",
+      "is_leaf": true,
+      "parameter_count": 16512,
+      "children": []
+    },
+    "encoder.layer.0.attention.self.dropout": {
+      "type": "Dropout",
+      "depth": 6,
+      "parent": "encoder.layer.0.attention.self",
+      "is_leaf": true,
+      "parameter_count": 0,
+      "children": []
+    },
+    "encoder.layer.0.attention.output": {
+      "type": "BertSelfOutput",
+      "depth": 5,
+      "parent": "encoder.layer.0.attention",
+      "is_leaf": false,
+      "parameter_count": 0,
+      "children": [
+        "dense",
+        "LayerNorm",
+        "dropout"
+      ]
+    },
+    "encoder.layer.0.attention.output.dense": {
+      "type": "Linear",
+      "depth": 6,
+      "parent": "encoder.layer.0.attention.output",
+      "is_leaf": true,
+      "parameter_count": 16512,
+      "children": []
+    },
+    "encoder.layer.0.attention.output.LayerNorm": {
+      "type": "LayerNorm",
+      "depth": 6,
+      "parent": "encoder.layer.0.attention.output",
+      "is_leaf": true,
+      "parameter_count": 256,
+      "children": []
+    },
+    "encoder.layer.0.attention.output.dropout": {
+      "type": "Dropout",
+      "depth": 6,
+      "parent": "encoder.layer.0.attention.output",
+      "is_leaf": true,
+      "parameter_count": 0,
+      "children": []
+    },
+    "encoder.layer.0.intermediate": {
+      "type": "BertIntermediate",
+      "depth": 4,
+      "parent": "encoder.layer.0",
+      "is_leaf": false,
+      "parameter_count": 0,
+      "children": [
+        "dense",
+        "intermediate_act_fn"
+      ]
+    },
+    "encoder.layer.0.intermediate.dense": {
+      "type": "Linear",
+      "depth": 5,
+      "parent": "encoder.layer.0.intermediate",
+      "is_leaf": true,
+      "parameter_count": 66048,
+      "children": []
+    },
+    "encoder.layer.0.intermediate.intermediate_act_fn": {
+      "type": "GELUActivation",
+      "depth": 5,
+      "parent": "encoder.layer.0.intermediate",
+      "is_leaf": true,
+      "parameter_count": 0,
+      "children": []
+    },
+    "encoder.layer.0.output": {
+      "type": "BertOutput",
+      "depth": 4,
+      "parent": "encoder.layer.0",
+      "is_leaf": false,
+      "parameter_count": 0,
+      "children": [
+        "dense",
+        "LayerNorm",
+        "dropout"
+      ]
+    },
+    "encoder.layer.0.output.dense": {
+      "type": "Linear",
+      "depth": 5,
+      "parent": "encoder.layer.0.output",
+      "is_leaf": true,
+      "parameter_count": 65664,
+      "children": []
+    },
+    "encoder.layer.0.output.LayerNorm": {
+      "type": "LayerNorm",
+      "depth": 5,
+      "parent": "encoder.layer.0.output",
+      "is_leaf": true,
+      "parameter_count": 256,
+      "children": []
+    },
+    "encoder.layer.0.output.dropout": {
+      "type": "Dropout",
+      "depth": 5,
+      "parent": "encoder.layer.0.output",
+      "is_leaf": true,
+      "parameter_count": 0,
+      "children": []
+    },
+    "encoder.layer.1": {
+      "type": "BertLayer",
+      "depth": 3,
+      "parent": "encoder.layer",
+      "is_leaf": false,
+      "parameter_count": 0,
+      "children": [
+        "attention",
+        "intermediate",
+        "output"
+      ]
+    },
+    "encoder.layer.1.attention": {
+      "type": "BertAttention",
+      "depth": 4,
+      "parent": "encoder.layer.1",
+      "is_leaf": false,
+      "parameter_count": 0,
+      "children": [
+        "self",
+        "output"
+      ]
+    },
+    "encoder.layer.1.attention.self": {
+      "type": "BertSdpaSelfAttention",
+      "depth": 5,
+      "parent": "encoder.layer.1.attention",
+      "is_leaf": false,
+      "parameter_count": 0,
+      "children": [
+        "query",
+        "key",
+        "value",
+        "dropout"
+      ]
+    },
+    "encoder.layer.1.attention.self.query": {
+      "type": "Linear",
+      "depth": 6,
+      "parent": "encoder.layer.1.attention.self",
+      "is_leaf": true,
+      "parameter_count": 16512,
+      "children": []
+    },
+    "encoder.layer.1.attention.self.key": {
+      "type": "Linear",
+      "depth": 6,
+      "parent": "encoder.layer.1.attention.self",
+      "is_leaf": true,
+      "parameter_count": 16512,
+      "children": []
+    },
+    "encoder.layer.1.attention.self.value": {
+      "type": "Linear",
+      "depth": 6,
+      "parent": "encoder.layer.1.attention.self",
+      "is_leaf": true,
+      "parameter_count": 16512,
+      "children": []
+    },
+    "encoder.layer.1.attention.self.dropout": {
+      "type": "Dropout",
+      "depth": 6,
+      "parent": "encoder.layer.1.attention.self",
+      "is_leaf": true,
+      "parameter_count": 0,
+      "children": []
+    },
+    "encoder.layer.1.attention.output": {
+      "type": "BertSelfOutput",
+      "depth": 5,
+      "parent": "encoder.layer.1.attention",
+      "is_leaf": false,
+      "parameter_count": 0,
+      "children": [
+        "dense",
+        "LayerNorm",
+        "dropout"
+      ]
+    },
+    "encoder.layer.1.attention.output.dense": {
+      "type": "Linear",
+      "depth": 6,
+      "parent": "encoder.layer.1.attention.output",
+      "is_leaf": true,
+      "parameter_count": 16512,
+      "children": []
+    },
+    "encoder.layer.1.attention.output.LayerNorm": {
+      "type": "LayerNorm",
+      "depth": 6,
+      "parent": "encoder.layer.1.attention.output",
+      "is_leaf": true,
+      "parameter_count": 256,
+      "children": []
+    },
+    "encoder.layer.1.attention.output.dropout": {
+      "type": "Dropout",
+      "depth": 6,
+      "parent": "encoder.layer.1.attention.output",
+      "is_leaf": true,
+      "parameter_count": 0,
+      "children": []
+    },
+    "encoder.layer.1.intermediate": {
+      "type": "BertIntermediate",
+      "depth": 4,
+      "parent": "encoder.layer.1",
+      "is_leaf": false,
+      "parameter_count": 0,
+      "children": [
+        "dense",
+        "intermediate_act_fn"
+      ]
+    },
+    "encoder.layer.1.intermediate.dense": {
+      "type": "Linear",
+      "depth": 5,
+      "parent": "encoder.layer.1.intermediate",
+      "is_leaf": true,
+      "parameter_count": 66048,
+      "children": []
+    },
+    "encoder.layer.1.intermediate.intermediate_act_fn": {
+      "type": "GELUActivation",
+      "depth": 5,
+      "parent": "encoder.layer.1.intermediate",
+      "is_leaf": true,
+      "parameter_count": 0,
+      "children": []
+    },
+    "encoder.layer.1.output": {
+      "type": "BertOutput",
+      "depth": 4,
+      "parent": "encoder.layer.1",
+      "is_leaf": false,
+      "parameter_count": 0,
+      "children": [
+        "dense",
+        "LayerNorm",
+        "dropout"
+      ]
+    },
+    "encoder.layer.1.output.dense": {
+      "type": "Linear",
+      "depth": 5,
+      "parent": "encoder.layer.1.output",
+      "is_leaf": true,
+      "parameter_count": 65664,
+      "children": []
+    },
+    "encoder.layer.1.output.LayerNorm": {
+      "type": "LayerNorm",
+      "depth": 5,
+      "parent": "encoder.layer.1.output",
+      "is_leaf": true,
+      "parameter_count": 256,
+      "children": []
+    },
+    "encoder.layer.1.output.dropout": {
+      "type": "Dropout",
+      "depth": 5,
+      "parent": "encoder.layer.1.output",
+      "is_leaf": true,
+      "parameter_count": 0,
+      "children": []
+    },
+    "pooler": {
+      "type": "BertPooler",
+      "depth": 1,
+      "parent": "root",
+      "is_leaf": false,
+      "parameter_count": 0,
+      "children": [
+        "dense",
+        "activation"
+      ]
+    },
+    "pooler.dense": {
+      "type": "Linear",
+      "depth": 2,
+      "parent": "pooler",
+      "is_leaf": true,
+      "parameter_count": 16512,
+      "children": []
+    },
+    "pooler.activation": {
+      "type": "Tanh",
+      "depth": 2,
+      "parent": "pooler",
+      "is_leaf": true,
+      "parameter_count": 0,
+      "children": []
+    }
+  },
+  "parameter_mapping": {
+    "embeddings_word_embeddings_weight": {
+      "module": "embeddings.word_embeddings",
+      "param_name": "weight",
+      "shape": [
+        30522,
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "embeddings_position_embeddings_weight": {
+      "module": "embeddings.position_embeddings",
+      "param_name": "weight",
+      "shape": [
+        512,
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "embeddings_token_type_embeddings_weight": {
+      "module": "embeddings.token_type_embeddings",
+      "param_name": "weight",
+      "shape": [
+        2,
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "embeddings_LayerNorm_weight": {
+      "module": "embeddings.LayerNorm",
+      "param_name": "weight",
+      "shape": [
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "embeddings_LayerNorm_bias": {
+      "module": "embeddings.LayerNorm",
+      "param_name": "bias",
+      "shape": [
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_0_attention_self_query_weight": {
+      "module": "encoder.layer.0.attention.self.query",
+      "param_name": "weight",
+      "shape": [
+        128,
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_0_attention_self_query_bias": {
+      "module": "encoder.layer.0.attention.self.query",
+      "param_name": "bias",
+      "shape": [
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_0_attention_self_key_weight": {
+      "module": "encoder.layer.0.attention.self.key",
+      "param_name": "weight",
+      "shape": [
+        128,
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_0_attention_self_key_bias": {
+      "module": "encoder.layer.0.attention.self.key",
+      "param_name": "bias",
+      "shape": [
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_0_attention_self_value_weight": {
+      "module": "encoder.layer.0.attention.self.value",
+      "param_name": "weight",
+      "shape": [
+        128,
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_0_attention_self_value_bias": {
+      "module": "encoder.layer.0.attention.self.value",
+      "param_name": "bias",
+      "shape": [
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_0_attention_output_dense_weight": {
+      "module": "encoder.layer.0.attention.output.dense",
+      "param_name": "weight",
+      "shape": [
+        128,
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_0_attention_output_dense_bias": {
+      "module": "encoder.layer.0.attention.output.dense",
+      "param_name": "bias",
+      "shape": [
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_0_attention_output_LayerNorm_weight": {
+      "module": "encoder.layer.0.attention.output.LayerNorm",
+      "param_name": "weight",
+      "shape": [
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_0_attention_output_LayerNorm_bias": {
+      "module": "encoder.layer.0.attention.output.LayerNorm",
+      "param_name": "bias",
+      "shape": [
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_0_intermediate_dense_weight": {
+      "module": "encoder.layer.0.intermediate.dense",
+      "param_name": "weight",
+      "shape": [
+        512,
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_0_intermediate_dense_bias": {
+      "module": "encoder.layer.0.intermediate.dense",
+      "param_name": "bias",
+      "shape": [
+        512
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_0_output_dense_weight": {
+      "module": "encoder.layer.0.output.dense",
+      "param_name": "weight",
+      "shape": [
+        128,
+        512
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_0_output_dense_bias": {
+      "module": "encoder.layer.0.output.dense",
+      "param_name": "bias",
+      "shape": [
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_0_output_LayerNorm_weight": {
+      "module": "encoder.layer.0.output.LayerNorm",
+      "param_name": "weight",
+      "shape": [
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_0_output_LayerNorm_bias": {
+      "module": "encoder.layer.0.output.LayerNorm",
+      "param_name": "bias",
+      "shape": [
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_1_attention_self_query_weight": {
+      "module": "encoder.layer.1.attention.self.query",
+      "param_name": "weight",
+      "shape": [
+        128,
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_1_attention_self_query_bias": {
+      "module": "encoder.layer.1.attention.self.query",
+      "param_name": "bias",
+      "shape": [
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_1_attention_self_key_weight": {
+      "module": "encoder.layer.1.attention.self.key",
+      "param_name": "weight",
+      "shape": [
+        128,
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_1_attention_self_key_bias": {
+      "module": "encoder.layer.1.attention.self.key",
+      "param_name": "bias",
+      "shape": [
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_1_attention_self_value_weight": {
+      "module": "encoder.layer.1.attention.self.value",
+      "param_name": "weight",
+      "shape": [
+        128,
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_1_attention_self_value_bias": {
+      "module": "encoder.layer.1.attention.self.value",
+      "param_name": "bias",
+      "shape": [
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_1_attention_output_dense_weight": {
+      "module": "encoder.layer.1.attention.output.dense",
+      "param_name": "weight",
+      "shape": [
+        128,
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_1_attention_output_dense_bias": {
+      "module": "encoder.layer.1.attention.output.dense",
+      "param_name": "bias",
+      "shape": [
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_1_attention_output_LayerNorm_weight": {
+      "module": "encoder.layer.1.attention.output.LayerNorm",
+      "param_name": "weight",
+      "shape": [
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_1_attention_output_LayerNorm_bias": {
+      "module": "encoder.layer.1.attention.output.LayerNorm",
+      "param_name": "bias",
+      "shape": [
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_1_intermediate_dense_weight": {
+      "module": "encoder.layer.1.intermediate.dense",
+      "param_name": "weight",
+      "shape": [
+        512,
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_1_intermediate_dense_bias": {
+      "module": "encoder.layer.1.intermediate.dense",
+      "param_name": "bias",
+      "shape": [
+        512
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_1_output_dense_weight": {
+      "module": "encoder.layer.1.output.dense",
+      "param_name": "weight",
+      "shape": [
+        128,
+        512
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_1_output_dense_bias": {
+      "module": "encoder.layer.1.output.dense",
+      "param_name": "bias",
+      "shape": [
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_1_output_LayerNorm_weight": {
+      "module": "encoder.layer.1.output.LayerNorm",
+      "param_name": "weight",
+      "shape": [
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "encoder_layer_1_output_LayerNorm_bias": {
+      "module": "encoder.layer.1.output.LayerNorm",
+      "param_name": "bias",
+      "shape": [
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "pooler_dense_weight": {
+      "module": "pooler.dense",
+      "param_name": "weight",
+      "shape": [
+        128,
+        128
+      ],
+      "dtype": "torch.float32"
+    },
+    "pooler_dense_bias": {
+      "module": "pooler.dense",
+      "param_name": "bias",
+      "shape": [
+        128
+      ],
+      "dtype": "torch.float32"
+    }
+  },
+  "execution_trace": [
+    {
+      "module": "embeddings.word_embeddings",
+      "type": "Embedding",
+      "order": 0,
+      "input_shapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        128
+      ]
+    },
+    {
+      "module": "embeddings.token_type_embeddings",
+      "type": "Embedding",
+      "order": 1,
+      "input_shapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        128
+      ]
+    },
+    {
+      "module": "embeddings.position_embeddings",
+      "type": "Embedding",
+      "order": 2,
+      "input_shapes": [
+        [
+          1,
+          32
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        128
+      ]
+    },
+    {
+      "module": "embeddings.LayerNorm",
+      "type": "LayerNorm",
+      "order": 3,
+      "input_shapes": [
+        [
+          1,
+          32,
+          128
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        128
+      ]
+    },
+    {
+      "module": "embeddings.dropout",
+      "type": "Dropout",
+      "order": 4,
+      "input_shapes": [
+        [
+          1,
+          32,
+          128
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        128
+      ]
+    },
+    {
+      "module": "encoder.layer.0.attention.self.query",
+      "type": "Linear",
+      "order": 5,
+      "input_shapes": [
+        [
+          1,
+          32,
+          128
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        128
+      ]
+    },
+    {
+      "module": "encoder.layer.0.attention.self.key",
+      "type": "Linear",
+      "order": 6,
+      "input_shapes": [
+        [
+          1,
+          32,
+          128
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        128
+      ]
+    },
+    {
+      "module": "encoder.layer.0.attention.self.value",
+      "type": "Linear",
+      "order": 7,
+      "input_shapes": [
+        [
+          1,
+          32,
+          128
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        128
+      ]
+    },
+    {
+      "module": "encoder.layer.0.attention.output.dense",
+      "type": "Linear",
+      "order": 8,
+      "input_shapes": [
+        [
+          1,
+          32,
+          128
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        128
+      ]
+    },
+    {
+      "module": "encoder.layer.0.attention.output.dropout",
+      "type": "Dropout",
+      "order": 9,
+      "input_shapes": [
+        [
+          1,
+          32,
+          128
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        128
+      ]
+    },
+    {
+      "module": "encoder.layer.0.attention.output.LayerNorm",
+      "type": "LayerNorm",
+      "order": 10,
+      "input_shapes": [
+        [
+          1,
+          32,
+          128
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        128
+      ]
+    },
+    {
+      "module": "encoder.layer.0.intermediate.dense",
+      "type": "Linear",
+      "order": 11,
+      "input_shapes": [
+        [
+          1,
+          32,
+          128
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        512
+      ]
+    },
+    {
+      "module": "encoder.layer.0.intermediate.intermediate_act_fn",
+      "type": "GELUActivation",
+      "order": 12,
+      "input_shapes": [
+        [
+          1,
+          32,
+          512
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        512
+      ]
+    },
+    {
+      "module": "encoder.layer.0.output.dense",
+      "type": "Linear",
+      "order": 13,
+      "input_shapes": [
+        [
+          1,
+          32,
+          512
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        128
+      ]
+    },
+    {
+      "module": "encoder.layer.0.output.dropout",
+      "type": "Dropout",
+      "order": 14,
+      "input_shapes": [
+        [
+          1,
+          32,
+          128
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        128
+      ]
+    },
+    {
+      "module": "encoder.layer.0.output.LayerNorm",
+      "type": "LayerNorm",
+      "order": 15,
+      "input_shapes": [
+        [
+          1,
+          32,
+          128
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        128
+      ]
+    },
+    {
+      "module": "encoder.layer.1.attention.self.query",
+      "type": "Linear",
+      "order": 16,
+      "input_shapes": [
+        [
+          1,
+          32,
+          128
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        128
+      ]
+    },
+    {
+      "module": "encoder.layer.1.attention.self.key",
+      "type": "Linear",
+      "order": 17,
+      "input_shapes": [
+        [
+          1,
+          32,
+          128
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        128
+      ]
+    },
+    {
+      "module": "encoder.layer.1.attention.self.value",
+      "type": "Linear",
+      "order": 18,
+      "input_shapes": [
+        [
+          1,
+          32,
+          128
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        128
+      ]
+    },
+    {
+      "module": "encoder.layer.1.attention.output.dense",
+      "type": "Linear",
+      "order": 19,
+      "input_shapes": [
+        [
+          1,
+          32,
+          128
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        128
+      ]
+    },
+    {
+      "module": "encoder.layer.1.attention.output.dropout",
+      "type": "Dropout",
+      "order": 20,
+      "input_shapes": [
+        [
+          1,
+          32,
+          128
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        128
+      ]
+    },
+    {
+      "module": "encoder.layer.1.attention.output.LayerNorm",
+      "type": "LayerNorm",
+      "order": 21,
+      "input_shapes": [
+        [
+          1,
+          32,
+          128
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        128
+      ]
+    },
+    {
+      "module": "encoder.layer.1.intermediate.dense",
+      "type": "Linear",
+      "order": 22,
+      "input_shapes": [
+        [
+          1,
+          32,
+          128
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        512
+      ]
+    },
+    {
+      "module": "encoder.layer.1.intermediate.intermediate_act_fn",
+      "type": "GELUActivation",
+      "order": 23,
+      "input_shapes": [
+        [
+          1,
+          32,
+          512
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        512
+      ]
+    },
+    {
+      "module": "encoder.layer.1.output.dense",
+      "type": "Linear",
+      "order": 24,
+      "input_shapes": [
+        [
+          1,
+          32,
+          512
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        128
+      ]
+    },
+    {
+      "module": "encoder.layer.1.output.dropout",
+      "type": "Dropout",
+      "order": 25,
+      "input_shapes": [
+        [
+          1,
+          32,
+          128
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        128
+      ]
+    },
+    {
+      "module": "encoder.layer.1.output.LayerNorm",
+      "type": "LayerNorm",
+      "order": 26,
+      "input_shapes": [
+        [
+          1,
+          32,
+          128
+        ]
+      ],
+      "output_shape": [
+        1,
+        32,
+        128
+      ]
+    },
+    {
+      "module": "pooler.dense",
+      "type": "Linear",
+      "order": 27,
+      "input_shapes": [
+        [
+          1,
+          128
+        ]
+      ],
+      "output_shape": [
+        1,
+        128
+      ]
+    },
+    {
+      "module": "pooler.activation",
+      "type": "Tanh",
+      "order": 28,
+      "input_shapes": [
+        [
+          1,
+          128
+        ]
+      ],
+      "output_shape": [
+        1,
+        128
+      ]
+    }
+  ]
+}

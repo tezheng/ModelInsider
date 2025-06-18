@@ -1,0 +1,592 @@
+{
+  "embeddings": {
+    "type": "BertEmbeddings",
+    "depth": 1,
+    "parent": "root",
+    "leaf_name": "embeddings",
+    "is_leaf": false,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": [
+      "word_embeddings",
+      "position_embeddings",
+      "token_type_embeddings",
+      "LayerNorm",
+      "dropout"
+    ]
+  },
+  "embeddings.word_embeddings": {
+    "type": "Embedding",
+    "depth": 2,
+    "parent": "embeddings",
+    "leaf_name": "word_embeddings",
+    "is_leaf": true,
+    "has_parameters": true,
+    "parameter_names": [
+      "weight"
+    ],
+    "children": []
+  },
+  "embeddings.position_embeddings": {
+    "type": "Embedding",
+    "depth": 2,
+    "parent": "embeddings",
+    "leaf_name": "position_embeddings",
+    "is_leaf": true,
+    "has_parameters": true,
+    "parameter_names": [
+      "weight"
+    ],
+    "children": []
+  },
+  "embeddings.token_type_embeddings": {
+    "type": "Embedding",
+    "depth": 2,
+    "parent": "embeddings",
+    "leaf_name": "token_type_embeddings",
+    "is_leaf": true,
+    "has_parameters": true,
+    "parameter_names": [
+      "weight"
+    ],
+    "children": []
+  },
+  "embeddings.LayerNorm": {
+    "type": "LayerNorm",
+    "depth": 2,
+    "parent": "embeddings",
+    "leaf_name": "LayerNorm",
+    "is_leaf": true,
+    "has_parameters": true,
+    "parameter_names": [
+      "weight",
+      "bias"
+    ],
+    "children": []
+  },
+  "embeddings.dropout": {
+    "type": "Dropout",
+    "depth": 2,
+    "parent": "embeddings",
+    "leaf_name": "dropout",
+    "is_leaf": true,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": []
+  },
+  "encoder": {
+    "type": "BertEncoder",
+    "depth": 1,
+    "parent": "root",
+    "leaf_name": "encoder",
+    "is_leaf": false,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": [
+      "layer"
+    ]
+  },
+  "encoder.layer": {
+    "type": "ModuleList",
+    "depth": 2,
+    "parent": "encoder",
+    "leaf_name": "layer",
+    "is_leaf": false,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": [
+      "0",
+      "1"
+    ]
+  },
+  "encoder.layer.0": {
+    "type": "BertLayer",
+    "depth": 3,
+    "parent": "encoder.layer",
+    "leaf_name": "0",
+    "is_leaf": false,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": [
+      "attention",
+      "intermediate",
+      "output"
+    ]
+  },
+  "encoder.layer.0.attention": {
+    "type": "BertAttention",
+    "depth": 4,
+    "parent": "encoder.layer.0",
+    "leaf_name": "attention",
+    "is_leaf": false,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": [
+      "self",
+      "output"
+    ]
+  },
+  "encoder.layer.0.attention.self": {
+    "type": "BertSdpaSelfAttention",
+    "depth": 5,
+    "parent": "encoder.layer.0.attention",
+    "leaf_name": "self",
+    "is_leaf": false,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": [
+      "query",
+      "key",
+      "value",
+      "dropout"
+    ]
+  },
+  "encoder.layer.0.attention.self.query": {
+    "type": "Linear",
+    "depth": 6,
+    "parent": "encoder.layer.0.attention.self",
+    "leaf_name": "query",
+    "is_leaf": true,
+    "has_parameters": true,
+    "parameter_names": [
+      "weight",
+      "bias"
+    ],
+    "children": []
+  },
+  "encoder.layer.0.attention.self.key": {
+    "type": "Linear",
+    "depth": 6,
+    "parent": "encoder.layer.0.attention.self",
+    "leaf_name": "key",
+    "is_leaf": true,
+    "has_parameters": true,
+    "parameter_names": [
+      "weight",
+      "bias"
+    ],
+    "children": []
+  },
+  "encoder.layer.0.attention.self.value": {
+    "type": "Linear",
+    "depth": 6,
+    "parent": "encoder.layer.0.attention.self",
+    "leaf_name": "value",
+    "is_leaf": true,
+    "has_parameters": true,
+    "parameter_names": [
+      "weight",
+      "bias"
+    ],
+    "children": []
+  },
+  "encoder.layer.0.attention.self.dropout": {
+    "type": "Dropout",
+    "depth": 6,
+    "parent": "encoder.layer.0.attention.self",
+    "leaf_name": "dropout",
+    "is_leaf": true,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": []
+  },
+  "encoder.layer.0.attention.output": {
+    "type": "BertSelfOutput",
+    "depth": 5,
+    "parent": "encoder.layer.0.attention",
+    "leaf_name": "output",
+    "is_leaf": false,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": [
+      "dense",
+      "LayerNorm",
+      "dropout"
+    ]
+  },
+  "encoder.layer.0.attention.output.dense": {
+    "type": "Linear",
+    "depth": 6,
+    "parent": "encoder.layer.0.attention.output",
+    "leaf_name": "dense",
+    "is_leaf": true,
+    "has_parameters": true,
+    "parameter_names": [
+      "weight",
+      "bias"
+    ],
+    "children": []
+  },
+  "encoder.layer.0.attention.output.LayerNorm": {
+    "type": "LayerNorm",
+    "depth": 6,
+    "parent": "encoder.layer.0.attention.output",
+    "leaf_name": "LayerNorm",
+    "is_leaf": true,
+    "has_parameters": true,
+    "parameter_names": [
+      "weight",
+      "bias"
+    ],
+    "children": []
+  },
+  "encoder.layer.0.attention.output.dropout": {
+    "type": "Dropout",
+    "depth": 6,
+    "parent": "encoder.layer.0.attention.output",
+    "leaf_name": "dropout",
+    "is_leaf": true,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": []
+  },
+  "encoder.layer.0.intermediate": {
+    "type": "BertIntermediate",
+    "depth": 4,
+    "parent": "encoder.layer.0",
+    "leaf_name": "intermediate",
+    "is_leaf": false,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": [
+      "dense",
+      "intermediate_act_fn"
+    ]
+  },
+  "encoder.layer.0.intermediate.dense": {
+    "type": "Linear",
+    "depth": 5,
+    "parent": "encoder.layer.0.intermediate",
+    "leaf_name": "dense",
+    "is_leaf": true,
+    "has_parameters": true,
+    "parameter_names": [
+      "weight",
+      "bias"
+    ],
+    "children": []
+  },
+  "encoder.layer.0.intermediate.intermediate_act_fn": {
+    "type": "GELUActivation",
+    "depth": 5,
+    "parent": "encoder.layer.0.intermediate",
+    "leaf_name": "intermediate_act_fn",
+    "is_leaf": true,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": []
+  },
+  "encoder.layer.0.output": {
+    "type": "BertOutput",
+    "depth": 4,
+    "parent": "encoder.layer.0",
+    "leaf_name": "output",
+    "is_leaf": false,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": [
+      "dense",
+      "LayerNorm",
+      "dropout"
+    ]
+  },
+  "encoder.layer.0.output.dense": {
+    "type": "Linear",
+    "depth": 5,
+    "parent": "encoder.layer.0.output",
+    "leaf_name": "dense",
+    "is_leaf": true,
+    "has_parameters": true,
+    "parameter_names": [
+      "weight",
+      "bias"
+    ],
+    "children": []
+  },
+  "encoder.layer.0.output.LayerNorm": {
+    "type": "LayerNorm",
+    "depth": 5,
+    "parent": "encoder.layer.0.output",
+    "leaf_name": "LayerNorm",
+    "is_leaf": true,
+    "has_parameters": true,
+    "parameter_names": [
+      "weight",
+      "bias"
+    ],
+    "children": []
+  },
+  "encoder.layer.0.output.dropout": {
+    "type": "Dropout",
+    "depth": 5,
+    "parent": "encoder.layer.0.output",
+    "leaf_name": "dropout",
+    "is_leaf": true,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": []
+  },
+  "encoder.layer.1": {
+    "type": "BertLayer",
+    "depth": 3,
+    "parent": "encoder.layer",
+    "leaf_name": "1",
+    "is_leaf": false,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": [
+      "attention",
+      "intermediate",
+      "output"
+    ]
+  },
+  "encoder.layer.1.attention": {
+    "type": "BertAttention",
+    "depth": 4,
+    "parent": "encoder.layer.1",
+    "leaf_name": "attention",
+    "is_leaf": false,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": [
+      "self",
+      "output"
+    ]
+  },
+  "encoder.layer.1.attention.self": {
+    "type": "BertSdpaSelfAttention",
+    "depth": 5,
+    "parent": "encoder.layer.1.attention",
+    "leaf_name": "self",
+    "is_leaf": false,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": [
+      "query",
+      "key",
+      "value",
+      "dropout"
+    ]
+  },
+  "encoder.layer.1.attention.self.query": {
+    "type": "Linear",
+    "depth": 6,
+    "parent": "encoder.layer.1.attention.self",
+    "leaf_name": "query",
+    "is_leaf": true,
+    "has_parameters": true,
+    "parameter_names": [
+      "weight",
+      "bias"
+    ],
+    "children": []
+  },
+  "encoder.layer.1.attention.self.key": {
+    "type": "Linear",
+    "depth": 6,
+    "parent": "encoder.layer.1.attention.self",
+    "leaf_name": "key",
+    "is_leaf": true,
+    "has_parameters": true,
+    "parameter_names": [
+      "weight",
+      "bias"
+    ],
+    "children": []
+  },
+  "encoder.layer.1.attention.self.value": {
+    "type": "Linear",
+    "depth": 6,
+    "parent": "encoder.layer.1.attention.self",
+    "leaf_name": "value",
+    "is_leaf": true,
+    "has_parameters": true,
+    "parameter_names": [
+      "weight",
+      "bias"
+    ],
+    "children": []
+  },
+  "encoder.layer.1.attention.self.dropout": {
+    "type": "Dropout",
+    "depth": 6,
+    "parent": "encoder.layer.1.attention.self",
+    "leaf_name": "dropout",
+    "is_leaf": true,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": []
+  },
+  "encoder.layer.1.attention.output": {
+    "type": "BertSelfOutput",
+    "depth": 5,
+    "parent": "encoder.layer.1.attention",
+    "leaf_name": "output",
+    "is_leaf": false,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": [
+      "dense",
+      "LayerNorm",
+      "dropout"
+    ]
+  },
+  "encoder.layer.1.attention.output.dense": {
+    "type": "Linear",
+    "depth": 6,
+    "parent": "encoder.layer.1.attention.output",
+    "leaf_name": "dense",
+    "is_leaf": true,
+    "has_parameters": true,
+    "parameter_names": [
+      "weight",
+      "bias"
+    ],
+    "children": []
+  },
+  "encoder.layer.1.attention.output.LayerNorm": {
+    "type": "LayerNorm",
+    "depth": 6,
+    "parent": "encoder.layer.1.attention.output",
+    "leaf_name": "LayerNorm",
+    "is_leaf": true,
+    "has_parameters": true,
+    "parameter_names": [
+      "weight",
+      "bias"
+    ],
+    "children": []
+  },
+  "encoder.layer.1.attention.output.dropout": {
+    "type": "Dropout",
+    "depth": 6,
+    "parent": "encoder.layer.1.attention.output",
+    "leaf_name": "dropout",
+    "is_leaf": true,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": []
+  },
+  "encoder.layer.1.intermediate": {
+    "type": "BertIntermediate",
+    "depth": 4,
+    "parent": "encoder.layer.1",
+    "leaf_name": "intermediate",
+    "is_leaf": false,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": [
+      "dense",
+      "intermediate_act_fn"
+    ]
+  },
+  "encoder.layer.1.intermediate.dense": {
+    "type": "Linear",
+    "depth": 5,
+    "parent": "encoder.layer.1.intermediate",
+    "leaf_name": "dense",
+    "is_leaf": true,
+    "has_parameters": true,
+    "parameter_names": [
+      "weight",
+      "bias"
+    ],
+    "children": []
+  },
+  "encoder.layer.1.intermediate.intermediate_act_fn": {
+    "type": "GELUActivation",
+    "depth": 5,
+    "parent": "encoder.layer.1.intermediate",
+    "leaf_name": "intermediate_act_fn",
+    "is_leaf": true,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": []
+  },
+  "encoder.layer.1.output": {
+    "type": "BertOutput",
+    "depth": 4,
+    "parent": "encoder.layer.1",
+    "leaf_name": "output",
+    "is_leaf": false,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": [
+      "dense",
+      "LayerNorm",
+      "dropout"
+    ]
+  },
+  "encoder.layer.1.output.dense": {
+    "type": "Linear",
+    "depth": 5,
+    "parent": "encoder.layer.1.output",
+    "leaf_name": "dense",
+    "is_leaf": true,
+    "has_parameters": true,
+    "parameter_names": [
+      "weight",
+      "bias"
+    ],
+    "children": []
+  },
+  "encoder.layer.1.output.LayerNorm": {
+    "type": "LayerNorm",
+    "depth": 5,
+    "parent": "encoder.layer.1.output",
+    "leaf_name": "LayerNorm",
+    "is_leaf": true,
+    "has_parameters": true,
+    "parameter_names": [
+      "weight",
+      "bias"
+    ],
+    "children": []
+  },
+  "encoder.layer.1.output.dropout": {
+    "type": "Dropout",
+    "depth": 5,
+    "parent": "encoder.layer.1.output",
+    "leaf_name": "dropout",
+    "is_leaf": true,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": []
+  },
+  "pooler": {
+    "type": "BertPooler",
+    "depth": 1,
+    "parent": "root",
+    "leaf_name": "pooler",
+    "is_leaf": false,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": [
+      "dense",
+      "activation"
+    ]
+  },
+  "pooler.dense": {
+    "type": "Linear",
+    "depth": 2,
+    "parent": "pooler",
+    "leaf_name": "dense",
+    "is_leaf": true,
+    "has_parameters": true,
+    "parameter_names": [
+      "weight",
+      "bias"
+    ],
+    "children": []
+  },
+  "pooler.activation": {
+    "type": "Tanh",
+    "depth": 2,
+    "parent": "pooler",
+    "leaf_name": "activation",
+    "is_leaf": true,
+    "has_parameters": false,
+    "parameter_names": [],
+    "children": []
+  }
+}

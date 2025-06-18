@@ -1,0 +1,19 @@
+# Temporary test data
+temp/
+*.onnx
+*_test_*.json
+*_dag_*.json
+
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info
+
+# Virtual environments
+.venv
+
+# External reference repositories
+external/

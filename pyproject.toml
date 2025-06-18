@@ -1,0 +1,16 @@
+[project]
+name = "modelexport"
+version = "0.1.0"
+description = "Universal hierarchy-preserving ONNX export for Hugging Face models"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "torch",
+    "transformers",
+    "onnx",
+    "numpy",
+    "torchvision"
+]
+
+[tool.setuptools.packages.find]
+exclude = ["temp*", "data*", "external*", "tests*"]
