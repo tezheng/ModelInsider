@@ -1,0 +1,10 @@
+{
+  "baseline_nodes": 304,
+  "tagged_nodes": 186,
+  "node_difference": 118,
+  "hierarchy_nodes": 90,
+  "io_compatibility": {
+    "inputs_match": true,
+    "outputs_match": true
+  }
+}

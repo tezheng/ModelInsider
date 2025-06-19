@@ -18,6 +18,23 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `nn.Module` hierarchy (`model.named_modules()`)
 - Forward hooks for execution tracing
 - Parameter-based and execution-based tagging only
+
+## ⚠️ CARDINAL RULE #2 - ALL TESTING MUST USE PYTEST WITH CODE-GENERATED RESULTS
+
+**THIS IS THE SECOND CARDINAL RULE - NO EXCEPTIONS!**
+
+❌ **NEVER**:
+- Create test-specific Python scripts outside pytest
+- Use LLM-generated test results or expectations  
+- Write standalone test runners
+- Generate test data manually
+
+✅ **ALWAYS**:
+- Use pytest for ALL testing
+- Generate test results with code during test execution
+- Structure test results in organized temp directories
+- Implement CLI subcommands for user testing
+- Test CLI using pytest with subprocess/click testing utilities
 - Dynamic analysis, never static assumptions
 
 **Before every code change**: Ask "Is this hardcoded to any specific architecture?"  
@@ -41,15 +58,23 @@ source .venv/bin/activate  # Linux/Mac
 # or .venv\Scripts\activate  # Windows
 uv pip install -e .
 
-# Run testing workflows (use uv run or activate venv first)
-uv run python bert_self_attention_test.py --debug-info
-uv run python test_universal_hierarchy.py    # Test all 3 model architectures
-uv run python verify_onnx_tags.py --all      # Verify ONNX tag consistency
-uv run python dag_extractor.py               # Test BERT model specifically
+# CLI Commands (primary interface)
+uv run modelexport export MODEL_NAME OUTPUT.onnx    # Export with hierarchy preservation
+uv run modelexport analyze OUTPUT.onnx              # Analyze hierarchy tags  
+uv run modelexport validate OUTPUT.onnx             # Validate ONNX and tags
+uv run modelexport compare model1.onnx model2.onnx  # Compare tag distributions
 
-# Run individual scripts
-uv run python input_generator.py             # Test input generation
-uv run python main.py                        # Basic hello world
+# Testing (CARDINAL RULE #2: ALL testing via pytest)
+uv run pytest tests/                                # Run all tests
+uv run pytest tests/test_cli.py -v                  # Test CLI functionality
+uv run pytest tests/test_hierarchy_exporter.py -v   # Test core exporter
+uv run pytest tests/test_param_mapping.py -v        # Test parameter mapping
+uv run pytest tests/test_tag_propagation.py -v      # Test tag propagation
+
+# Examples
+uv run modelexport export prajjwal1/bert-tiny bert.onnx --input-text "Hello world"
+uv run modelexport --verbose analyze bert.onnx --output-format summary
+uv run modelexport validate bert.onnx --check-consistency
 ```
 
 ## Project Structure
@@ -83,6 +108,13 @@ See `MEMO.md` for detailed rationale.
 4. **Universal**: Works with any PyTorch model automatically
 
 ## Development Rules of Thumb
+
+### 0. MUST Test Validation (CRITICAL RULE)
+- **🚨 MUST VALIDATE**: Every feature implementation change MUST be validated against ALL MUST test cases
+- **⚠️ ZERO TOLERANCE**: Any MUST test failure breaks the entire system
+- **🔴 CARDINAL RULES**: MUST-001 (No Hardcoded Logic), MUST-002 (Torch.nn Filtering), MUST-003 (Universal Design)
+- **✅ ENFORCEMENT**: Run MUST tests before any commit, PR, or release
+- **📍 Location**: See `/docs/test-cases/MUST-*.md` for detailed validation procedures
 
 ### 1. Universal Design Principles
 - **Target**: Universal hierarchy-preserving ONNX export for HuggingFace models

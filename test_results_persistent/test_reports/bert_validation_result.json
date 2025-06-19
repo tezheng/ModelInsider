@@ -1,0 +1,8 @@
+{
+  "test_name": "bert_validation",
+  "exit_code": 0,
+  "output": "\u2705 ONNX model is valid: test_results_persistent/exports/bert_test_export.onnx\n\u2705 Found 90 operations with hierarchy tags in ONNX\n\u2705 Found sidecar file with 186 tagged operations\n\u274c Tag inconsistencies found:\n   ONNX nodes: 90\n   Sidecar nodes: 186\n   Sidecar-only nodes: 96\n",
+  "has_onnx_tags": true,
+  "has_sidecar": true,
+  "consistency_check": true
+}

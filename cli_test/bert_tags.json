@@ -1,0 +1,2310 @@
+{
+  "metadata": {
+    "total_operations": 186,
+    "tagged_operations": 185,
+    "unique_tags": 5
+  },
+  "operations": {
+    "/embeddings/Constant": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.Gemm"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/embeddings/Constant_output_0"
+      ]
+    },
+    "/embeddings/Constant_1": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.Gather"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/embeddings/Constant_1_output_0"
+      ]
+    },
+    "/embeddings/word_embeddings/Gather": {
+      "op_type": "Gather",
+      "tags": [
+        "/operation.Gather",
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "embeddings.word_embeddings.weight",
+        "input_ids"
+      ],
+      "outputs": [
+        "/embeddings/word_embeddings/Gather_output_0"
+      ]
+    },
+    "/embeddings/token_type_embeddings/Gather": {
+      "op_type": "Gather",
+      "tags": [
+        "/operation.Gather",
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "embeddings.token_type_embeddings.weight",
+        "attention_mask"
+      ],
+      "outputs": [
+        "/embeddings/token_type_embeddings/Gather_output_0"
+      ]
+    },
+    "/embeddings/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/embeddings/word_embeddings/Gather_output_0",
+        "/embeddings/token_type_embeddings/Gather_output_0"
+      ],
+      "outputs": [
+        "/embeddings/Add_output_0"
+      ]
+    },
+    "/embeddings/position_embeddings/Gather": {
+      "op_type": "Gather",
+      "tags": [
+        "/operation.Gather",
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "embeddings.position_embeddings.weight",
+        "/embeddings/Constant_1_output_0"
+      ],
+      "outputs": [
+        "/embeddings/position_embeddings/Gather_output_0"
+      ]
+    },
+    "/embeddings/Add_1": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/embeddings/Add_output_0",
+        "/embeddings/position_embeddings/Gather_output_0"
+      ],
+      "outputs": [
+        "/embeddings/Add_1_output_0"
+      ]
+    },
+    "/embeddings/LayerNorm/ReduceMean": {
+      "op_type": "ReduceMean",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/embeddings/Add_1_output_0"
+      ],
+      "outputs": [
+        "/embeddings/LayerNorm/ReduceMean_output_0"
+      ]
+    },
+    "/embeddings/LayerNorm/Sub": {
+      "op_type": "Sub",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/embeddings/Add_1_output_0",
+        "/embeddings/LayerNorm/ReduceMean_output_0"
+      ],
+      "outputs": [
+        "/embeddings/LayerNorm/Sub_output_0"
+      ]
+    },
+    "/embeddings/LayerNorm/Constant": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/embeddings/LayerNorm/Constant_output_0"
+      ]
+    },
+    "/embeddings/LayerNorm/Pow": {
+      "op_type": "Pow",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/embeddings/LayerNorm/Sub_output_0",
+        "/embeddings/LayerNorm/Constant_output_0"
+      ],
+      "outputs": [
+        "/embeddings/LayerNorm/Pow_output_0"
+      ]
+    },
+    "/embeddings/LayerNorm/ReduceMean_1": {
+      "op_type": "ReduceMean",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/embeddings/LayerNorm/Pow_output_0"
+      ],
+      "outputs": [
+        "/embeddings/LayerNorm/ReduceMean_1_output_0"
+      ]
+    },
+    "/embeddings/LayerNorm/Constant_1": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/embeddings/LayerNorm/Constant_1_output_0"
+      ]
+    },
+    "/embeddings/LayerNorm/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/embeddings/LayerNorm/ReduceMean_1_output_0",
+        "/embeddings/LayerNorm/Constant_1_output_0"
+      ],
+      "outputs": [
+        "/embeddings/LayerNorm/Add_output_0"
+      ]
+    },
+    "/embeddings/LayerNorm/Sqrt": {
+      "op_type": "Sqrt",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/embeddings/LayerNorm/Add_output_0"
+      ],
+      "outputs": [
+        "/embeddings/LayerNorm/Sqrt_output_0"
+      ]
+    },
+    "/embeddings/LayerNorm/Div": {
+      "op_type": "Div",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/embeddings/LayerNorm/Sub_output_0",
+        "/embeddings/LayerNorm/Sqrt_output_0"
+      ],
+      "outputs": [
+        "/embeddings/LayerNorm/Div_output_0"
+      ]
+    },
+    "/embeddings/LayerNorm/Mul": {
+      "op_type": "Mul",
+      "tags": [
+        "/operation.Mul",
+        "/operation.Add"
+      ],
+      "inputs": [
+        "/embeddings/LayerNorm/Div_output_0",
+        "embeddings.LayerNorm.weight"
+      ],
+      "outputs": [
+        "/embeddings/LayerNorm/Mul_output_0"
+      ]
+    },
+    "/embeddings/LayerNorm/Add_1": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Add",
+        "/operation.MatMul",
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/embeddings/LayerNorm/Mul_output_0",
+        "embeddings.LayerNorm.bias"
+      ],
+      "outputs": [
+        "/embeddings/LayerNorm/Add_1_output_0"
+      ]
+    },
+    "/Constant": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/Constant_output_0"
+      ]
+    },
+    "/Unsqueeze": {
+      "op_type": "Unsqueeze",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "token_type_ids",
+        "/Constant_output_0"
+      ],
+      "outputs": [
+        "/Unsqueeze_output_0"
+      ]
+    },
+    "/Constant_1": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/Constant_1_output_0"
+      ]
+    },
+    "/Unsqueeze_1": {
+      "op_type": "Unsqueeze",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/Unsqueeze_output_0",
+        "/Constant_1_output_0"
+      ],
+      "outputs": [
+        "/Unsqueeze_1_output_0"
+      ]
+    },
+    "/Constant_2": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/Constant_2_output_0"
+      ]
+    },
+    "/Constant_3": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/Constant_3_output_0"
+      ]
+    },
+    "/ConstantOfShape": {
+      "op_type": "ConstantOfShape",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/Constant_3_output_0"
+      ],
+      "outputs": [
+        "/ConstantOfShape_output_0"
+      ]
+    },
+    "/Constant_4": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/Constant_4_output_0"
+      ]
+    },
+    "/Mul": {
+      "op_type": "Mul",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/ConstantOfShape_output_0",
+        "/Constant_4_output_0"
+      ],
+      "outputs": [
+        "/Mul_output_0"
+      ]
+    },
+    "/Equal": {
+      "op_type": "Equal",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/Constant_2_output_0",
+        "/Mul_output_0"
+      ],
+      "outputs": [
+        "/Equal_output_0"
+      ]
+    },
+    "/Where": {
+      "op_type": "Where",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/Equal_output_0",
+        "/ConstantOfShape_output_0",
+        "/Constant_2_output_0"
+      ],
+      "outputs": [
+        "/Where_output_0"
+      ]
+    },
+    "/Expand": {
+      "op_type": "Expand",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/Unsqueeze_1_output_0",
+        "/Where_output_0"
+      ],
+      "outputs": [
+        "/Expand_output_0"
+      ]
+    },
+    "/Cast": {
+      "op_type": "Cast",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/Expand_output_0"
+      ],
+      "outputs": [
+        "/Cast_output_0"
+      ]
+    },
+    "/Constant_5": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/Constant_5_output_0"
+      ]
+    },
+    "/Sub": {
+      "op_type": "Sub",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/Constant_5_output_0",
+        "/Cast_output_0"
+      ],
+      "outputs": [
+        "/Sub_output_0"
+      ]
+    },
+    "/Cast_1": {
+      "op_type": "Cast",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/Sub_output_0"
+      ],
+      "outputs": [
+        "/Cast_1_output_0"
+      ]
+    },
+    "/Cast_2": {
+      "op_type": "Cast",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/Cast_1_output_0"
+      ],
+      "outputs": [
+        "/Cast_2_output_0"
+      ]
+    },
+    "/Constant_6": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/Constant_6_output_0"
+      ]
+    },
+    "/Where_1": {
+      "op_type": "Where",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/Cast_2_output_0",
+        "/Constant_6_output_0",
+        "/Sub_output_0"
+      ],
+      "outputs": [
+        "/Where_1_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/query/MatMul": {
+      "op_type": "MatMul",
+      "tags": [
+        "/operation.MatMul",
+        "/operation.Add"
+      ],
+      "inputs": [
+        "/embeddings/LayerNorm/Add_1_output_0",
+        "onnx::MatMul_340"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/query/MatMul_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/query/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Add",
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "encoder.layer.0.attention.self.query.bias",
+        "/encoder/layer.0/attention/self/query/MatMul_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/query/Add_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Constant": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Constant_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Reshape": {
+      "op_type": "Reshape",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/self/query/Add_output_0",
+        "/encoder/layer.0/attention/self/Constant_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Reshape_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Transpose": {
+      "op_type": "Transpose",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/self/Reshape_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Transpose_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/key/MatMul": {
+      "op_type": "MatMul",
+      "tags": [
+        "/operation.MatMul",
+        "/operation.Add"
+      ],
+      "inputs": [
+        "/embeddings/LayerNorm/Add_1_output_0",
+        "onnx::MatMul_346"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/key/MatMul_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/key/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Add",
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "encoder.layer.0.attention.self.key.bias",
+        "/encoder/layer.0/attention/self/key/MatMul_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/key/Add_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Constant_1": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Constant_1_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Reshape_1": {
+      "op_type": "Reshape",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/self/key/Add_output_0",
+        "/encoder/layer.0/attention/self/Constant_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Reshape_1_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/value/MatMul": {
+      "op_type": "MatMul",
+      "tags": [
+        "/operation.MatMul",
+        "/operation.Add"
+      ],
+      "inputs": [
+        "/embeddings/LayerNorm/Add_1_output_0",
+        "onnx::MatMul_352"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/value/MatMul_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/value/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Add",
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "encoder.layer.0.attention.self.value.bias",
+        "/encoder/layer.0/attention/self/value/MatMul_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/value/Add_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Constant_2": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Constant_2_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Reshape_2": {
+      "op_type": "Reshape",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/self/value/Add_output_0",
+        "/encoder/layer.0/attention/self/Constant_2_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Reshape_2_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Transpose_1": {
+      "op_type": "Transpose",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/self/Reshape_2_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Transpose_1_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Shape": {
+      "op_type": "Shape",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/self/Transpose_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Shape_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Constant_3": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Constant_3_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Constant_4": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Constant_4_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Slice": {
+      "op_type": "Slice",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/self/Shape_output_0",
+        "/encoder/layer.0/attention/self/Constant_3_output_0",
+        "/encoder/layer.0/attention/self/Constant_4_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Slice_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Cast": {
+      "op_type": "Cast",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/self/Slice_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Cast_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Sqrt": {
+      "op_type": "Sqrt",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/self/Cast_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Sqrt_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Constant_5": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Constant_5_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Div": {
+      "op_type": "Div",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/self/Constant_5_output_0",
+        "/encoder/layer.0/attention/self/Sqrt_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Div_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Cast_1": {
+      "op_type": "Cast",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/self/Div_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Cast_1_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Transpose_2": {
+      "op_type": "Transpose",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/self/Reshape_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Transpose_2_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Sqrt_1": {
+      "op_type": "Sqrt",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/self/Cast_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Sqrt_1_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Mul": {
+      "op_type": "Mul",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/self/Transpose_output_0",
+        "/encoder/layer.0/attention/self/Sqrt_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Mul_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Sqrt_2": {
+      "op_type": "Sqrt",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/self/Cast_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Sqrt_2_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Mul_1": {
+      "op_type": "Mul",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/self/Transpose_2_output_0",
+        "/encoder/layer.0/attention/self/Sqrt_2_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Mul_1_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/MatMul": {
+      "op_type": "MatMul",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/self/Mul_output_0",
+        "/encoder/layer.0/attention/self/Mul_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/MatMul_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/self/MatMul_output_0",
+        "/Where_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Add_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Softmax": {
+      "op_type": "Softmax",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/self/Add_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Softmax_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/MatMul_1": {
+      "op_type": "MatMul",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/self/Softmax_output_0",
+        "/encoder/layer.0/attention/self/Transpose_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/MatMul_1_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Transpose_3": {
+      "op_type": "Transpose",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/self/MatMul_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Transpose_3_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Constant_6": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Constant_6_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/self/Reshape_3": {
+      "op_type": "Reshape",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/self/Transpose_3_output_0",
+        "/encoder/layer.0/attention/self/Constant_6_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/self/Reshape_3_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/output/dense/MatMul": {
+      "op_type": "MatMul",
+      "tags": [
+        "/operation.MatMul",
+        "/operation.Add"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/self/Reshape_3_output_0",
+        "onnx::MatMul_362"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/output/dense/MatMul_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/output/dense/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Add",
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "encoder.layer.0.attention.output.dense.bias",
+        "/encoder/layer.0/attention/output/dense/MatMul_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/output/dense/Add_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/output/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/output/dense/Add_output_0",
+        "/embeddings/LayerNorm/Add_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/output/Add_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/output/LayerNorm/ReduceMean": {
+      "op_type": "ReduceMean",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/output/Add_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/output/LayerNorm/ReduceMean_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/output/LayerNorm/Sub": {
+      "op_type": "Sub",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/output/Add_output_0",
+        "/encoder/layer.0/attention/output/LayerNorm/ReduceMean_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/output/LayerNorm/Sub_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/output/LayerNorm/Constant": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.0/attention/output/LayerNorm/Constant_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/output/LayerNorm/Pow": {
+      "op_type": "Pow",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/output/LayerNorm/Sub_output_0",
+        "/encoder/layer.0/attention/output/LayerNorm/Constant_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/output/LayerNorm/Pow_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/output/LayerNorm/ReduceMean_1": {
+      "op_type": "ReduceMean",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/output/LayerNorm/Pow_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/output/LayerNorm/ReduceMean_1_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/output/LayerNorm/Constant_1": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.0/attention/output/LayerNorm/Constant_1_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/output/LayerNorm/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/output/LayerNorm/ReduceMean_1_output_0",
+        "/encoder/layer.0/attention/output/LayerNorm/Constant_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/output/LayerNorm/Add_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/output/LayerNorm/Sqrt": {
+      "op_type": "Sqrt",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/output/LayerNorm/Add_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/output/LayerNorm/Sqrt_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/output/LayerNorm/Div": {
+      "op_type": "Div",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/output/LayerNorm/Sub_output_0",
+        "/encoder/layer.0/attention/output/LayerNorm/Sqrt_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/output/LayerNorm/Div_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/output/LayerNorm/Mul": {
+      "op_type": "Mul",
+      "tags": [
+        "/operation.Mul",
+        "/operation.Add"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/output/LayerNorm/Div_output_0",
+        "encoder.layer.0.attention.output.LayerNorm.weight"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/output/LayerNorm/Mul_output_0"
+      ]
+    },
+    "/encoder/layer.0/attention/output/LayerNorm/Add_1": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Add",
+        "/operation.MatMul",
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/output/LayerNorm/Mul_output_0",
+        "encoder.layer.0.attention.output.LayerNorm.bias"
+      ],
+      "outputs": [
+        "/encoder/layer.0/attention/output/LayerNorm/Add_1_output_0"
+      ]
+    },
+    "/encoder/layer.0/intermediate/dense/MatMul": {
+      "op_type": "MatMul",
+      "tags": [
+        "/operation.MatMul",
+        "/operation.Add"
+      ],
+      "inputs": [
+        "/encoder/layer.0/attention/output/LayerNorm/Add_1_output_0",
+        "onnx::MatMul_363"
+      ],
+      "outputs": [
+        "/encoder/layer.0/intermediate/dense/MatMul_output_0"
+      ]
+    },
+    "/encoder/layer.0/intermediate/dense/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Add",
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "encoder.layer.0.intermediate.dense.bias",
+        "/encoder/layer.0/intermediate/dense/MatMul_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/intermediate/dense/Add_output_0"
+      ]
+    },
+    "/encoder/layer.0/intermediate/intermediate_act_fn/Constant": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.0/intermediate/intermediate_act_fn/Constant_output_0"
+      ]
+    },
+    "/encoder/layer.0/intermediate/intermediate_act_fn/Div": {
+      "op_type": "Div",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/intermediate/dense/Add_output_0",
+        "/encoder/layer.0/intermediate/intermediate_act_fn/Constant_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/intermediate/intermediate_act_fn/Div_output_0"
+      ]
+    },
+    "/encoder/layer.0/intermediate/intermediate_act_fn/Erf": {
+      "op_type": "Erf",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/intermediate/intermediate_act_fn/Div_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/intermediate/intermediate_act_fn/Erf_output_0"
+      ]
+    },
+    "/encoder/layer.0/intermediate/intermediate_act_fn/Constant_1": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.0/intermediate/intermediate_act_fn/Constant_1_output_0"
+      ]
+    },
+    "/encoder/layer.0/intermediate/intermediate_act_fn/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/intermediate/intermediate_act_fn/Erf_output_0",
+        "/encoder/layer.0/intermediate/intermediate_act_fn/Constant_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/intermediate/intermediate_act_fn/Add_output_0"
+      ]
+    },
+    "/encoder/layer.0/intermediate/intermediate_act_fn/Mul": {
+      "op_type": "Mul",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/intermediate/dense/Add_output_0",
+        "/encoder/layer.0/intermediate/intermediate_act_fn/Add_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/intermediate/intermediate_act_fn/Mul_output_0"
+      ]
+    },
+    "/encoder/layer.0/intermediate/intermediate_act_fn/Constant_2": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.0/intermediate/intermediate_act_fn/Constant_2_output_0"
+      ]
+    },
+    "/encoder/layer.0/intermediate/intermediate_act_fn/Mul_1": {
+      "op_type": "Mul",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/intermediate/intermediate_act_fn/Mul_output_0",
+        "/encoder/layer.0/intermediate/intermediate_act_fn/Constant_2_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/intermediate/intermediate_act_fn/Mul_1_output_0"
+      ]
+    },
+    "/encoder/layer.0/output/dense/MatMul": {
+      "op_type": "MatMul",
+      "tags": [
+        "/operation.MatMul",
+        "/operation.Add"
+      ],
+      "inputs": [
+        "/encoder/layer.0/intermediate/intermediate_act_fn/Mul_1_output_0",
+        "onnx::MatMul_364"
+      ],
+      "outputs": [
+        "/encoder/layer.0/output/dense/MatMul_output_0"
+      ]
+    },
+    "/encoder/layer.0/output/dense/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Add",
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "encoder.layer.0.output.dense.bias",
+        "/encoder/layer.0/output/dense/MatMul_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/output/dense/Add_output_0"
+      ]
+    },
+    "/encoder/layer.0/output/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/output/dense/Add_output_0",
+        "/encoder/layer.0/attention/output/LayerNorm/Add_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/output/Add_output_0"
+      ]
+    },
+    "/encoder/layer.0/output/LayerNorm/ReduceMean": {
+      "op_type": "ReduceMean",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/output/Add_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/output/LayerNorm/ReduceMean_output_0"
+      ]
+    },
+    "/encoder/layer.0/output/LayerNorm/Sub": {
+      "op_type": "Sub",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/output/Add_output_0",
+        "/encoder/layer.0/output/LayerNorm/ReduceMean_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/output/LayerNorm/Sub_output_0"
+      ]
+    },
+    "/encoder/layer.0/output/LayerNorm/Constant": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.0/output/LayerNorm/Constant_output_0"
+      ]
+    },
+    "/encoder/layer.0/output/LayerNorm/Pow": {
+      "op_type": "Pow",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/output/LayerNorm/Sub_output_0",
+        "/encoder/layer.0/output/LayerNorm/Constant_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/output/LayerNorm/Pow_output_0"
+      ]
+    },
+    "/encoder/layer.0/output/LayerNorm/ReduceMean_1": {
+      "op_type": "ReduceMean",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/output/LayerNorm/Pow_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/output/LayerNorm/ReduceMean_1_output_0"
+      ]
+    },
+    "/encoder/layer.0/output/LayerNorm/Constant_1": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.0/output/LayerNorm/Constant_1_output_0"
+      ]
+    },
+    "/encoder/layer.0/output/LayerNorm/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/output/LayerNorm/ReduceMean_1_output_0",
+        "/encoder/layer.0/output/LayerNorm/Constant_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/output/LayerNorm/Add_output_0"
+      ]
+    },
+    "/encoder/layer.0/output/LayerNorm/Sqrt": {
+      "op_type": "Sqrt",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/output/LayerNorm/Add_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/output/LayerNorm/Sqrt_output_0"
+      ]
+    },
+    "/encoder/layer.0/output/LayerNorm/Div": {
+      "op_type": "Div",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/output/LayerNorm/Sub_output_0",
+        "/encoder/layer.0/output/LayerNorm/Sqrt_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.0/output/LayerNorm/Div_output_0"
+      ]
+    },
+    "/encoder/layer.0/output/LayerNorm/Mul": {
+      "op_type": "Mul",
+      "tags": [
+        "/operation.Mul",
+        "/operation.Add"
+      ],
+      "inputs": [
+        "/encoder/layer.0/output/LayerNorm/Div_output_0",
+        "encoder.layer.0.output.LayerNorm.weight"
+      ],
+      "outputs": [
+        "/encoder/layer.0/output/LayerNorm/Mul_output_0"
+      ]
+    },
+    "/encoder/layer.0/output/LayerNorm/Add_1": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Add",
+        "/operation.MatMul",
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.0/output/LayerNorm/Mul_output_0",
+        "encoder.layer.0.output.LayerNorm.bias"
+      ],
+      "outputs": [
+        "/encoder/layer.0/output/LayerNorm/Add_1_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/query/MatMul": {
+      "op_type": "MatMul",
+      "tags": [
+        "/operation.MatMul",
+        "/operation.Add"
+      ],
+      "inputs": [
+        "/encoder/layer.0/output/LayerNorm/Add_1_output_0",
+        "onnx::MatMul_365"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/query/MatMul_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/query/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Add",
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "encoder.layer.1.attention.self.query.bias",
+        "/encoder/layer.1/attention/self/query/MatMul_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/query/Add_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Constant": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Constant_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Reshape": {
+      "op_type": "Reshape",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/self/query/Add_output_0",
+        "/encoder/layer.1/attention/self/Constant_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Reshape_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Transpose": {
+      "op_type": "Transpose",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/self/Reshape_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Transpose_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/key/MatMul": {
+      "op_type": "MatMul",
+      "tags": [
+        "/operation.MatMul",
+        "/operation.Add"
+      ],
+      "inputs": [
+        "/encoder/layer.0/output/LayerNorm/Add_1_output_0",
+        "onnx::MatMul_371"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/key/MatMul_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/key/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Add",
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "encoder.layer.1.attention.self.key.bias",
+        "/encoder/layer.1/attention/self/key/MatMul_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/key/Add_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Constant_1": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Constant_1_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Reshape_1": {
+      "op_type": "Reshape",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/self/key/Add_output_0",
+        "/encoder/layer.1/attention/self/Constant_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Reshape_1_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/value/MatMul": {
+      "op_type": "MatMul",
+      "tags": [
+        "/operation.MatMul",
+        "/operation.Add"
+      ],
+      "inputs": [
+        "/encoder/layer.0/output/LayerNorm/Add_1_output_0",
+        "onnx::MatMul_377"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/value/MatMul_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/value/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Add",
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "encoder.layer.1.attention.self.value.bias",
+        "/encoder/layer.1/attention/self/value/MatMul_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/value/Add_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Constant_2": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Constant_2_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Reshape_2": {
+      "op_type": "Reshape",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/self/value/Add_output_0",
+        "/encoder/layer.1/attention/self/Constant_2_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Reshape_2_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Transpose_1": {
+      "op_type": "Transpose",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/self/Reshape_2_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Transpose_1_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Shape": {
+      "op_type": "Shape",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/self/Transpose_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Shape_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Constant_3": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Constant_3_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Constant_4": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Constant_4_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Slice": {
+      "op_type": "Slice",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/self/Shape_output_0",
+        "/encoder/layer.1/attention/self/Constant_3_output_0",
+        "/encoder/layer.1/attention/self/Constant_4_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Slice_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Cast": {
+      "op_type": "Cast",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/self/Slice_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Cast_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Sqrt": {
+      "op_type": "Sqrt",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/self/Cast_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Sqrt_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Constant_5": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Constant_5_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Div": {
+      "op_type": "Div",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/self/Constant_5_output_0",
+        "/encoder/layer.1/attention/self/Sqrt_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Div_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Cast_1": {
+      "op_type": "Cast",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/self/Div_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Cast_1_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Transpose_2": {
+      "op_type": "Transpose",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/self/Reshape_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Transpose_2_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Sqrt_1": {
+      "op_type": "Sqrt",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/self/Cast_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Sqrt_1_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Mul": {
+      "op_type": "Mul",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/self/Transpose_output_0",
+        "/encoder/layer.1/attention/self/Sqrt_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Mul_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Sqrt_2": {
+      "op_type": "Sqrt",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/self/Cast_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Sqrt_2_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Mul_1": {
+      "op_type": "Mul",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/self/Transpose_2_output_0",
+        "/encoder/layer.1/attention/self/Sqrt_2_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Mul_1_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/MatMul": {
+      "op_type": "MatMul",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/self/Mul_output_0",
+        "/encoder/layer.1/attention/self/Mul_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/MatMul_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/self/MatMul_output_0",
+        "/Where_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Add_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Softmax": {
+      "op_type": "Softmax",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/self/Add_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Softmax_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/MatMul_1": {
+      "op_type": "MatMul",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/self/Softmax_output_0",
+        "/encoder/layer.1/attention/self/Transpose_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/MatMul_1_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Transpose_3": {
+      "op_type": "Transpose",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/self/MatMul_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Transpose_3_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Constant_6": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Constant_6_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/self/Reshape_3": {
+      "op_type": "Reshape",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/self/Transpose_3_output_0",
+        "/encoder/layer.1/attention/self/Constant_6_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/self/Reshape_3_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/output/dense/MatMul": {
+      "op_type": "MatMul",
+      "tags": [
+        "/operation.MatMul",
+        "/operation.Add"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/self/Reshape_3_output_0",
+        "onnx::MatMul_387"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/output/dense/MatMul_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/output/dense/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Add",
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "encoder.layer.1.attention.output.dense.bias",
+        "/encoder/layer.1/attention/output/dense/MatMul_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/output/dense/Add_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/output/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/output/dense/Add_output_0",
+        "/encoder/layer.0/output/LayerNorm/Add_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/output/Add_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/output/LayerNorm/ReduceMean": {
+      "op_type": "ReduceMean",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/output/Add_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/output/LayerNorm/ReduceMean_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/output/LayerNorm/Sub": {
+      "op_type": "Sub",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/output/Add_output_0",
+        "/encoder/layer.1/attention/output/LayerNorm/ReduceMean_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/output/LayerNorm/Sub_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/output/LayerNorm/Constant": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.1/attention/output/LayerNorm/Constant_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/output/LayerNorm/Pow": {
+      "op_type": "Pow",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/output/LayerNorm/Sub_output_0",
+        "/encoder/layer.1/attention/output/LayerNorm/Constant_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/output/LayerNorm/Pow_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/output/LayerNorm/ReduceMean_1": {
+      "op_type": "ReduceMean",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/output/LayerNorm/Pow_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/output/LayerNorm/ReduceMean_1_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/output/LayerNorm/Constant_1": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.1/attention/output/LayerNorm/Constant_1_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/output/LayerNorm/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/output/LayerNorm/ReduceMean_1_output_0",
+        "/encoder/layer.1/attention/output/LayerNorm/Constant_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/output/LayerNorm/Add_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/output/LayerNorm/Sqrt": {
+      "op_type": "Sqrt",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/output/LayerNorm/Add_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/output/LayerNorm/Sqrt_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/output/LayerNorm/Div": {
+      "op_type": "Div",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/output/LayerNorm/Sub_output_0",
+        "/encoder/layer.1/attention/output/LayerNorm/Sqrt_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/output/LayerNorm/Div_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/output/LayerNorm/Mul": {
+      "op_type": "Mul",
+      "tags": [
+        "/operation.Mul",
+        "/operation.Add"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/output/LayerNorm/Div_output_0",
+        "encoder.layer.1.attention.output.LayerNorm.weight"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/output/LayerNorm/Mul_output_0"
+      ]
+    },
+    "/encoder/layer.1/attention/output/LayerNorm/Add_1": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Add",
+        "/operation.MatMul",
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/output/LayerNorm/Mul_output_0",
+        "encoder.layer.1.attention.output.LayerNorm.bias"
+      ],
+      "outputs": [
+        "/encoder/layer.1/attention/output/LayerNorm/Add_1_output_0"
+      ]
+    },
+    "/encoder/layer.1/intermediate/dense/MatMul": {
+      "op_type": "MatMul",
+      "tags": [
+        "/operation.MatMul",
+        "/operation.Add"
+      ],
+      "inputs": [
+        "/encoder/layer.1/attention/output/LayerNorm/Add_1_output_0",
+        "onnx::MatMul_388"
+      ],
+      "outputs": [
+        "/encoder/layer.1/intermediate/dense/MatMul_output_0"
+      ]
+    },
+    "/encoder/layer.1/intermediate/dense/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Add",
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "encoder.layer.1.intermediate.dense.bias",
+        "/encoder/layer.1/intermediate/dense/MatMul_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/intermediate/dense/Add_output_0"
+      ]
+    },
+    "/encoder/layer.1/intermediate/intermediate_act_fn/Constant": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.1/intermediate/intermediate_act_fn/Constant_output_0"
+      ]
+    },
+    "/encoder/layer.1/intermediate/intermediate_act_fn/Div": {
+      "op_type": "Div",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/intermediate/dense/Add_output_0",
+        "/encoder/layer.1/intermediate/intermediate_act_fn/Constant_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/intermediate/intermediate_act_fn/Div_output_0"
+      ]
+    },
+    "/encoder/layer.1/intermediate/intermediate_act_fn/Erf": {
+      "op_type": "Erf",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/intermediate/intermediate_act_fn/Div_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/intermediate/intermediate_act_fn/Erf_output_0"
+      ]
+    },
+    "/encoder/layer.1/intermediate/intermediate_act_fn/Constant_1": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.1/intermediate/intermediate_act_fn/Constant_1_output_0"
+      ]
+    },
+    "/encoder/layer.1/intermediate/intermediate_act_fn/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/intermediate/intermediate_act_fn/Erf_output_0",
+        "/encoder/layer.1/intermediate/intermediate_act_fn/Constant_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/intermediate/intermediate_act_fn/Add_output_0"
+      ]
+    },
+    "/encoder/layer.1/intermediate/intermediate_act_fn/Mul": {
+      "op_type": "Mul",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/intermediate/dense/Add_output_0",
+        "/encoder/layer.1/intermediate/intermediate_act_fn/Add_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/intermediate/intermediate_act_fn/Mul_output_0"
+      ]
+    },
+    "/encoder/layer.1/intermediate/intermediate_act_fn/Constant_2": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.1/intermediate/intermediate_act_fn/Constant_2_output_0"
+      ]
+    },
+    "/encoder/layer.1/intermediate/intermediate_act_fn/Mul_1": {
+      "op_type": "Mul",
+      "tags": [
+        "/operation.MatMul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/intermediate/intermediate_act_fn/Mul_output_0",
+        "/encoder/layer.1/intermediate/intermediate_act_fn/Constant_2_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/intermediate/intermediate_act_fn/Mul_1_output_0"
+      ]
+    },
+    "/encoder/layer.1/output/dense/MatMul": {
+      "op_type": "MatMul",
+      "tags": [
+        "/operation.MatMul",
+        "/operation.Add"
+      ],
+      "inputs": [
+        "/encoder/layer.1/intermediate/intermediate_act_fn/Mul_1_output_0",
+        "onnx::MatMul_389"
+      ],
+      "outputs": [
+        "/encoder/layer.1/output/dense/MatMul_output_0"
+      ]
+    },
+    "/encoder/layer.1/output/dense/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Add",
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "encoder.layer.1.output.dense.bias",
+        "/encoder/layer.1/output/dense/MatMul_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/output/dense/Add_output_0"
+      ]
+    },
+    "/encoder/layer.1/output/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/output/dense/Add_output_0",
+        "/encoder/layer.1/attention/output/LayerNorm/Add_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/output/Add_output_0"
+      ]
+    },
+    "/encoder/layer.1/output/LayerNorm/ReduceMean": {
+      "op_type": "ReduceMean",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/output/Add_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/output/LayerNorm/ReduceMean_output_0"
+      ]
+    },
+    "/encoder/layer.1/output/LayerNorm/Sub": {
+      "op_type": "Sub",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/output/Add_output_0",
+        "/encoder/layer.1/output/LayerNorm/ReduceMean_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/output/LayerNorm/Sub_output_0"
+      ]
+    },
+    "/encoder/layer.1/output/LayerNorm/Constant": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.1/output/LayerNorm/Constant_output_0"
+      ]
+    },
+    "/encoder/layer.1/output/LayerNorm/Pow": {
+      "op_type": "Pow",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/output/LayerNorm/Sub_output_0",
+        "/encoder/layer.1/output/LayerNorm/Constant_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/output/LayerNorm/Pow_output_0"
+      ]
+    },
+    "/encoder/layer.1/output/LayerNorm/ReduceMean_1": {
+      "op_type": "ReduceMean",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/output/LayerNorm/Pow_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/output/LayerNorm/ReduceMean_1_output_0"
+      ]
+    },
+    "/encoder/layer.1/output/LayerNorm/Constant_1": {
+      "op_type": "Constant",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/encoder/layer.1/output/LayerNorm/Constant_1_output_0"
+      ]
+    },
+    "/encoder/layer.1/output/LayerNorm/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/output/LayerNorm/ReduceMean_1_output_0",
+        "/encoder/layer.1/output/LayerNorm/Constant_1_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/output/LayerNorm/Add_output_0"
+      ]
+    },
+    "/encoder/layer.1/output/LayerNorm/Sqrt": {
+      "op_type": "Sqrt",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/output/LayerNorm/Add_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/output/LayerNorm/Sqrt_output_0"
+      ]
+    },
+    "/encoder/layer.1/output/LayerNorm/Div": {
+      "op_type": "Div",
+      "tags": [
+        "/operation.Mul"
+      ],
+      "inputs": [
+        "/encoder/layer.1/output/LayerNorm/Sub_output_0",
+        "/encoder/layer.1/output/LayerNorm/Sqrt_output_0"
+      ],
+      "outputs": [
+        "/encoder/layer.1/output/LayerNorm/Div_output_0"
+      ]
+    },
+    "/encoder/layer.1/output/LayerNorm/Mul": {
+      "op_type": "Mul",
+      "tags": [
+        "/operation.Mul",
+        "/operation.Add"
+      ],
+      "inputs": [
+        "/encoder/layer.1/output/LayerNorm/Div_output_0",
+        "encoder.layer.1.output.LayerNorm.weight"
+      ],
+      "outputs": [
+        "/encoder/layer.1/output/LayerNorm/Mul_output_0"
+      ]
+    },
+    "/encoder/layer.1/output/LayerNorm/Add_1": {
+      "op_type": "Add",
+      "tags": [
+        "/operation.Add",
+        "/operation.Gemm"
+      ],
+      "inputs": [
+        "/encoder/layer.1/output/LayerNorm/Mul_output_0",
+        "encoder.layer.1.output.LayerNorm.bias"
+      ],
+      "outputs": [
+        "output"
+      ]
+    },
+    "/pooler/Gather": {
+      "op_type": "Gather",
+      "tags": [
+        "/operation.Gemm"
+      ],
+      "inputs": [
+        "output",
+        "/embeddings/Constant_output_0"
+      ],
+      "outputs": [
+        "/pooler/Gather_output_0"
+      ]
+    },
+    "/pooler/dense/Gemm": {
+      "op_type": "Gemm",
+      "tags": [
+        "/operation.Gemm"
+      ],
+      "inputs": [
+        "/pooler/Gather_output_0",
+        "pooler.dense.weight",
+        "pooler.dense.bias"
+      ],
+      "outputs": [
+        "/pooler/dense/Gemm_output_0"
+      ]
+    },
+    "/pooler/activation/Tanh": {
+      "op_type": "Tanh",
+      "tags": [],
+      "inputs": [
+        "/pooler/dense/Gemm_output_0"
+      ],
+      "outputs": [
+        "332"
+      ]
+    }
+  }
+}

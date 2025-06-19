@@ -1,0 +1,19 @@
+{
+  "test_name": "bounded_propagation",
+  "total_operations": 186,
+  "tagged_operations": 90,
+  "unique_tags": 6,
+  "tag_distribution": {
+    "/BertModel/BertPooler": 3,
+    "/BertModel/BertEmbeddings": 15,
+    "/BertModel/BertEncoder/BertLayer/BertAttention/BertSdpaSelfAttention": 13,
+    "/BertModel/BertEncoder/BertLayer/BertAttention/BertSelfOutput": 29,
+    "/BertModel/BertEncoder/BertLayer/BertIntermediate": 6,
+    "/BertModel/BertEncoder/BertLayer/BertOutput": 32
+  },
+  "files_created": [
+    "test_results_persistent/exports/bounded_propagation_test.onnx"
+  ],
+  "bert_self_output_operations": 29,
+  "over_propagation_check": true
+}

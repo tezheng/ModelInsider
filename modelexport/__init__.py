@@ -12,6 +12,7 @@ Key Features:
 """
 
 from .hierarchy_exporter import HierarchyExporter
+from . import tag_utils
 
 __version__ = "0.1.0"
-__all__ = ["HierarchyExporter"]
+__all__ = ["HierarchyExporter", "tag_utils"]

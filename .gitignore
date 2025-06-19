@@ -4,6 +4,11 @@ temp/
 *_test_*.json
 *_dag_*.json
 
+# Debug outputs (keep debug/ folder but ignore generated files)
+debug_*.onnx
+debug_*.json
+debug_graph_mutation/
+
 # Python-generated files
 __pycache__/
 *.py[oc]

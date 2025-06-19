@@ -1,0 +1,23 @@
+{
+  "test_name": "bert_export",
+  "exit_code": 0,
+  "output": "Loading model: prajjwal1/bert-tiny\nAsking to truncate to max_length but no maximum length is provided and the model has no predefined maximum length. Default to no truncation.\nExporting to: test_results_persistent/exports/bert_test_export.onnx\n\u2705 Export completed successfully!\n   Output: test_results_persistent/exports/bert_test_export.onnx\n   Sidecar: test_results_persistent/exports/bert_test_export_hierarchy.json\n   Total operations: 186\n   Tagged operations: 90\n   Strategy: usage_based\n\nTag distribution:\n   /BertModel/BertPooler: 3\n   /BertModel/BertEmbeddings: 15\n   /BertModel/BertEncoder/BertLayer/BertAttention/BertSdpaSelfAttention: 13\n   /BertModel/BertEncoder/BertLayer/BertAttention/BertSelfOutput: 29\n   /BertModel/BertEncoder/BertLayer/BertIntermediate: 6\n   /BertModel/BertEncoder/BertLayer/BertOutput: 32\n",
+  "files_created": [
+    "test_results_persistent/exports/bert_test_export.onnx",
+    "test_results_persistent/exports/bert_test_export_hierarchy.json"
+  ],
+  "tag_statistics": {
+    "/BertModel/BertPooler": 3,
+    "/BertModel/BertEmbeddings": 15,
+    "/BertModel/BertEncoder/BertLayer/BertAttention/BertSdpaSelfAttention": 13,
+    "/BertModel/BertEncoder/BertLayer/BertAttention/BertSelfOutput": 29,
+    "/BertModel/BertEncoder/BertLayer/BertIntermediate": 6,
+    "/BertModel/BertEncoder/BertLayer/BertOutput": 32
+  },
+  "summary": {
+    "total_operations": 186,
+    "tagged_operations": 90,
+    "nodes_with_attributes": 90,
+    "unique_tags": 6
+  }
+}

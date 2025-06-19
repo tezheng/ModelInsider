@@ -9,8 +9,12 @@ dependencies = [
     "transformers",
     "onnx",
     "numpy",
-    "torchvision"
+    "torchvision",
+    "click>=8.0.0"
 ]
+
+[project.scripts]
+modelexport = "modelexport.cli:cli"
 
 [project.optional-dependencies]
 dev = [

@@ -1,0 +1,55 @@
+{
+    "python.defaultInterpreterPath": "${workspaceFolder}/.venv/bin/python",
+    "python.terminal.activateEnvironment": true,
+    "python.envFile": "${workspaceFolder}/.env",
+    "python.analysis.extraPaths": [
+        "${workspaceFolder}"
+    ],
+    "python.analysis.autoImportCompletions": true,
+    "python.linting.enabled": true,
+    "python.linting.pylintEnabled": false,
+    "python.linting.flake8Enabled": false,
+    "python.linting.mypyEnabled": true,
+    "python.formatting.provider": "black",
+    "python.testing.pytestEnabled": true,
+    "python.testing.pytestPath": "${workspaceFolder}/.venv/bin/pytest",
+    "python.testing.pytestArgs": [
+        "tests",
+        "-v"
+    ],
+    "python.testing.unittestEnabled": false,
+    "files.associations": {
+        "*.onnx": "binary"
+    },
+    "files.exclude": {
+        "**/__pycache__": true,
+        "**/*.pyc": true,
+        "**/.pytest_cache": true,
+        "**/debug_*.onnx": false,
+        "**/debug_*.json": false
+    },
+    "terminal.integrated.defaultProfile.linux": "bash",
+    "terminal.integrated.profiles.linux": {
+        "bash": {
+            "path": "/bin/bash",
+            "args": [],
+            "env": {
+                "PATH": "${workspaceFolder}/.venv/bin:${env:PATH}",
+                "VIRTUAL_ENV": "${workspaceFolder}/.venv",
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }
+    },
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "terminal.integrated.profiles.windows": {
+        "PowerShell": {
+            "source": "PowerShell",
+            "args": [],
+            "env": {
+                "PATH": "${workspaceFolder}\\.venv\\Scripts;${env:PATH}",
+                "VIRTUAL_ENV": "${workspaceFolder}\\.venv",
+                "PYTHONPATH": "${workspaceFolder}"
+            }
+        }
+    }
+}

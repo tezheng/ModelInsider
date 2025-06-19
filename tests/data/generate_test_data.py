@@ -65,23 +65,32 @@ def export_baseline_onnx(model: torch.nn.Module, inputs: Dict, output_path: Path
     print(f"Exporting baseline ONNX to {output_path}")
     
     # Convert inputs to tuple for torch.onnx.export
-    if isinstance(inputs, dict):
+    if hasattr(inputs, 'data'):
+        # Handle BatchEncoding from transformers
+        tensor_inputs = {k: v for k, v in inputs.data.items() if isinstance(v, torch.Tensor)}
+        input_args = tuple(tensor_inputs.values())
+        input_names = list(tensor_inputs.keys())
+    elif isinstance(inputs, dict):
         input_args = tuple(inputs.values())
+        input_names = list(inputs.keys())
     else:
         input_args = (inputs,)
+        input_names = ['input']
     
     torch.onnx.export(
         model,
         input_args,
         str(output_path),
         export_params=True,
-        opset_version=11,
+        opset_version=14,
         do_constant_folding=True,
-        input_names=list(inputs.keys()) if isinstance(inputs, dict) else ['input'],
+        input_names=input_names,
         output_names=['output'],
         dynamic_axes={
-            list(inputs.keys())[0]: {0: 'batch_size', 1: 'sequence_length'} if isinstance(inputs, dict) else 'input': {0: 'batch_size'}
-        } if isinstance(inputs, dict) else {}
+            input_names[0]: {0: 'batch_size', 1: 'sequence_length'}
+        } if len(input_names) > 0 else {
+            'input': {0: 'batch_size'}
+        }
     )
     
     print(f"✅ Baseline ONNX exported successfully")
@@ -126,7 +135,7 @@ def export_individual_modules(model: torch.nn.Module, model_inputs: Dict, output
                     module_input,
                     str(output_path),
                     export_params=True,
-                    opset_version=11,
+                    opset_version=14,
                     do_constant_folding=True,
                     input_names=['input'],
                     output_names=['output']

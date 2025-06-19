@@ -76,22 +76,17 @@ class TestUniversalTagging:
             # Get the tag mapping
             tag_mapping = exporter.get_tag_mapping()
             
-            # Verify we have tags based on actual module classes (universal)
-            expected_modules = [
-                "torch.nn.modules.linear.Linear",  # linear1 and linear2
-                "torch.nn.modules.activation.ReLU"  # relu
-            ]
-            
             # Check that operations are tagged with actual module classes
             found_modules = set()
             for node_tags in tag_mapping.values():
                 for tag in node_tags.get('tags', []):
                     # Extract module class from tag
                     if tag.startswith('/'):
-                        module_class = tag[1:]  # Remove leading /
+                        # Tags now have hierarchical format, extract last component
+                        module_class = tag.split('/')[-1]  # Get the last component
                         found_modules.add(module_class)
             
-            # At least some of our expected modules should be found
+            # At least some modules should be found (Linear, ReLU)
             assert len(found_modules) > 0, "Should find some module tags"
             
             # NO hardcoded checks - just verify structure is reasonable

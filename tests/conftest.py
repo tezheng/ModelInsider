@@ -1,112 +1,94 @@
 """
-Test configuration and fixtures for modelexport tests.
+Pytest configuration and fixtures for modelexport tests.
 
-This module provides common test fixtures and utilities for testing
-the universal hierarchy-preserving ONNX export functionality.
+Centralized test configurations including BERT input shapes (1, 128 as default).
 """
 
 import pytest
 import torch
-import tempfile
-import shutil
-from pathlib import Path
-from typing import Dict, Any, Tuple
-
-try:
-    from transformers import BertModel, BertTokenizer
-    HAS_TRANSFORMERS = True
-except ImportError:
-    HAS_TRANSFORMERS = False
+from transformers import AutoModel, AutoTokenizer
 
 
-@pytest.fixture(scope="session")
-def test_data_dir():
-    """Temporary directory for test data that persists across the session."""
-    temp_dir = tempfile.mkdtemp(prefix="modelexport_test_")
-    yield Path(temp_dir)
-    shutil.rmtree(temp_dir)
-
-
-@pytest.fixture(scope="session") 
-def bert_tiny_model():
-    """Load BERT tiny model for testing (session-scoped for efficiency)."""
-    if not HAS_TRANSFORMERS:
-        pytest.skip("transformers library not available")
-    
-    model_name = "google/bert_uncased_L-2_H-128_A-2"
-    try:
-        model = BertModel.from_pretrained(model_name)
-        model.eval()
-        return model
-    except Exception as e:
-        pytest.skip(f"Could not load BERT model: {e}")
+# Test configurations for BERT input shapes
+BERT_TEST_CONFIGS = {
+    "default": {
+        "batch_size": 1,
+        "sequence_length": 128,
+        "model": "prajjwal1/bert-tiny",
+        "text": "This is a test input for BERT model with default configuration settings that should be around 128 tokens when tokenized properly."
+    },
+    "short": {
+        "batch_size": 1,
+        "sequence_length": 32, 
+        "model": "prajjwal1/bert-tiny",
+        "text": "Short test input."
+    },
+    "batch": {
+        "batch_size": 4,
+        "sequence_length": 128,
+        "model": "prajjwal1/bert-tiny",
+        "text": [
+            "First batch item for testing with reasonable length.",
+            "Second batch item with different content for variety.",
+            "Third item shorter.",
+            "Fourth and final batch item for comprehensive testing purposes."
+        ]
+    }
+}
 
 
 @pytest.fixture(scope="session")
-def bert_tiny_tokenizer():
-    """Load BERT tiny tokenizer."""
-    if not HAS_TRANSFORMERS:
-        pytest.skip("transformers library not available")
-        
-    model_name = "google/bert_uncased_L-2_H-128_A-2"
-    try:
-        return BertTokenizer.from_pretrained(model_name)
-    except Exception as e:
-        pytest.skip(f"Could not load BERT tokenizer: {e}")
-
-
-@pytest.fixture
-def sample_input():
-    """Generate sample input for BERT model."""
-    text = "Hello world, this is a test."
-    return text
-
-
-@pytest.fixture 
-def bert_model_inputs(bert_tiny_tokenizer, sample_input):
-    """Generate BERT model inputs from sample text."""
-    inputs = bert_tiny_tokenizer(
-        sample_input, 
-        return_tensors="pt",
-        padding=True,
-        truncation=True,
-        max_length=32
-    )
-    return inputs
-
-
-@pytest.fixture
-def simple_pytorch_model():
-    """Create a simple PyTorch model for basic testing."""
-    class SimpleModel(torch.nn.Module):
-        def __init__(self):
-            super().__init__()
-            self.linear1 = torch.nn.Linear(10, 5)
-            self.relu = torch.nn.ReLU()
-            self.linear2 = torch.nn.Linear(5, 1)
-            
-        def forward(self, x):
-            x = self.linear1(x)
-            x = self.relu(x)
-            x = self.linear2(x)
-            return x
-    
-    model = SimpleModel()
+def bert_model_cache():
+    """Cache BERT model and tokenizer for session to avoid repeated loading."""
+    model_name = "prajjwal1/bert-tiny"
+    model = AutoModel.from_pretrained(model_name)
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
     model.eval()
-    return model
+    return model, tokenizer
 
 
 @pytest.fixture
-def simple_model_input():
-    """Input for simple PyTorch model."""
-    return torch.randn(1, 10)
+def bert_test_config():
+    """Provide BERT test configurations."""
+    return BERT_TEST_CONFIGS
 
 
-def pytest_configure(config):
-    """Configure pytest with custom markers."""
-    config.addinivalue_line(
-        "markers", "slow: marks tests as slow (may download models)"
+@pytest.fixture
+def prepared_bert_inputs(bert_model_cache):
+    """Prepare BERT inputs with default configuration (1, 128)."""
+    model, tokenizer = bert_model_cache
+    config = BERT_TEST_CONFIGS["default"]
+    
+    inputs = tokenizer(
+        config["text"],
+        return_tensors='pt',
+        padding='max_length',
+        truncation=True,
+        max_length=config["sequence_length"]
     )
-    config.addinivalue_line(
-        "markers", "integration: marks tests as integration tests"
-    )
+    
+    return {
+        'model': model,
+        'tokenizer': tokenizer,
+        'inputs': inputs,
+        'config': config
+    }
+
+
+@pytest.fixture
+def temp_test_workspace(tmp_path):
+    """Create structured temporary workspace for tests."""
+    workspace = tmp_path / "test_workspace"
+    
+    subdirs = {
+        'models': workspace / 'models',
+        'exports': workspace / 'exports',
+        'analysis': workspace / 'analysis',
+        'comparisons': workspace / 'comparisons',
+        'reports': workspace / 'reports'
+    }
+    
+    for subdir in subdirs.values():
+        subdir.mkdir(parents=True, exist_ok=True)
+    
+    return workspace, subdirs
