@@ -113,6 +113,11 @@ Examples:
     
     # Other options
     parser.add_argument(
+        "--config",
+        type=Path,
+        help="Export configuration file (JSON)"
+    )
+    parser.add_argument(
         "--strategy",
         choices=["usage_based"],
         default="usage_based",
@@ -262,15 +267,30 @@ def main():
             raise NotImplementedError("--model-class not yet implemented. Use --model-path or --hf-model instead.")
         
         # Step 2: Set up export parameters
-        export_kwargs = {
-            'opset_version': args.opset_version
-        }
-        
-        if args.dynamic_axes:
-            try:
-                export_kwargs['dynamic_axes'] = json.loads(args.dynamic_axes)
-            except json.JSONDecodeError as e:
-                raise ValueError(f"Invalid JSON for --dynamic-axes: {e}")
+        if args.config:
+            # Load config file
+            if args.verbose:
+                print(f"Loading export config: {args.config}")
+            with open(args.config, 'r') as f:
+                export_kwargs = json.load(f)
+            
+            # Convert dynamic_axes string keys to integers (JSON limitation workaround)
+            if 'dynamic_axes' in export_kwargs:
+                fixed_dynamic_axes = {}
+                for input_name, axes in export_kwargs['dynamic_axes'].items():
+                    fixed_dynamic_axes[input_name] = {int(k): v for k, v in axes.items()}
+                export_kwargs['dynamic_axes'] = fixed_dynamic_axes
+        else:
+            # Use command line arguments
+            export_kwargs = {
+                'opset_version': args.opset_version
+            }
+            
+            if args.dynamic_axes:
+                try:
+                    export_kwargs['dynamic_axes'] = json.loads(args.dynamic_axes)
+                except json.JSONDecodeError as e:
+                    raise ValueError(f"Invalid JSON for --dynamic-axes: {e}")
         
         # Step 3: Export with HierarchyExporter
         if args.verbose:

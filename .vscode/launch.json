@@ -5,8 +5,7 @@
             "name": "Debug: modelexport export (default text)",
             "type": "debugpy",
             "request": "launch",
-            "python": "${workspaceFolder}/.venv/bin/python",
-            "module": "modelexport.cli",
+            "module": "modelexport",
             "args": [
                 "--verbose",
                 "export",
@@ -21,8 +20,7 @@
             "name": "Debug: modelexport export (custom text)",
             "type": "debugpy",
             "request": "launch",
-            "python": "${workspaceFolder}/.venv/bin/python",
-            "module": "modelexport.cli",
+            "module": "modelexport",
             "args": [
                 "--verbose",
                 "export",
@@ -38,8 +36,7 @@
             "name": "Debug: modelexport analyze",
             "type": "debugpy",
             "request": "launch",
-            "python": "${workspaceFolder}/.venv/bin/python",
-            "module": "modelexport.cli",
+            "module": "modelexport",
             "args": [
                 "--verbose",
                 "analyze",

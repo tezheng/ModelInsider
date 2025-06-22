@@ -41,10 +41,12 @@ def cli(ctx, verbose):
               help='Tagging strategy to use')
 @click.option('--opset-version', default=14, type=int,
               help='ONNX opset version to use')
+@click.option('--config', type=click.Path(exists=True),
+              help='Export configuration file (JSON)')
 @click.option('--temp-dir', type=click.Path(),
               help='Directory for temporary files (default: system temp)')
 @click.pass_context
-def export(ctx, model_name_or_path, output_path, input_text, input_shape, strategy, opset_version, temp_dir):
+def export(ctx, model_name_or_path, output_path, input_text, input_shape, strategy, opset_version, config, temp_dir):
     """
     Export a PyTorch model to ONNX with hierarchy preservation.
     
@@ -94,13 +96,33 @@ def export(ctx, model_name_or_path, output_path, input_text, input_shape, strate
         if verbose:
             click.echo(f"Exporting to: {output_path}")
         
+        # Set up export parameters
+        if config:
+            # Load config file
+            if verbose:
+                click.echo(f"Loading export config: {config}")
+            with open(config, 'r') as f:
+                export_kwargs = json.load(f)
+            
+            # Convert dynamic_axes string keys to integers (JSON limitation workaround)
+            if 'dynamic_axes' in export_kwargs:
+                fixed_dynamic_axes = {}
+                for input_name, axes in export_kwargs['dynamic_axes'].items():
+                    fixed_dynamic_axes[input_name] = {int(k): v for k, v in axes.items()}
+                export_kwargs['dynamic_axes'] = fixed_dynamic_axes
+        else:
+            # Use command line arguments
+            export_kwargs = {
+                'opset_version': opset_version
+            }
+        
         # Export with hierarchy preservation
         exporter = HierarchyExporter(strategy=strategy)
         result = exporter.export(
             model=model,
             example_inputs=inputs,
             output_path=output_path,
-            opset_version=opset_version
+            **export_kwargs
         )
         
         # Output results

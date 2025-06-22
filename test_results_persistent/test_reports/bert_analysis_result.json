@@ -1,8 +1,0 @@
-{
-  "test_name": "bert_analysis",
-  "exit_code": 0,
-  "output": "\u2705 Analysis saved to: test_results_persistent/analysis/bert_analysis.json\n",
-  "analysis_file": "test_results_persistent/analysis/bert_analysis.json",
-  "node_count": 186,
-  "unique_tags": 6
-}
