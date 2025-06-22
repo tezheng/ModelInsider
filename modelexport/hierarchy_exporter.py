@@ -32,13 +32,27 @@ class HierarchyExporter:
     This exporter works with ANY PyTorch model by leveraging the universal
     nn.Module hierarchy structure and forward hooks for execution tracing.
     """
+    
+    # Semantically important torch.nn modules that should create hierarchy levels
+    TORCH_NN_HIERARCHY_EXCEPTIONS = {
+        "LayerNorm",      # Normalization layers are architecturally significant
+        "Embedding",      # Embedding layers represent major components
+        "BatchNorm1d",    # Batch normalization variants
+        "BatchNorm2d",
+        "BatchNorm3d",
+        "GroupNorm",
+        "InstanceNorm1d",
+        "InstanceNorm2d",
+        "InstanceNorm3d",
+    }
 
-    def __init__(self, strategy: str = "usage_based"):
+    def __init__(self, strategy: str = "usage_based", torch_nn_exceptions: Optional[List[str]] = None):
         """
         Initialize the HierarchyExporter.
 
         Args:
             strategy: Tagging strategy to use. Currently supports "usage_based"
+            torch_nn_exceptions: Override default list of torch.nn modules that create hierarchy
         """
         if strategy != "usage_based":
             raise ValueError(
@@ -47,12 +61,20 @@ class HierarchyExporter:
 
         self.strategy = strategy
         self._tag_mapping: Dict[str, Dict[str, Any]] = {}
-        self._module_stack: List[str] = []
+        self._tag_stack: List[str] = []  # Stack for hierarchical tags
         self._operation_context: Dict[str, List[str]] = defaultdict(list)
         self._tensor_producers: Dict[str, str] = {}
         self._tensor_consumer_mapping: Dict[str, List[str]] = {}
-        self._hooks = []
+        self._tensor_to_tag: Dict[str, List[str]] = {}  # Tensor-to-tag mapping for filtering
+        self._pre_hooks = []  # Pre-forward hooks
+        self._post_hooks = []  # Post-forward hooks
         self._model = None  # Track the root model
+        
+        # Allow customization of torch.nn exceptions
+        self._torch_nn_exceptions = (
+            set(torch_nn_exceptions) if torch_nn_exceptions 
+            else self.TORCH_NN_HIERARCHY_EXCEPTIONS.copy()
+        )
 
     def export(
         self,
@@ -85,6 +107,9 @@ class HierarchyExporter:
             # Step 3: Perform tracing to build operation context
             with torch.no_grad():
                 self._trace_model_execution(model, example_inputs)
+
+            # Step 3.5: Remove hooks before ONNX export to ensure clean topology
+            self._remove_hooks()
 
             # Step 4: Export to ONNX (standard PyTorch export - PRESERVE TOPOLOGY)
             self._export_to_onnx(model, example_inputs, output_path, **kwargs)
@@ -123,45 +148,106 @@ class HierarchyExporter:
     def _reset_state(self):
         """Reset internal state for new export."""
         self._tag_mapping.clear()
-        self._module_stack.clear()
+        self._tag_stack.clear()
         self._operation_context.clear()
         self._tensor_producers.clear()
         self._tensor_consumer_mapping = {}
+        self._tensor_to_tag = {}
         self._model = None
         self._remove_hooks()
 
     def _register_hooks(self, model: torch.nn.Module):
-        """Register forward hooks on all modules for execution tracing."""
+        """Register pre and post forward hooks for stack-based execution tracing."""
 
-        def create_forward_hook(module_name: str, module: torch.nn.Module):
-            def forward_hook(module, inputs, outputs):
-                # Create hierarchical tag from module name and class
+        def create_pre_hook(module_name: str, module: torch.nn.Module):
+            """Create pre-forward hook that pushes tag onto stack."""
+            def pre_hook(module, inputs):
+                # Build hierarchical tag for this module
                 hierarchical_tag = self._build_hierarchical_tag(module_name, module)
-
-                # Record this execution context with module name for mapping
-                context_key = module_name
-                self._operation_context[context_key] = {
+                # Push tag onto stack - any operations from now use this tag
+                self._tag_stack.append(hierarchical_tag)
+                
+                # Also record in operation context for later mapping
+                self._operation_context[module_name] = {
                     "tag": hierarchical_tag,
                     "module_class": module.__class__.__name__,
-                    "stack": [],  # Don't store corrupted stack
+                    "creates_hierarchy": True,
+                    "stack_depth": len(self._tag_stack),
                 }
+            return pre_hook
 
-            return forward_hook
+        def create_post_hook(module_name: str, module: torch.nn.Module):
+            """Create post-forward hook that pops tag from stack."""
+            def post_hook(module, inputs, outputs):
+                # Pop the tag when module execution completes
+                if self._tag_stack:
+                    self._tag_stack.pop()
+            return post_hook
+
+        def create_tagging_hook(module_name: str, module: torch.nn.Module):
+            """Create hook for non-hierarchy modules that still need operation tagging."""
+            def tagging_hook(module, inputs, outputs):
+                # Record execution context for operation tagging but don't affect stack
+                # Get current tag from stack (from parent module)
+                current_tag = self.get_current_tag()
+                if current_tag:
+                    self._operation_context[module_name] = {
+                        "tag": current_tag,  # Use parent's tag
+                        "module_class": module.__class__.__name__,
+                        "creates_hierarchy": False,
+                        "parent_tag": current_tag,
+                    }
+            return tagging_hook
 
         # Register hooks on all modules using universal criteria
         for name, module in model.named_modules():
             if name:  # Skip root module
-                # Check if we should register hook for this module
                 module_class = module.__class__.__module__
                 should_tag = self._should_tag_module(module_class)
+                
                 if should_tag:
-                    hook = module.register_forward_hook(
-                        create_forward_hook(name, module)
-                    )
-                    self._hooks.append(hook)
+                    creates_hierarchy = self._should_create_hierarchy_level(module)
+                    
+                    if creates_hierarchy:
+                        # HF modules and torch.nn exceptions: Register pre/post hooks (push/pop stack)
+                        pre_hook = module.register_forward_pre_hook(
+                            create_pre_hook(name, module)
+                        )
+                        self._pre_hooks.append(pre_hook)
+                        
+                        post_hook = module.register_forward_hook(
+                            create_post_hook(name, module)
+                        )
+                        self._post_hooks.append(post_hook)
+                    else:
+                        # Other torch.nn modules: Register only tagging hook (no stack change)
+                        tag_hook = module.register_forward_hook(
+                            create_tagging_hook(name, module)
+                        )
+                        self._post_hooks.append(tag_hook)
 
+    def _should_create_hierarchy_level(self, module: torch.nn.Module) -> bool:
+        """Determine if module should create a hierarchy level (push/pop stack)."""
+        module_class_path = module.__class__.__module__
+        module_class_name = module.__class__.__name__
+        
+        # Skip low-level PyTorch implementation modules
+        if "torch._C" in module_class_path:
+            return False
+            
+        # Skip built-in Python modules
+        if module_class_path.startswith("builtins"):
+            return False
+            
+        # torch.nn modules only create hierarchy if in exception list
+        if module_class_path.startswith("torch.nn"):
+            return module_class_name in self._torch_nn_exceptions
+            
+        # All other modules (HF, custom) create hierarchy levels
+        return True
+    
     def _should_tag_module(self, module_class_path: str) -> bool:
-        """Determine if we should tag a module based on universal criteria."""
+        """Determine if we should tag a module (all modules except internals)."""
         # Skip low-level PyTorch implementation modules
         if "torch._C" in module_class_path:
             return False
@@ -170,8 +256,7 @@ class HierarchyExporter:
         if module_class_path.startswith("builtins"):
             return False
 
-        # Tag all other modules - this is universal and works for any model
-        # Whether it's transformers, torchvision, custom models, etc.
+        # Tag all other modules - operations need attribution
         return True
 
     def _build_hierarchical_tag(self, module_name: str, module: torch.nn.Module) -> str:
@@ -222,11 +307,21 @@ class HierarchyExporter:
         # Build the final path
         return "/" + "/".join(path_segments)
 
+    def get_current_tag(self) -> Optional[str]:
+        """Get current execution context tag from stack."""
+        return self._tag_stack[-1] if self._tag_stack else None
+
     def _remove_hooks(self):
         """Remove all registered hooks."""
-        for hook in self._hooks:
+        # Remove pre-hooks
+        for hook in self._pre_hooks:
             hook.remove()
-        self._hooks.clear()
+        self._pre_hooks.clear()
+        
+        # Remove post-hooks
+        for hook in self._post_hooks:
+            hook.remove()
+        self._post_hooks.clear()
 
     def _trace_model_execution(self, model: torch.nn.Module, example_inputs):
         """Trace model execution to capture operation context."""
@@ -337,15 +432,148 @@ class HierarchyExporter:
                 "outputs": list(node.output),
             }
 
-        # TODO: Implement the core mapping logic from our plan:
-        # 1. Map parameter names to module execution contexts
-        # 2. Tag operations that use parameters with their module context
-        # 3. Recursively propagate tags backward through the graph
+        # NEW APPROACH: Use stack-based operation context from tracing
+        # 1. Map ONNX operations to module execution contexts via stack-based tracing
+        # 2. Forward propagate tags through the dataflow graph
+        # 3. Apply multi-consumer propagation for complete subgraph extraction
+        # 4. Tag tensors and operations for filtering capabilities
+        
+        self._map_operations_to_stack_context(onnx_model)
+        self._forward_propagate_tags(onnx_model, tensor_producers)
+        self._propagate_tags_with_multi_consumer_logic(onnx_model, tensor_producers)
+        self._tag_tensor_inputs_for_filtering(onnx_model)
 
-        # For now, implement basic parameter-based tagging to get the structure working
-        self._map_parameters_to_modules(onnx_model)
-        self._tag_operations_by_parameter_usage(onnx_model)
-        self._propagate_tags_recursively(onnx_model, tensor_producers)
+    def _map_operations_to_stack_context(self, onnx_model):
+        """Map ONNX operations to module execution contexts from stack-based tracing."""
+        # Strategy: Use parameter names and operation patterns to infer module context
+        # This leverages the operation_context built during stack-based tracing
+        
+        # Method 1: Direct parameter-based mapping (most reliable)
+        param_to_module_context = {}
+        param_names = {init.name for init in onnx_model.graph.initializer}
+        
+        for param_name in param_names:
+            if not param_name.startswith("onnx::"):
+                # Extract module name from parameter (e.g., "encoder.layer.0.attention.self.query.weight")
+                module_name = self._extract_module_name_from_param(param_name)
+                
+                # Find matching execution context from our stack-based tracing
+                if module_name in self._operation_context:
+                    param_to_module_context[param_name] = self._operation_context[module_name]["tag"]
+                else:
+                    # Try parent modules
+                    parent_module = self._find_parent_module_in_context(module_name)
+                    if parent_module:
+                        param_to_module_context[param_name] = parent_module
+        
+        # Method 2: Tag operations based on parameter usage
+        for node in onnx_model.graph.node:
+            node_name = node.name or f"{node.op_type}_{len([n for n in self._tag_mapping.keys() if node.op_type in n])}"
+            
+            # Find parameters used by this operation
+            operation_tags = set()
+            for input_tensor in node.input:
+                if input_tensor in param_to_module_context:
+                    operation_tags.add(param_to_module_context[input_tensor])
+            
+            # Apply tags to operation
+            if operation_tags:
+                self._tag_mapping[node_name]["tags"] = list(operation_tags)
+    
+    def _find_parent_module_in_context(self, module_name: str) -> Optional[str]:
+        """Find parent module context for a given module name."""
+        parts = module_name.split(".")
+        
+        # Walk up the hierarchy to find a parent with execution context
+        for i in range(len(parts) - 1, 0, -1):
+            parent_name = ".".join(parts[:i])
+            if parent_name in self._operation_context:
+                return self._operation_context[parent_name]["tag"]
+        
+        return None
+    
+    def _forward_propagate_tags(self, onnx_model, tensor_producers):
+        """Forward propagate tags through the dataflow graph."""
+        # This fills in operations that don't use parameters but process tagged tensors
+        
+        max_iterations = 10  # Prevent infinite loops
+        for iteration in range(max_iterations):
+            tags_changed = False
+            
+            for node in onnx_model.graph.node:
+                node_name = node.name or f"{node.op_type}_{len([n for n in self._tag_mapping.keys() if node.op_type in n])}"
+                current_tags = set(self._tag_mapping[node_name].get('tags', []))
+                
+                # Collect tags from input tensors
+                input_tags = set()
+                for input_tensor in node.input:
+                    # Find the operation that produces this tensor
+                    producer_node = tensor_producers.get(input_tensor)
+                    if producer_node and producer_node in self._tag_mapping:
+                        producer_tags = self._tag_mapping[producer_node].get('tags', [])
+                        input_tags.update(producer_tags)
+                
+                # If this operation doesn't have tags but its inputs do, inherit them
+                if not current_tags and input_tags:
+                    self._tag_mapping[node_name]['tags'] = list(input_tags)
+                    tags_changed = True
+                elif input_tags and not input_tags.issubset(current_tags):
+                    # Add new tags from inputs
+                    all_tags = current_tags.union(input_tags)
+                    self._tag_mapping[node_name]['tags'] = list(all_tags)
+                    tags_changed = True
+            
+            # Stop if no changes in this iteration
+            if not tags_changed:
+                break
+        
+    def _propagate_tags_with_multi_consumer_logic(self, onnx_model, tensor_producers):
+        """Apply multi-consumer propagation on top of stack-based foundation."""
+        # Build tensor -> consumer modules mapping
+        tensor_consumers = defaultdict(set)
+        
+        for node in onnx_model.graph.node:
+            node_name = node.name or f"{node.op_type}_{len([n for n in self._tag_mapping.keys() if node.op_type in n])}"
+            node_tags = self._tag_mapping.get(node_name, {}).get('tags', [])
+            
+            # For each input tensor this operation uses
+            for input_tensor in node.input:
+                # Add ALL tags from this consuming operation
+                for tag in node_tags:
+                    tensor_consumers[input_tensor].add(tag)
+        
+        # Propagate consumer tags back to producing operations
+        for node in onnx_model.graph.node:
+            node_name = node.name or f"{node.op_type}_{len([n for n in self._tag_mapping.keys() if node.op_type in n])}"
+            
+            for output_tensor in node.output:
+                if output_tensor in tensor_consumers:
+                    consumer_tags = tensor_consumers[output_tensor]
+                    # Add all consumer tags to this operation
+                    existing_tags = set(self._tag_mapping[node_name].get('tags', []))
+                    all_tags = existing_tags.union(consumer_tags)
+                    self._tag_mapping[node_name]['tags'] = list(all_tags)
+    
+    def _tag_tensor_inputs_for_filtering(self, onnx_model):
+        """Tag tensor inputs with their context for filtering capabilities."""
+        # Create tensor-to-tag mapping for input filtering
+        self._tensor_to_tag = {}
+        
+        for node in onnx_model.graph.node:
+            node_name = node.name or f"{node.op_type}_{len([n for n in self._tag_mapping.keys() if node.op_type in n])}"
+            node_tags = self._tag_mapping.get(node_name, {}).get('tags', [])
+            
+            # Tag all input tensors with the operation's tags
+            for input_tensor in node.input:
+                if input_tensor not in self._tensor_to_tag:
+                    self._tensor_to_tag[input_tensor] = []
+                self._tensor_to_tag[input_tensor].extend(node_tags)
+            
+            # Tag all output tensors with the operation's tags
+            for output_tensor in node.output:
+                if output_tensor not in self._tensor_to_tag:
+                    self._tensor_to_tag[output_tensor] = []
+                self._tensor_to_tag[output_tensor].extend(node_tags)
 
     def _map_parameters_to_modules(self, onnx_model):
         """Map ONNX parameters to PyTorch modules based on naming and usage."""
