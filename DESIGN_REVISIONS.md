@@ -1111,3 +1111,370 @@ def format_category_summary(category_stats: Dict, format='cli') -> str:
 - Optional `--detailed` flag prevents output bloat
 
 **Status**: Design complete, ready for implementation
+
+---
+
+## R18: Hierarchical Trace-and-Project (HTP) Approach for Accurate Module Attribution (2024-12-22)
+
+### Problem Analysis: Root Causes of Over-Tagging and Missing Layer Specificity
+
+**Issue 1: Over-tagging (6 tags instead of 1)**
+- Root Cause: Multi-consumer propagation too aggressive
+- Example: `/pooler/activation/Tanh` has 6 tags from unrelated modules
+- Problem: Operations inherit ALL tags from tensor producers, not direct lineage
+
+**Issue 2: Missing Layer Specificity (no .0/.1 distinction)**
+- Root Cause: `_build_hierarchical_tag` filters duplicate class names
+- Example: `encoder.layer.0` and `encoder.layer.1` both become `/BertLayer`
+- Problem: Only class names preserved, instance names lost
+
+### The HTP Solution: Execution-Trace Projection with Native Operation Pattern Recognition
+
+**Core Principle**: Instead of parameter-based tagging, trace actual execution context and project it onto ONNX operations.
+
+#### Component 1: Execution Context Tracing
+```python
+def _trace_execution_context(self, model):
+    """Trace module execution with stack-based hooks."""
+    
+    def create_pre_hook(module_name, module):
+        def pre_hook(module, inputs):
+            # Build hierarchical tag preserving instance names
+            tag = self._build_instance_aware_tag(module_name, module)
+            self._tag_stack.append(tag)
+            self._execution_trace.append({
+                'type': 'module_enter',
+                'tag': tag,
+                'order': len(self._execution_trace)
+            })
+        return pre_hook
+    
+    # Tag includes instance numbers: /BertModel/BertEncoder/BertLayer.0/BertAttention
+```
+
+#### Component 2: Operation-Level Context Capture
+```python
+def _patch_torch_operations(self):
+    """Patch PyTorch operations to capture execution context."""
+    
+    operations_to_patch = [
+        (torch, 'matmul'), (torch, 'add'), (torch, 'tanh'),
+        (torch.nn.functional, 'linear'), (torch.nn.functional, 'relu'),
+        (torch.nn.functional, 'scaled_dot_product_attention'),  # Native ops
+    ]
+    
+    def create_traced_op(op_name, original_op):
+        def traced_op(*args, **kwargs):
+            # Capture current module context
+            current_tag = self.get_current_tag()
+            
+            # Execute operation
+            result = original_op(*args, **kwargs)
+            
+            # Record operation with context
+            self._operation_trace.append({
+                'op_name': op_name,
+                'module_tag': current_tag,
+                'order': len(self._operation_trace)
+            })
+            
+            return result
+        return traced_op
+```
+
+#### Component 3: Native Operation Pattern Recognition
+```python
+NATIVE_OP_PATTERNS = {
+    'scaled_dot_product_attention': {
+        'onnx_decomposition': ['MatMul', 'Div/Mul', 'Softmax', 'MatMul'],
+        'typical_node_count': 15-20,
+        'identifying_sequence': ['MatMul', 'Div', 'Softmax', 'MatMul']
+    }
+}
+
+def _tag_native_op_decompositions(self, onnx_model):
+    """Tag ONNX nodes that came from native operations."""
+    for region in self._native_op_regions:
+        # Find pattern in ONNX graph
+        pattern_start = self._find_attention_pattern(onnx_model, region)
+        pattern_length = self._get_pattern_length(onnx_model, pattern_start)
+        
+        # Tag entire decomposition with same module tag
+        for i in range(pattern_start, pattern_start + pattern_length):
+            self._tag_onnx_node(onnx_model.graph.node[i], region['module_tag'])
+```
+
+#### Component 4: ONNX Projection
+```python
+def _project_execution_trace_to_onnx(self, onnx_model):
+    """Project execution trace onto ONNX operations."""
+    
+    # Match ONNX operations to execution trace by:
+    # 1. Operation type correspondence (torch.matmul → ONNX MatMul)
+    # 2. Execution order alignment
+    # 3. Pattern recognition for native ops
+    
+    trace_idx = 0
+    for node in onnx_model.graph.node:
+        if trace_idx < len(self._operation_trace):
+            trace_entry = self._operation_trace[trace_idx]
+            
+            if self._operation_matches(node, trace_entry):
+                # Direct attribution
+                self._tag_onnx_node(node, trace_entry['module_tag'])
+                trace_idx += 1
+            elif self._is_native_op_component(node, trace_idx):
+                # Native operation pattern
+                native_tag = self._get_native_op_tag(trace_idx)
+                self._tag_onnx_node(node, native_tag)
+```
+
+### Instance-Aware Hierarchical Tagging
+
+**Problem**: `encoder.layer.0` and `encoder.layer.1` collapsed to same tag
+**Solution**: Preserve instance identifiers in hierarchical tags
+
+```python
+def _build_instance_aware_tag(self, module_name: str, module: torch.nn.Module) -> str:
+    """Build tag preserving instance names like .0, .1, etc."""
+    
+    path_segments = [self._model.__class__.__name__]
+    
+    if module_name:
+        name_parts = module_name.split(".")
+        current_module = self._model
+        
+        for part in name_parts:
+            current_module = getattr(current_module, part)
+            class_name = current_module.__class__.__name__
+            
+            # Preserve instance numbers
+            if part.isdigit() and len(name_parts) > 1:
+                # Use format: ClassName.instance
+                path_segments.append(f"{class_name}.{part}")
+            else:
+                path_segments.append(class_name)
+    
+    return "/" + "/".join(path_segments)
+    
+# Results in: /BertModel/BertEncoder/BertLayer.0/BertAttention
+#         vs: /BertModel/BertEncoder/BertLayer.1/BertAttention
+```
+
+### Expected Results
+
+**Before HTP**:
+```json
+"/pooler/activation/Tanh": {
+    "tags": [
+        "/BertModel/BertEncoder/BertLayer/BertAttention/BertSdpaSelfAttention",
+        "/BertModel/BertEncoder/BertLayer/BertIntermediate", 
+        "/BertModel/BertPooler",
+        "/BertModel/BertEncoder/BertLayer/BertAttention/BertSelfOutput",
+        "/BertModel/BertEmbeddings",
+        "/BertModel/BertEncoder/BertLayer/BertOutput"
+    ]
+}
+```
+
+**After HTP**:
+```json
+"/pooler/activation/Tanh": {
+    "tags": ["/BertModel/BertPooler"]
+},
+"/encoder/layer.0/attention/self/MatMul": {
+    "tags": ["/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention"]
+},
+"/encoder/layer.1/attention/self/MatMul": {
+    "tags": ["/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention"]
+}
+```
+
+### Implementation Phases
+
+**Phase 1: Core Operation Tracing**
+- Implement execution context tracing
+- Add operation-level patching
+- Basic ONNX projection
+
+**Phase 2: Native Operation Support**
+- Add native operation boundary detection
+- Implement pattern recognition
+- Test with scaled_dot_product_attention
+
+**Phase 3: Instance-Aware Tagging**
+- Fix hierarchical tag building
+- Preserve layer instance numbers
+- Test layer distinction
+
+**Phase 4: Input/Output Tagging**
+- Design tensor tagging strategy
+- Implement input inheritance from operations
+- Enable subgraph filtering
+
+### Benefits
+
+**Precision**: Each operation tagged with exactly its source module
+**Accuracy**: No over-tagging from unrelated modules  
+**Completeness**: Native operations properly attributed
+**Specificity**: Layer instances properly distinguished
+**Universal**: Works with any PyTorch model architecture
+
+**Status**: ✅ Design complete, ready for implementation
+
+---
+
+## R19: Operation Tracing Solution Summary (2024-12-22)
+
+### Context: The Working Solution for Module Attribution
+
+After analyzing parameter-based tagging limitations, we developed a more robust approach: **Operation-level execution tracing during ONNX export**.
+
+### Key Insight: ONNX Export IS Model Execution
+
+**The Realization**:
+- When `torch.onnx.export()` runs, it executes the model with tracing
+- Our forward hooks run during this execution  
+- PyTorch operations execute and create ONNX nodes in real-time
+- We can capture the execution context of every operation
+
+### The Operation Tracing Approach
+
+#### How It Works
+```python
+# During torch.onnx.export():
+# 1. Model executes with our hooks active
+# 2. We patch PyTorch operations to capture context
+# 3. ONNX nodes are created from these operations
+# 4. We match operations to ONNX nodes by order and type
+
+def export_with_operation_tracing(self, model, inputs, output_path):
+    # Step 1: Register module hooks (track execution stack)
+    self._register_hooks(model)
+    
+    # Step 2: Patch operations (capture operation-to-module mapping)
+    self._patch_torch_operations()
+    
+    # Step 3: Export to ONNX (our patches capture context)
+    torch.onnx.export(model, inputs, output_path)
+    
+    # Step 4: Project captured context onto ONNX nodes
+    self._project_operation_trace_to_onnx(output_path)
+```
+
+#### Operation Patching Example
+```python
+def _patch_torch_operations(self):
+    original_matmul = torch.matmul
+    
+    def traced_matmul(*args, **kwargs):
+        # Capture current module context from our stack
+        current_tag = self.get_current_tag()  # e.g., "/BertAttention"
+        
+        # Execute original operation
+        result = original_matmul(*args, **kwargs)
+        
+        # Record this operation with its context
+        self._operation_trace.append({
+            'op_type': 'matmul',
+            'module_tag': current_tag,
+            'order': len(self._operation_trace)
+        })
+        
+        return result
+    
+    torch.matmul = traced_matmul
+```
+
+#### ONNX Projection
+```python
+def _project_operation_trace_to_onnx(self, onnx_path):
+    onnx_model = onnx.load(onnx_path)
+    trace_idx = 0
+    
+    for node in onnx_model.graph.node:
+        if trace_idx < len(self._operation_trace):
+            trace_entry = self._operation_trace[trace_idx]
+            
+            # Match by operation type
+            if self._ops_match(node.op_type, trace_entry['op_type']):
+                # Tag ONNX node with module context
+                self._inject_tag(node, trace_entry['module_tag'])
+                trace_idx += 1
+```
+
+### Why This Approach Works
+
+**1. Real Execution Context**: Captures actual module execution, not parameter inference
+**2. Operation-Level Precision**: Each operation tagged individually
+**3. Native Operation Support**: Can handle C++ functions via boundary detection
+**4. Universal Coverage**: Works with any PyTorch model
+**5. Reliable Mapping**: Operations map to ONNX nodes by execution order
+
+### Handling Edge Cases
+
+#### Native Operations (scaled_dot_product_attention)
+```python
+# Wrap native functions to mark boundaries
+original_sdpa = F.scaled_dot_product_attention
+
+def traced_sdpa(*args, **kwargs):
+    current_tag = self.get_current_tag()
+    
+    # Mark start of native operation region
+    self._native_regions.append({
+        'start': len(self._operation_trace),
+        'tag': current_tag,
+        'op_type': 'scaled_dot_product_attention'
+    })
+    
+    result = original_sdpa(*args, **kwargs)
+    
+    # Mark end of region
+    self._native_regions[-1]['end'] = len(self._operation_trace)
+    
+    return result
+```
+
+#### Complex Operations (Multi-output, Inplace)
+- Handle operations with multiple ONNX node outputs
+- Track inplace operations that modify tensors
+- Manage operations that create auxiliary nodes (shape, constants)
+
+### Advantages Over Parameter-Based Approach
+
+| Aspect | Parameter-Based | Operation Tracing |
+|--------|----------------|-------------------|
+| **Accuracy** | ❌ Over-tagging via multi-consumer | ✅ Precise operation attribution |
+| **Native Ops** | ❌ Cannot handle C++ functions | ✅ Boundary detection + patterns |
+| **Reliability** | ❌ Depends on parameter name preservation | ✅ Uses actual execution context |
+| **Universality** | ❌ Architecture-specific assumptions | ✅ Works with any PyTorch model |
+| **Precision** | ❌ Tensor-level propagation errors | ✅ Operation-level granularity |
+
+### Implementation Considerations
+
+**Operations to Patch**:
+- Core math: `torch.matmul`, `torch.add`, `torch.mul`, `torch.div`
+- Neural network: `F.linear`, `F.conv2d`, `F.relu`, `F.softmax`
+- Native functions: `F.scaled_dot_product_attention`, `F.flash_attention`
+- Tensor ops: `torch.transpose`, `torch.reshape`, `torch.cat`
+
+**Matching Strategy**:
+- Primary: Operation type correspondence (torch.matmul → ONNX MatMul)
+- Secondary: Execution order alignment
+- Fallback: Pattern recognition for complex decompositions
+
+**Performance Impact**:
+- Minimal: Only patches during export, not runtime
+- Temporary: All patches restored after export
+- Efficient: Simple operation wrapping
+
+### Expected Outcomes
+
+**Precision**: Each ONNX operation tagged with exactly its source module
+**No Over-tagging**: Operations only get tags from their actual execution context
+**Native Support**: C++ functions properly attributed via pattern recognition
+**Layer Distinction**: Instance-aware tagging preserves layer.0 vs layer.1
+**Filtering Ready**: Tagged tensors enable precise subgraph extraction
+
+**Status**: ✅ Proven approach, ready for full implementation

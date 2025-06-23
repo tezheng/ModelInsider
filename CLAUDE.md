@@ -86,6 +86,13 @@ Execute → Proceed with confirmed understanding
 **After every test fix**: Review the diff for model-specific assumptions  
 **When tests fail**: Fix with universal logic, never hardcoded patches
 
+## MUST-RULES
+
+Always follow MUST-RULES
+- Rigorously adhere to universal design principles
+- Prioritize generalizability over specific implementations
+- Validate against core architectural constraints before committing any changes
+
 ## Project Overview
 
 This is a Python project named "modelexport" for universal hierarchy-preserving ONNX export of Hugging Face models. The project uses Python 3.12+ and is configured with pyproject.toml for dependency management.
@@ -95,6 +102,8 @@ This is a Python project named "modelexport" for universal hierarchy-preserving 
 **IMPORTANT**: Always use uv with virtual environment for this project.
 
 **FOR CLAUDE CODE**: Always use uv run or activate venv first. Never run bare python commands.
+
+**TEMPORARY FILES**: Always use temp/ folder in project root to persist temporary files and test outputs.
 
 ```bash
 # Create virtual environment and install dependencies
@@ -186,3 +195,8 @@ See `MEMO.md` for detailed rationale.
 - **List/Dict Comprehensions**: Prefer Pythonic constructs over verbose loops where appropriate
 - **Context Managers**: Use `with` statements for resource management
 - **Exception Handling**: Use specific exception types and proper error handling patterns
+
+## Memories
+
+### Model Export Workflows
+- Use `uv run modelexport export prajjwal1/bert-tiny temp/bert-tiny/model.onnx --strategy htp --config export_config_bertmodel.json` to export prajjwal1/bert-tiny

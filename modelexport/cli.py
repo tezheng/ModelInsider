@@ -11,6 +11,7 @@ validation, and analysis. All commands are designed to be:
 import click
 import json
 import sys
+import torch
 from pathlib import Path
 from typing import Optional, Dict, Any
 import tempfile
@@ -33,11 +34,9 @@ def cli(ctx, verbose):
 @cli.command()
 @click.argument('model_name_or_path')
 @click.argument('output_path')
-@click.option('--input-text', default='Hello world test input for model tracing and ONNX export validation', 
-              help='Input text for model tracing (for language models). Default provides reasonable coverage.')
-@click.option('--input-shape', help='Input shape as comma-separated values (e.g., 1,3,224,224)')
+@click.option('--input-shape', help='Input shape as comma-separated values (e.g., 1,3,224,224) for vision models')
 @click.option('--strategy', default='usage_based', 
-              type=click.Choice(['usage_based']), 
+              type=click.Choice(['usage_based', 'htp']), 
               help='Tagging strategy to use')
 @click.option('--opset-version', default=14, type=int,
               help='ONNX opset version to use')
@@ -45,8 +44,12 @@ def cli(ctx, verbose):
               help='Export configuration file (JSON)')
 @click.option('--temp-dir', type=click.Path(),
               help='Directory for temporary files (default: system temp)')
+@click.option('--jit-graph', is_flag=True,
+              help='Dump TorchScript graph information before ONNX export (preserves context)')
+@click.option('--fx-graph', type=click.Choice(['symbolic_trace', 'torch_export', 'both']),
+              help='Export FX graph representation (dynamo=False alternative)')
 @click.pass_context
-def export(ctx, model_name_or_path, output_path, input_text, input_shape, strategy, opset_version, config, temp_dir):
+def export(ctx, model_name_or_path, output_path, input_shape, strategy, opset_version, config, temp_dir, jit_graph, fx_graph):
     """
     Export a PyTorch model to ONNX with hierarchy preservation.
     
@@ -55,14 +58,20 @@ def export(ctx, model_name_or_path, output_path, input_text, input_shape, strate
     
     Examples:
     \b
-        # Export BERT model
-        modelexport export prajjwal1/bert-tiny bert_tiny.onnx
+        # Export BERT model with config
+        modelexport export prajjwal1/bert-tiny bert.onnx --config export_config.json
         
-        # Export with custom input text
-        modelexport export prajjwal1/bert-tiny bert.onnx --input-text "Custom test input"
+        # Export with HTP strategy and debug info
+        modelexport export prajjwal1/bert-tiny bert.onnx --strategy htp --config config.json --jit-graph
         
-        # Export with specific opset version
-        modelexport export prajjwal1/bert-tiny bert.onnx --opset-version 16
+        # Export with FX graph alternative (for analysis)
+        modelexport export prajjwal1/bert-tiny bert.onnx --config config.json --fx-graph both
+        
+        # Export vision model with input shape
+        modelexport export resnet50 resnet.onnx --input-shape 1,3,224,224
+        
+        # Full debug export with all features
+        modelexport export prajjwal1/bert-tiny bert.onnx --config config.json --jit-graph --fx-graph both --verbose
     """
     verbose = ctx.obj['verbose']
     
@@ -79,12 +88,44 @@ def export(ctx, model_name_or_path, output_path, input_text, input_shape, strate
         try:
             from transformers import AutoModel, AutoTokenizer
             
-            # Load model and tokenizer
+            # Load model
             model = AutoModel.from_pretrained(model_name_or_path)
-            tokenizer = AutoTokenizer.from_pretrained(model_name_or_path)
             
             # Prepare inputs
-            inputs = tokenizer(input_text, return_tensors='pt', padding=True, truncation=True)
+            if config and Path(config).exists():
+                with open(config, 'r') as f:
+                    config_data = json.load(f)
+                if 'input_specs' in config_data:
+                    # Generate dummy inputs from specs
+                    inputs = {}
+                    for name, spec in config_data['input_specs'].items():
+                        dtype = torch.long if spec.get('dtype') == 'int' else torch.float32
+                        # Create dummy tensor with shape from dynamic_axes or default
+                        if 'dynamic_axes' in config_data and name in config_data['dynamic_axes']:
+                            # Default shape: batch_size=1, sequence_length=128
+                            shape = [1, 128]  # Common for BERT-like models
+                        else:
+                            shape = [1, 128]  # Default fallback
+                        
+                        # Generate values within specified range
+                        if 'range' in spec:
+                            min_val, max_val = spec['range']
+                            if dtype == torch.long:
+                                inputs[name] = torch.randint(min_val, max_val + 1, shape, dtype=dtype)
+                            else:
+                                inputs[name] = torch.rand(shape, dtype=dtype) * (max_val - min_val) + min_val
+                        else:
+                            inputs[name] = torch.ones(shape, dtype=dtype)
+                else:
+                    click.echo("Error: Config file must contain 'input_specs' to generate inputs", err=True)
+                    sys.exit(1)
+            elif input_shape:
+                # Use provided input shape for vision models
+                shape = [int(x) for x in input_shape.split(',')]
+                inputs = torch.randn(shape)
+            else:
+                click.echo("Error: Either --config with input_specs or --input-shape is required", err=True)
+                sys.exit(1)
             
         except ImportError:
             click.echo("Error: transformers library required for HuggingFace models", err=True)
@@ -116,6 +157,70 @@ def export(ctx, model_name_or_path, output_path, input_text, input_shape, strate
                 'opset_version': opset_version
             }
         
+        # Determine output directory for additional exports
+        output_base = Path(output_path).parent
+        output_name = Path(output_path).stem
+        
+        # JIT Graph dumping (before ONNX export)
+        jit_info = None
+        if jit_graph:
+            if verbose:
+                click.echo("🔍 Dumping TorchScript graph information...")
+            
+            try:
+                # Import the JIT graph dumper
+                import sys
+                sys.path.append(str(Path(__file__).parent.parent))
+                from jit_graph_dumper import dump_jit_graph_before_onnx_export
+                
+                jit_output_dir = output_base / f"{output_name}_jit_debug"
+                jit_output_dir.mkdir(exist_ok=True)
+                
+                traced_model, jit_info = dump_jit_graph_before_onnx_export(
+                    model, inputs, str(jit_output_dir)
+                )
+                
+                if verbose:
+                    scopes_found = jit_info['unified_scope_hierarchy']['total_unique_scopes']
+                    click.echo(f"✅ JIT graph analysis complete: {scopes_found} scopes found")
+                    click.echo(f"   Debug info saved to: {jit_output_dir}")
+                
+            except Exception as e:
+                click.echo(f"Warning: JIT graph dumping failed: {e}", err=True)
+                if verbose:
+                    import traceback
+                    click.echo(traceback.format_exc(), err=True)
+        
+        # FX Graph export (alternative to ONNX)
+        fx_info = None
+        if fx_graph:
+            if verbose:
+                click.echo(f"🔄 Exporting FX graph using method: {fx_graph}")
+            
+            try:
+                # Import the FX graph exporter
+                import sys
+                sys.path.append(str(Path(__file__).parent.parent))
+                from fx_graph_exporter import export_fx_graph_cli
+                
+                fx_output_path = output_base / f"{output_name}_fx_graph"
+                
+                fx_info = export_fx_graph_cli(
+                    model, inputs, str(fx_output_path), method=fx_graph
+                )
+                
+                if verbose and fx_info.get('success'):
+                    click.echo(f"✅ FX graph export complete")
+                    click.echo(f"   FX graph saved to: {fx_output_path}")
+                elif fx_info.get('error'):
+                    click.echo(f"Warning: FX graph export failed: {fx_info['error']}", err=True)
+                
+            except Exception as e:
+                click.echo(f"Warning: FX graph export failed: {e}", err=True)
+                if verbose:
+                    import traceback
+                    click.echo(traceback.format_exc(), err=True)
+        
         # Export with hierarchy preservation
         exporter = HierarchyExporter(strategy=strategy)
         result = exporter.export(
@@ -127,11 +232,19 @@ def export(ctx, model_name_or_path, output_path, input_text, input_shape, strate
         
         # Output results
         click.echo(f"✅ Export completed successfully!")
-        click.echo(f"   Output: {output_path}")
+        click.echo(f"   ONNX Output: {output_path}")
         click.echo(f"   Sidecar: {output_path.replace('.onnx', '_hierarchy.json')}")
         click.echo(f"   Total operations: {result['total_operations']}")
         click.echo(f"   Tagged operations: {result['tagged_operations']}")
         click.echo(f"   Strategy: {result['strategy']}")
+        
+        # Report on additional exports
+        if jit_info and jit_info.get('scope_statistics', {}).get('extraction_success'):
+            scopes_found = jit_info['unified_scope_hierarchy']['total_unique_scopes']
+            click.echo(f"   JIT Debug: {scopes_found} scopes extracted → {output_base}/{output_name}_jit_debug/")
+        
+        if fx_info and fx_info.get('success'):
+            click.echo(f"   FX Graph: {fx_graph} method → {output_base}/{output_name}_fx_graph")
         
         if verbose:
             # Show tag statistics
@@ -142,6 +255,26 @@ def export(ctx, model_name_or_path, output_path, input_text, input_shape, strate
                     click.echo(f"   {tag}: {count}")
             except Exception as e:
                 click.echo(f"Warning: Could not load tag statistics: {e}", err=True)
+                
+            # Show JIT graph analysis if available
+            if jit_info:
+                click.echo(f"\nJIT Graph Analysis:")
+                click.echo(f"   Extraction success: {jit_info.get('scope_statistics', {}).get('extraction_success', False)}")
+                if jit_info.get('scope_statistics', {}).get('coverage_analysis'):
+                    coverage = jit_info['scope_statistics']['coverage_analysis']
+                    click.echo(f"   BERT modules found: {coverage.get('has_bert_modules', False)}")
+                    click.echo(f"   Attention modules: {coverage.get('has_attention_modules', False)}")
+                    click.echo(f"   Layer modules: {coverage.get('has_layer_modules', False)}")
+            
+            # Show FX graph details if available  
+            if fx_info and fx_info.get('success'):
+                click.echo(f"\nFX Graph Export:")
+                click.echo(f"   Method: {fx_info.get('method', 'unknown')}")
+                click.echo(f"   Execution test: {fx_info.get('execution_test', 'unknown')}")
+                if 'fx_graph_analysis' in fx_info:
+                    analysis = fx_info['fx_graph_analysis']
+                    click.echo(f"   Total nodes: {analysis.get('total_nodes', 'unknown')}")
+                    click.echo(f"   Node types: {len(analysis.get('node_types', {}))}")
         
     except Exception as e:
         click.echo(f"Error during export: {e}", err=True)

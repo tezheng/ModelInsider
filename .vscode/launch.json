@@ -1,65 +1,48 @@
 {
-    "version": "0.2.0",
-    "configurations": [
-        {
-            "name": "Debug: modelexport export (default text)",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "modelexport",
-            "args": [
-                "--verbose",
-                "export",
-                "prajjwal1/bert-tiny",
-                "debug_export.onnx"
-            ],
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}",
-            "justMyCode": false
-        },
-        {
-            "name": "Debug: modelexport export (custom text)",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "modelexport",
-            "args": [
-                "--verbose",
-                "export",
-                "prajjwal1/bert-tiny",
-                "debug_export_custom.onnx",
-                "--input-text", "Natural language processing with transformers"
-            ],
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}",
-            "justMyCode": false
-        },
-        {
-            "name": "Debug: modelexport analyze",
-            "type": "debugpy",
-            "request": "launch",
-            "module": "modelexport",
-            "args": [
-                "--verbose",
-                "analyze",
-                "debug_export.onnx"
-            ],
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}",
-            "justMyCode": false
-        },
-        {
-            "name": "Debug: pytest test",
-            "type": "debugpy",
-            "request": "launch",
-            "python": "${workspaceFolder}/.venv/bin/python",
-            "module": "pytest",
-            "args": [
-                "tests/test_hierarchy_exporter.py::TestHierarchyExporterBasic::test_hierarchy_exporter_can_be_imported",
-                "-v",
-                "-s"
-            ],
-            "console": "integratedTerminal",
-            "cwd": "${workspaceFolder}",
-            "justMyCode": false
-        }
-    ]
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug: modelexport",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "modelexport",
+      "args": [
+        "export",
+        "--strategy",
+        "htp",
+        "--config",
+        "export_config_bertmodel.json",
+        "prajjwal1/bert-tiny",
+        "debug_export.onnx"
+      ],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": false
+    },
+    {
+      "name": "Debug: modelexport analyze",
+      "type": "debugpy",
+      "request": "launch",
+      "module": "modelexport",
+      "args": ["--verbose", "analyze", "debug_export.onnx"],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": false
+    },
+    {
+      "name": "Debug: pytest test",
+      "type": "debugpy",
+      "request": "launch",
+      "python": "${workspaceFolder}/.venv/bin/python",
+      "module": "pytest",
+      "args": [
+        "tests/test_hierarchy_exporter.py::TestHierarchyExporterBasic::test_hierarchy_exporter_can_be_imported",
+        "-v",
+        "-s"
+      ],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": false
+    }
+  ]
 }
