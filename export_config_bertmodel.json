@@ -1,0 +1,17 @@
+{
+  "export_params": true,
+  "opset_version": 17,
+  "do_constant_folding": true,
+  "input_names": ["input_ids", "token_type_ids", "attention_mask"],
+  "output_names": ["output"],
+  "dynamic_axes": {
+    "input_ids": {"0": "batch_size", "1": "sequence_length"},
+    "token_type_ids": {"0": "batch_size", "1": "sequence_length"},
+    "attention_mask": {"0": "batch_size", "1": "sequence_length"}
+  },
+  "input_specs": {
+    "input_ids": {"dtype": "int", "range": [0, 1000]},
+    "token_type_ids": {"dtype": "int", "range": [0, 1]},
+    "attention_mask": {"dtype": "int", "range": [0, 1]}
+  }
+}

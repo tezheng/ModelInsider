@@ -51,12 +51,12 @@ class HierarchyExporter:
         Initialize the HierarchyExporter.
 
         Args:
-            strategy: Tagging strategy to use. Currently supports "usage_based"
+            strategy: Tagging strategy to use. Supports "usage_based" and "htp"
             torch_nn_exceptions: Override default list of torch.nn modules that create hierarchy
         """
-        if strategy != "usage_based":
+        if strategy not in ["usage_based", "htp"]:
             raise ValueError(
-                f"Unsupported strategy: {strategy}. Only 'usage_based' is implemented."
+                f"Unsupported strategy: {strategy}. Supported: 'usage_based', 'htp'"
             )
 
         self.strategy = strategy
@@ -69,6 +69,12 @@ class HierarchyExporter:
         self._pre_hooks = []  # Pre-forward hooks
         self._post_hooks = []  # Post-forward hooks
         self._model = None  # Track the root model
+        
+        # HTP-specific state variables
+        self._operation_trace: List[Dict[str, Any]] = []  # Operation execution trace
+        self._native_op_regions: List[Dict[str, Any]] = []  # Native operation boundaries
+        self._patched_operations: Dict[str, Any] = {}  # Store original operations
+        self._tensor_tags: Dict[str, Dict[str, Any]] = {}  # Tensor tagging information
         
         # Allow customization of torch.nn exceptions
         self._torch_nn_exceptions = (
@@ -104,37 +110,97 @@ class HierarchyExporter:
         self._register_hooks(model)
 
         try:
-            # Step 3: Perform tracing to build operation context
-            with torch.no_grad():
-                self._trace_model_execution(model, example_inputs)
-
-            # Step 3.5: Remove hooks before ONNX export to ensure clean topology
-            self._remove_hooks()
-
-            # Step 4: Export to ONNX (standard PyTorch export - PRESERVE TOPOLOGY)
-            self._export_to_onnx(model, example_inputs, output_path, **kwargs)
-
-            # Step 5: Load exported ONNX and analyze its structure
-            onnx_model = onnx.load(output_path)
-            
-            # Step 6: Build tag mapping based on the ACTUAL exported graph
-            self._build_tag_mapping_from_onnx(onnx_model)
-
-            # Step 7: Inject tags into EXISTING nodes (no topology changes)
-            self._inject_tags_into_onnx(output_path)
-
-            return {
-                "output_path": output_path,
-                "strategy": self.strategy,
-                "total_operations": len(self._tag_mapping),
-                "tagged_operations": len(
-                    [op for op in self._tag_mapping.values() if op.get("tags", [])]
-                ),
-            }
+            if self.strategy == "htp":
+                # HTP: Hierarchical Trace-and-Project approach
+                return self._export_htp(model, example_inputs, output_path, **kwargs)
+            else:
+                # Legacy: usage_based approach
+                return self._export_usage_based(model, example_inputs, output_path, **kwargs)
 
         finally:
-            # Clean up hooks
+            # Clean up hooks and patches
             self._remove_hooks()
+            self._unpatch_operations()
+
+    def _export_usage_based(self, model, example_inputs, output_path, **kwargs):
+        """Legacy usage-based export approach."""
+        # Step 3: Perform tracing to build operation context
+        with torch.no_grad():
+            self._trace_model_execution(model, example_inputs)
+
+        # Step 3.5: Remove hooks before ONNX export to ensure clean topology
+        self._remove_hooks()
+
+        # Step 4: Export to ONNX (standard PyTorch export - PRESERVE TOPOLOGY)
+        self._export_to_onnx(model, example_inputs, output_path, **kwargs)
+
+        # Step 5: Load exported ONNX and analyze its structure
+        onnx_model = onnx.load(output_path)
+        
+        # Step 6: Build tag mapping based on the ACTUAL exported graph
+        self._build_tag_mapping_from_onnx(onnx_model)
+
+        # Step 7: Inject tags into EXISTING nodes (no topology changes)
+        self._inject_tags_into_onnx(output_path)
+        
+        return {
+            "output_path": output_path,
+            "strategy": self.strategy,
+            "total_operations": len(self._tag_mapping),
+            "tagged_operations": len(
+                [op for op in self._tag_mapping.values() if op.get("tags", [])]
+            ),
+        }
+
+    def _export_htp(self, model, example_inputs, output_path, **kwargs):
+        """HTP: Hierarchical Trace-and-Project export approach."""
+        
+        # Step 1: Patch PyTorch operations to capture execution context
+        self._patch_torch_operations()
+        
+        # Step 2: Trace model execution to capture module context (needed for operation tagging)
+        with torch.no_grad():
+            self._trace_model_execution(model, example_inputs)
+        
+        # Step 3: Export to ONNX with operation tracing active (keep hooks during export!)
+        # CRITICAL: For HTP, hooks must remain active during ONNX export to capture operation context
+        self._export_to_onnx(model, example_inputs, output_path, **kwargs)
+        
+        # Step 4: Load exported ONNX and project execution trace onto it
+        onnx_model = onnx.load(output_path)
+        self._project_execution_trace_to_onnx(onnx_model)
+        
+        # Step 5: Handle native operation patterns
+        self._tag_native_operation_patterns(onnx_model)
+        
+        # Step 6: Forward propagate tags from traced operations to untraced operations
+        # For HTP, use conservative propagation to avoid over-tagging
+        tensor_producers = {}
+        for node in onnx_model.graph.node:
+            node_name = node.name or f"{node.op_type}_{len(self._tag_mapping)}"
+            for output_tensor in node.output:
+                tensor_producers[output_tensor] = node_name
+        self._forward_propagate_tags_htp(onnx_model, tensor_producers)
+        
+        # Step 7: Build tensor tagging for subgraph filtering
+        self._build_tensor_tags(onnx_model)
+        
+        # Step 8: Ensure 100% coverage
+        self._ensure_complete_coverage(onnx_model)
+        
+        # Step 9: Inject all tags into ONNX model
+        self._inject_htp_tags_into_onnx(output_path, onnx_model)
+        
+        return {
+            "output_path": output_path,
+            "strategy": self.strategy,
+            "total_operations": len(self._tag_mapping),
+            "tagged_operations": len(
+                [op for op in self._tag_mapping.values() if op.get("tags", [])]
+            ),
+            "operation_trace_length": len(self._operation_trace),
+            "native_op_regions": len(self._native_op_regions),
+        }
 
     def get_tag_mapping(self) -> Dict[str, Dict[str, Any]]:
         """
@@ -162,8 +228,11 @@ class HierarchyExporter:
         def create_pre_hook(module_name: str, module: torch.nn.Module):
             """Create pre-forward hook that pushes tag onto stack."""
             def pre_hook(module, inputs):
-                # Build hierarchical tag for this module
-                hierarchical_tag = self._build_hierarchical_tag(module_name, module)
+                # Build hierarchical tag for this module (strategy-specific)
+                if self.strategy == "htp":
+                    hierarchical_tag = self._build_instance_aware_tag(module_name, module)
+                else:
+                    hierarchical_tag = self._build_hierarchical_tag(module_name, module)
                 # Push tag onto stack - any operations from now use this tag
                 self._tag_stack.append(hierarchical_tag)
                 
@@ -1235,3 +1304,634 @@ class HierarchyExporter:
             for tag in node_info.get("tags", []):
                 tag_counts[tag] = tag_counts.get(tag, 0) + 1
         return tag_counts
+
+    # ============================================================================
+    # HTP (Hierarchical Trace-and-Project) Implementation
+    # ============================================================================
+
+    def _patch_torch_operations(self):
+        """Patch PyTorch operations to capture execution context during ONNX export."""
+        import torch.nn.functional as F
+        
+        # Operations to patch for execution tracing
+        operations_to_patch = [
+            # Core mathematical operations
+            (torch, 'matmul'),
+            (torch, 'add'),
+            (torch, 'sub'),
+            (torch, 'mul'),
+            (torch, 'div'),
+            (torch, 'pow'),
+            (torch, 'sqrt'),
+            (torch, 'erf'),
+            (torch, 'tanh'),
+            (torch, 'relu'),
+            (torch, 'bmm'),  # Batch matrix multiply
+            
+            # Indexing and gathering operations
+            (torch, 'index_select'),
+            (torch, 'gather'),
+            (torch, 'embedding'),  # For nn.Embedding layers
+            (torch, 'where'),
+            (torch, 'eq'),  # Equal
+            (torch, 'equal'),
+            
+            # Shape operations
+            (torch, 'reshape'),
+            (torch, 'transpose'),
+            (torch, 'unsqueeze'),
+            (torch, 'squeeze'),
+            (torch, 'cat'),
+            (torch, 'expand'),
+            (torch, 'slice'),
+            
+            # Reduction operations
+            (torch, 'mean'),
+            (torch, 'sum'),
+            (torch, 'cumsum'),
+            (torch, 'cumprod'),
+            
+            # Type operations
+            (torch, 'cast'),
+            
+            # Functional operations
+            (F, 'linear'),
+            (F, 'relu'),
+            (F, 'tanh'),
+            (F, 'softmax'),
+            (F, 'layer_norm'),
+            (F, 'embedding'),  # F.embedding function
+            (F, 'pad'),
+            (F, 'dropout'),
+            (F, 'gelu'),
+            
+            # Native operations
+            (F, 'scaled_dot_product_attention'),
+        ]
+        
+        patched_count = 0
+        for module, op_name in operations_to_patch:
+            if hasattr(module, op_name):
+                original_op = getattr(module, op_name)
+                self._patched_operations[(module, op_name)] = original_op
+                
+                # Create traced version
+                traced_op = self._create_traced_operation(op_name, original_op)
+                setattr(module, op_name, traced_op)
+                patched_count += 1
+
+    def _create_traced_operation(self, op_name: str, original_op):
+        """Create a traced version of a PyTorch operation."""
+        def traced_operation(*args, **kwargs):
+            # Capture current module context from stack
+            current_tag = self.get_current_tag()
+            
+            # Handle native operations specially
+            if op_name == 'scaled_dot_product_attention':
+                return self._trace_native_operation(
+                    op_name, original_op, current_tag, *args, **kwargs
+                )
+            
+            # Execute original operation
+            result = original_op(*args, **kwargs)
+            
+            # Record operation with context
+            if current_tag:
+                self._operation_trace.append({
+                    'op_name': op_name,
+                    'module_tag': current_tag,
+                    'order': len(self._operation_trace),
+                    'type': 'regular'
+                })
+            
+            return result
+        
+        return traced_operation
+
+    def _trace_native_operation(self, op_name: str, original_op, current_tag, *args, **kwargs):
+        """Trace native C++ operations with boundary detection."""
+        # Mark start of native operation region
+        start_trace_idx = len(self._operation_trace)
+        
+        self._native_op_regions.append({
+            'op_name': op_name,
+            'module_tag': current_tag,
+            'start_trace_idx': start_trace_idx,
+            'start_order': len(self._operation_trace)
+        })
+        
+        # Execute native operation
+        result = original_op(*args, **kwargs)
+        
+        # Mark end of native operation region
+        end_trace_idx = len(self._operation_trace)
+        self._native_op_regions[-1].update({
+            'end_trace_idx': end_trace_idx,
+            'end_order': len(self._operation_trace)
+        })
+        
+        return result
+
+    def _unpatch_operations(self):
+        """Restore original PyTorch operations."""
+        for (module, op_name), original_op in self._patched_operations.items():
+            setattr(module, op_name, original_op)
+        self._patched_operations.clear()
+
+    def _build_instance_aware_tag(self, module_name: str, module: torch.nn.Module) -> str:
+        """Build hierarchical tag preserving instance names like .0, .1, etc."""
+        if not self._model:
+            return f"/{module.__class__.__name__}"
+
+        # Build path by traversing the actual module hierarchy
+        path_segments = [self._model.__class__.__name__]
+
+        if module_name:
+            current_module = self._model
+            name_parts = module_name.split(".")
+
+            for i, part in enumerate(name_parts):
+                if hasattr(current_module, part):
+                    current_module = getattr(current_module, part)
+                    module_path = current_module.__class__.__module__
+                    
+                    # Skip torch internal modules
+                    if module_path.startswith("torch._C") or module_path.startswith("builtins"):
+                        continue
+                    
+                    class_name = current_module.__class__.__name__
+                    
+                    # Preserve instance numbers for layers
+                    if part.isdigit() and i > 0:
+                        # Look at the previous part to see if it's a container
+                        prev_part = name_parts[i-1]
+                        if prev_part in ['layer', 'layers', 'block', 'blocks']:
+                            # Format as ClassName.instance_number
+                            path_segments.append(f"{class_name}.{part}")
+                        else:
+                            path_segments.append(class_name)
+                    else:
+                        # Skip torch.nn modules unless in exceptions
+                        if (module_path.startswith("torch.nn") and 
+                            class_name not in self._torch_nn_exceptions):
+                            continue
+                        
+                        # For model-specific modules, use class name
+                        if not module_path.startswith("torch."):
+                            path_segments.append(class_name)
+                        else:
+                            # For torch.nn modules in exceptions or Linear in HTP
+                            path_segments.append(class_name)
+
+        return "/" + "/".join(path_segments)
+    
+    def _forward_propagate_tags_htp(self, onnx_model, tensor_producers):
+        """Conservative forward propagation for HTP to avoid over-tagging."""
+        # Only propagate to directly connected operations that don't have tags
+        for node in onnx_model.graph.node:
+            node_name = node.name or f"{node.op_type}_{len(self._tag_mapping)}"
+            current_tags = self._tag_mapping[node_name].get('tags', [])
+            
+            # Skip if already tagged
+            if current_tags:
+                continue
+            
+            # Special handling for infrastructure operations that work on model inputs
+            if node.op_type in ['Shape', 'ConstantOfShape'] and any('input_ids' in inp or 'attention_mask' in inp for inp in node.input):
+                # Tag with embedding layer since they process model inputs
+                for context in self._operation_context.values():
+                    if 'embedding' in context['tag'].lower():
+                        self._tag_mapping[node_name]['tags'] = [context['tag']]
+                        break
+                continue
+            
+            # Only inherit tags from direct inputs if they all agree
+            input_tags_sets = []
+            for input_tensor in node.input:
+                if input_tensor in tensor_producers:
+                    producer_node = tensor_producers[input_tensor]
+                    if producer_node in self._tag_mapping:
+                        producer_tags = self._tag_mapping[producer_node].get('tags', [])
+                        if producer_tags:
+                            input_tags_sets.append(set(producer_tags))
+            
+            # Only propagate if all inputs have the same tag set
+            if input_tags_sets and all(tags == input_tags_sets[0] for tags in input_tags_sets):
+                self._tag_mapping[node_name]['tags'] = list(input_tags_sets[0])
+
+    def _project_execution_trace_to_onnx(self, onnx_model):
+        """Project execution trace onto ONNX operations."""
+        
+        # Build operation type mapping
+        torch_to_onnx_mapping = {
+            # Math operations
+            'matmul': ['MatMul', 'Gemm'],
+            'add': ['Add'],
+            'sub': ['Sub'],
+            'mul': ['Mul'],
+            'div': ['Div'],
+            'pow': ['Pow'],
+            'sqrt': ['Sqrt'],
+            'erf': ['Erf'],
+            'tanh': ['Tanh'],
+            'relu': ['Relu'],
+            'bmm': ['MatMul'],
+            
+            # Indexing and selection
+            'embedding': ['Gather'],  # Embedding lookups become Gather
+            'index_select': ['Gather'],
+            'gather': ['Gather'],
+            'where': ['Where'],
+            'eq': ['Equal'],
+            'equal': ['Equal'],
+            
+            # Shape operations
+            'reshape': ['Reshape'],
+            'transpose': ['Transpose'],
+            'unsqueeze': ['Unsqueeze'],
+            'squeeze': ['Squeeze'],
+            'cat': ['Concat'],
+            'expand': ['Expand'],
+            'slice': ['Slice'],
+            'size': ['Shape'],  # torch.size() -> Shape
+            'shape': ['Shape'],  # tensor.shape -> Shape
+            
+            # Reduction operations
+            'mean': ['ReduceMean'],
+            'sum': ['ReduceSum'],
+            'cumsum': ['CumSum'],
+            'cumprod': ['CumProd'],
+            
+            # Type operations
+            'cast': ['Cast'],
+            
+            # Constants and initialization
+            'zeros': ['ConstantOfShape'],
+            'ones': ['ConstantOfShape'],
+            'full': ['ConstantOfShape'],
+            'tensor': ['Constant'],  # torch.tensor() -> Constant
+            
+            # High-level operations
+            'linear': ['Gemm', 'MatMul'],
+            'softmax': ['Softmax'],
+            'layer_norm': ['LayerNormalization', 'Add', 'Mul', 'Div', 'ReduceMean', 'Sub', 'Sqrt', 'Pow'],  # Layer norm can be fused or decomposed
+            'pad': ['Pad'],
+            'dropout': ['Dropout'],
+            'gelu': ['Erf', 'Add', 'Mul', 'Div'],  # GELU decomposes
+        }
+        
+        # Initialize tag mapping for all nodes
+        for node in onnx_model.graph.node:
+            node_name = node.name or f"{node.op_type}_{len(self._tag_mapping)}"
+            self._tag_mapping[node_name] = {
+                "op_type": node.op_type,
+                "tags": [],
+                "inputs": list(node.input),
+                "outputs": list(node.output),
+            }
+        
+        # Group trace entries by operation type for better matching
+        trace_by_type = {}
+        for trace_entry in self._operation_trace:
+            op_type = trace_entry['op_name']
+            if op_type not in trace_by_type:
+                trace_by_type[op_type] = []
+            trace_by_type[op_type].append(trace_entry)
+        
+        # Track which trace entries have been used
+        used_traces = set()
+        
+        # Match operations by type and order
+        # Group ONNX nodes by type for better matching
+        onnx_nodes_by_type = {}
+        for node in onnx_model.graph.node:
+            if node.op_type not in onnx_nodes_by_type:
+                onnx_nodes_by_type[node.op_type] = []
+            onnx_nodes_by_type[node.op_type].append(node)
+        
+        # Match traces to ONNX nodes using type-based matching
+        for op_type, trace_list in trace_by_type.items():
+            # Get corresponding ONNX operation types
+            onnx_types = torch_to_onnx_mapping.get(op_type, [])
+            
+            # For each ONNX type that maps to this trace type
+            for onnx_type in onnx_types:
+                if onnx_type in onnx_nodes_by_type:
+                    nodes = onnx_nodes_by_type[onnx_type]
+                    trace_idx = 0
+                    
+                    # Match traces to nodes of this type in order
+                    for node in nodes:
+                        node_name = node.name or f"{node.op_type}_{len(self._tag_mapping)}"
+                        
+                        # Skip if already tagged
+                        if self._tag_mapping[node_name]["tags"]:
+                            continue
+                        
+                        # Find next unused trace of this type
+                        while trace_idx < len(trace_list):
+                            trace_entry = trace_list[trace_idx]
+                            trace_global_idx = self._operation_trace.index(trace_entry)
+                            
+                            if trace_global_idx not in used_traces:
+                                # Tag the node
+                                self._tag_mapping[node_name]["tags"] = [trace_entry['module_tag']]
+                                used_traces.add(trace_global_idx)
+                                trace_idx += 1
+                                break
+                            trace_idx += 1
+        
+        # Universal path-based tagging for all remaining operations
+        self._tag_operations_by_path_inference(onnx_model)
+        
+        # Tag Constants based on their path names and usage context (universal approach)
+        if 'Constant' in onnx_nodes_by_type:
+            for node in onnx_nodes_by_type['Constant']:
+                node_name = node.name or f"{node.op_type}_{len(self._tag_mapping)}"
+                
+                # Skip if already tagged
+                if self._tag_mapping[node_name]["tags"]:
+                    continue
+                
+                # Method 1: Tag based on path structure (for named constants)
+                if '/' in node_name and not node_name.startswith('Constant_'):
+                    # Extract module path from node name
+                    path_parts = node_name.strip('/').split('/')
+                    if len(path_parts) >= 2:  # Has meaningful path structure
+                        # Try to find corresponding module in operation context
+                        for module_name, context in self._operation_context.items():
+                            if any(part in module_name for part in path_parts[:-1]):  # Match path components
+                                self._tag_mapping[node_name]["tags"] = [context["tag"]]
+                                break
+                
+                # Method 2: Tag based on consumers (for generic constants)
+                if not self._tag_mapping[node_name]["tags"]:
+                    # Find operations that consume this constant
+                    constant_outputs = self._tag_mapping[node_name]["outputs"]
+                    consumer_tags = set()
+                    
+                    for output_tensor in constant_outputs:
+                        # Find operations that use this tensor as input
+                        for other_node_name, other_node_info in self._tag_mapping.items():
+                            if output_tensor in other_node_info.get("inputs", []):
+                                other_tags = other_node_info.get("tags", [])
+                                if other_tags:  # Only consider tagged consumers
+                                    consumer_tags.update(other_tags)
+                    
+                    # If all consumers agree on tags, inherit them
+                    if consumer_tags:
+                        self._tag_mapping[node_name]["tags"] = list(consumer_tags)
+    
+    def _tag_operations_by_path_inference(self, onnx_model):
+        """Tag operations based on their ONNX path structure (universal approach)."""
+        for node in onnx_model.graph.node:
+            node_name = node.name or f"{node.op_type}_{len(self._tag_mapping)}"
+            
+            # Skip if already tagged
+            if self._tag_mapping[node_name]["tags"]:
+                continue
+            
+            # Skip generic names without meaningful paths
+            if not '/' in node_name or node_name.startswith(node.op_type + '_'):
+                continue
+            
+            # Extract meaningful path components
+            path_parts = node_name.strip('/').split('/')
+            if len(path_parts) < 2:
+                continue
+            
+            # Try to match path to existing operation context
+            best_match = None
+            best_score = 0
+            
+            for module_name, context in self._operation_context.items():
+                # Score based on path component overlap
+                module_parts = module_name.split('.')
+                overlap = len(set(path_parts) & set(module_parts))
+                
+                if overlap > best_score:
+                    best_score = overlap
+                    best_match = context["tag"]
+            
+            # Tag if we found a reasonable match
+            if best_match and best_score >= 1:
+                self._tag_mapping[node_name]["tags"] = [best_match]
+    
+    def _ensure_complete_coverage(self, onnx_model):
+        """Ensure 100% operation coverage by tagging remaining operations."""
+        # Find a default tag (preferably from embeddings/input processing)
+        default_tag = None
+        for context in self._operation_context.values():
+            if 'embedding' in context['tag'].lower():
+                default_tag = context['tag']
+                break
+        
+        # If no embedding tag found, use the first available tag
+        if not default_tag and self._operation_context:
+            default_tag = next(iter(self._operation_context.values()))['tag']
+        
+        # Tag any remaining untagged operations
+        if default_tag:
+            for node in onnx_model.graph.node:
+                node_name = node.name or f"{node.op_type}_{len(self._tag_mapping)}"
+                
+                if not self._tag_mapping[node_name]["tags"]:
+                    # For input preprocessing operations, use embedding tag
+                    if any(inp in ['input_ids', 'token_type_ids', 'attention_mask'] for inp in node.input):
+                        self._tag_mapping[node_name]["tags"] = [default_tag]
+                    # For truly generic operations, also use default tag for complete coverage
+                    else:
+                        self._tag_mapping[node_name]["tags"] = [default_tag]
+
+    def _operation_matches_trace(self, onnx_node, trace_entry, mapping):
+        """Check if an ONNX node matches a traced operation."""
+        traced_op = trace_entry['op_name']
+        onnx_op_type = onnx_node.op_type
+        
+        # Direct mapping check
+        if traced_op in mapping:
+            return onnx_op_type in mapping[traced_op]
+        
+        # Fallback: string similarity
+        return traced_op.lower() in onnx_op_type.lower() or onnx_op_type.lower() in traced_op.lower()
+
+    def _tag_native_operation_patterns(self, onnx_model):
+        """Tag ONNX nodes that came from native operations using pattern recognition."""
+        
+        for region in self._native_op_regions:
+            if region['op_name'] == 'scaled_dot_product_attention':
+                self._tag_attention_pattern(onnx_model, region)
+
+    def _tag_attention_pattern(self, onnx_model, region):
+        """Tag the scaled_dot_product_attention decomposition pattern."""
+        nodes = onnx_model.graph.node
+        module_tag = region['module_tag']
+        
+        # Look for attention pattern: MatMul -> Div/Mul -> Softmax -> MatMul
+        for i in range(len(nodes) - 4):
+            if self._is_attention_pattern_at(nodes, i):
+                # Tag the entire pattern
+                pattern_length = self._get_attention_pattern_length(nodes, i)
+                
+                for j in range(i, min(i + pattern_length, len(nodes))):
+                    node_name = nodes[j].name or f"{nodes[j].op_type}_{j}"
+                    if node_name in self._tag_mapping:
+                        # Add native operation tag
+                        current_tags = self._tag_mapping[node_name].get("tags", [])
+                        if module_tag and module_tag not in current_tags:
+                            current_tags.append(module_tag)
+                            self._tag_mapping[node_name]["tags"] = current_tags
+                
+                break  # Found one pattern, move to next region
+
+    def _is_attention_pattern_at(self, nodes, start_idx):
+        """Check if attention pattern starts at given index."""
+        if start_idx + 4 >= len(nodes):
+            return False
+        
+        # Simple heuristic: MatMul followed by scaling operations and Softmax
+        ops = [nodes[start_idx + i].op_type for i in range(min(8, len(nodes) - start_idx))]
+        
+        # Look for MatMul and Softmax within a reasonable window
+        has_matmul = 'MatMul' in ops
+        has_softmax = 'Softmax' in ops
+        has_scaling = any(op in ops for op in ['Div', 'Mul'])
+        
+        return has_matmul and has_softmax and has_scaling
+
+    def _get_attention_pattern_length(self, nodes, start_idx):
+        """Get the length of the attention pattern."""
+        # Find the second MatMul after Softmax
+        softmax_found = False
+        for i in range(start_idx, min(start_idx + 15, len(nodes))):
+            if nodes[i].op_type == 'Softmax':
+                softmax_found = True
+            elif softmax_found and nodes[i].op_type == 'MatMul':
+                return i - start_idx + 1
+        
+        return 8  # Default pattern length
+
+    def _build_tensor_tags(self, onnx_model):
+        """Build tensor tagging for subgraph filtering support."""
+        
+        # Build tensor producer/consumer mappings
+        tensor_producers = {}
+        tensor_consumers = defaultdict(list)
+        
+        for node in onnx_model.graph.node:
+            node_name = node.name or f"{node.op_type}_{len(tensor_producers)}"
+            
+            # Record producers
+            for output in node.output:
+                tensor_producers[output] = node_name
+            
+            # Record consumers
+            for input_tensor in node.input:
+                tensor_consumers[input_tensor].append(node_name)
+        
+        # Build tensor tags based on operation tags
+        self._tensor_tags = {}
+        
+        for tensor_name in set(tensor_producers.keys()) | set(tensor_consumers.keys()):
+            tags = set()
+            
+            # Add producer tag
+            if tensor_name in tensor_producers:
+                producer_node = tensor_producers[tensor_name]
+                if producer_node in self._tag_mapping:
+                    producer_tags = self._tag_mapping[producer_node].get("tags", [])
+                    tags.update(producer_tags)
+            
+            # Add consumer tags
+            if tensor_name in tensor_consumers:
+                for consumer_node in tensor_consumers[tensor_name]:
+                    if consumer_node in self._tag_mapping:
+                        consumer_tags = self._tag_mapping[consumer_node].get("tags", [])
+                        tags.update(consumer_tags)
+            
+            if tags:
+                self._tensor_tags[tensor_name] = {
+                    'tags': list(tags),
+                    'producer': tensor_producers.get(tensor_name),
+                    'consumers': tensor_consumers.get(tensor_name, [])
+                }
+
+    def _inject_htp_tags_into_onnx(self, onnx_path: str, onnx_model):
+        """Inject HTP tags into ONNX model and create comprehensive sidecar file."""
+        from datetime import datetime
+        import json
+
+        # 1. Inject tags as node doc_strings (ONNX-compliant approach)
+        nodes_with_tags = 0
+        for node in onnx_model.graph.node:
+            node_name = node.name or f"{node.op_type}_{hash(str(node))}"
+
+            if node_name in self._tag_mapping:
+                node_info = self._tag_mapping[node_name]
+                tags = node_info.get("tags", [])
+
+                if tags:
+                    hierarchy_info = {
+                        "hierarchy_tags": tags,
+                        "hierarchy_path": tags[0] if tags else "",
+                        "hierarchy_count": len(tags),
+                        "hierarchy_method": "htp",
+                    }
+                    node.doc_string = json.dumps(hierarchy_info)
+                    nodes_with_tags += 1
+
+        # Save enhanced ONNX model
+        onnx.save(onnx_model, onnx_path)
+
+        # 2. Create comprehensive sidecar JSON file
+        sidecar_path = onnx_path.replace(".onnx", "_hierarchy.json")
+        sidecar_data = {
+            "version": "1.0",
+            "format": "modelexport_hierarchy_htp",
+            "model_path": str(onnx_path),
+            "generated_at": datetime.now().isoformat(),
+            "exporter": {
+                "name": "modelexport",
+                "version": "0.1.0",
+                "strategy": "htp"
+            },
+            "summary": {
+                "total_operations": len(self._tag_mapping),
+                "tagged_operations": len([op for op in self._tag_mapping.values() if op.get("tags", [])]),
+                "nodes_with_attributes": nodes_with_tags,
+                "unique_tags": len(set(tag for op in self._tag_mapping.values() for tag in op.get("tags", []))),
+                "operation_trace_length": len(self._operation_trace),
+                "native_op_regions": len(self._native_op_regions),
+            },
+            "tag_statistics": self._compute_tag_statistics(),
+            "node_tags": self._tag_mapping,
+            "tensor_tags": self._tensor_tags,
+            "htp_metadata": {
+                "operation_trace": self._operation_trace[:100],  # Limit for size
+                "native_op_regions": self._native_op_regions,
+                "patched_operations": [f"{module.__name__}.{op_name}" for (module, op_name) in self._patched_operations.keys()]
+            }
+        }
+
+        with open(sidecar_path, "w") as f:
+            json.dump(sidecar_data, f, indent=2)
+
+        print(f"HTP: Tagged {nodes_with_tags} nodes, created {sidecar_path}")
+
+    def _reset_state(self):
+        """Reset internal state for new export."""
+        # Call parent reset
+        self._tag_mapping.clear()
+        self._tag_stack.clear()
+        self._operation_context.clear()
+        self._tensor_producers.clear()
+        self._tensor_consumer_mapping = {}
+        self._tensor_to_tag = {}
+        self._model = None
+        self._remove_hooks()
+        
+        # Reset HTP-specific state
+        self._operation_trace.clear()
+        self._native_op_regions.clear()
+        self._tensor_tags.clear()
+        self._unpatch_operations()
