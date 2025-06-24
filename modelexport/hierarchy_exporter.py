@@ -425,6 +425,10 @@ class HierarchyExporter:
             set(torch_nn_exceptions) if torch_nn_exceptions 
             else self.TORCH_NN_HIERARCHY_EXCEPTIONS.copy()
         )
+        
+        # New approach: PyTorch built-in module tracking
+        self._use_builtin_module_tracking = False  # Temporarily disabled for debugging
+        self._builtin_module_map: Optional[Dict[Any, str]] = None
 
     def export(
         self,
@@ -456,7 +460,10 @@ class HierarchyExporter:
         try:
             if self.strategy == "htp":
                 # HTP: Hierarchical Trace-and-Project approach
-                return self._export_htp(model, example_inputs, output_path, **kwargs)
+                if self._use_builtin_module_tracking:
+                    return self._export_htp_builtin_tracking(model, example_inputs, output_path, **kwargs)
+                else:
+                    return self._export_htp(model, example_inputs, output_path, **kwargs)
             else:
                 # Legacy: usage_based approach
                 return self._export_usage_based(model, example_inputs, output_path, **kwargs)
@@ -465,6 +472,41 @@ class HierarchyExporter:
             # Clean up hooks and patches
             self._remove_hooks()
             self._unpatch_operations()
+    
+    def _export_htp_builtin_tracking(self, model, example_inputs, output_path, **kwargs):
+        """HTP with PyTorch built-in module tracking: Direct ONNX export context mapping."""
+        
+        # Step 1: Setup PyTorch's built-in module tracking (mimics ONNX export)
+        self._setup_builtin_module_tracking(model)
+        
+        try:
+            # Step 2: Patch operations to capture context with built-in tracking
+            self._patch_torch_operations_with_builtin_tracking()
+            
+            # Step 3: Setup tensor slicing hooks with built-in tracking
+            self._setup_tensor_slicing_hooks_with_builtin_tracking()
+            
+            # Step 4: Perform ONNX export with context capture
+            torch.onnx.export(
+                model,
+                example_inputs,
+                output_path,
+                **kwargs,
+            )
+            
+            # Step 5: Load exported ONNX model and apply direct context mapping
+            onnx_model = onnx.load(output_path)
+            
+            # Step 6: Use PyTorch's module tracking for direct node-to-module mapping
+            hierarchy_metadata = self._create_direct_hierarchy_metadata_builtin(onnx_model, model)
+            
+            # Step 7: Save final model with hierarchy metadata
+            return self._save_hierarchy_model(onnx_model, hierarchy_metadata, output_path)
+            
+        finally:
+            # Clean up
+            self._unpatch_operations()
+            self._cleanup_builtin_module_tracking()
 
     def _export_usage_based(self, model, example_inputs, output_path, **kwargs):
         """Legacy usage-based export approach."""
@@ -816,6 +858,35 @@ class HierarchyExporter:
             return f"/{self._model.__class__.__name__}"
         else:
             return None
+    
+    def _setup_builtin_module_tracking(self, model: torch.nn.Module):
+        """Setup PyTorch's built-in module tracking infrastructure."""
+        # This mimics what torch.onnx.export does internally
+        import torch.jit._trace
+        
+        # Create module map like PyTorch ONNX export does
+        trace_module_map = {
+            module: name
+            for name, module in model.named_modules()
+        }
+        
+        # Store our copy before setting PyTorch's global
+        self._builtin_module_map = trace_module_map.copy()
+        
+        # Set PyTorch's global module map (this is what ONNX export uses)
+        torch.jit._trace._trace_module_map = trace_module_map
+    
+    def _get_module_name_from_builtin_tracking(self, module: torch.nn.Module) -> Optional[str]:
+        """Get module name using PyTorch's built-in module tracking."""
+        if self._builtin_module_map is None:
+            return None
+        return self._builtin_module_map.get(module)
+    
+    def _cleanup_builtin_module_tracking(self):
+        """Clean up PyTorch's built-in module tracking."""
+        import torch.jit._trace
+        torch.jit._trace._trace_module_map = None
+        self._builtin_module_map = None
 
     def _remove_hooks(self):
         """Remove all registered hooks."""
@@ -2496,3 +2567,201 @@ class HierarchyExporter:
         self._tensor_tags.clear()
         self._slice_operations.clear()  # Reset slice operation tracking
         self._unpatch_operations()
+    
+    def _patch_torch_operations_with_builtin_tracking(self):
+        """Patch PyTorch operations to capture context using built-in module tracking."""
+        # Get operations to patch from centralized registry
+        operations_to_patch = OperationConfig.get_operations_to_patch()
+        
+        def create_context_capturing_wrapper_builtin(op_name: str, original_op):
+            """Create wrapper that captures module context using PyTorch's built-in tracking."""
+            def traced_operation_builtin(*args, **kwargs):
+                # Get current module context using PyTorch's built-in tracking
+                current_module = self._get_current_executing_module_builtin()
+                current_tag = None
+                
+                if current_module is not None:
+                    module_name = self._get_module_name_from_builtin_tracking(current_module)
+                    if module_name and self._should_tag_module_by_name(module_name):
+                        # Build hierarchical tag from module name
+                        current_tag = self._build_tag_from_module_name(module_name)
+                
+                # Call original operation
+                result = original_op(*args, **kwargs)
+                
+                # Record operation trace with built-in context
+                if current_tag:
+                    trace_entry = {
+                        'operation': op_name,
+                        'module_context': current_tag,
+                        'tensor_id': id(result) if isinstance(result, torch.Tensor) else None,
+                        'timestamp': len(self._operation_trace),
+                        'context_source': 'builtin_tracking'
+                    }
+                    self._operation_trace.append(trace_entry)
+                
+                return result
+            return traced_operation_builtin
+        
+        # Patch all registered operations
+        for module, op_name in operations_to_patch:
+            if hasattr(module, op_name):
+                original_op = getattr(module, op_name)
+                wrapper = create_context_capturing_wrapper_builtin(op_name, original_op)
+                setattr(module, op_name, wrapper)
+                self._patched_operations[f"{module.__name__}.{op_name}"] = original_op
+    
+    def _setup_tensor_slicing_hooks_with_builtin_tracking(self):
+        """Setup tensor slicing hooks using built-in module tracking."""
+        # Store original __getitem__ method
+        self._original_getitem = torch.Tensor.__getitem__
+        
+        def context_aware_getitem_builtin(tensor_self, key):
+            # Get current module context using built-in tracking
+            current_module = self._get_current_executing_module_builtin()
+            current_tag = None
+            
+            if current_module is not None:
+                module_name = self._get_module_name_from_builtin_tracking(current_module)
+                if module_name and self._should_tag_module_by_name(module_name):
+                    current_tag = self._build_tag_from_module_name(module_name)
+            
+            # Record slice operation if we have context and it's a slice
+            if current_tag and self._is_slice_operation(key):
+                self._slice_operations.append({
+                    'tensor_id': id(tensor_self),
+                    'slice_key': str(key),
+                    'module_context': current_tag,
+                    'timestamp': len(self._slice_operations),
+                    'context_source': 'builtin_tracking'
+                })
+            
+            # Call original __getitem__
+            return self._original_getitem(tensor_self, key)
+        
+        # Replace __getitem__ method
+        torch.Tensor.__getitem__ = context_aware_getitem_builtin
+    
+    def _get_current_executing_module_builtin(self) -> Optional[torch.nn.Module]:
+        """Get current executing module using PyTorch's built-in tracking."""
+        # This is a simplified approach - in practice, we'd need to hook into 
+        # PyTorch's internal execution context
+        # For now, we'll use the builtin module map to find the current context
+        
+        # Safety check to prevent infinite recursion
+        if not hasattr(self, '_in_module_lookup'):
+            self._in_module_lookup = True
+        else:
+            return None
+        
+        try:
+            # Get current frame and walk up to find a module in our tracking map
+            import inspect
+            
+            frame = inspect.currentframe()
+            depth = 0
+            try:
+                # Walk up the stack to find a frame that corresponds to a module
+                while frame and depth < 20:  # Limit depth to prevent infinite loops
+                    frame_locals = frame.f_locals
+                    
+                    # Look for 'self' that is a torch.nn.Module
+                    if 'self' in frame_locals:
+                        obj = frame_locals['self']
+                        if isinstance(obj, torch.nn.Module) and obj in self._builtin_module_map:
+                            return obj
+                    
+                    frame = frame.f_back
+                    depth += 1
+            finally:
+                del frame
+            
+            return None
+        finally:
+            self._in_module_lookup = False
+    
+    def _should_tag_module_by_name(self, module_name: str) -> bool:
+        """Check if module should be tagged based on its name."""
+        if not module_name:
+            return False
+            
+        # Skip root module
+        if not module_name:
+            return False
+            
+        # Use existing logic but based on module name instead of module class
+        # For now, assume all named modules should be tagged (can be refined)
+        return True
+    
+    def _build_tag_from_module_name(self, module_name: str) -> str:
+        """Build hierarchical tag from module name."""
+        if not module_name:
+            return ""
+        
+        # Simple approach: convert module path to hierarchical tag
+        # e.g., "encoder.layer.0.attention" -> "/BertEncoder/BertLayer.0/BertAttention"
+        components = module_name.split('.')
+        
+        # Build hierarchical path with class name inference
+        tag_parts = []
+        for component in components:
+            # Convert snake_case to CamelCase and handle numeric indices
+            if component.isdigit():
+                # This is an index - append to previous component
+                if tag_parts:
+                    tag_parts[-1] = f"{tag_parts[-1]}.{component}"
+            else:
+                # Convert to CamelCase class name
+                class_name = ''.join(word.capitalize() for word in component.split('_'))
+                tag_parts.append(class_name)
+        
+        # Prepend root model class name
+        if self._model:
+            root_name = self._model.__class__.__name__
+            return f"/{root_name}/" + "/".join(tag_parts)
+        else:
+            return "/" + "/".join(tag_parts)
+    
+    def _create_direct_hierarchy_metadata_builtin(self, onnx_model, model) -> Dict[str, Any]:
+        """Create hierarchy metadata using direct built-in tracking approach."""
+        
+        # Use the existing operation trace but with improved context from built-in tracking
+        tag_mapping = {}
+        
+        # Project operation trace to ONNX nodes (reuse existing logic)
+        self._project_execution_trace_to_onnx(onnx_model)
+        
+        # Use existing tag mapping logic 
+        tag_mapping = self._tag_mapping.copy()
+        
+        # Calculate statistics
+        total_operations = len(onnx_model.graph.node)
+        tagged_operations = len([node for node in tag_mapping.values() if node.get('tags')])
+        unique_tags = len(set(
+            tag for node in tag_mapping.values() 
+            for tag in node.get('tags', [])
+        ))
+        
+        return {
+            "version": "1.0",
+            "format": "modelexport_hierarchy_htp_builtin",
+            "model_path": None,  # Set by caller
+            "generated_at": None,  # Set by caller
+            "exporter": {
+                "name": "modelexport",
+                "version": "0.1.0",
+                "strategy": "htp_builtin"
+            },
+            "summary": {
+                "total_operations": total_operations,
+                "tagged_operations": tagged_operations,
+                "nodes_with_attributes": total_operations,
+                "unique_tags": unique_tags,
+                "operation_trace_length": len(self._operation_trace),
+                "native_op_regions": len(self._native_op_regions),
+                "slice_operations_tracked": len(self._slice_operations),
+                "builtin_tracking_enabled": True
+            },
+            "tag_statistics": self._calculate_tag_statistics(tag_mapping),
+            "node_tags": tag_mapping
+        }
