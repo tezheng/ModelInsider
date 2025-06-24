@@ -19,10 +19,350 @@ from __future__ import annotations
 import torch
 import torch.onnx
 import onnx
+import re
 from typing import Dict, List, Any, Optional, Union, Tuple
-from pathlib import Path
-import tempfile
 from collections import defaultdict, deque
+from dataclasses import dataclass
+
+
+@dataclass
+class OperationConfig:
+    """
+    Centralized operation configuration for both patching and ONNX mapping.
+    
+    This class provides a single source of truth for PyTorch operation definitions
+    and their corresponding ONNX operation types, eliminating duplication between
+    _patch_torch_operations() and _project_execution_trace_to_onnx().
+    """
+    
+    # Single source of truth for operation mappings
+    OPERATION_REGISTRY = {
+        # Core mathematical operations
+        'matmul': {
+            'patch_targets': [('torch', 'matmul')],
+            'onnx_types': ['MatMul', 'Gemm'],
+            'priority': 1
+        },
+        'add': {
+            'patch_targets': [('torch', 'add')],
+            'onnx_types': ['Add'],
+            'priority': 1
+        },
+        'sub': {
+            'patch_targets': [('torch', 'sub')],
+            'onnx_types': ['Sub'],
+            'priority': 1
+        },
+        'mul': {
+            'patch_targets': [('torch', 'mul')],
+            'onnx_types': ['Mul'],
+            'priority': 1
+        },
+        'div': {
+            'patch_targets': [('torch', 'div')],
+            'onnx_types': ['Div'],
+            'priority': 1
+        },
+        'pow': {
+            'patch_targets': [('torch', 'pow')],
+            'onnx_types': ['Pow'],
+            'priority': 1
+        },
+        'sqrt': {
+            'patch_targets': [('torch', 'sqrt')],
+            'onnx_types': ['Sqrt'],
+            'priority': 1
+        },
+        'erf': {
+            'patch_targets': [('torch', 'erf')],
+            'onnx_types': ['Erf'],
+            'priority': 1
+        },
+        'tanh': {
+            'patch_targets': [('torch', 'tanh'), ('F', 'tanh')],
+            'onnx_types': ['Tanh'],
+            'priority': 1
+        },
+        'relu': {
+            'patch_targets': [('torch', 'relu'), ('F', 'relu')],
+            'onnx_types': ['Relu'],
+            'priority': 1
+        },
+        'bmm': {
+            'patch_targets': [('torch', 'bmm')],
+            'onnx_types': ['MatMul'],
+            'priority': 1
+        },
+        'abs': {
+            'patch_targets': [('torch', 'abs')],
+            'onnx_types': ['Abs'],
+            'priority': 1
+        },
+        'neg': {
+            'patch_targets': [('torch', 'neg')],
+            'onnx_types': ['Neg'],
+            'priority': 1
+        },
+        'reciprocal': {
+            'patch_targets': [('torch', 'reciprocal')],
+            'onnx_types': ['Reciprocal'],
+            'priority': 1
+        },
+        'sigmoid': {
+            'patch_targets': [('torch', 'sigmoid'), ('F', 'sigmoid')],
+            'onnx_types': ['Sigmoid'],
+            'priority': 1
+        },
+        'log': {
+            'patch_targets': [('torch', 'log')],
+            'onnx_types': ['Log'],
+            'priority': 1
+        },
+        'exp': {
+            'patch_targets': [('torch', 'exp')],
+            'onnx_types': ['Exp'],
+            'priority': 1
+        },
+        'floor': {
+            'patch_targets': [('torch', 'floor')],
+            'onnx_types': ['Floor'],
+            'priority': 1
+        },
+        'ceil': {
+            'patch_targets': [('torch', 'ceil')],
+            'onnx_types': ['Ceil'],
+            'priority': 1
+        },
+        
+        # Indexing and gathering operations
+        'index_select': {
+            'patch_targets': [('torch', 'index_select')],
+            'onnx_types': ['Gather'],
+            'priority': 2
+        },
+        'gather': {
+            'patch_targets': [('torch', 'gather')],
+            'onnx_types': ['Gather'],
+            'priority': 2
+        },
+        'embedding': {
+            'patch_targets': [('torch', 'embedding'), ('F', 'embedding')],
+            'onnx_types': ['Gather'],
+            'priority': 2
+        },
+        'where': {
+            'patch_targets': [('torch', 'where')],
+            'onnx_types': ['Where'],
+            'priority': 2
+        },
+        'eq': {
+            'patch_targets': [('torch', 'eq')],
+            'onnx_types': ['Equal'],
+            'priority': 2
+        },
+        'equal': {
+            'patch_targets': [('torch', 'equal')],
+            'onnx_types': ['Equal'],
+            'priority': 2
+        },
+        
+        # Shape operations
+        'reshape': {
+            'patch_targets': [('torch', 'reshape')],
+            'onnx_types': ['Reshape'],
+            'priority': 3
+        },
+        'transpose': {
+            'patch_targets': [('torch', 'transpose')],
+            'onnx_types': ['Transpose'],
+            'priority': 3
+        },
+        'unsqueeze': {
+            'patch_targets': [('torch', 'unsqueeze')],
+            'onnx_types': ['Unsqueeze'],
+            'priority': 3
+        },
+        'squeeze': {
+            'patch_targets': [('torch', 'squeeze')],
+            'onnx_types': ['Squeeze'],
+            'priority': 3
+        },
+        'cat': {
+            'patch_targets': [('torch', 'cat')],
+            'onnx_types': ['Concat'],
+            'priority': 3
+        },
+        # Note: expand is a tensor method, not a torch function
+        # slice: PyTorch slicing (x[1:5]) converts to ONNX Slice nodes
+        # but there's no torch.slice function to patch - handled by ONNX conversion
+        'slice': {
+            'patch_targets': [],  # No patchable function - tensor[1:5] syntax handled by ONNX
+            'onnx_types': ['Slice'],
+            'priority': 3
+        },
+        'narrow': {
+            'patch_targets': [('torch', 'narrow')],
+            'onnx_types': ['Slice'],
+            'priority': 3
+        },
+        'select': {
+            'patch_targets': [('torch', 'select')],
+            'onnx_types': ['Gather', 'Slice'],
+            'priority': 3
+        },
+        'take': {
+            'patch_targets': [('torch', 'take')],
+            'onnx_types': ['Gather'],
+            'priority': 3
+        },
+        
+        # Reduction operations
+        'mean': {
+            'patch_targets': [('torch', 'mean')],
+            'onnx_types': ['ReduceMean'],
+            'priority': 4
+        },
+        'sum': {
+            'patch_targets': [('torch', 'sum')],
+            'onnx_types': ['ReduceSum'],
+            'priority': 4
+        },
+        'cumsum': {
+            'patch_targets': [('torch', 'cumsum')],
+            'onnx_types': ['CumSum'],
+            'priority': 4
+        },
+        'cumprod': {
+            'patch_targets': [('torch', 'cumprod')],
+            'onnx_types': ['CumProd'],
+            'priority': 4
+        },
+        
+        # Note: cast is typically done via .to() method, not a torch function
+        
+        # High-level functional operations
+        'linear': {
+            'patch_targets': [('F', 'linear')],
+            'onnx_types': ['Gemm', 'MatMul'],
+            'priority': 6
+        },
+        'softmax': {
+            'patch_targets': [('F', 'softmax')],
+            'onnx_types': ['Softmax'],
+            'priority': 6
+        },
+        'layer_norm': {
+            'patch_targets': [('F', 'layer_norm')],
+            'onnx_types': ['LayerNormalization', 'Add', 'Mul', 'Div', 'ReduceMean', 'Sub', 'Sqrt', 'Pow'],
+            'priority': 6
+        },
+        'pad': {
+            'patch_targets': [('F', 'pad')],
+            'onnx_types': ['Pad'],
+            'priority': 6
+        },
+        'dropout': {
+            'patch_targets': [('F', 'dropout')],
+            'onnx_types': ['Dropout'],
+            'priority': 6
+        },
+        'gelu': {
+            'patch_targets': [('F', 'gelu')],
+            'onnx_types': ['Erf', 'Add', 'Mul', 'Div'],
+            'priority': 6
+        },
+        
+        # Native operations (highest priority)
+        'scaled_dot_product_attention': {
+            'patch_targets': [('F', 'scaled_dot_product_attention')],
+            'onnx_types': ['MatMul', 'Div', 'Softmax', 'MatMul'],  # Typical decomposition pattern
+            'priority': 10
+        },
+        
+        # Additional ONNX-only mappings (no patch targets)
+        'size': {
+            'patch_targets': [],
+            'onnx_types': ['Shape'],
+            'priority': 3
+        },
+        'shape': {
+            'patch_targets': [],
+            'onnx_types': ['Shape'],
+            'priority': 3
+        },
+        'zeros': {
+            'patch_targets': [],
+            'onnx_types': ['ConstantOfShape'],
+            'priority': 5
+        },
+        'ones': {
+            'patch_targets': [],
+            'onnx_types': ['ConstantOfShape'],
+            'priority': 5
+        },
+        'full': {
+            'patch_targets': [],
+            'onnx_types': ['ConstantOfShape'],
+            'priority': 5
+        },
+        'tensor': {
+            'patch_targets': [],
+            'onnx_types': ['Constant'],
+            'priority': 5
+        },
+    }
+    
+    @classmethod
+    def get_operations_to_patch(cls) -> List[Tuple]:
+        """
+        Get list of (module_name, operation_name) tuples for patching.
+        
+        Returns:
+            List of tuples suitable for patching PyTorch operations
+        """
+        import torch
+        import torch.nn.functional as F
+        
+        module_map = {'torch': torch, 'F': F}
+        
+        operations = []
+        for op_data in cls.OPERATION_REGISTRY.values():
+            for module_name, op_name in op_data['patch_targets']:
+                if module_name in module_map:
+                    operations.append((module_map[module_name], op_name))
+        
+        return operations
+    
+    @classmethod
+    def get_torch_to_onnx_mapping(cls) -> Dict[str, List[str]]:
+        """
+        Get mapping from PyTorch operation names to ONNX operation types.
+        
+        Returns:
+            Dictionary mapping operation names to lists of ONNX types
+        """
+        return {
+            op_name: op_data['onnx_types'] 
+            for op_name, op_data in cls.OPERATION_REGISTRY.items()
+        }
+    
+    @classmethod
+    def add_operation(cls, op_name: str, patch_targets: List[Tuple[str, str]], 
+                      onnx_types: List[str], priority: int = 5):
+        """
+        Add a new operation to the registry.
+        
+        Args:
+            op_name: Name of the operation
+            patch_targets: List of (module_name, operation_name) for patching
+            onnx_types: List of corresponding ONNX operation types
+            priority: Priority level (1=highest, 10=lowest)
+        """
+        cls.OPERATION_REGISTRY[op_name] = {
+            'patch_targets': patch_targets,
+            'onnx_types': onnx_types,
+            'priority': priority
+        }
 
 
 class HierarchyExporter:
@@ -75,6 +415,10 @@ class HierarchyExporter:
         self._native_op_regions: List[Dict[str, Any]] = []  # Native operation boundaries
         self._patched_operations: Dict[str, Any] = {}  # Store original operations
         self._tensor_tags: Dict[str, Dict[str, Any]] = {}  # Tensor tagging information
+        
+        # Slice operation tracking
+        self._slice_operations: List[Dict[str, Any]] = []  # Track slice operations with context
+        self._original_getitem = None  # Store original __getitem__ method
         
         # Allow customization of torch.nn exceptions
         self._torch_nn_exceptions = (
@@ -223,54 +567,68 @@ class HierarchyExporter:
         self._remove_hooks()
 
     def _register_hooks(self, model: torch.nn.Module):
-        """Register pre and post forward hooks for stack-based execution tracing."""
-
-        def create_pre_hook(module_name: str, module: torch.nn.Module):
-            """Create pre-forward hook that pushes tag onto stack."""
+        """Register pre and post forward hooks for incremental stack-based execution tracing."""
+        
+        # Initialize stack with root module tag (ADR-001: Don't hook root)
+        root_tag = f"/{model.__class__.__name__}"
+        self._tag_stack.append(root_tag)
+        
+        def create_incremental_pre_hook(module_info: Dict[str, Any]):
+            """Create pre-forward hook with bound module information for incremental tag building."""
             def pre_hook(module, inputs):
-                # Build hierarchical tag for this module (strategy-specific)
-                if self.strategy == "htp":
-                    hierarchical_tag = self._build_instance_aware_tag(module_name, module)
+                # Get parent context from stack (guaranteed non-empty due to root initialization)
+                parent_tag = self._tag_stack[-1]
+                
+                # Build current class name using pre-extracted info
+                if module_info['is_indexed']:
+                    current_class_name = f"{module_info['class_name']}.{module_info['module_index']}"
                 else:
-                    hierarchical_tag = self._build_hierarchical_tag(module_name, module)
-                # Push tag onto stack - any operations from now use this tag
+                    current_class_name = module_info['class_name']
+                
+                # Incremental build: append to parent context
+                hierarchical_tag = f"{parent_tag}/{current_class_name}"
                 self._tag_stack.append(hierarchical_tag)
                 
-                # Also record in operation context for later mapping
-                self._operation_context[module_name] = {
+                # Record in operation context for later mapping
+                self._operation_context[module_info['full_name']] = {
                     "tag": hierarchical_tag,
-                    "module_class": module.__class__.__name__,
+                    "module_class": module_info['class_name'],
                     "creates_hierarchy": True,
                     "stack_depth": len(self._tag_stack),
+                    "module_info": module_info,  # Bound info available for debugging
                 }
             return pre_hook
 
-        def create_post_hook(module_name: str, module: torch.nn.Module):
-            """Create post-forward hook that pops tag from stack."""
+        def create_incremental_post_hook(module_info: Dict[str, Any]):
+            """Create post-forward hook with bound module information."""
             def post_hook(module, inputs, outputs):
                 # Pop the tag when module execution completes
                 if self._tag_stack:
                     self._tag_stack.pop()
             return post_hook
 
-        def create_tagging_hook(module_name: str, module: torch.nn.Module):
+        def create_incremental_tagging_hook(module_info: Dict[str, Any]):
             """Create hook for non-hierarchy modules that still need operation tagging."""
             def tagging_hook(module, inputs, outputs):
                 # Record execution context for operation tagging but don't affect stack
                 # Get current tag from stack (from parent module)
                 current_tag = self.get_current_tag()
                 if current_tag:
-                    self._operation_context[module_name] = {
+                    self._operation_context[module_info['full_name']] = {
                         "tag": current_tag,  # Use parent's tag
-                        "module_class": module.__class__.__name__,
+                        "module_class": module_info['class_name'],
                         "creates_hierarchy": False,
                         "parent_tag": current_tag,
+                        "module_info": module_info,
                     }
             return tagging_hook
 
         # Register hooks on all modules using universal criteria
         for name, module in model.named_modules():
-            if name:  # Skip root module
+            if name:  # Skip root module (ADR-001: Root handled by manual stack initialization)
+                # Extract and bind module information at registration time
+                module_info = self._extract_module_info(name, module)
+                
                 module_class = module.__class__.__module__
                 should_tag = self._should_tag_module(module_class)
                 
@@ -280,20 +638,141 @@ class HierarchyExporter:
                     if creates_hierarchy:
                         # HF modules and torch.nn exceptions: Register pre/post hooks (push/pop stack)
                         pre_hook = module.register_forward_pre_hook(
-                            create_pre_hook(name, module)
+                            create_incremental_pre_hook(module_info)
                         )
                         self._pre_hooks.append(pre_hook)
                         
                         post_hook = module.register_forward_hook(
-                            create_post_hook(name, module)
+                            create_incremental_post_hook(module_info)
                         )
                         self._post_hooks.append(post_hook)
                     else:
                         # Other torch.nn modules: Register only tagging hook (no stack change)
                         tag_hook = module.register_forward_hook(
-                            create_tagging_hook(name, module)
+                            create_incremental_tagging_hook(module_info)
                         )
                         self._post_hooks.append(tag_hook)
+
+    def _extract_module_info(self, module_name: str, module: torch.nn.Module) -> Dict[str, Any]:
+        """Extract and bind module information at registration time for efficient hook processing."""
+        name_parts = module_name.split(".")
+        
+        # Determine if THIS specific module is the indexed one
+        # For "encoder.layer.0.attention.self", only "layer.0" should get the index
+        is_indexed_module = False
+        module_index = None
+        container_type = None
+        
+        # Check if this module name ends with a digit and has a container before it
+        if len(name_parts) >= 2:
+            last_part = name_parts[-1]
+            second_last_part = name_parts[-2]
+            
+            if (last_part.isdigit() and 
+                second_last_part in ['layer', 'layers', 'block', 'blocks']):
+                is_indexed_module = True
+                module_index = last_part
+                container_type = second_last_part
+        
+        return {
+            'class_name': module.__class__.__name__,
+            'module_index': module_index,
+            'container_type': container_type,
+            'full_name': module_name,
+            'is_indexed': is_indexed_module,
+            'name_parts': name_parts,
+        }
+
+    def _validate_tag_propagation_compatibility(self, producer_tags: List[str], consumer_tags: List[str]) -> List[str]:
+        """Validate and filter tag propagation based on hierarchical compatibility."""
+        compatible_tags = []
+        
+        for producer_tag in producer_tags:
+            for consumer_tag in consumer_tags:
+                if self._are_tags_hierarchically_compatible(producer_tag, consumer_tag):
+                    compatible_tags.append(consumer_tag)
+        
+        return compatible_tags
+    
+    def _are_tags_hierarchically_compatible(self, tag1: str, tag2: str) -> bool:
+        """Check if two tags are hierarchically compatible for propagation."""
+        if tag1 == tag2:
+            return True
+        
+        # Parse hierarchical paths
+        components1 = tag1.strip('/').split('/')
+        components2 = tag2.strip('/').split('/')
+        
+        # Extract layer information using universal patterns
+        layer1_info = self._extract_layer_info_from_path(components1)
+        layer2_info = self._extract_layer_info_from_path(components2)
+        
+        # If both have layer numbers, they must match for compatibility
+        if layer1_info and layer2_info:
+            return layer1_info['number'] == layer2_info['number']
+        
+        # Check parent-child relationship
+        return self._is_hierarchical_parent_child(components1, components2)
+    
+    def _extract_layer_info_from_path(self, path_components: List[str]) -> Optional[Dict[str, Any]]:
+        """Extract layer information from hierarchical path components."""
+        
+        # Universal layer detection patterns (no hardcoding)
+        LAYER_PATTERNS = [
+            r'.*Layer\.(\d+)',      # BertLayer.0, TransformerLayer.1, DecoderLayer.2
+            r'.*Block\.(\d+)',      # ResNetBlock.2, AttentionBlock.0  
+            r'.*Stage\.(\d+)',      # ConvStage.1, ProcessingStage.3
+            r'h\.(\d+)',            # GPT-style h.0, h.1
+            r'.*Encoder\.(\d+)',    # TransformerEncoder.0
+            r'.*Decoder\.(\d+)',    # TransformerDecoder.1
+        ]
+        
+        for component in path_components:
+            for pattern in LAYER_PATTERNS:
+                match = re.match(pattern, component)
+                if match:
+                    return {
+                        'component': component,
+                        'number': match.group(1),
+                        'pattern': pattern
+                    }
+        return None
+    
+    def _is_hierarchical_parent_child(self, components1: List[str], components2: List[str]) -> bool:
+        """Check if one path is ancestor/descendant of another."""
+        shorter, longer = (components1, components2) if len(components1) < len(components2) else (components2, components1)
+        
+        # Check if shorter path is prefix of longer path
+        return longer[:len(shorter)] == shorter
+    
+    def _validate_self_consistency(self, tags: List[str]) -> List[str]:
+        """Validate that a set of tags are mutually compatible (no cross-layer contamination)."""
+        if len(tags) <= 1:
+            return tags
+        
+        # Group tags by layer information
+        layer_groups = {}
+        non_layered_tags = []
+        
+        for tag in tags:
+            components = tag.strip('/').split('/')
+            layer_info = self._extract_layer_info_from_path(components)
+            
+            if layer_info:
+                layer_number = layer_info['number']
+                if layer_number not in layer_groups:
+                    layer_groups[layer_number] = []
+                layer_groups[layer_number].append(tag)
+            else:
+                non_layered_tags.append(tag)
+        
+        # If tags span multiple layers, only keep the most specific one
+        if len(layer_groups) > 1:
+            # Conservative approach: reject cross-layer propagation
+            return []
+        
+        # If all tags are from same layer or non-layered, they're compatible
+        return tags
 
     def _should_create_hierarchy_level(self, module: torch.nn.Module) -> bool:
         """Determine if module should create a hierarchy level (push/pop stack)."""
@@ -328,57 +807,15 @@ class HierarchyExporter:
         # Tag all other modules - operations need attribution
         return True
 
-    def _build_hierarchical_tag(self, module_name: str, module: torch.nn.Module) -> str:
-        """
-        Build hierarchical tag from module name and class.
-
-        UNIVERSAL APPROACH: Build path using actual module classes only.
-        No hardcoded architecture assumptions.
-        """
-        # Always build from module name by resolving class names
-        return self._resolve_hierarchical_path(module_name, module)
-
-    def _resolve_hierarchical_path(
-        self, module_name: str, module: torch.nn.Module
-    ) -> str:
-        """
-        Resolve hierarchical path from module name.
-
-        UNIVERSAL APPROACH: Map dot-separated module names to hierarchical class paths.
-        No hardcoded architecture assumptions.
-
-        IMPORTANT: torch.nn modules should NOT appear in tags - only model-specific modules.
-        """
-        if not self._model:
-            return f"/{module.__class__.__name__}"
-
-        # Build path by traversing the actual module hierarchy
-        path_segments = []
-
-        # Add root model class
-        path_segments.append(self._model.__class__.__name__)
-
-        # Parse the module name and map each segment to its actual class
-        if module_name:
-            current_module = self._model
-            name_parts = module_name.split(".")
-
-            for part in name_parts:
-                if hasattr(current_module, part):
-                    current_module = getattr(current_module, part)
-                    # Filter out torch.nn modules - only include model-specific modules
-                    module_path = current_module.__class__.__module__
-                    if not module_path.startswith(
-                        "torch._C"
-                    ) and not module_path.startswith("torch.nn"):
-                        path_segments.append(current_module.__class__.__name__)
-
-        # Build the final path
-        return "/" + "/".join(path_segments)
-
     def get_current_tag(self) -> Optional[str]:
         """Get current execution context tag from stack."""
-        return self._tag_stack[-1] if self._tag_stack else None
+        if self._tag_stack:
+            return self._tag_stack[-1]
+        elif self._model:
+            # Fallback: Use root model context if no module context available
+            return f"/{self._model.__class__.__name__}"
+        else:
+            return None
 
     def _remove_hooks(self):
         """Remove all registered hooks."""
@@ -582,15 +1019,22 @@ class HierarchyExporter:
                         producer_tags = self._tag_mapping[producer_node].get('tags', [])
                         input_tags.update(producer_tags)
                 
-                # If this operation doesn't have tags but its inputs do, inherit them
+                # If this operation doesn't have tags but its inputs do, inherit them with validation
                 if not current_tags and input_tags:
-                    self._tag_mapping[node_name]['tags'] = list(input_tags)
-                    tags_changed = True
+                    # For new operations, validate compatibility among input tags
+                    validated_tags = self._validate_self_consistency(list(input_tags))
+                    if validated_tags:
+                        self._tag_mapping[node_name]['tags'] = validated_tags
+                        tags_changed = True
                 elif input_tags and not input_tags.issubset(current_tags):
-                    # Add new tags from inputs
-                    all_tags = current_tags.union(input_tags)
-                    self._tag_mapping[node_name]['tags'] = list(all_tags)
-                    tags_changed = True
+                    # Add new tags from inputs with compatibility validation
+                    compatible_tags = self._validate_tag_propagation_compatibility(
+                        list(current_tags), list(input_tags)
+                    )
+                    if compatible_tags:
+                        all_tags = current_tags.union(compatible_tags)
+                        self._tag_mapping[node_name]['tags'] = list(all_tags)
+                        tags_changed = True
             
             # Stop if no changes in this iteration
             if not tags_changed:
@@ -611,17 +1055,28 @@ class HierarchyExporter:
                 for tag in node_tags:
                     tensor_consumers[input_tensor].add(tag)
         
-        # Propagate consumer tags back to producing operations
+        # Propagate consumer tags back to producing operations with validation
         for node in onnx_model.graph.node:
             node_name = node.name or f"{node.op_type}_{len([n for n in self._tag_mapping.keys() if node.op_type in n])}"
             
             for output_tensor in node.output:
                 if output_tensor in tensor_consumers:
-                    consumer_tags = tensor_consumers[output_tensor]
-                    # Add all consumer tags to this operation
-                    existing_tags = set(self._tag_mapping[node_name].get('tags', []))
-                    all_tags = existing_tags.union(consumer_tags)
-                    self._tag_mapping[node_name]['tags'] = list(all_tags)
+                    consumer_tags = list(tensor_consumers[output_tensor])
+                    existing_tags = list(self._tag_mapping[node_name].get('tags', []))
+                    
+                    if existing_tags:
+                        # Validate compatibility before propagation
+                        compatible_tags = self._validate_tag_propagation_compatibility(
+                            existing_tags, consumer_tags
+                        )
+                        if compatible_tags:
+                            all_tags = set(existing_tags).union(compatible_tags)
+                            self._tag_mapping[node_name]['tags'] = list(all_tags)
+                    else:
+                        # For operations without existing tags, validate self-consistency of consumer tags
+                        validated_tags = self._validate_self_consistency(consumer_tags)
+                        if validated_tags:
+                            self._tag_mapping[node_name]['tags'] = validated_tags
     
     def _tag_tensor_inputs_for_filtering(self, onnx_model):
         """Tag tensor inputs with their context for filtering capabilities."""
@@ -1311,63 +1766,9 @@ class HierarchyExporter:
 
     def _patch_torch_operations(self):
         """Patch PyTorch operations to capture execution context during ONNX export."""
-        import torch.nn.functional as F
         
-        # Operations to patch for execution tracing
-        operations_to_patch = [
-            # Core mathematical operations
-            (torch, 'matmul'),
-            (torch, 'add'),
-            (torch, 'sub'),
-            (torch, 'mul'),
-            (torch, 'div'),
-            (torch, 'pow'),
-            (torch, 'sqrt'),
-            (torch, 'erf'),
-            (torch, 'tanh'),
-            (torch, 'relu'),
-            (torch, 'bmm'),  # Batch matrix multiply
-            
-            # Indexing and gathering operations
-            (torch, 'index_select'),
-            (torch, 'gather'),
-            (torch, 'embedding'),  # For nn.Embedding layers
-            (torch, 'where'),
-            (torch, 'eq'),  # Equal
-            (torch, 'equal'),
-            
-            # Shape operations
-            (torch, 'reshape'),
-            (torch, 'transpose'),
-            (torch, 'unsqueeze'),
-            (torch, 'squeeze'),
-            (torch, 'cat'),
-            (torch, 'expand'),
-            (torch, 'slice'),
-            
-            # Reduction operations
-            (torch, 'mean'),
-            (torch, 'sum'),
-            (torch, 'cumsum'),
-            (torch, 'cumprod'),
-            
-            # Type operations
-            (torch, 'cast'),
-            
-            # Functional operations
-            (F, 'linear'),
-            (F, 'relu'),
-            (F, 'tanh'),
-            (F, 'softmax'),
-            (F, 'layer_norm'),
-            (F, 'embedding'),  # F.embedding function
-            (F, 'pad'),
-            (F, 'dropout'),
-            (F, 'gelu'),
-            
-            # Native operations
-            (F, 'scaled_dot_product_attention'),
-        ]
+        # Get operations to patch from centralized configuration
+        operations_to_patch = OperationConfig.get_operations_to_patch()
         
         patched_count = 0
         for module, op_name in operations_to_patch:
@@ -1379,6 +1780,9 @@ class HierarchyExporter:
                 traced_op = self._create_traced_operation(op_name, original_op)
                 setattr(module, op_name, traced_op)
                 patched_count += 1
+        
+        # Also patch tensor.__getitem__ for slice operation tracking
+        self._patch_tensor_getitem()
 
     def _create_traced_operation(self, op_name: str, original_op):
         """Create a traced version of a PyTorch operation."""
@@ -1437,53 +1841,259 @@ class HierarchyExporter:
         for (module, op_name), original_op in self._patched_operations.items():
             setattr(module, op_name, original_op)
         self._patched_operations.clear()
+        
+        # Restore original __getitem__ if we patched it
+        self._unpatch_tensor_getitem()
 
-    def _build_instance_aware_tag(self, module_name: str, module: torch.nn.Module) -> str:
-        """Build hierarchical tag preserving instance names like .0, .1, etc."""
-        if not self._model:
-            return f"/{module.__class__.__name__}"
+    def _patch_tensor_getitem(self):
+        """Patch torch.Tensor.__getitem__ to track slice operations with context."""
+        if self._original_getitem is None:  # Only patch once
+            self._original_getitem = torch.Tensor.__getitem__
+            
+            def context_aware_getitem(tensor_self, key):
+                # Capture current module context from stack
+                current_tag = self.get_current_tag()
+                
+                # Record slice operation if we have context and it's a slice
+                if current_tag and self._is_slice_operation(key):
+                    self._slice_operations.append({
+                        'tensor_id': id(tensor_self),
+                        'key': str(key),  # Convert to string for JSON serialization
+                        'context': current_tag,
+                        'order': len(self._slice_operations),
+                        'type': 'slice'
+                    })
+                
+                # Execute original __getitem__
+                return self._original_getitem(tensor_self, key)
+            
+            # Apply the patch
+            torch.Tensor.__getitem__ = context_aware_getitem
 
-        # Build path by traversing the actual module hierarchy
-        path_segments = [self._model.__class__.__name__]
+    def _unpatch_tensor_getitem(self):
+        """Restore original torch.Tensor.__getitem__."""
+        if self._original_getitem is not None:
+            torch.Tensor.__getitem__ = self._original_getitem
+            self._original_getitem = None
 
-        if module_name:
-            current_module = self._model
-            name_parts = module_name.split(".")
+    def _is_slice_operation(self, key):
+        """Determine if the key represents a slice operation."""
+        # Handle various slice patterns
+        if isinstance(key, slice):
+            return True
+        elif isinstance(key, tuple):
+            # Multiple dimensions: check if any element is a slice
+            return any(isinstance(k, slice) for k in key)
+        else:
+            # Single index, ellipsis, etc. - not a slice
+            return False
 
-            for i, part in enumerate(name_parts):
-                if hasattr(current_module, part):
-                    current_module = getattr(current_module, part)
-                    module_path = current_module.__class__.__module__
+    def _tag_slice_operations(self, onnx_model, onnx_nodes_by_type):
+        """
+        Tag ONNX Slice nodes with correct context using enhanced mapping.
+        
+        ISSUE FIX: Slice operations in attention layers were getting tagged with 
+        wrong contexts (embeddings/pooler) instead of attention submodule context
+        due to delayed execution timing.
+        
+        SOLUTION: Use ONNX node path analysis to infer correct module context
+        rather than relying solely on execution timing.
+        """
+        if 'Slice' not in onnx_nodes_by_type:
+            return
+        
+        slice_nodes = onnx_nodes_by_type['Slice']
+        print(f"Processing {len(slice_nodes)} ONNX Slice nodes for context tagging")
+        
+        # Build mapping from ONNX paths to module contexts
+        path_to_context = self._build_onnx_path_to_context_mapping()
+        
+        for node in slice_nodes:
+            node_name = node.name or f"{node.op_type}_{len(self._tag_mapping)}"
+            
+            # Skip if already tagged
+            if self._tag_mapping[node_name]["tags"]:
+                continue
+            
+            # Method 1: Infer context from ONNX node path (most reliable)
+            inferred_context = self._infer_context_from_onnx_path(node_name, path_to_context)
+            
+            if inferred_context:
+                self._tag_mapping[node_name]["tags"] = [inferred_context]
+                print(f"Tagged Slice node '{node_name}' with inferred context: {inferred_context}")
+                continue
+            
+            # Method 2: Use execution-captured context (may be wrong due to timing issues)
+            if self._slice_operations:
+                # Find best matching slice operation
+                best_slice_op = self._find_matching_slice_operation(node_name, node)
+                if best_slice_op:
+                    context = best_slice_op['context']
                     
-                    # Skip torch internal modules
-                    if module_path.startswith("torch._C") or module_path.startswith("builtins"):
-                        continue
+                    # Apply context correction if needed
+                    corrected_context = self._correct_slice_context(node_name, context)
                     
-                    class_name = current_module.__class__.__name__
-                    
-                    # Preserve instance numbers for layers
-                    if part.isdigit() and i > 0:
-                        # Look at the previous part to see if it's a container
-                        prev_part = name_parts[i-1]
-                        if prev_part in ['layer', 'layers', 'block', 'blocks']:
-                            # Format as ClassName.instance_number
-                            path_segments.append(f"{class_name}.{part}")
-                        else:
-                            path_segments.append(class_name)
-                    else:
-                        # Skip torch.nn modules unless in exceptions
-                        if (module_path.startswith("torch.nn") and 
-                            class_name not in self._torch_nn_exceptions):
-                            continue
-                        
-                        # For model-specific modules, use class name
-                        if not module_path.startswith("torch."):
-                            path_segments.append(class_name)
-                        else:
-                            # For torch.nn modules in exceptions or Linear in HTP
-                            path_segments.append(class_name)
-
-        return "/" + "/".join(path_segments)
+                    self._tag_mapping[node_name]["tags"] = [corrected_context]
+                    correction_note = " (corrected)" if corrected_context != context else ""
+                    print(f"Tagged Slice node '{node_name}' with context: {corrected_context}{correction_note}")
+                    continue
+            
+            # Method 3: Fallback to attention context for attention-related paths
+            if 'attention' in node_name.lower():
+                attention_context = self._find_attention_context_for_node(node_name)
+                if attention_context:
+                    self._tag_mapping[node_name]["tags"] = [attention_context]
+                    print(f"Tagged Slice node '{node_name}' with fallback attention context: {attention_context}")
+    
+    def _build_onnx_path_to_context_mapping(self):
+        """Build mapping from ONNX node paths to module contexts."""
+        mapping = {}
+        
+        for module_name, context_info in self._operation_context.items():
+            # Convert module path to ONNX path variants
+            onnx_paths = self._generate_onnx_path_variants(module_name)
+            
+            for onnx_path in onnx_paths:
+                mapping[onnx_path] = context_info['tag']
+        
+        return mapping
+    
+    def _generate_onnx_path_variants(self, module_name):
+        """Generate ONNX path variants for a module name."""
+        variants = []
+        
+        # Convert dots to slashes: encoder.layer.0.attention.self -> /encoder/layer.0/attention/self
+        onnx_path = '/' + module_name.replace('.', '/')
+        variants.append(onnx_path)
+        
+        # Add partial paths for prefix matching
+        parts = module_name.split('.')
+        for i in range(1, len(parts) + 1):
+            partial_path = '/' + '/'.join(parts[:i])
+            variants.append(partial_path)
+        
+        return variants
+    
+    def _infer_context_from_onnx_path(self, node_name, path_to_context):
+        """Infer correct context from ONNX node path structure."""
+        # Try exact match first
+        if node_name in path_to_context:
+            return path_to_context[node_name]
+        
+        # For attention slice nodes, use specialized matching
+        if 'attention' in node_name.lower() and 'slice' in node_name.lower():
+            return self._find_attention_context_for_node(node_name)
+        
+        # Find best prefix match
+        best_match = None
+        best_length = 0
+        
+        for path, context in path_to_context.items():
+            if node_name.startswith(path) and len(path) > best_length:
+                best_match = context
+                best_length = len(path)
+        
+        # For attention nodes, ensure we get attention context
+        if 'attention' in node_name.lower() and best_match:
+            if 'attention' in best_match.lower():
+                return best_match
+            else:
+                # Look for most specific attention context
+                attention_contexts = [ctx for ctx in path_to_context.values() 
+                                    if 'attention' in ctx.lower()]
+                if attention_contexts:
+                    # Return the most specific (longest) attention context
+                    return max(attention_contexts, key=len)
+        
+        return best_match
+    
+    def _find_matching_slice_operation(self, node_name, node):
+        """Find the best matching captured slice operation for an ONNX node."""
+        if not self._slice_operations:
+            return None
+        
+        # Simple approach: use node index as operation index
+        # This maintains the original order-based matching but allows for improvements
+        node_index = 0
+        for i, other_node in enumerate(node.graph.node if hasattr(node, 'graph') else []):
+            if other_node == node:
+                node_index = i
+                break
+        
+        # Find slice operations that could match this node
+        candidate_ops = []
+        for i, slice_op in enumerate(self._slice_operations):
+            candidate_ops.append((i, slice_op))
+        
+        # Return the operation at the corresponding index, or the first available
+        if node_index < len(candidate_ops):
+            return candidate_ops[node_index][1]
+        elif candidate_ops:
+            return candidate_ops[0][1]
+        
+        return None
+    
+    def _correct_slice_context(self, node_name, captured_context):
+        """
+        Correct slice context if it appears to be wrong due to timing issues.
+        
+        Common corrections:
+        - Slice in attention path but captured with embeddings context -> use attention
+        - Slice in layer.X path but captured with wrong layer -> use correct layer
+        """
+        # If node path suggests attention but context doesn't include attention
+        if 'attention' in node_name.lower() and 'attention' not in captured_context.lower():
+            # Find the most appropriate attention context
+            attention_context = self._find_attention_context_for_node(node_name)
+            if attention_context:
+                return attention_context
+        
+        # If node path suggests specific layer but context has wrong layer
+        if '/layer.' in node_name and '/layer.' in captured_context:
+            # Extract layer number from node name
+            import re
+            node_layer_match = re.search(r'/layer\.(\d+)/', node_name)
+            context_layer_match = re.search(r'/layer\.(\d+)/', captured_context)
+            
+            if node_layer_match and context_layer_match:
+                node_layer = node_layer_match.group(1)
+                context_layer = context_layer_match.group(1)
+                
+                if node_layer != context_layer:
+                    # Correct the layer number in the context
+                    corrected = captured_context.replace(f'/layer.{context_layer}/', f'/layer.{node_layer}/')
+                    return corrected
+        
+        return captured_context
+    
+    def _find_attention_context_for_node(self, node_name):
+        """Find the most appropriate attention context for a given node."""
+        # Extract layer information from node name if present
+        layer_num = None
+        if '/layer.' in node_name:
+            import re
+            layer_match = re.search(r'/layer\.(\d+)/', node_name)
+            if layer_match:
+                layer_num = layer_match.group(1)
+        
+        # Find attention contexts
+        attention_contexts = []
+        for context in self._operation_context.values():
+            if 'attention' in context['tag'].lower():
+                attention_contexts.append(context['tag'])
+        
+        # If we have layer information, prefer matching layer
+        if layer_num is not None:
+            layer_specific_contexts = [ctx for ctx in attention_contexts 
+                                     if f'Layer.{layer_num}' in ctx or f'layer.{layer_num}' in ctx.lower()]
+            if layer_specific_contexts:
+                return max(layer_specific_contexts, key=len)
+        
+        # Return most specific attention context
+        if attention_contexts:
+            return max(attention_contexts, key=len)
+        
+        return None
     
     def _forward_propagate_tags_htp(self, onnx_model, tensor_producers):
         """Conservative forward propagation for HTP to avoid over-tagging."""
@@ -1522,63 +2132,8 @@ class HierarchyExporter:
     def _project_execution_trace_to_onnx(self, onnx_model):
         """Project execution trace onto ONNX operations."""
         
-        # Build operation type mapping
-        torch_to_onnx_mapping = {
-            # Math operations
-            'matmul': ['MatMul', 'Gemm'],
-            'add': ['Add'],
-            'sub': ['Sub'],
-            'mul': ['Mul'],
-            'div': ['Div'],
-            'pow': ['Pow'],
-            'sqrt': ['Sqrt'],
-            'erf': ['Erf'],
-            'tanh': ['Tanh'],
-            'relu': ['Relu'],
-            'bmm': ['MatMul'],
-            
-            # Indexing and selection
-            'embedding': ['Gather'],  # Embedding lookups become Gather
-            'index_select': ['Gather'],
-            'gather': ['Gather'],
-            'where': ['Where'],
-            'eq': ['Equal'],
-            'equal': ['Equal'],
-            
-            # Shape operations
-            'reshape': ['Reshape'],
-            'transpose': ['Transpose'],
-            'unsqueeze': ['Unsqueeze'],
-            'squeeze': ['Squeeze'],
-            'cat': ['Concat'],
-            'expand': ['Expand'],
-            'slice': ['Slice'],
-            'size': ['Shape'],  # torch.size() -> Shape
-            'shape': ['Shape'],  # tensor.shape -> Shape
-            
-            # Reduction operations
-            'mean': ['ReduceMean'],
-            'sum': ['ReduceSum'],
-            'cumsum': ['CumSum'],
-            'cumprod': ['CumProd'],
-            
-            # Type operations
-            'cast': ['Cast'],
-            
-            # Constants and initialization
-            'zeros': ['ConstantOfShape'],
-            'ones': ['ConstantOfShape'],
-            'full': ['ConstantOfShape'],
-            'tensor': ['Constant'],  # torch.tensor() -> Constant
-            
-            # High-level operations
-            'linear': ['Gemm', 'MatMul'],
-            'softmax': ['Softmax'],
-            'layer_norm': ['LayerNormalization', 'Add', 'Mul', 'Div', 'ReduceMean', 'Sub', 'Sqrt', 'Pow'],  # Layer norm can be fused or decomposed
-            'pad': ['Pad'],
-            'dropout': ['Dropout'],
-            'gelu': ['Erf', 'Add', 'Mul', 'Div'],  # GELU decomposes
-        }
+        # Get operation type mapping from centralized configuration
+        torch_to_onnx_mapping = OperationConfig.get_torch_to_onnx_mapping()
         
         # Initialize tag mapping for all nodes
         for node in onnx_model.graph.node:
@@ -1640,6 +2195,9 @@ class HierarchyExporter:
                                 trace_idx += 1
                                 break
                             trace_idx += 1
+        
+        # Tag slice operations based on tracked slice contexts
+        self._tag_slice_operations(onnx_model, onnx_nodes_by_type)
         
         # Universal path-based tagging for all remaining operations
         self._tag_operations_by_path_inference(onnx_model)
@@ -1902,6 +2460,7 @@ class HierarchyExporter:
                 "unique_tags": len(set(tag for op in self._tag_mapping.values() for tag in op.get("tags", []))),
                 "operation_trace_length": len(self._operation_trace),
                 "native_op_regions": len(self._native_op_regions),
+                "slice_operations_tracked": len(self._slice_operations),
             },
             "tag_statistics": self._compute_tag_statistics(),
             "node_tags": self._tag_mapping,
@@ -1909,6 +2468,7 @@ class HierarchyExporter:
             "htp_metadata": {
                 "operation_trace": self._operation_trace[:100],  # Limit for size
                 "native_op_regions": self._native_op_regions,
+                "slice_operations": self._slice_operations,  # Include slice operation tracking
                 "patched_operations": [f"{module.__name__}.{op_name}" for (module, op_name) in self._patched_operations.keys()]
             }
         }
@@ -1934,4 +2494,5 @@ class HierarchyExporter:
         self._operation_trace.clear()
         self._native_op_regions.clear()
         self._tensor_tags.clear()
+        self._slice_operations.clear()  # Reset slice operation tracking
         self._unpatch_operations()

@@ -10,6 +10,14 @@ This document tracks all design changes, clarifications, and important decisions
 
 **Core Principle**: The hierarchy-preserving export must produce IDENTICAL graph topology to baseline export, only adding hierarchy metadata without changing the computational graph structure.
 
+**CLARIFICATION (2024-12-22)**: This requirement is about **topology preservation**, NOT **topology sorting**. Our tagging approach works by:
+1. Using standard `torch.onnx.export()` to maintain identical topology
+2. Loading the exported ONNX model
+3. Adding metadata tags to existing nodes without structural changes
+4. NO graph manipulation or node reordering required
+
+**Status**: ✅ IMPLEMENTED - Current approach preserves topology by design
+
 ### R8: Debug Tool Session for Graph Topology Comparison
 
 **Requirement**: "create a debug tool session, and graph topology comparison"
@@ -1478,3 +1486,57 @@ def traced_sdpa(*args, **kwargs):
 **Filtering Ready**: Tagged tensors enable precise subgraph extraction
 
 **Status**: ✅ Proven approach, ready for full implementation
+
+---
+
+## R19: Post-Refactoring Performance Validation (December 23, 2024)
+
+**Status**: ✅ VALIDATED  
+**Focus**: Validation of refactoring results and performance characteristics
+
+**Key Validation Results**:
+- Phase 1A (Unified Tag Building): Successfully consolidated duplicate logic, eliminated ~100 lines
+- Phase 1B (Operation Registry): Centralized operation configuration, eliminated duplication
+- Performance maintained: Export times unchanged, memory usage stable
+- 100% functional compatibility: Both strategies produce identical results
+- Test coverage: 121 comprehensive tests across 6 testing categories
+
+**Refactoring Impact**:
+- **Code Reduction**: ~100 lines of duplicate code eliminated
+- **Maintainability**: Single source of truth for operation definitions  
+- **Architecture**: Cleaner separation between strategies and operation handling
+- **Stability**: Zero regressions detected across comprehensive test suite
+
+**Test Infrastructure**:
+- Round 1: Smoke tests (20 tests) - Basic functionality validation
+- Round 2: Edge cases (37 tests) - Error handling and robustness  
+- Round 3: Strategy comparison (17 tests) - Behavioral validation
+- Round 4: Operation config (23 tests) - Registry and configuration
+- Round 5: Complex models (12 tests) - Architecture coverage
+- Round 6: Performance (12 tests) - Stress testing and memory validation
+
+**Decision**: Refactoring Phase 1 completed successfully. System ready for continued development with improved maintainability and validated stability.
+
+## R20: Tagging Strategy Documentation and Phase Clarification (December 24, 2024)
+
+**Status**: ✅ DOCUMENTED  
+**Focus**: Comprehensive documentation of tagging behavior and phase-based approach
+
+**Key Clarifications**:
+- **Phase 1 Focus**: System correctly targets HuggingFace modules, filters basic torch.nn modules
+- **Expected Behavior**: 0 tags on simple PyTorch models is correct and by design
+- **Strategy Differentiation**: Both strategies currently use identical torch.nn exception lists
+- **Whitelist Approach**: Key modules (LayerNorm, Embedding, BatchNorm) always tagged regardless of phase
+
+**Documentation Created**:
+- **TAGGING_STRATEGY.md**: Comprehensive guide explaining current behavior, future phases, and diagnostic information
+- **Expected Behavior Examples**: Clear examples showing why different models produce different tag counts
+- **Debugging Section**: Help users understand and diagnose tagging results
+- **Migration Guide**: Assists users transitioning from other tools or versions
+
+**Behavioral Validation**:
+- Simple PyTorch models: 0 tags (expected in Phase 1)
+- HuggingFace models: Rich tagging (primary target)
+- Mixed models: Whitelist modules tagged appropriately
+
+**Decision**: Phase 1 behavior is working as designed. Documentation provides clear guidance for users and future development phases.

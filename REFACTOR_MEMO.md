@@ -318,3 +318,196 @@ hierarchical_tag = self.strategy_impl.build_tag(module_name, module)
 ---
 
 *This refactoring maintains the universal approach and MUST-RULES while significantly improving code organization and maintainability.*
+
+## Iteration 2: Implementation Reality Check and Refined Strategy (2024-12-22)
+
+### Current State Analysis: What We Actually Have
+
+After comprehensive review of the actual `hierarchy_exporter.py` implementation (~1900 lines), several critical discoveries emerge that significantly impact the refactoring strategy.
+
+#### **Discovery 1: Strategy Pattern Already Partially Implemented** ✅
+
+**Reality Check**: The current code already separates strategies effectively:
+
+```python
+# In export() method
+if self.strategy == "htp":
+    return self._export_htp(model, example_inputs, output_path, **kwargs)
+else:
+    return self._export_usage_based(model, example_inputs, output_path, **kwargs)
+```
+
+**Current Architecture**:
+- `_export_usage_based()`: Legacy approach with parameter-based tagging
+- `_export_htp()`: Advanced Hierarchical Trace-and-Project approach
+- Strategy-specific tag building: `_build_hierarchical_tag()` vs `_build_instance_aware_tag()`
+- Minimal conditional logic elsewhere
+
+**Assessment**: The original refactor plan **overestimated** the strategy pattern problem. Most strategy logic is already properly contained.
+
+#### **Discovery 2: HTP Strategy is Production-Ready and Feature-Rich** 🚀
+
+**Sophisticated Features Found**:
+- **Operation Tracing**: 70+ PyTorch operations patched for execution context capture
+- **Native Operation Support**: Handles `scaled_dot_product_attention` with pattern recognition
+- **Stack-Based Context**: Real-time module execution tracking
+- **Subgraph Extraction**: Complete multi-consumer tensor tagging for filtering
+- **ONNX Projection**: Maps execution trace to ONNX nodes with universal type mapping
+
+**Complexity Indicators**:
+- **1900+ lines** of production-ready code
+- **19 design revisions** showing mature evolution
+- **Comprehensive test coverage** mentioned in documentation
+- **Universal compliance** with MUST rules throughout
+
+**Assessment**: HTP is not experimental - it's a sophisticated, working implementation that rivals commercial tools.
+
+#### **Discovery 3: Operation Configuration is More Unified Than Expected** 📍
+
+**Current Implementation Analysis**:
+
+```python
+# In _patch_torch_operations() (line 1312)
+operations_to_patch = [
+    (torch, 'matmul'), (torch, 'add'), (F, 'linear'),
+    (F, 'scaled_dot_product_attention'),
+    # ... 70+ operations centralized here
+]
+
+# In _project_execution_trace_to_onnx() (line 1526)  
+torch_to_onnx_mapping = {
+    'matmul': ['MatMul', 'Gemm'],
+    'add': ['Add'],
+    'linear': ['Gemm', 'MatMul'],
+    # ... mapping definitions here
+}
+```
+
+**Assessment**: While there IS duplication between patching and mapping, both are already centralized in specific methods, making this a **lower priority** than initially assessed.
+
+### **Revised Risk Assessment** ⚠️
+
+#### **High Risk Factors Identified**:
+
+1. **Working Production System**: Current HTP implementation is sophisticated and working
+2. **Complex State Management**: Stack-based hooks, operation tracing, multi-consumer logic
+3. **Universal Design Compliance**: Any changes must maintain MUST rule compliance
+4. **Test Integration**: Changes could break existing comprehensive test coverage
+
+#### **Lower Impact Than Expected**:
+
+1. **Strategy Pattern**: Already mostly implemented
+2. **Operation Configuration**: Duplication exists but centralized
+3. **Conditional Logic**: Minimal scattered conditionals found
+
+### **Refined Refactoring Strategy: Conservative Incremental Approach** 🎯
+
+#### **Phase 1: Low-Risk Consolidation** (Recommended Priority)
+
+**1A. Unify Tag Building Methods** ⭐⭐⭐ (SAFE)
+```python
+def _build_tag(self, module_name: str, module: torch.nn.Module, 
+               preserve_instances: bool = None) -> str:
+    """Unified tag building with strategy-aware instance preservation."""
+    if preserve_instances is None:
+        preserve_instances = (self.strategy == "htp")
+    
+    if preserve_instances:
+        return self._build_instance_aware_tag(module_name, module)
+    else:
+        return self._build_hierarchical_tag(module_name, module)
+```
+
+**Benefits**: 
+- ✅ Eliminates 80% duplicate logic between tag building methods
+- ✅ Zero risk - just consolidates existing working code
+- ✅ Maintains all current functionality
+
+**1B. Extract Operation Registry** ⭐⭐ (SAFE)
+```python
+class OperationConfig:
+    """Centralized operation configuration for both patching and mapping."""
+    
+    OPERATION_REGISTRY = {
+        'matmul': {
+            'patch_targets': [(torch, 'matmul')],
+            'onnx_types': ['MatMul', 'Gemm'],
+            'priority': 1
+        },
+        'linear': {
+            'patch_targets': [(F, 'linear')],
+            'onnx_types': ['Gemm', 'MatMul'],
+            'priority': 2
+        },
+        # ... unified definitions
+    }
+```
+
+**Benefits**:
+- ✅ Eliminates operation definition duplication
+- ✅ Single source of truth for operation configuration
+- ✅ Easy to add new operations
+
+#### **Phase 2: Strategic Assessment** (CONDITIONAL)
+
+**2A. Full Strategy Pattern Implementation** ⭐ (ONLY IF NEEDED)
+
+**Recommendation**: **DEFER** until Phase 1 is complete and benefits are measured.
+
+**Rationale**:
+- Current strategy separation is already effective
+- Risk of breaking sophisticated HTP implementation
+- Unclear benefit vs. complexity tradeoff
+
+**2B. Advanced Node Processing** ⭐⭐ (MODERATE RISK)
+
+Only proceed if Phase 1 reveals significant patterns of repetitive conditional logic.
+
+### **Implementation Priorities: Focus on HTP First** 🎯
+
+#### **Strategic Decision: HTP-First Approach** ✅
+
+**Rationale**:
+- HTP is the advanced, feature-rich implementation
+- Usage_based appears to be legacy/simplified approach  
+- Focus limited resources on the production-ready strategy
+- Multiple approaches create comparison capability
+
+**Implementation Plan**:
+1. **Stabilize HTP**: Consolidate HTP implementation first
+2. **Extract Learnings**: Apply successful patterns to usage_based if needed
+3. **Maintain Competition**: Keep both approaches for comparison/validation
+
+### **Answers to Specific Implementation Questions**
+
+#### **Q1: Operation Definition Centralization Location**
+
+**Answer**: Two locations currently exist:
+
+1. **`_patch_torch_operations()` (line 1312)**: `operations_to_patch` list - defines what to patch
+2. **`_project_execution_trace_to_onnx()` (line 1526)**: `torch_to_onnx_mapping` dict - defines PyTorch→ONNX mapping
+
+**Current State**: Both are centralized within their respective methods, but duplicated across methods.
+
+**Refactor Target**: Create `OperationConfig` class to unify both definitions.
+
+### **Success Metrics for Iteration 2**
+
+#### **Phase 1 Success Criteria**:
+- ✅ Reduce tag building duplication from 3 methods to 1
+- ✅ Eliminate operation definition duplication
+- ✅ Maintain 100% existing test coverage
+- ✅ Zero functional changes to HTP behavior
+- ✅ Preserve all performance characteristics
+
+#### **Risk Mitigation**:
+- Implement changes incrementally with immediate testing
+- Maintain parallel old methods during transition
+- Focus on HTP strategy as primary target
+- Defer complex architectural changes until value is proven
+
+### **Conclusion: Conservative Consolidation Over Aggressive Restructuring**
+
+The reality check reveals that the HierarchyExporter is already a sophisticated, working system that needs **refinement**, not **restructuring**. The most valuable improvements come from consolidating existing functionality rather than implementing new architectural patterns.
+
+**Recommended Approach**: Focus on low-risk, high-value consolidation of duplicated code within the existing architecture, with special attention to maintaining the production-ready HTP implementation.
