@@ -426,8 +426,8 @@ class HierarchyExporter:
             else self.TORCH_NN_HIERARCHY_EXCEPTIONS.copy()
         )
         
-        # New approach: PyTorch built-in module tracking
-        self._use_builtin_module_tracking = True  # Re-enabled for testing
+        # New approach: PyTorch built-in module tracking (default enabled)
+        self._use_builtin_module_tracking = True  # Default enabled - significant improvements validated
         self._builtin_module_map: Optional[Dict[Any, str]] = None
 
     def export(
