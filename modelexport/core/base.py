@@ -1,7 +1,79 @@
-"""Utility functions for modelexport."""
+"""
+Base Classes and Shared Utilities for Model Export
+
+This module provides the base hierarchy exporter interface and shared utilities
+used across all export strategies.
+
+Components:
+- BaseHierarchyExporter: Abstract base class for all export strategies
+- Shared utility functions for module filtering and hierarchy building
+- Common data structures and type definitions
+"""
+
+from __future__ import annotations
 
 import torch
-from typing import List, Optional
+from abc import ABC, abstractmethod
+from typing import Dict, List, Any, Optional, Union, Tuple
+from pathlib import Path
+
+
+class BaseHierarchyExporter(ABC):
+    """
+    Abstract base class for all hierarchy-preserving ONNX exporters.
+    
+    Defines the common interface that all export strategies must implement,
+    ensuring consistency across FX, HTP, and usage-based strategies.
+    """
+    
+    def __init__(self):
+        """Initialize base exporter with common state tracking."""
+        self._model_root: Optional[torch.nn.Module] = None
+        self._export_stats: Dict[str, Any] = {}
+        
+    @abstractmethod
+    def export(
+        self,
+        model: torch.nn.Module,
+        example_inputs: Union[torch.Tensor, Tuple, Dict],
+        output_path: str,
+        **kwargs
+    ) -> Dict[str, Any]:
+        """
+        Export PyTorch model to ONNX with hierarchy preservation.
+        
+        Args:
+            model: PyTorch model to export
+            example_inputs: Example inputs for tracing/export
+            output_path: Path to save ONNX model
+            **kwargs: Strategy-specific arguments
+            
+        Returns:
+            Export metadata with hierarchy information
+        """
+        pass
+    
+    @abstractmethod
+    def extract_subgraph(
+        self, 
+        onnx_path: str, 
+        target_module: str
+    ) -> Dict[str, Any]:
+        """
+        Extract subgraph for specific module hierarchy.
+        
+        Args:
+            onnx_path: Path to ONNX model file
+            target_module: Target module hierarchy path
+            
+        Returns:
+            Subgraph extraction results
+        """
+        pass
+    
+    def get_export_stats(self) -> Dict[str, Any]:
+        """Get statistics from the last export operation."""
+        return self._export_stats.copy()
 
 
 def should_tag_module(module: torch.nn.Module, exceptions: Optional[List[str]] = None) -> bool:
@@ -109,3 +181,72 @@ def build_hierarchy_path(model_root: torch.nn.Module, module_path: str, all_modu
                 hierarchy_parts.append(class_name)
     
     return "/" + "/".join(hierarchy_parts)
+
+
+def validate_output_path(output_path: str) -> str:
+    """
+    Validate and normalize output path for ONNX export.
+    
+    Args:
+        output_path: User-provided output path
+        
+    Returns:
+        Validated and normalized output path
+        
+    Raises:
+        ValueError: If path is invalid
+    """
+    path = Path(output_path)
+    
+    # Ensure .onnx extension
+    if not path.suffix:
+        path = path.with_suffix('.onnx')
+    elif path.suffix.lower() != '.onnx':
+        raise ValueError(f"Output path must have .onnx extension, got: {path.suffix}")
+    
+    # Create parent directory if it doesn't exist
+    path.parent.mkdir(parents=True, exist_ok=True)
+    
+    return str(path)
+
+
+def get_model_signature(model: torch.nn.Module) -> str:
+    """
+    Generate a unique signature for a model for caching and identification.
+    
+    Args:
+        model: PyTorch model
+        
+    Returns:
+        Unique model signature string
+    """
+    class_name = model.__class__.__name__
+    module_count = len(list(model.named_modules()))
+    param_count = sum(p.numel() for p in model.parameters())
+    
+    return f"{class_name}_{module_count}_{param_count}"
+
+
+def extract_forward_signature(module: torch.nn.Module) -> Dict[str, Any]:
+    """
+    Extract forward method signature for module metadata.
+    
+    Args:
+        module: PyTorch module
+        
+    Returns:
+        Dictionary with forward method signature information
+    """
+    import inspect
+    
+    try:
+        sig = inspect.signature(module.forward)
+        return {
+            "forward_args": list(sig.parameters.keys()),
+            "forward_defaults": {
+                name: param.default if param.default != param.empty else None 
+                for name, param in sig.parameters.items()
+            }
+        }
+    except Exception:
+        return {"forward_args": [], "forward_defaults": {}}

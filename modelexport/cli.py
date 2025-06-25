@@ -17,8 +17,10 @@ from typing import Optional, Dict, Any
 import tempfile
 import shutil
 
-from .hierarchy_exporter import HierarchyExporter
-from . import tag_utils
+from .strategies.htp.htp_hierarchy_exporter import HierarchyExporter
+from .strategies.fx.fx_hierarchy_exporter import FXHierarchyExporter
+from .strategies.usage_based.usage_based_exporter import UsageBasedExporter
+from .core import tag_utils
 
 
 @click.group()
@@ -36,7 +38,7 @@ def cli(ctx, verbose):
 @click.argument('output_path')
 @click.option('--input-shape', help='Input shape as comma-separated values (e.g., 1,3,224,224) for vision models')
 @click.option('--strategy', default='usage_based', 
-              type=click.Choice(['usage_based', 'htp']), 
+              type=click.Choice(['usage_based', 'htp', 'fx_graph']), 
               help='Tagging strategy to use')
 @click.option('--opset-version', default=14, type=int,
               help='ONNX opset version to use')
@@ -66,6 +68,9 @@ def export(ctx, model_name_or_path, output_path, input_shape, strategy, opset_ve
         
         # Export with FX graph alternative (for analysis)
         modelexport export prajjwal1/bert-tiny bert.onnx --config config.json --fx-graph both
+        
+        # Export with FX Graph strategy (structural analysis)
+        modelexport export prajjwal1/bert-tiny bert.onnx --strategy fx_graph
         
         # Export vision model with input shape
         modelexport export resnet50 resnet.onnx --input-shape 1,3,224,224
@@ -221,22 +226,63 @@ def export(ctx, model_name_or_path, output_path, input_shape, strategy, opset_ve
                     import traceback
                     click.echo(traceback.format_exc(), err=True)
         
-        # Export with hierarchy preservation
-        exporter = HierarchyExporter(strategy=strategy)
-        result = exporter.export(
-            model=model,
-            example_inputs=inputs,
-            output_path=output_path,
-            **export_kwargs
-        )
+        # Export with hierarchy preservation using appropriate strategy
+        if strategy == 'fx_graph':
+            if verbose:
+                click.echo("🚀 Using FX Graph-based hierarchy preservation")
+            exporter = FXHierarchyExporter()
+            result = exporter.export(
+                model=model,
+                example_inputs=inputs,
+                output_path=output_path,
+                **export_kwargs
+            )
+        elif strategy == 'usage_based':
+            if verbose:
+                click.echo("🔄 Using Usage-based hierarchy preservation (legacy)")
+            exporter = UsageBasedExporter()
+            result = exporter.export(
+                model=model,
+                example_inputs=inputs,
+                output_path=output_path,
+                **export_kwargs
+            )
+        else:  # htp strategy
+            if verbose:
+                click.echo("🧠 Using HTP (Hierarchical Trace-and-Project) strategy")
+            exporter = HierarchyExporter(strategy=strategy)
+            result = exporter.export(
+                model=model,
+                example_inputs=inputs,
+                output_path=output_path,
+                **export_kwargs
+            )
         
         # Output results
         click.echo(f"✅ Export completed successfully!")
-        click.echo(f"   ONNX Output: {output_path}")
-        click.echo(f"   Sidecar: {output_path.replace('.onnx', '_hierarchy.json')}")
-        click.echo(f"   Total operations: {result['total_operations']}")
-        click.echo(f"   Tagged operations: {result['tagged_operations']}")
-        click.echo(f"   Strategy: {result['strategy']}")
+        
+        if strategy == 'fx_graph':
+            # FX strategy specific output
+            click.echo(f"   ONNX Output: {result['onnx_path']}")
+            click.echo(f"   Sidecar: {result['sidecar_path']}")
+            click.echo(f"   Module Info: {result['module_info_path']}")
+            click.echo(f"   FX Nodes with hierarchy: {result['hierarchy_nodes']}")
+            click.echo(f"   Unique modules: {result['unique_modules']}")
+            click.echo(f"   Strategy: {result['strategy']}")
+            click.echo(f"   Export time: {result['export_time']:.2f}s")
+            if verbose:
+                fx_stats = result['fx_graph_stats']
+                click.echo(f"   FX Graph stats:")
+                click.echo(f"     Total FX nodes: {fx_stats['total_fx_nodes']}")
+                click.echo(f"     Coverage ratio: {fx_stats['coverage_ratio']:.1%}")
+                click.echo(f"     Module types: {len(fx_stats['module_types_found'])}")
+        else:
+            # Legacy strategy output
+            click.echo(f"   ONNX Output: {output_path}")
+            click.echo(f"   Sidecar: {output_path.replace('.onnx', '_hierarchy.json')}")
+            click.echo(f"   Total operations: {result['total_operations']}")
+            click.echo(f"   Tagged operations: {result['tagged_operations']}")
+            click.echo(f"   Strategy: {result['strategy']}")
         
         # Report on additional exports
         if jit_info and jit_info.get('scope_statistics', {}).get('extraction_success'):
