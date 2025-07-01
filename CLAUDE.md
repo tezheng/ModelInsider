@@ -93,6 +93,27 @@ Always follow MUST-RULES
 - Prioritize generalizability over specific implementations
 - Validate against core architectural constraints before committing any changes
 
+## ⚠️ CARDINAL RULE #3 - MANDATORY ITERATION DOCUMENTATION
+
+**THIS IS THE THIRD CARDINAL RULE - NO EXCEPTIONS!**
+
+❌ **NEVER**:
+- Complete an iteration without creating iteration notes
+- Start a new iteration without reviewing previous iteration notes
+- Skip todo updates after completing tasks
+- Forget to record mistakes and insights
+
+✅ **ALWAYS**:
+- Create iteration notes immediately after each iteration using `/docs/design/iteration_note_template.md`
+- Include: achievements, mistakes, insights, follow-up actions, updated todos
+- Review the last 10 iteration notes before starting any new iteration
+- Update todo list and append to iteration notes
+- Follow the established plan and learn from recorded mistakes
+
+**Before every iteration**: Read the last 10 iteration notes to understand context and avoid repeating mistakes  
+**After every iteration**: Create comprehensive iteration notes using the template  
+**When planning**: Use iteration notes to inform decisions and priorities
+
 ## Project Overview
 
 This is a Python project named "modelexport" for universal hierarchy-preserving ONNX export of Hugging Face models. The project uses Python 3.12+ and is configured with pyproject.toml for dependency management.
@@ -209,3 +230,5 @@ The HTP strategy now uses PyTorch's built-in `torch.jit._trace._trace_module_map
 
 ### Model Export Workflows
 - Use `uv run modelexport export prajjwal1/bert-tiny temp/bert-tiny/model.onnx --strategy htp --config export_config_bertmodel.json` to export prajjwal1/bert-tiny
+- Generate bert-tiny baseline with `uv run python tests/data/generate_test_data.py --model prajjwal1/bert-tiny --output-dir temp/baseline/bert-tiny/`
+- Prefer opset_version=17 when converting to onnx model

@@ -1,0 +1,184 @@
+{
+  "version": "1.0",
+  "format": "modelexport_hierarchy_htp_builtin",
+  "model_path": "/mnt/d/BYOM/modelexport/examples/outputs/auxiliary_heavy_model.onnx",
+  "generated_at": "2025-06-26T20:50:48.835622",
+  "exporter": {
+    "name": "modelexport",
+    "version": "0.1.0",
+    "strategy": "htp_builtin"
+  },
+  "summary": {
+    "total_operations": 13,
+    "tagged_operations": 13,
+    "nodes_with_attributes": 13,
+    "unique_tags": 8,
+    "operation_trace_length": 0,
+    "native_op_regions": 0,
+    "slice_operations_tracked": 0,
+    "builtin_tracking_enabled": true
+  },
+  "tag_statistics": {
+    "/AuxiliaryHeavyModel/Parameters/Constant": 5,
+    "/AuxiliaryHeavyModel/Introspection/Reshape": 1,
+    "/AuxiliaryHeavyModel/DataTransformation/Unsqueeze": 2,
+    "/AuxiliaryHeavyModel/DataTransformation/Transpose": 1,
+    "/AuxiliaryHeavyModel/DataTransformation/Squeeze": 1,
+    "/AuxiliaryHeavyModel/Elementwise/Mul": 1,
+    "/AuxiliaryHeavyModel/Elementwise/Add": 1,
+    "/AuxiliaryHeavyModel/Aggregation/ReduceMean": 1
+  },
+  "node_tags": {
+    "/Constant": {
+      "op_type": "Constant",
+      "tags": [
+        "/AuxiliaryHeavyModel/Parameters/Constant"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/Constant_output_0"
+      ]
+    },
+    "/Reshape": {
+      "op_type": "Reshape",
+      "tags": [
+        "/AuxiliaryHeavyModel/Introspection/Reshape"
+      ],
+      "inputs": [
+        "onnx::Reshape_0",
+        "/Constant_output_0"
+      ],
+      "outputs": [
+        "/Reshape_output_0"
+      ]
+    },
+    "/Constant_1": {
+      "op_type": "Constant",
+      "tags": [
+        "/AuxiliaryHeavyModel/Parameters/Constant"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/Constant_1_output_0"
+      ]
+    },
+    "/Unsqueeze": {
+      "op_type": "Unsqueeze",
+      "tags": [
+        "/AuxiliaryHeavyModel/DataTransformation/Unsqueeze"
+      ],
+      "inputs": [
+        "/Reshape_output_0",
+        "/Constant_1_output_0"
+      ],
+      "outputs": [
+        "/Unsqueeze_output_0"
+      ]
+    },
+    "/Transpose": {
+      "op_type": "Transpose",
+      "tags": [
+        "/AuxiliaryHeavyModel/DataTransformation/Transpose"
+      ],
+      "inputs": [
+        "/Unsqueeze_output_0"
+      ],
+      "outputs": [
+        "/Transpose_output_0"
+      ]
+    },
+    "/Squeeze": {
+      "op_type": "Squeeze",
+      "tags": [
+        "/AuxiliaryHeavyModel/DataTransformation/Squeeze"
+      ],
+      "inputs": [
+        "/Transpose_output_0"
+      ],
+      "outputs": [
+        "/Squeeze_output_0"
+      ]
+    },
+    "/Constant_2": {
+      "op_type": "Constant",
+      "tags": [
+        "/AuxiliaryHeavyModel/Parameters/Constant"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/Constant_2_output_0"
+      ]
+    },
+    "/Mul": {
+      "op_type": "Mul",
+      "tags": [
+        "/AuxiliaryHeavyModel/Elementwise/Mul"
+      ],
+      "inputs": [
+        "/Squeeze_output_0",
+        "/Constant_2_output_0"
+      ],
+      "outputs": [
+        "/Mul_output_0"
+      ]
+    },
+    "/Constant_3": {
+      "op_type": "Constant",
+      "tags": [
+        "/AuxiliaryHeavyModel/Parameters/Constant"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/Constant_3_output_0"
+      ]
+    },
+    "/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/AuxiliaryHeavyModel/Elementwise/Add"
+      ],
+      "inputs": [
+        "/Mul_output_0",
+        "/Constant_3_output_0"
+      ],
+      "outputs": [
+        "/Add_output_0"
+      ]
+    },
+    "/ReduceMean": {
+      "op_type": "ReduceMean",
+      "tags": [
+        "/AuxiliaryHeavyModel/Aggregation/ReduceMean"
+      ],
+      "inputs": [
+        "/Add_output_0"
+      ],
+      "outputs": [
+        "/ReduceMean_output_0"
+      ]
+    },
+    "/Constant_4": {
+      "op_type": "Constant",
+      "tags": [
+        "/AuxiliaryHeavyModel/Parameters/Constant"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/Constant_4_output_0"
+      ]
+    },
+    "/Unsqueeze_1": {
+      "op_type": "Unsqueeze",
+      "tags": [
+        "/AuxiliaryHeavyModel/DataTransformation/Unsqueeze"
+      ],
+      "inputs": [
+        "/ReduceMean_output_0",
+        "/Constant_4_output_0"
+      ],
+      "outputs": [
+        "13"
+      ]
+    }
+  }
+}

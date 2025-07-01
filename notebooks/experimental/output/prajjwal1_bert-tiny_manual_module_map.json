@@ -1,0 +1,242 @@
+{
+  "BertModel_280780875255248": {
+    "scope_name": "__module",
+    "class_name": "BertModel",
+    "module_str": "BertModel(\n  (embeddings): BertEmbeddings(\n    (word_embeddings): Embedding(30522, 128, padding_idx=0)\n    (position_embeddings): Embedding(512, 128)\n    (token_type_embeddings): Embedding(2, 128)\n   ..."
+  },
+  "BertEmbeddings_280780875279792": {
+    "scope_name": "__module.embeddings",
+    "class_name": "BertEmbeddings",
+    "module_str": "BertEmbeddings(\n  (word_embeddings): Embedding(30522, 128, padding_idx=0)\n  (position_embeddings): Embedding(512, 128)\n  (token_type_embeddings): Embedding(2, 128)\n  (LayerNorm): LayerNorm((128,), eps..."
+  },
+  "Embedding_280780875306416": {
+    "scope_name": "__module.embeddings.word_embeddings",
+    "class_name": "Embedding",
+    "module_str": "Embedding(30522, 128, padding_idx=0)"
+  },
+  "Embedding_280781046325296": {
+    "scope_name": "__module.embeddings.position_embeddings",
+    "class_name": "Embedding",
+    "module_str": "Embedding(512, 128)"
+  },
+  "Embedding_280781046332736": {
+    "scope_name": "__module.embeddings.token_type_embeddings",
+    "class_name": "Embedding",
+    "module_str": "Embedding(2, 128)"
+  },
+  "LayerNorm_280781030939760": {
+    "scope_name": "__module.embeddings.LayerNorm",
+    "class_name": "LayerNorm",
+    "module_str": "LayerNorm((128,), eps=1e-12, elementwise_affine=True)"
+  },
+  "Dropout_280781098741744": {
+    "scope_name": "__module.embeddings.dropout",
+    "class_name": "Dropout",
+    "module_str": "Dropout(p=0.1, inplace=False)"
+  },
+  "BertEncoder_280781047183552": {
+    "scope_name": "__module.encoder",
+    "class_name": "BertEncoder",
+    "module_str": "BertEncoder(\n  (layer): ModuleList(\n    (0-1): 2 x BertLayer(\n      (attention): BertAttention(\n        (self): BertSdpaSelfAttention(\n          (query): Linear(in_features=128, out_features=128, bias..."
+  },
+  "ModuleList_280781030945760": {
+    "scope_name": "__module.encoder.layer",
+    "class_name": "ModuleList",
+    "module_str": "ModuleList(\n  (0-1): 2 x BertLayer(\n    (attention): BertAttention(\n      (self): BertSdpaSelfAttention(\n        (query): Linear(in_features=128, out_features=128, bias=True)\n        (key): Linear(in_..."
+  },
+  "BertLayer_280781030937120": {
+    "scope_name": "__module.encoder.layer.0",
+    "class_name": "BertLayer",
+    "module_str": "BertLayer(\n  (attention): BertAttention(\n    (self): BertSdpaSelfAttention(\n      (query): Linear(in_features=128, out_features=128, bias=True)\n      (key): Linear(in_features=128, out_features=128, b..."
+  },
+  "BertAttention_280781030935680": {
+    "scope_name": "__module.encoder.layer.0.attention",
+    "class_name": "BertAttention",
+    "module_str": "BertAttention(\n  (self): BertSdpaSelfAttention(\n    (query): Linear(in_features=128, out_features=128, bias=True)\n    (key): Linear(in_features=128, out_features=128, bias=True)\n    (value): Linear(in..."
+  },
+  "BertSdpaSelfAttention_280780874932944": {
+    "scope_name": "__module.encoder.layer.0.attention.self",
+    "class_name": "BertSdpaSelfAttention",
+    "module_str": "BertSdpaSelfAttention(\n  (query): Linear(in_features=128, out_features=128, bias=True)\n  (key): Linear(in_features=128, out_features=128, bias=True)\n  (value): Linear(in_features=128, out_features=128..."
+  },
+  "Linear_280780874908016": {
+    "scope_name": "__module.encoder.layer.0.attention.self.query",
+    "class_name": "Linear",
+    "module_str": "Linear(in_features=128, out_features=128, bias=True)"
+  },
+  "Linear_280780875260480": {
+    "scope_name": "__module.encoder.layer.0.attention.self.key",
+    "class_name": "Linear",
+    "module_str": "Linear(in_features=128, out_features=128, bias=True)"
+  },
+  "Linear_280780875240448": {
+    "scope_name": "__module.encoder.layer.0.attention.self.value",
+    "class_name": "Linear",
+    "module_str": "Linear(in_features=128, out_features=128, bias=True)"
+  },
+  "Dropout_280780875305984": {
+    "scope_name": "__module.encoder.layer.0.attention.self.dropout",
+    "class_name": "Dropout",
+    "module_str": "Dropout(p=0.1, inplace=False)"
+  },
+  "BertSelfOutput_280780875250528": {
+    "scope_name": "__module.encoder.layer.0.attention.output",
+    "class_name": "BertSelfOutput",
+    "module_str": "BertSelfOutput(\n  (dense): Linear(in_features=128, out_features=128, bias=True)\n  (LayerNorm): LayerNorm((128,), eps=1e-12, elementwise_affine=True)\n  (dropout): Dropout(p=0.1, inplace=False)\n)"
+  },
+  "Linear_280780874935392": {
+    "scope_name": "__module.encoder.layer.0.attention.output.dense",
+    "class_name": "Linear",
+    "module_str": "Linear(in_features=128, out_features=128, bias=True)"
+  },
+  "LayerNorm_280780875275904": {
+    "scope_name": "__module.encoder.layer.0.attention.output.LayerNorm",
+    "class_name": "LayerNorm",
+    "module_str": "LayerNorm((128,), eps=1e-12, elementwise_affine=True)"
+  },
+  "Dropout_280780875302576": {
+    "scope_name": "__module.encoder.layer.0.attention.output.dropout",
+    "class_name": "Dropout",
+    "module_str": "Dropout(p=0.1, inplace=False)"
+  },
+  "BertIntermediate_280780875274800": {
+    "scope_name": "__module.encoder.layer.0.intermediate",
+    "class_name": "BertIntermediate",
+    "module_str": "BertIntermediate(\n  (dense): Linear(in_features=128, out_features=512, bias=True)\n  (intermediate_act_fn): GELUActivation()\n)"
+  },
+  "Linear_280780875256304": {
+    "scope_name": "__module.encoder.layer.0.intermediate.dense",
+    "class_name": "Linear",
+    "module_str": "Linear(in_features=128, out_features=512, bias=True)"
+  },
+  "GELUActivation_280780875280560": {
+    "scope_name": "__module.encoder.layer.0.intermediate.intermediate_act_fn",
+    "class_name": "GELUActivation",
+    "module_str": "GELUActivation()"
+  },
+  "BertOutput_280780875275952": {
+    "scope_name": "__module.encoder.layer.0.output",
+    "class_name": "BertOutput",
+    "module_str": "BertOutput(\n  (dense): Linear(in_features=512, out_features=128, bias=True)\n  (LayerNorm): LayerNorm((128,), eps=1e-12, elementwise_affine=True)\n  (dropout): Dropout(p=0.1, inplace=False)\n)"
+  },
+  "Linear_280783143850048": {
+    "scope_name": "__module.encoder.layer.0.output.dense",
+    "class_name": "Linear",
+    "module_str": "Linear(in_features=512, out_features=128, bias=True)"
+  },
+  "LayerNorm_280780875257216": {
+    "scope_name": "__module.encoder.layer.0.output.LayerNorm",
+    "class_name": "LayerNorm",
+    "module_str": "LayerNorm((128,), eps=1e-12, elementwise_affine=True)"
+  },
+  "Dropout_280780874935728": {
+    "scope_name": "__module.encoder.layer.0.output.dropout",
+    "class_name": "Dropout",
+    "module_str": "Dropout(p=0.1, inplace=False)"
+  },
+  "BertLayer_280780874679600": {
+    "scope_name": "__module.encoder.layer.1",
+    "class_name": "BertLayer",
+    "module_str": "BertLayer(\n  (attention): BertAttention(\n    (self): BertSdpaSelfAttention(\n      (query): Linear(in_features=128, out_features=128, bias=True)\n      (key): Linear(in_features=128, out_features=128, b..."
+  },
+  "BertAttention_280780875313472": {
+    "scope_name": "__module.encoder.layer.1.attention",
+    "class_name": "BertAttention",
+    "module_str": "BertAttention(\n  (self): BertSdpaSelfAttention(\n    (query): Linear(in_features=128, out_features=128, bias=True)\n    (key): Linear(in_features=128, out_features=128, bias=True)\n    (value): Linear(in..."
+  },
+  "BertSdpaSelfAttention_280780875308960": {
+    "scope_name": "__module.encoder.layer.1.attention.self",
+    "class_name": "BertSdpaSelfAttention",
+    "module_str": "BertSdpaSelfAttention(\n  (query): Linear(in_features=128, out_features=128, bias=True)\n  (key): Linear(in_features=128, out_features=128, bias=True)\n  (value): Linear(in_features=128, out_features=128..."
+  },
+  "Linear_280780875304208": {
+    "scope_name": "__module.encoder.layer.1.attention.self.query",
+    "class_name": "Linear",
+    "module_str": "Linear(in_features=128, out_features=128, bias=True)"
+  },
+  "Linear_280780875308864": {
+    "scope_name": "__module.encoder.layer.1.attention.self.key",
+    "class_name": "Linear",
+    "module_str": "Linear(in_features=128, out_features=128, bias=True)"
+  },
+  "Linear_280780875316256": {
+    "scope_name": "__module.encoder.layer.1.attention.self.value",
+    "class_name": "Linear",
+    "module_str": "Linear(in_features=128, out_features=128, bias=True)"
+  },
+  "Dropout_280780875308384": {
+    "scope_name": "__module.encoder.layer.1.attention.self.dropout",
+    "class_name": "Dropout",
+    "module_str": "Dropout(p=0.1, inplace=False)"
+  },
+  "BertSelfOutput_280780875306272": {
+    "scope_name": "__module.encoder.layer.1.attention.output",
+    "class_name": "BertSelfOutput",
+    "module_str": "BertSelfOutput(\n  (dense): Linear(in_features=128, out_features=128, bias=True)\n  (LayerNorm): LayerNorm((128,), eps=1e-12, elementwise_affine=True)\n  (dropout): Dropout(p=0.1, inplace=False)\n)"
+  },
+  "Linear_280780875282864": {
+    "scope_name": "__module.encoder.layer.1.attention.output.dense",
+    "class_name": "Linear",
+    "module_str": "Linear(in_features=128, out_features=128, bias=True)"
+  },
+  "LayerNorm_280781030940000": {
+    "scope_name": "__module.encoder.layer.1.attention.output.LayerNorm",
+    "class_name": "LayerNorm",
+    "module_str": "LayerNorm((128,), eps=1e-12, elementwise_affine=True)"
+  },
+  "Dropout_280781030944800": {
+    "scope_name": "__module.encoder.layer.1.attention.output.dropout",
+    "class_name": "Dropout",
+    "module_str": "Dropout(p=0.1, inplace=False)"
+  },
+  "BertIntermediate_280781035101104": {
+    "scope_name": "__module.encoder.layer.1.intermediate",
+    "class_name": "BertIntermediate",
+    "module_str": "BertIntermediate(\n  (dense): Linear(in_features=128, out_features=512, bias=True)\n  (intermediate_act_fn): GELUActivation()\n)"
+  },
+  "Linear_280781033721536": {
+    "scope_name": "__module.encoder.layer.1.intermediate.dense",
+    "class_name": "Linear",
+    "module_str": "Linear(in_features=128, out_features=512, bias=True)"
+  },
+  "GELUActivation_280782854227536": {
+    "scope_name": "__module.encoder.layer.1.intermediate.intermediate_act_fn",
+    "class_name": "GELUActivation",
+    "module_str": "GELUActivation()"
+  },
+  "BertOutput_280781098739488": {
+    "scope_name": "__module.encoder.layer.1.output",
+    "class_name": "BertOutput",
+    "module_str": "BertOutput(\n  (dense): Linear(in_features=512, out_features=128, bias=True)\n  (LayerNorm): LayerNorm((128,), eps=1e-12, elementwise_affine=True)\n  (dropout): Dropout(p=0.1, inplace=False)\n)"
+  },
+  "Linear_280781098737712": {
+    "scope_name": "__module.encoder.layer.1.output.dense",
+    "class_name": "Linear",
+    "module_str": "Linear(in_features=512, out_features=128, bias=True)"
+  },
+  "LayerNorm_280781098739296": {
+    "scope_name": "__module.encoder.layer.1.output.LayerNorm",
+    "class_name": "LayerNorm",
+    "module_str": "LayerNorm((128,), eps=1e-12, elementwise_affine=True)"
+  },
+  "Dropout_280781098740112": {
+    "scope_name": "__module.encoder.layer.1.output.dropout",
+    "class_name": "Dropout",
+    "module_str": "Dropout(p=0.1, inplace=False)"
+  },
+  "BertPooler_280781032242736": {
+    "scope_name": "__module.pooler",
+    "class_name": "BertPooler",
+    "module_str": "BertPooler(\n  (dense): Linear(in_features=128, out_features=128, bias=True)\n  (activation): Tanh()\n)"
+  },
+  "Linear_280781030943504": {
+    "scope_name": "__module.pooler.dense",
+    "class_name": "Linear",
+    "module_str": "Linear(in_features=128, out_features=128, bias=True)"
+  },
+  "Tanh_280780874918720": {
+    "scope_name": "__module.pooler.activation",
+    "class_name": "Tanh",
+    "module_str": "Tanh()"
+  }
+}

@@ -1,35 +1,72 @@
 """
-Universal Hierarchy-Preserving ONNX Export for PyTorch Models
+ModelExport - Universal Hierarchy-Preserving ONNX Export
 
-A universal exporter with multiple strategies for different model types and use cases.
+A production-ready framework for exporting PyTorch models to ONNX with preserved
+module hierarchy information. Features intelligent strategy selection and 
+comprehensive optimizations.
+
+Quick Start:
+    >>> import modelexport
+    >>> report = modelexport.export_model(
+    ...     model,
+    ...     torch.randn(1, 3, 224, 224),
+    ...     "model.onnx"
+    ... )
+    >>> print(f"Exported using {report['summary']['final_strategy']} strategy")
 
 Strategies:
-- FX: Symbolic tracing for pure PyTorch models (95%+ coverage, fast)
-- HTP: Execution tracing for complex models with control flow (HuggingFace compatible)
-- Usage-based: Legacy strategy for backward compatibility
-
-Key Features:
-- Universal: Works with any PyTorch model (no hardcoded architectures)
-- Strategy-based: Optimized approach for different model types
-- Hierarchy preservation: Complete module structure maintained in ONNX
-- Production ready: Comprehensive testing and validation
+- Usage-Based: Fastest strategy (2.5s), recommended for production
+- HTP: Comprehensive tracing for complex models (4-6s)
+- FX: Limited compatibility, not recommended for HuggingFace models
 """
 
-from .strategies.fx import FXHierarchyExporter
-from .strategies.htp import HTPHierarchyExporter
+# Main export interface
+from .unified_export import export_model, UnifiedExporter
+
+# Core components for advanced usage
+from .core.strategy_selector import ExportStrategy, StrategySelector, select_best_strategy
+from .core.unified_optimizer import UnifiedOptimizer, create_optimized_exporter
+
+# Individual strategies for direct access
 from .strategies.usage_based import UsageBasedExporter
+from .strategies.htp import HTPHierarchyExporter
+from .strategies.fx import FXHierarchyExporter
+
+# Utilities
+from .core.base import BaseHierarchyExporter, should_tag_module, build_hierarchy_path
+from .core.onnx_utils import ONNXUtils
 from .core import tag_utils
-from .core.base import BaseHierarchyExporter
 
 # Backward compatibility
 HierarchyExporter = HTPHierarchyExporter
 
 __version__ = "0.1.0"
 __all__ = [
-    "FXHierarchyExporter",
-    "HTPHierarchyExporter", 
+    # Main interface (recommended)
+    "export_model",
+    "UnifiedExporter",
+    
+    # Strategy selection
+    "ExportStrategy", 
+    "StrategySelector",
+    "select_best_strategy",
+    
+    # Optimization framework
+    "UnifiedOptimizer",
+    "create_optimized_exporter",
+    
+    # Individual strategies
     "UsageBasedExporter",
+    "HTPHierarchyExporter", 
+    "FXHierarchyExporter",
+    
+    # Utilities
     "BaseHierarchyExporter",
-    "HierarchyExporter",  # Backward compatibility
-    "tag_utils"
+    "should_tag_module",
+    "build_hierarchy_path",
+    "ONNXUtils",
+    "tag_utils",
+    
+    # Backward compatibility
+    "HierarchyExporter",
 ]

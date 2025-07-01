@@ -22,7 +22,7 @@ import os
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from modelexport.utils import should_tag_module, build_hierarchy_path
+from modelexport.core.base import should_tag_module, build_hierarchy_path
 
 try:
     from transformers import AutoModel, AutoTokenizer

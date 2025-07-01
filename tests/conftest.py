@@ -217,3 +217,111 @@ def complex_hierarchical_model():
 def complex_model_input():
     """Input for complex hierarchical model."""
     return torch.randint(0, 1000, (2, 10))  # batch_size=2, seq_len=10
+
+
+# Additional fixtures for new test infrastructure
+
+@pytest.fixture(scope="session")
+def test_models():
+    """Provide test model fixtures for the entire test session."""
+    from .fixtures.test_models import TestModelFixtures
+    return TestModelFixtures()
+
+
+@pytest.fixture(scope="function")
+def temp_dir():
+    """Provide a temporary directory for each test."""
+    import tempfile
+    import shutil
+    from pathlib import Path
+    
+    temp_dir = tempfile.mkdtemp()
+    yield Path(temp_dir)
+    shutil.rmtree(temp_dir, ignore_errors=True)
+
+
+@pytest.fixture(scope="function")
+def sample_onnx_path(temp_dir):
+    """Provide a sample ONNX file path for testing."""
+    return str(temp_dir / "test_model.onnx")
+
+
+def pytest_configure(config):
+    """Configure pytest with custom markers."""
+    config.addinivalue_line("markers", "unit: Unit tests for individual components")
+    config.addinivalue_line("markers", "integration: Integration tests across components")
+    config.addinivalue_line("markers", "strategy: Strategy-specific tests")
+    config.addinivalue_line("markers", "fx: FX strategy tests")
+    config.addinivalue_line("markers", "htp: HTP strategy tests")
+    config.addinivalue_line("markers", "usage_based: Usage-based strategy tests")
+    config.addinivalue_line("markers", "cli: CLI integration tests")
+    config.addinivalue_line("markers", "slow: Tests that take longer to run")
+    config.addinivalue_line("markers", "requires_transformers: Tests requiring transformers")
+    config.addinivalue_line("markers", "requires_onnx: Tests requiring ONNX runtime")
+
+
+def pytest_collection_modifyitems(config, items):
+    """Modify test collection to add markers based on test location."""
+    for item in items:
+        # Add markers based on test file location
+        test_path = str(item.fspath)
+        
+        if "/unit/" in test_path:
+            item.add_marker(pytest.mark.unit)
+        elif "/integration/" in test_path:
+            item.add_marker(pytest.mark.integration)
+        
+        if "/test_strategies/" in test_path:
+            item.add_marker(pytest.mark.strategy)
+            
+        if "/fx/" in test_path:
+            item.add_marker(pytest.mark.fx)
+        elif "/htp/" in test_path:
+            item.add_marker(pytest.mark.htp)
+        elif "/usage_based/" in test_path:
+            item.add_marker(pytest.mark.usage_based)
+            
+        if "/test_cli" in test_path:
+            item.add_marker(pytest.mark.cli)
+        
+        # Add markers based on test content
+        if "transformers" in test_path or "huggingface" in test_path.lower():
+            item.add_marker(pytest.mark.requires_transformers)
+        
+        if "slow" in item.name.lower() or "performance" in item.name.lower():
+            item.add_marker(pytest.mark.slow)
+
+
+def pytest_runtest_setup(item):
+    """Set up each test run."""
+    # Skip tests that require optional dependencies
+    if item.get_closest_marker("requires_transformers"):
+        pytest.importorskip("transformers")
+    
+    if item.get_closest_marker("requires_onnx"):
+        pytest.importorskip("onnx")
+        pytest.importorskip("onnxruntime")
+
+
+@pytest.fixture(autouse=True)
+def reset_model_state():
+    """Reset model state before each test."""
+    # Clear any cached models or state
+    if hasattr(torch.cuda, 'empty_cache'):
+        torch.cuda.empty_cache()
+    
+    # Set deterministic behavior for testing
+    torch.manual_seed(42)
+    if torch.cuda.is_available():
+        torch.cuda.manual_seed(42)
+
+
+@pytest.fixture(scope="session")
+def test_config():
+    """Provide test configuration."""
+    return {
+        "test_timeout": 30,  # seconds
+        "temp_file_cleanup": True,
+        "verbose_output": False,
+        "skip_slow_tests": False
+    }

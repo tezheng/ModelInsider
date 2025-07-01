@@ -1,0 +1,96 @@
+{
+  "model_path": "/tmp/tmpvbx1xehe/custom_exceptions_fx.onnx",
+  "export_method": "fx_graph",
+  "hierarchy_mapping": {
+    "x": "/Inputs/x",
+    "layers_0": "/ComplexMLP/Sequential.0",
+    "layers_1": "/ComplexMLP/Sequential.1",
+    "layers_3": "/ComplexMLP/Sequential.3",
+    "layers_4": "/ComplexMLP/Sequential.4",
+    "layers_5": "/ComplexMLP/Sequential.5",
+    "layers_7": "/ComplexMLP/Sequential.7",
+    "layers_8": "/ComplexMLP/Sequential.8",
+    "layers_9": "/ComplexMLP/Sequential.9",
+    "output": "/ComplexMLP/Sequential.9/Output"
+  },
+  "module_mapping": {
+    "/Inputs/x": [
+      "x"
+    ],
+    "/ComplexMLP/Sequential.0": [
+      "layers_0"
+    ],
+    "/ComplexMLP/Sequential.1": [
+      "layers_1"
+    ],
+    "/ComplexMLP/Sequential.3": [
+      "layers_3"
+    ],
+    "/ComplexMLP/Sequential.4": [
+      "layers_4"
+    ],
+    "/ComplexMLP/Sequential.5": [
+      "layers_5"
+    ],
+    "/ComplexMLP/Sequential.7": [
+      "layers_7"
+    ],
+    "/ComplexMLP/Sequential.8": [
+      "layers_8"
+    ],
+    "/ComplexMLP/Sequential.9": [
+      "layers_9"
+    ],
+    "/ComplexMLP/Sequential.9/Output": [
+      "output"
+    ]
+  },
+  "instance_mapping": {
+    "layers.0": "/ComplexMLP/Sequential.0",
+    "layers.1": "/ComplexMLP/Sequential.1",
+    "layers.3": "/ComplexMLP/Sequential.3",
+    "layers.4": "/ComplexMLP/Sequential.4",
+    "layers.5": "/ComplexMLP/Sequential.5",
+    "layers.7": "/ComplexMLP/Sequential.7",
+    "layers.8": "/ComplexMLP/Sequential.8",
+    "layers.9": "/ComplexMLP/Sequential.9"
+  },
+  "statistics": {
+    "total_fx_nodes": 12,
+    "hierarchy_nodes": 10,
+    "unique_hierarchy_paths": 10,
+    "coverage_ratio": 0.8333333333333334,
+    "coverage_percentage": "83.3%",
+    "node_type_distribution": {
+      "placeholder": 1,
+      "call_module": 10,
+      "output": 1
+    },
+    "confidence_distribution": {
+      "high": 8,
+      "medium": 0,
+      "low": 2
+    },
+    "module_types_found": {
+      "Linear": 4,
+      "ReLU": 3,
+      "Dropout": 2,
+      "LayerNorm": 1
+    },
+    "fx_analysis_method": "comprehensive_coverage",
+    "hierarchy_categories": {
+      "torch_modules": 0,
+      "functions": 0,
+      "methods": 0,
+      "attributes": 0,
+      "inputs": 1,
+      "outputs": 1,
+      "custom_modules": 8
+    }
+  },
+  "torch_nn_exceptions": [
+    "LayerNorm",
+    "ReLU",
+    "Linear"
+  ]
+}

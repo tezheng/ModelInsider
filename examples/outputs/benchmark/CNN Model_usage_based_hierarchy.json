@@ -1,0 +1,18 @@
+{
+  "version": "1.0",
+  "model_path": "/mnt/d/BYOM/modelexport/examples/outputs/benchmark/CNN Model_usage_based.onnx",
+  "export_method": "usage_based",
+  "node_tags": {},
+  "statistics": {
+    "total_nodes": 0,
+    "tagged_nodes": 0,
+    "unique_tags": 0
+  },
+  "metadata": {
+    "strategy": "usage_based",
+    "torch_nn_exceptions": [
+      "LayerNorm"
+    ],
+    "usage_stats": {}
+  }
+}

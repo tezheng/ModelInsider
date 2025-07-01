@@ -1,0 +1,22 @@
+{
+  "input_specs": {
+    "input_ids": {
+      "shape": [1, 128],
+      "dtype": "long"
+    },
+    "attention_mask": {
+      "shape": [1, 128], 
+      "dtype": "long"
+    }
+  },
+  "dynamic_axes": {
+    "input_ids": {
+      "0": "batch_size",
+      "1": "sequence_length"
+    },
+    "attention_mask": {
+      "0": "batch_size",
+      "1": "sequence_length"
+    }
+  }
+}

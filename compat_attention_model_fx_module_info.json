@@ -1,0 +1,101 @@
+{
+  "model_class": "tests.fixtures.test_models.AttentionModel",
+  "model_signature": {
+    "forward_args": [
+      "x"
+    ],
+    "forward_defaults": {
+      "x": null
+    }
+  },
+  "modules": {
+    "embedding": {
+      "class": "Embedding",
+      "module_path": "embedding",
+      "forward_args": [
+        "input"
+      ],
+      "parameters": [
+        "weight"
+      ],
+      "direct_parameters": [
+        "weight"
+      ],
+      "children": {}
+    },
+    "attention": {
+      "class": "MultiheadAttention",
+      "module_path": "attention",
+      "forward_args": [
+        "query",
+        "key",
+        "value",
+        "key_padding_mask",
+        "need_weights",
+        "attn_mask",
+        "average_attn_weights",
+        "is_causal"
+      ],
+      "parameters": [
+        "in_proj_weight",
+        "in_proj_bias",
+        "out_proj.weight",
+        "out_proj.bias"
+      ],
+      "direct_parameters": [
+        "in_proj_weight",
+        "in_proj_bias"
+      ],
+      "children": {
+        "out_proj": "NonDynamicallyQuantizableLinear"
+      }
+    },
+    "norm": {
+      "class": "LayerNorm",
+      "module_path": "norm",
+      "forward_args": [
+        "input"
+      ],
+      "parameters": [
+        "weight",
+        "bias"
+      ],
+      "direct_parameters": [
+        "weight",
+        "bias"
+      ],
+      "children": {}
+    },
+    "fc": {
+      "class": "Linear",
+      "module_path": "fc",
+      "forward_args": [
+        "input"
+      ],
+      "parameters": [
+        "weight",
+        "bias"
+      ],
+      "direct_parameters": [
+        "weight",
+        "bias"
+      ],
+      "children": {}
+    }
+  },
+  "hierarchy_depth": 1,
+  "expected_hierarchy": {
+    "/AttentionModel/Embedding": [
+      "embedding"
+    ],
+    "/AttentionModel/MultiheadAttention": [
+      "attention"
+    ],
+    "/AttentionModel/LayerNorm": [
+      "norm"
+    ],
+    "/AttentionModel/Linear": [
+      "fc"
+    ]
+  }
+}

@@ -1,0 +1,117 @@
+{
+  "model_path": "/tmp/tmpf_md0heo/compat_attention_model_fx.onnx",
+  "export_method": "fx_graph",
+  "hierarchy_mapping": {
+    "x": "/Inputs/x",
+    "embedding": "/AttentionModel/Embedding",
+    "size": "/AttentionModel/Embedding/method_size",
+    "pos_encoding": "/Attributes/pos_encoding",
+    "getitem": "/Attributes/pos_encoding",
+    "unsqueeze": "/Attributes/pos_encoding/method_unsqueeze",
+    "add": "/AttentionModel/Embedding",
+    "attention": "/AttentionModel/MultiheadAttention",
+    "getitem_1": "/AttentionModel/MultiheadAttention",
+    "getitem_2": "/AttentionModel/MultiheadAttention",
+    "add_1": "/AttentionModel/MultiheadAttention",
+    "norm": "/AttentionModel/LayerNorm",
+    "mean": "/AttentionModel/LayerNorm/method_mean",
+    "fc": "/AttentionModel/Linear",
+    "output": "/AttentionModel/Linear/Output"
+  },
+  "module_mapping": {
+    "/Inputs/x": [
+      "x"
+    ],
+    "/AttentionModel/Embedding": [
+      "embedding",
+      "add"
+    ],
+    "/AttentionModel/Embedding/method_size": [
+      "size"
+    ],
+    "/Attributes/pos_encoding": [
+      "pos_encoding",
+      "getitem"
+    ],
+    "/Attributes/pos_encoding/method_unsqueeze": [
+      "unsqueeze"
+    ],
+    "/AttentionModel/MultiheadAttention": [
+      "attention",
+      "getitem_1",
+      "getitem_2",
+      "add_1"
+    ],
+    "/AttentionModel/LayerNorm": [
+      "norm"
+    ],
+    "/AttentionModel/LayerNorm/method_mean": [
+      "mean"
+    ],
+    "/AttentionModel/Linear": [
+      "fc"
+    ],
+    "/AttentionModel/Linear/Output": [
+      "output"
+    ]
+  },
+  "instance_mapping": {
+    "embedding": "/AttentionModel/Embedding",
+    "attention": "/AttentionModel/MultiheadAttention",
+    "norm": "/AttentionModel/LayerNorm",
+    "fc": "/AttentionModel/Linear"
+  },
+  "statistics": {
+    "total_fx_nodes": 15,
+    "hierarchy_nodes": 15,
+    "unique_hierarchy_paths": 10,
+    "coverage_ratio": 1.0,
+    "coverage_percentage": "100.0%",
+    "node_type_distribution": {
+      "placeholder": 1,
+      "call_module": 4,
+      "call_method": 3,
+      "get_attr": 1,
+      "call_function": 5,
+      "output": 1
+    },
+    "confidence_distribution": {
+      "high": 9,
+      "medium": 3,
+      "low": 3
+    },
+    "module_types_found": {
+      "Embedding": 1,
+      "MultiheadAttention": 1,
+      "LayerNorm": 1,
+      "Linear": 1
+    },
+    "fx_analysis_method": "comprehensive_coverage",
+    "hierarchy_categories": {
+      "torch_modules": 3,
+      "functions": 0,
+      "methods": 3,
+      "attributes": 1,
+      "inputs": 1,
+      "outputs": 1,
+      "custom_modules": 1
+    }
+  },
+  "torch_nn_exceptions": [
+    "Dropout",
+    "InstanceNorm2d",
+    "LayerNorm",
+    "Conv1d",
+    "InstanceNorm3d",
+    "Conv2d",
+    "Linear",
+    "Conv3d",
+    "Embedding",
+    "GroupNorm",
+    "BatchNorm1d",
+    "MultiheadAttention",
+    "InstanceNorm1d",
+    "BatchNorm3d",
+    "BatchNorm2d"
+  ]
+}
