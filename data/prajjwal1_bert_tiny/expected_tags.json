@@ -1,0 +1,745 @@
+{
+  "model_class": "transformers.models.bert.modeling_bert.BertModel",
+  "model_signature": {
+    "forward_args": [
+      "input_ids",
+      "attention_mask",
+      "token_type_ids",
+      "position_ids",
+      "head_mask",
+      "inputs_embeds",
+      "encoder_hidden_states",
+      "encoder_attention_mask",
+      "past_key_values",
+      "use_cache",
+      "output_attentions",
+      "output_hidden_states",
+      "return_dict"
+    ],
+    "forward_defaults": {
+      "input_ids": "None",
+      "attention_mask": "None",
+      "token_type_ids": "None",
+      "position_ids": "None",
+      "head_mask": "None",
+      "inputs_embeds": "None",
+      "encoder_hidden_states": "None",
+      "encoder_attention_mask": "None",
+      "past_key_values": "None",
+      "use_cache": "None",
+      "output_attentions": "None",
+      "output_hidden_states": "None",
+      "return_dict": "None"
+    }
+  },
+  "modules": {
+    "embeddings": {
+      "class": "BertEmbeddings",
+      "module_path": "embeddings",
+      "module_class_full": "transformers.models.bert.modeling_bert.BertEmbeddings",
+      "forward_args": [
+        "input_ids",
+        "token_type_ids",
+        "position_ids",
+        "inputs_embeds",
+        "past_key_values_length"
+      ],
+      "forward_defaults": {
+        "input_ids": "None",
+        "token_type_ids": "None",
+        "position_ids": "None",
+        "inputs_embeds": "None",
+        "past_key_values_length": "0"
+      },
+      "parameters": [
+        "word_embeddings.weight",
+        "position_embeddings.weight",
+        "token_type_embeddings.weight",
+        "LayerNorm.weight",
+        "LayerNorm.bias"
+      ],
+      "direct_parameters": [],
+      "children": {
+        "word_embeddings": "Embedding",
+        "position_embeddings": "Embedding",
+        "token_type_embeddings": "Embedding",
+        "LayerNorm": "LayerNorm",
+        "dropout": "Dropout"
+      }
+    },
+    "embeddings.LayerNorm": {
+      "class": "LayerNorm",
+      "module_path": "embeddings.LayerNorm",
+      "module_class_full": "torch.nn.modules.normalization.LayerNorm",
+      "forward_args": [
+        "input"
+      ],
+      "forward_defaults": {
+        "input": null
+      },
+      "parameters": [
+        "weight",
+        "bias"
+      ],
+      "direct_parameters": [
+        "weight",
+        "bias"
+      ],
+      "children": {}
+    },
+    "encoder": {
+      "class": "BertEncoder",
+      "module_path": "encoder",
+      "module_class_full": "transformers.models.bert.modeling_bert.BertEncoder",
+      "forward_args": [
+        "hidden_states",
+        "attention_mask",
+        "head_mask",
+        "encoder_hidden_states",
+        "encoder_attention_mask",
+        "past_key_values",
+        "use_cache",
+        "output_attentions",
+        "output_hidden_states",
+        "return_dict"
+      ],
+      "forward_defaults": {
+        "hidden_states": null,
+        "attention_mask": "None",
+        "head_mask": "None",
+        "encoder_hidden_states": "None",
+        "encoder_attention_mask": "None",
+        "past_key_values": "None",
+        "use_cache": "None",
+        "output_attentions": "False",
+        "output_hidden_states": "False",
+        "return_dict": "True"
+      },
+      "parameters": [
+        "layer.0.attention.self.query.weight",
+        "layer.0.attention.self.query.bias",
+        "layer.0.attention.self.key.weight",
+        "layer.0.attention.self.key.bias",
+        "layer.0.attention.self.value.weight",
+        "layer.0.attention.self.value.bias",
+        "layer.0.attention.output.dense.weight",
+        "layer.0.attention.output.dense.bias",
+        "layer.0.attention.output.LayerNorm.weight",
+        "layer.0.attention.output.LayerNorm.bias",
+        "layer.0.intermediate.dense.weight",
+        "layer.0.intermediate.dense.bias",
+        "layer.0.output.dense.weight",
+        "layer.0.output.dense.bias",
+        "layer.0.output.LayerNorm.weight",
+        "layer.0.output.LayerNorm.bias",
+        "layer.1.attention.self.query.weight",
+        "layer.1.attention.self.query.bias",
+        "layer.1.attention.self.key.weight",
+        "layer.1.attention.self.key.bias",
+        "layer.1.attention.self.value.weight",
+        "layer.1.attention.self.value.bias",
+        "layer.1.attention.output.dense.weight",
+        "layer.1.attention.output.dense.bias",
+        "layer.1.attention.output.LayerNorm.weight",
+        "layer.1.attention.output.LayerNorm.bias",
+        "layer.1.intermediate.dense.weight",
+        "layer.1.intermediate.dense.bias",
+        "layer.1.output.dense.weight",
+        "layer.1.output.dense.bias",
+        "layer.1.output.LayerNorm.weight",
+        "layer.1.output.LayerNorm.bias"
+      ],
+      "direct_parameters": [],
+      "children": {
+        "layer": "ModuleList"
+      }
+    },
+    "encoder.layer.0": {
+      "class": "BertLayer",
+      "module_path": "encoder.layer.0",
+      "module_class_full": "transformers.models.bert.modeling_bert.BertLayer",
+      "forward_args": [
+        "hidden_states",
+        "attention_mask",
+        "head_mask",
+        "encoder_hidden_states",
+        "encoder_attention_mask",
+        "past_key_value",
+        "output_attentions"
+      ],
+      "forward_defaults": {
+        "hidden_states": null,
+        "attention_mask": "None",
+        "head_mask": "None",
+        "encoder_hidden_states": "None",
+        "encoder_attention_mask": "None",
+        "past_key_value": "None",
+        "output_attentions": "False"
+      },
+      "parameters": [
+        "attention.self.query.weight",
+        "attention.self.query.bias",
+        "attention.self.key.weight",
+        "attention.self.key.bias",
+        "attention.self.value.weight",
+        "attention.self.value.bias",
+        "attention.output.dense.weight",
+        "attention.output.dense.bias",
+        "attention.output.LayerNorm.weight",
+        "attention.output.LayerNorm.bias",
+        "intermediate.dense.weight",
+        "intermediate.dense.bias",
+        "output.dense.weight",
+        "output.dense.bias",
+        "output.LayerNorm.weight",
+        "output.LayerNorm.bias"
+      ],
+      "direct_parameters": [],
+      "children": {
+        "attention": "BertAttention",
+        "intermediate": "BertIntermediate",
+        "output": "BertOutput"
+      }
+    },
+    "encoder.layer.0.attention": {
+      "class": "BertAttention",
+      "module_path": "encoder.layer.0.attention",
+      "module_class_full": "transformers.models.bert.modeling_bert.BertAttention",
+      "forward_args": [
+        "hidden_states",
+        "attention_mask",
+        "head_mask",
+        "encoder_hidden_states",
+        "encoder_attention_mask",
+        "past_key_value",
+        "output_attentions"
+      ],
+      "forward_defaults": {
+        "hidden_states": null,
+        "attention_mask": "None",
+        "head_mask": "None",
+        "encoder_hidden_states": "None",
+        "encoder_attention_mask": "None",
+        "past_key_value": "None",
+        "output_attentions": "False"
+      },
+      "parameters": [
+        "self.query.weight",
+        "self.query.bias",
+        "self.key.weight",
+        "self.key.bias",
+        "self.value.weight",
+        "self.value.bias",
+        "output.dense.weight",
+        "output.dense.bias",
+        "output.LayerNorm.weight",
+        "output.LayerNorm.bias"
+      ],
+      "direct_parameters": [],
+      "children": {
+        "self": "BertSdpaSelfAttention",
+        "output": "BertSelfOutput"
+      }
+    },
+    "encoder.layer.0.attention.self": {
+      "class": "BertSdpaSelfAttention",
+      "module_path": "encoder.layer.0.attention.self",
+      "module_class_full": "transformers.models.bert.modeling_bert.BertSdpaSelfAttention",
+      "forward_args": [
+        "hidden_states",
+        "attention_mask",
+        "head_mask",
+        "encoder_hidden_states",
+        "encoder_attention_mask",
+        "past_key_value",
+        "output_attentions"
+      ],
+      "forward_defaults": {
+        "hidden_states": null,
+        "attention_mask": "None",
+        "head_mask": "None",
+        "encoder_hidden_states": "None",
+        "encoder_attention_mask": "None",
+        "past_key_value": "None",
+        "output_attentions": "False"
+      },
+      "parameters": [
+        "query.weight",
+        "query.bias",
+        "key.weight",
+        "key.bias",
+        "value.weight",
+        "value.bias"
+      ],
+      "direct_parameters": [],
+      "children": {
+        "query": "Linear",
+        "key": "Linear",
+        "value": "Linear",
+        "dropout": "Dropout"
+      }
+    },
+    "encoder.layer.0.attention.output": {
+      "class": "BertSelfOutput",
+      "module_path": "encoder.layer.0.attention.output",
+      "module_class_full": "transformers.models.bert.modeling_bert.BertSelfOutput",
+      "forward_args": [
+        "hidden_states",
+        "input_tensor"
+      ],
+      "forward_defaults": {
+        "hidden_states": null,
+        "input_tensor": null
+      },
+      "parameters": [
+        "dense.weight",
+        "dense.bias",
+        "LayerNorm.weight",
+        "LayerNorm.bias"
+      ],
+      "direct_parameters": [],
+      "children": {
+        "dense": "Linear",
+        "LayerNorm": "LayerNorm",
+        "dropout": "Dropout"
+      }
+    },
+    "encoder.layer.0.attention.output.LayerNorm": {
+      "class": "LayerNorm",
+      "module_path": "encoder.layer.0.attention.output.LayerNorm",
+      "module_class_full": "torch.nn.modules.normalization.LayerNorm",
+      "forward_args": [
+        "input"
+      ],
+      "forward_defaults": {
+        "input": null
+      },
+      "parameters": [
+        "weight",
+        "bias"
+      ],
+      "direct_parameters": [
+        "weight",
+        "bias"
+      ],
+      "children": {}
+    },
+    "encoder.layer.0.intermediate": {
+      "class": "BertIntermediate",
+      "module_path": "encoder.layer.0.intermediate",
+      "module_class_full": "transformers.models.bert.modeling_bert.BertIntermediate",
+      "forward_args": [
+        "hidden_states"
+      ],
+      "forward_defaults": {
+        "hidden_states": null
+      },
+      "parameters": [
+        "dense.weight",
+        "dense.bias"
+      ],
+      "direct_parameters": [],
+      "children": {
+        "dense": "Linear",
+        "intermediate_act_fn": "GELUActivation"
+      }
+    },
+    "encoder.layer.0.intermediate.intermediate_act_fn": {
+      "class": "GELUActivation",
+      "module_path": "encoder.layer.0.intermediate.intermediate_act_fn",
+      "module_class_full": "transformers.activations.GELUActivation",
+      "forward_args": [
+        "input"
+      ],
+      "forward_defaults": {
+        "input": null
+      },
+      "parameters": [],
+      "direct_parameters": [],
+      "children": {}
+    },
+    "encoder.layer.0.output": {
+      "class": "BertOutput",
+      "module_path": "encoder.layer.0.output",
+      "module_class_full": "transformers.models.bert.modeling_bert.BertOutput",
+      "forward_args": [
+        "hidden_states",
+        "input_tensor"
+      ],
+      "forward_defaults": {
+        "hidden_states": null,
+        "input_tensor": null
+      },
+      "parameters": [
+        "dense.weight",
+        "dense.bias",
+        "LayerNorm.weight",
+        "LayerNorm.bias"
+      ],
+      "direct_parameters": [],
+      "children": {
+        "dense": "Linear",
+        "LayerNorm": "LayerNorm",
+        "dropout": "Dropout"
+      }
+    },
+    "encoder.layer.0.output.LayerNorm": {
+      "class": "LayerNorm",
+      "module_path": "encoder.layer.0.output.LayerNorm",
+      "module_class_full": "torch.nn.modules.normalization.LayerNorm",
+      "forward_args": [
+        "input"
+      ],
+      "forward_defaults": {
+        "input": null
+      },
+      "parameters": [
+        "weight",
+        "bias"
+      ],
+      "direct_parameters": [
+        "weight",
+        "bias"
+      ],
+      "children": {}
+    },
+    "encoder.layer.1": {
+      "class": "BertLayer",
+      "module_path": "encoder.layer.1",
+      "module_class_full": "transformers.models.bert.modeling_bert.BertLayer",
+      "forward_args": [
+        "hidden_states",
+        "attention_mask",
+        "head_mask",
+        "encoder_hidden_states",
+        "encoder_attention_mask",
+        "past_key_value",
+        "output_attentions"
+      ],
+      "forward_defaults": {
+        "hidden_states": null,
+        "attention_mask": "None",
+        "head_mask": "None",
+        "encoder_hidden_states": "None",
+        "encoder_attention_mask": "None",
+        "past_key_value": "None",
+        "output_attentions": "False"
+      },
+      "parameters": [
+        "attention.self.query.weight",
+        "attention.self.query.bias",
+        "attention.self.key.weight",
+        "attention.self.key.bias",
+        "attention.self.value.weight",
+        "attention.self.value.bias",
+        "attention.output.dense.weight",
+        "attention.output.dense.bias",
+        "attention.output.LayerNorm.weight",
+        "attention.output.LayerNorm.bias",
+        "intermediate.dense.weight",
+        "intermediate.dense.bias",
+        "output.dense.weight",
+        "output.dense.bias",
+        "output.LayerNorm.weight",
+        "output.LayerNorm.bias"
+      ],
+      "direct_parameters": [],
+      "children": {
+        "attention": "BertAttention",
+        "intermediate": "BertIntermediate",
+        "output": "BertOutput"
+      }
+    },
+    "encoder.layer.1.attention": {
+      "class": "BertAttention",
+      "module_path": "encoder.layer.1.attention",
+      "module_class_full": "transformers.models.bert.modeling_bert.BertAttention",
+      "forward_args": [
+        "hidden_states",
+        "attention_mask",
+        "head_mask",
+        "encoder_hidden_states",
+        "encoder_attention_mask",
+        "past_key_value",
+        "output_attentions"
+      ],
+      "forward_defaults": {
+        "hidden_states": null,
+        "attention_mask": "None",
+        "head_mask": "None",
+        "encoder_hidden_states": "None",
+        "encoder_attention_mask": "None",
+        "past_key_value": "None",
+        "output_attentions": "False"
+      },
+      "parameters": [
+        "self.query.weight",
+        "self.query.bias",
+        "self.key.weight",
+        "self.key.bias",
+        "self.value.weight",
+        "self.value.bias",
+        "output.dense.weight",
+        "output.dense.bias",
+        "output.LayerNorm.weight",
+        "output.LayerNorm.bias"
+      ],
+      "direct_parameters": [],
+      "children": {
+        "self": "BertSdpaSelfAttention",
+        "output": "BertSelfOutput"
+      }
+    },
+    "encoder.layer.1.attention.self": {
+      "class": "BertSdpaSelfAttention",
+      "module_path": "encoder.layer.1.attention.self",
+      "module_class_full": "transformers.models.bert.modeling_bert.BertSdpaSelfAttention",
+      "forward_args": [
+        "hidden_states",
+        "attention_mask",
+        "head_mask",
+        "encoder_hidden_states",
+        "encoder_attention_mask",
+        "past_key_value",
+        "output_attentions"
+      ],
+      "forward_defaults": {
+        "hidden_states": null,
+        "attention_mask": "None",
+        "head_mask": "None",
+        "encoder_hidden_states": "None",
+        "encoder_attention_mask": "None",
+        "past_key_value": "None",
+        "output_attentions": "False"
+      },
+      "parameters": [
+        "query.weight",
+        "query.bias",
+        "key.weight",
+        "key.bias",
+        "value.weight",
+        "value.bias"
+      ],
+      "direct_parameters": [],
+      "children": {
+        "query": "Linear",
+        "key": "Linear",
+        "value": "Linear",
+        "dropout": "Dropout"
+      }
+    },
+    "encoder.layer.1.attention.output": {
+      "class": "BertSelfOutput",
+      "module_path": "encoder.layer.1.attention.output",
+      "module_class_full": "transformers.models.bert.modeling_bert.BertSelfOutput",
+      "forward_args": [
+        "hidden_states",
+        "input_tensor"
+      ],
+      "forward_defaults": {
+        "hidden_states": null,
+        "input_tensor": null
+      },
+      "parameters": [
+        "dense.weight",
+        "dense.bias",
+        "LayerNorm.weight",
+        "LayerNorm.bias"
+      ],
+      "direct_parameters": [],
+      "children": {
+        "dense": "Linear",
+        "LayerNorm": "LayerNorm",
+        "dropout": "Dropout"
+      }
+    },
+    "encoder.layer.1.attention.output.LayerNorm": {
+      "class": "LayerNorm",
+      "module_path": "encoder.layer.1.attention.output.LayerNorm",
+      "module_class_full": "torch.nn.modules.normalization.LayerNorm",
+      "forward_args": [
+        "input"
+      ],
+      "forward_defaults": {
+        "input": null
+      },
+      "parameters": [
+        "weight",
+        "bias"
+      ],
+      "direct_parameters": [
+        "weight",
+        "bias"
+      ],
+      "children": {}
+    },
+    "encoder.layer.1.intermediate": {
+      "class": "BertIntermediate",
+      "module_path": "encoder.layer.1.intermediate",
+      "module_class_full": "transformers.models.bert.modeling_bert.BertIntermediate",
+      "forward_args": [
+        "hidden_states"
+      ],
+      "forward_defaults": {
+        "hidden_states": null
+      },
+      "parameters": [
+        "dense.weight",
+        "dense.bias"
+      ],
+      "direct_parameters": [],
+      "children": {
+        "dense": "Linear",
+        "intermediate_act_fn": "GELUActivation"
+      }
+    },
+    "encoder.layer.1.intermediate.intermediate_act_fn": {
+      "class": "GELUActivation",
+      "module_path": "encoder.layer.1.intermediate.intermediate_act_fn",
+      "module_class_full": "transformers.activations.GELUActivation",
+      "forward_args": [
+        "input"
+      ],
+      "forward_defaults": {
+        "input": null
+      },
+      "parameters": [],
+      "direct_parameters": [],
+      "children": {}
+    },
+    "encoder.layer.1.output": {
+      "class": "BertOutput",
+      "module_path": "encoder.layer.1.output",
+      "module_class_full": "transformers.models.bert.modeling_bert.BertOutput",
+      "forward_args": [
+        "hidden_states",
+        "input_tensor"
+      ],
+      "forward_defaults": {
+        "hidden_states": null,
+        "input_tensor": null
+      },
+      "parameters": [
+        "dense.weight",
+        "dense.bias",
+        "LayerNorm.weight",
+        "LayerNorm.bias"
+      ],
+      "direct_parameters": [],
+      "children": {
+        "dense": "Linear",
+        "LayerNorm": "LayerNorm",
+        "dropout": "Dropout"
+      }
+    },
+    "encoder.layer.1.output.LayerNorm": {
+      "class": "LayerNorm",
+      "module_path": "encoder.layer.1.output.LayerNorm",
+      "module_class_full": "torch.nn.modules.normalization.LayerNorm",
+      "forward_args": [
+        "input"
+      ],
+      "forward_defaults": {
+        "input": null
+      },
+      "parameters": [
+        "weight",
+        "bias"
+      ],
+      "direct_parameters": [
+        "weight",
+        "bias"
+      ],
+      "children": {}
+    },
+    "pooler": {
+      "class": "BertPooler",
+      "module_path": "pooler",
+      "module_class_full": "transformers.models.bert.modeling_bert.BertPooler",
+      "forward_args": [
+        "hidden_states"
+      ],
+      "forward_defaults": {
+        "hidden_states": null
+      },
+      "parameters": [
+        "dense.weight",
+        "dense.bias"
+      ],
+      "direct_parameters": [],
+      "children": {
+        "dense": "Linear",
+        "activation": "Tanh"
+      }
+    }
+  },
+  "hierarchy_depth": 6,
+  "expected_hierarchy": {
+    "/BertModel/BertEmbeddings": [
+      "embeddings"
+    ],
+    "/BertModel/BertEmbeddings/LayerNorm": [
+      "embeddings.LayerNorm"
+    ],
+    "/BertModel/BertEncoder": [
+      "encoder"
+    ],
+    "/BertModel/BertEncoder/BertLayer.0": [
+      "encoder.layer.0"
+    ],
+    "/BertModel/BertEncoder/BertLayer.0/BertAttention": [
+      "encoder.layer.0.attention"
+    ],
+    "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention": [
+      "encoder.layer.0.attention.self"
+    ],
+    "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSelfOutput": [
+      "encoder.layer.0.attention.output"
+    ],
+    "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSelfOutput/LayerNorm": [
+      "encoder.layer.0.attention.output.LayerNorm"
+    ],
+    "/BertModel/BertEncoder/BertLayer.0/BertIntermediate": [
+      "encoder.layer.0.intermediate"
+    ],
+    "/BertModel/BertEncoder/BertLayer.0/BertIntermediate/GELUActivation": [
+      "encoder.layer.0.intermediate.intermediate_act_fn"
+    ],
+    "/BertModel/BertEncoder/BertLayer.0/BertOutput": [
+      "encoder.layer.0.output"
+    ],
+    "/BertModel/BertEncoder/BertLayer.0/BertOutput/LayerNorm": [
+      "encoder.layer.0.output.LayerNorm"
+    ],
+    "/BertModel/BertEncoder/BertLayer.1": [
+      "encoder.layer.1"
+    ],
+    "/BertModel/BertEncoder/BertLayer.1/BertAttention": [
+      "encoder.layer.1.attention"
+    ],
+    "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention": [
+      "encoder.layer.1.attention.self"
+    ],
+    "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSelfOutput": [
+      "encoder.layer.1.attention.output"
+    ],
+    "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSelfOutput/LayerNorm": [
+      "encoder.layer.1.attention.output.LayerNorm"
+    ],
+    "/BertModel/BertEncoder/BertLayer.1/BertIntermediate": [
+      "encoder.layer.1.intermediate"
+    ],
+    "/BertModel/BertEncoder/BertLayer.1/BertIntermediate/GELUActivation": [
+      "encoder.layer.1.intermediate.intermediate_act_fn"
+    ],
+    "/BertModel/BertEncoder/BertLayer.1/BertOutput": [
+      "encoder.layer.1.output"
+    ],
+    "/BertModel/BertEncoder/BertLayer.1/BertOutput/LayerNorm": [
+      "encoder.layer.1.output.LayerNorm"
+    ],
+    "/BertModel/BertPooler": [
+      "pooler"
+    ]
+  }
+}

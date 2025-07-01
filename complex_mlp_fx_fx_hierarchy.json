@@ -1,0 +1,103 @@
+{
+  "model_path": "/tmp/tmparafv55x/complex_mlp_fx.onnx",
+  "export_method": "fx_graph",
+  "hierarchy_mapping": {
+    "x": "/Inputs/x",
+    "layers_0": "/ComplexMLP/Sequential.0",
+    "layers_2": "/ComplexMLP/Sequential.2",
+    "layers_3": "/ComplexMLP/Sequential.3",
+    "layers_4": "/ComplexMLP/Sequential.4",
+    "layers_6": "/ComplexMLP/Sequential.6",
+    "layers_7": "/ComplexMLP/Sequential.7",
+    "layers_9": "/ComplexMLP/Sequential.9",
+    "output": "/ComplexMLP/Sequential.9/Output"
+  },
+  "module_mapping": {
+    "/Inputs/x": [
+      "x"
+    ],
+    "/ComplexMLP/Sequential.0": [
+      "layers_0"
+    ],
+    "/ComplexMLP/Sequential.2": [
+      "layers_2"
+    ],
+    "/ComplexMLP/Sequential.3": [
+      "layers_3"
+    ],
+    "/ComplexMLP/Sequential.4": [
+      "layers_4"
+    ],
+    "/ComplexMLP/Sequential.6": [
+      "layers_6"
+    ],
+    "/ComplexMLP/Sequential.7": [
+      "layers_7"
+    ],
+    "/ComplexMLP/Sequential.9": [
+      "layers_9"
+    ],
+    "/ComplexMLP/Sequential.9/Output": [
+      "output"
+    ]
+  },
+  "instance_mapping": {
+    "layers.0": "/ComplexMLP/Sequential.0",
+    "layers.2": "/ComplexMLP/Sequential.2",
+    "layers.3": "/ComplexMLP/Sequential.3",
+    "layers.4": "/ComplexMLP/Sequential.4",
+    "layers.6": "/ComplexMLP/Sequential.6",
+    "layers.7": "/ComplexMLP/Sequential.7",
+    "layers.9": "/ComplexMLP/Sequential.9"
+  },
+  "statistics": {
+    "total_fx_nodes": 12,
+    "hierarchy_nodes": 9,
+    "unique_hierarchy_paths": 9,
+    "coverage_ratio": 0.75,
+    "coverage_percentage": "75.0%",
+    "node_type_distribution": {
+      "placeholder": 1,
+      "call_module": 10,
+      "output": 1
+    },
+    "confidence_distribution": {
+      "high": 7,
+      "medium": 0,
+      "low": 2
+    },
+    "module_types_found": {
+      "Linear": 4,
+      "ReLU": 3,
+      "Dropout": 2,
+      "LayerNorm": 1
+    },
+    "fx_analysis_method": "comprehensive_coverage",
+    "hierarchy_categories": {
+      "torch_modules": 0,
+      "functions": 0,
+      "methods": 0,
+      "attributes": 0,
+      "inputs": 1,
+      "outputs": 1,
+      "custom_modules": 7
+    }
+  },
+  "torch_nn_exceptions": [
+    "Dropout",
+    "InstanceNorm2d",
+    "LayerNorm",
+    "Conv1d",
+    "InstanceNorm3d",
+    "Conv2d",
+    "Linear",
+    "Conv3d",
+    "Embedding",
+    "GroupNorm",
+    "BatchNorm1d",
+    "MultiheadAttention",
+    "InstanceNorm1d",
+    "BatchNorm3d",
+    "BatchNorm2d"
+  ]
+}

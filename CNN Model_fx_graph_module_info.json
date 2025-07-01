@@ -1,0 +1,71 @@
+{
+  "model_class": "torch.nn.modules.container.Sequential",
+  "model_signature": {
+    "forward_args": [
+      "input"
+    ],
+    "forward_defaults": {
+      "input": null
+    }
+  },
+  "modules": {
+    "0": {
+      "class": "Conv2d",
+      "module_path": "0",
+      "forward_args": [
+        "input"
+      ],
+      "parameters": [
+        "weight",
+        "bias"
+      ],
+      "direct_parameters": [
+        "weight",
+        "bias"
+      ],
+      "children": {}
+    },
+    "3": {
+      "class": "Conv2d",
+      "module_path": "3",
+      "forward_args": [
+        "input"
+      ],
+      "parameters": [
+        "weight",
+        "bias"
+      ],
+      "direct_parameters": [
+        "weight",
+        "bias"
+      ],
+      "children": {}
+    },
+    "8": {
+      "class": "Linear",
+      "module_path": "8",
+      "forward_args": [
+        "input"
+      ],
+      "parameters": [
+        "weight",
+        "bias"
+      ],
+      "direct_parameters": [
+        "weight",
+        "bias"
+      ],
+      "children": {}
+    }
+  },
+  "hierarchy_depth": 1,
+  "expected_hierarchy": {
+    "/Sequential/Conv2d": [
+      "0",
+      "3"
+    ],
+    "/Sequential/Linear": [
+      "8"
+    ]
+  }
+}

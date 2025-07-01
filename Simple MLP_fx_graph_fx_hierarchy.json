@@ -1,0 +1,77 @@
+{
+  "model_path": "/mnt/d/BYOM/modelexport/examples/outputs/benchmark/Simple MLP_fx_graph.onnx",
+  "export_method": "fx_graph",
+  "hierarchy_mapping": {
+    "input_1": "/Inputs/input",
+    "_0": "/Sequential/Linear",
+    "_2": "/Sequential/Linear",
+    "_4": "/Sequential/Linear",
+    "output": "/Sequential/Linear/Output"
+  },
+  "module_mapping": {
+    "/Inputs/input": [
+      "input_1"
+    ],
+    "/Sequential/Linear": [
+      "_0",
+      "_2",
+      "_4"
+    ],
+    "/Sequential/Linear/Output": [
+      "output"
+    ]
+  },
+  "instance_mapping": {
+    "0": "/Sequential/Linear",
+    "2": "/Sequential/Linear",
+    "4": "/Sequential/Linear"
+  },
+  "statistics": {
+    "total_fx_nodes": 7,
+    "hierarchy_nodes": 5,
+    "unique_hierarchy_paths": 3,
+    "coverage_ratio": 0.7142857142857143,
+    "coverage_percentage": "71.4%",
+    "node_type_distribution": {
+      "placeholder": 1,
+      "call_module": 5,
+      "output": 1
+    },
+    "confidence_distribution": {
+      "high": 3,
+      "medium": 0,
+      "low": 2
+    },
+    "module_types_found": {
+      "Linear": 3,
+      "ReLU": 2
+    },
+    "fx_analysis_method": "comprehensive_coverage",
+    "hierarchy_categories": {
+      "torch_modules": 1,
+      "functions": 0,
+      "methods": 0,
+      "attributes": 0,
+      "inputs": 1,
+      "outputs": 1,
+      "custom_modules": 0
+    }
+  },
+  "torch_nn_exceptions": [
+    "Conv2d",
+    "BatchNorm1d",
+    "Conv3d",
+    "Conv1d",
+    "InstanceNorm1d",
+    "BatchNorm3d",
+    "MultiheadAttention",
+    "Dropout",
+    "InstanceNorm3d",
+    "InstanceNorm2d",
+    "Linear",
+    "LayerNorm",
+    "Embedding",
+    "BatchNorm2d",
+    "GroupNorm"
+  ]
+}

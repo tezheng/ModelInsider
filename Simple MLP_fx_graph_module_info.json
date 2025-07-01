@@ -1,0 +1,69 @@
+{
+  "model_class": "torch.nn.modules.container.Sequential",
+  "model_signature": {
+    "forward_args": [
+      "input"
+    ],
+    "forward_defaults": {
+      "input": null
+    }
+  },
+  "modules": {
+    "0": {
+      "class": "Linear",
+      "module_path": "0",
+      "forward_args": [
+        "input"
+      ],
+      "parameters": [
+        "weight",
+        "bias"
+      ],
+      "direct_parameters": [
+        "weight",
+        "bias"
+      ],
+      "children": {}
+    },
+    "2": {
+      "class": "Linear",
+      "module_path": "2",
+      "forward_args": [
+        "input"
+      ],
+      "parameters": [
+        "weight",
+        "bias"
+      ],
+      "direct_parameters": [
+        "weight",
+        "bias"
+      ],
+      "children": {}
+    },
+    "4": {
+      "class": "Linear",
+      "module_path": "4",
+      "forward_args": [
+        "input"
+      ],
+      "parameters": [
+        "weight",
+        "bias"
+      ],
+      "direct_parameters": [
+        "weight",
+        "bias"
+      ],
+      "children": {}
+    }
+  },
+  "hierarchy_depth": 1,
+  "expected_hierarchy": {
+    "/Sequential/Linear": [
+      "0",
+      "2",
+      "4"
+    ]
+  }
+}

@@ -1,0 +1,457 @@
+{
+  "version": "1.0",
+  "format": "modelexport_hierarchy_htp_builtin",
+  "model_path": "/mnt/d/BYOM/modelexport/examples/outputs/benchmark/Transformer-like_enhanced_htp.onnx",
+  "generated_at": "2025-06-26T20:51:14.763139",
+  "exporter": {
+    "name": "modelexport",
+    "version": "0.1.0",
+    "strategy": "htp_builtin"
+  },
+  "summary": {
+    "total_operations": 34,
+    "tagged_operations": 34,
+    "nodes_with_attributes": 34,
+    "unique_tags": 9,
+    "operation_trace_length": 10,
+    "native_op_regions": 0,
+    "slice_operations_tracked": 0,
+    "builtin_tracking_enabled": true
+  },
+  "tag_statistics": {
+    "/SimpleTransformer/Query": 1,
+    "/SimpleTransformer": 17,
+    "/SimpleTransformer/Key": 1,
+    "/SimpleTransformer/Value": 1,
+    "/SimpleTransformer/Output": 4,
+    "/SimpleTransformer/Ffn.0": 4,
+    "/SimpleTransformer/Ffn.2": 2,
+    "/SimpleTransformer/Norm": 3,
+    "/SimpleTransformer/Ffn.1": 1
+  },
+  "node_tags": {
+    "/query/MatMul": {
+      "op_type": "MatMul",
+      "tags": [
+        "/SimpleTransformer/Query"
+      ],
+      "inputs": [
+        "input.1",
+        "onnx::MatMul_90"
+      ],
+      "outputs": [
+        "/query/MatMul_output_0"
+      ]
+    },
+    "/query/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/SimpleTransformer"
+      ],
+      "inputs": [
+        "query.bias",
+        "/query/MatMul_output_0"
+      ],
+      "outputs": [
+        "/query/Add_output_0"
+      ]
+    },
+    "/key/MatMul": {
+      "op_type": "MatMul",
+      "tags": [
+        "/SimpleTransformer/Key"
+      ],
+      "inputs": [
+        "input.1",
+        "onnx::MatMul_91"
+      ],
+      "outputs": [
+        "/key/MatMul_output_0"
+      ]
+    },
+    "/key/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/SimpleTransformer"
+      ],
+      "inputs": [
+        "key.bias",
+        "/key/MatMul_output_0"
+      ],
+      "outputs": [
+        "/key/Add_output_0"
+      ]
+    },
+    "/value/MatMul": {
+      "op_type": "MatMul",
+      "tags": [
+        "/SimpleTransformer/Value"
+      ],
+      "inputs": [
+        "input.1",
+        "onnx::MatMul_92"
+      ],
+      "outputs": [
+        "/value/MatMul_output_0"
+      ]
+    },
+    "/value/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/SimpleTransformer"
+      ],
+      "inputs": [
+        "value.bias",
+        "/value/MatMul_output_0"
+      ],
+      "outputs": [
+        "/value/Add_output_0"
+      ]
+    },
+    "/Constant": {
+      "op_type": "Constant",
+      "tags": [
+        "/SimpleTransformer"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/Constant_output_0"
+      ]
+    },
+    "/Constant_1": {
+      "op_type": "Constant",
+      "tags": [
+        "/SimpleTransformer"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/Constant_1_output_0"
+      ]
+    },
+    "/Constant_2": {
+      "op_type": "Constant",
+      "tags": [
+        "/SimpleTransformer"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/Constant_2_output_0"
+      ]
+    },
+    "/Reshape": {
+      "op_type": "Reshape",
+      "tags": [
+        "/SimpleTransformer"
+      ],
+      "inputs": [
+        "/query/Add_output_0",
+        "/Constant_output_0"
+      ],
+      "outputs": [
+        "/Reshape_output_0"
+      ]
+    },
+    "/Reshape_1": {
+      "op_type": "Reshape",
+      "tags": [
+        "/SimpleTransformer"
+      ],
+      "inputs": [
+        "/key/Add_output_0",
+        "/Constant_1_output_0"
+      ],
+      "outputs": [
+        "/Reshape_1_output_0"
+      ]
+    },
+    "/Reshape_2": {
+      "op_type": "Reshape",
+      "tags": [
+        "/SimpleTransformer"
+      ],
+      "inputs": [
+        "/value/Add_output_0",
+        "/Constant_2_output_0"
+      ],
+      "outputs": [
+        "/Reshape_2_output_0"
+      ]
+    },
+    "/Transpose": {
+      "op_type": "Transpose",
+      "tags": [
+        "/SimpleTransformer/Output"
+      ],
+      "inputs": [
+        "/Reshape_output_0"
+      ],
+      "outputs": [
+        "/Transpose_output_0"
+      ]
+    },
+    "/Transpose_1": {
+      "op_type": "Transpose",
+      "tags": [
+        "/SimpleTransformer/Ffn.0"
+      ],
+      "inputs": [
+        "/Reshape_2_output_0"
+      ],
+      "outputs": [
+        "/Transpose_1_output_0"
+      ]
+    },
+    "/Transpose_2": {
+      "op_type": "Transpose",
+      "tags": [
+        "/SimpleTransformer/Output"
+      ],
+      "inputs": [
+        "/Reshape_1_output_0"
+      ],
+      "outputs": [
+        "/Transpose_2_output_0"
+      ]
+    },
+    "/MatMul": {
+      "op_type": "MatMul",
+      "tags": [
+        "/SimpleTransformer/Output"
+      ],
+      "inputs": [
+        "/Transpose_output_0",
+        "/Transpose_2_output_0"
+      ],
+      "outputs": [
+        "/MatMul_output_0"
+      ]
+    },
+    "/Constant_3": {
+      "op_type": "Constant",
+      "tags": [
+        "/SimpleTransformer"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/Constant_3_output_0"
+      ]
+    },
+    "/Mul": {
+      "op_type": "Mul",
+      "tags": [
+        "/SimpleTransformer/Output"
+      ],
+      "inputs": [
+        "/MatMul_output_0",
+        "/Constant_3_output_0"
+      ],
+      "outputs": [
+        "/Mul_output_0"
+      ]
+    },
+    "/Softmax": {
+      "op_type": "Softmax",
+      "tags": [
+        "/SimpleTransformer/Ffn.0"
+      ],
+      "inputs": [
+        "/Mul_output_0"
+      ],
+      "outputs": [
+        "/Softmax_output_0"
+      ]
+    },
+    "/MatMul_1": {
+      "op_type": "MatMul",
+      "tags": [
+        "/SimpleTransformer/Ffn.0"
+      ],
+      "inputs": [
+        "/Softmax_output_0",
+        "/Transpose_1_output_0"
+      ],
+      "outputs": [
+        "/MatMul_1_output_0"
+      ]
+    },
+    "/Transpose_3": {
+      "op_type": "Transpose",
+      "tags": [
+        "/SimpleTransformer/Ffn.0"
+      ],
+      "inputs": [
+        "/MatMul_1_output_0"
+      ],
+      "outputs": [
+        "/Transpose_3_output_0"
+      ]
+    },
+    "/Constant_4": {
+      "op_type": "Constant",
+      "tags": [
+        "/SimpleTransformer"
+      ],
+      "inputs": [],
+      "outputs": [
+        "/Constant_4_output_0"
+      ]
+    },
+    "/Reshape_3": {
+      "op_type": "Reshape",
+      "tags": [
+        "/SimpleTransformer/Ffn.2"
+      ],
+      "inputs": [
+        "/Transpose_3_output_0",
+        "/Constant_4_output_0"
+      ],
+      "outputs": [
+        "/Reshape_3_output_0"
+      ]
+    },
+    "/output/MatMul": {
+      "op_type": "MatMul",
+      "tags": [
+        "/SimpleTransformer/Ffn.2"
+      ],
+      "inputs": [
+        "/Reshape_3_output_0",
+        "onnx::MatMul_112"
+      ],
+      "outputs": [
+        "/output/MatMul_output_0"
+      ]
+    },
+    "/output/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/SimpleTransformer"
+      ],
+      "inputs": [
+        "output.bias",
+        "/output/MatMul_output_0"
+      ],
+      "outputs": [
+        "/output/Add_output_0"
+      ]
+    },
+    "/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/SimpleTransformer"
+      ],
+      "inputs": [
+        "input.1",
+        "/output/Add_output_0"
+      ],
+      "outputs": [
+        "/Add_output_0"
+      ]
+    },
+    "/norm/LayerNormalization": {
+      "op_type": "LayerNormalization",
+      "tags": [
+        "/SimpleTransformer/Norm"
+      ],
+      "inputs": [
+        "/Add_output_0",
+        "norm.weight",
+        "norm.bias"
+      ],
+      "outputs": [
+        "/norm/LayerNormalization_output_0"
+      ]
+    },
+    "/ffn/ffn.0/MatMul": {
+      "op_type": "MatMul",
+      "tags": [
+        "/SimpleTransformer"
+      ],
+      "inputs": [
+        "/norm/LayerNormalization_output_0",
+        "onnx::MatMul_113"
+      ],
+      "outputs": [
+        "/ffn/ffn.0/MatMul_output_0"
+      ]
+    },
+    "/ffn/ffn.0/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/SimpleTransformer"
+      ],
+      "inputs": [
+        "ffn.0.bias",
+        "/ffn/ffn.0/MatMul_output_0"
+      ],
+      "outputs": [
+        "/ffn/ffn.0/Add_output_0"
+      ]
+    },
+    "/ffn/ffn.1/Relu": {
+      "op_type": "Relu",
+      "tags": [
+        "/SimpleTransformer/Ffn.1"
+      ],
+      "inputs": [
+        "/ffn/ffn.0/Add_output_0"
+      ],
+      "outputs": [
+        "/ffn/ffn.1/Relu_output_0"
+      ]
+    },
+    "/ffn/ffn.2/MatMul": {
+      "op_type": "MatMul",
+      "tags": [
+        "/SimpleTransformer"
+      ],
+      "inputs": [
+        "/ffn/ffn.1/Relu_output_0",
+        "onnx::MatMul_114"
+      ],
+      "outputs": [
+        "/ffn/ffn.2/MatMul_output_0"
+      ]
+    },
+    "/ffn/ffn.2/Add": {
+      "op_type": "Add",
+      "tags": [
+        "/SimpleTransformer"
+      ],
+      "inputs": [
+        "ffn.2.bias",
+        "/ffn/ffn.2/MatMul_output_0"
+      ],
+      "outputs": [
+        "/ffn/ffn.2/Add_output_0"
+      ]
+    },
+    "/Add_1": {
+      "op_type": "Add",
+      "tags": [
+        "/SimpleTransformer/Norm"
+      ],
+      "inputs": [
+        "/norm/LayerNormalization_output_0",
+        "/ffn/ffn.2/Add_output_0"
+      ],
+      "outputs": [
+        "/Add_1_output_0"
+      ]
+    },
+    "/norm_1/LayerNormalization": {
+      "op_type": "LayerNormalization",
+      "tags": [
+        "/SimpleTransformer/Norm"
+      ],
+      "inputs": [
+        "/Add_1_output_0",
+        "norm.weight",
+        "norm.bias"
+      ],
+      "outputs": [
+        "89"
+      ]
+    }
+  }
+}

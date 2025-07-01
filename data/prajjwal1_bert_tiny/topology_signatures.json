@@ -1,0 +1,31 @@
+{
+  "total_nodes": 136,
+  "operation_counts": {
+    "Constant": 29,
+    "Gather": 4,
+    "Add": 22,
+    "LayerNormalization": 5,
+    "Unsqueeze": 2,
+    "ConstantOfShape": 1,
+    "Mul": 9,
+    "Equal": 1,
+    "Where": 2,
+    "Expand": 1,
+    "Cast": 7,
+    "Sub": 1,
+    "MatMul": 16,
+    "Reshape": 8,
+    "Transpose": 8,
+    "Shape": 2,
+    "Slice": 2,
+    "Sqrt": 6,
+    "Div": 4,
+    "Softmax": 2,
+    "Erf": 2,
+    "Gemm": 1,
+    "Tanh": 1
+  },
+  "total_parameters": 39,
+  "input_count": 3,
+  "output_count": 2
+}

@@ -1,0 +1,141 @@
+{
+  "version": "1.0",
+  "format": "modelexport_hierarchy_htp_builtin",
+  "model_path": "/mnt/d/BYOM/modelexport/examples/outputs/benchmark/CNN Model_enhanced_htp.onnx",
+  "generated_at": "2025-06-26T20:51:14.397566",
+  "exporter": {
+    "name": "modelexport",
+    "version": "0.1.0",
+    "strategy": "htp_builtin"
+  },
+  "summary": {
+    "total_operations": 9,
+    "tagged_operations": 9,
+    "nodes_with_attributes": 9,
+    "unique_tags": 2,
+    "operation_trace_length": 5,
+    "native_op_regions": 0,
+    "slice_operations_tracked": 0,
+    "builtin_tracking_enabled": true
+  },
+  "tag_statistics": {
+    "/Sequential": 6,
+    "/Sequential/": 3
+  },
+  "node_tags": {
+    "/0/Conv": {
+      "op_type": "Conv",
+      "tags": [
+        "/Sequential"
+      ],
+      "inputs": [
+        "input.1",
+        "0.weight",
+        "0.bias"
+      ],
+      "outputs": [
+        "/0/Conv_output_0"
+      ]
+    },
+    "/1/Relu": {
+      "op_type": "Relu",
+      "tags": [
+        "/Sequential/"
+      ],
+      "inputs": [
+        "/0/Conv_output_0"
+      ],
+      "outputs": [
+        "/1/Relu_output_0"
+      ]
+    },
+    "/2/MaxPool": {
+      "op_type": "MaxPool",
+      "tags": [
+        "/Sequential"
+      ],
+      "inputs": [
+        "/1/Relu_output_0"
+      ],
+      "outputs": [
+        "/2/MaxPool_output_0"
+      ]
+    },
+    "/3/Conv": {
+      "op_type": "Conv",
+      "tags": [
+        "/Sequential"
+      ],
+      "inputs": [
+        "/2/MaxPool_output_0",
+        "3.weight",
+        "3.bias"
+      ],
+      "outputs": [
+        "/3/Conv_output_0"
+      ]
+    },
+    "/4/Relu": {
+      "op_type": "Relu",
+      "tags": [
+        "/Sequential/"
+      ],
+      "inputs": [
+        "/3/Conv_output_0"
+      ],
+      "outputs": [
+        "/4/Relu_output_0"
+      ]
+    },
+    "/5/MaxPool": {
+      "op_type": "MaxPool",
+      "tags": [
+        "/Sequential"
+      ],
+      "inputs": [
+        "/4/Relu_output_0"
+      ],
+      "outputs": [
+        "/5/MaxPool_output_0"
+      ]
+    },
+    "/6/GlobalAveragePool": {
+      "op_type": "GlobalAveragePool",
+      "tags": [
+        "/Sequential"
+      ],
+      "inputs": [
+        "/5/MaxPool_output_0"
+      ],
+      "outputs": [
+        "/6/GlobalAveragePool_output_0"
+      ]
+    },
+    "/7/Flatten": {
+      "op_type": "Flatten",
+      "tags": [
+        "/Sequential"
+      ],
+      "inputs": [
+        "/6/GlobalAveragePool_output_0"
+      ],
+      "outputs": [
+        "/7/Flatten_output_0"
+      ]
+    },
+    "/8/Gemm": {
+      "op_type": "Gemm",
+      "tags": [
+        "/Sequential/"
+      ],
+      "inputs": [
+        "/7/Flatten_output_0",
+        "8.weight",
+        "8.bias"
+      ],
+      "outputs": [
+        "15"
+      ]
+    }
+  }
+}

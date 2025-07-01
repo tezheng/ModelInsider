@@ -1,0 +1,97 @@
+{
+  "embeddings.word_embeddings": {
+    "file": "data/prajjwal1_bert_tiny/modules/embeddings_word_embeddings.onnx",
+    "class": "Embedding",
+    "parameters": 1
+  },
+  "embeddings.LayerNorm": {
+    "file": "data/prajjwal1_bert_tiny/modules/embeddings_LayerNorm.onnx",
+    "class": "LayerNorm",
+    "parameters": 2
+  },
+  "encoder.layer.0.attention.self.query": {
+    "file": "data/prajjwal1_bert_tiny/modules/encoder_layer_0_attention_self_query.onnx",
+    "class": "Linear",
+    "parameters": 2
+  },
+  "encoder.layer.0.attention.self.key": {
+    "file": "data/prajjwal1_bert_tiny/modules/encoder_layer_0_attention_self_key.onnx",
+    "class": "Linear",
+    "parameters": 2
+  },
+  "encoder.layer.0.attention.self.value": {
+    "file": "data/prajjwal1_bert_tiny/modules/encoder_layer_0_attention_self_value.onnx",
+    "class": "Linear",
+    "parameters": 2
+  },
+  "encoder.layer.0.attention.output.dense": {
+    "file": "data/prajjwal1_bert_tiny/modules/encoder_layer_0_attention_output_dense.onnx",
+    "class": "Linear",
+    "parameters": 2
+  },
+  "encoder.layer.0.attention.output.LayerNorm": {
+    "file": "data/prajjwal1_bert_tiny/modules/encoder_layer_0_attention_output_LayerNorm.onnx",
+    "class": "LayerNorm",
+    "parameters": 2
+  },
+  "encoder.layer.0.intermediate.dense": {
+    "file": "data/prajjwal1_bert_tiny/modules/encoder_layer_0_intermediate_dense.onnx",
+    "class": "Linear",
+    "parameters": 2
+  },
+  "encoder.layer.0.output.dense": {
+    "file": "data/prajjwal1_bert_tiny/modules/encoder_layer_0_output_dense.onnx",
+    "class": "Linear",
+    "parameters": 2
+  },
+  "encoder.layer.0.output.LayerNorm": {
+    "file": "data/prajjwal1_bert_tiny/modules/encoder_layer_0_output_LayerNorm.onnx",
+    "class": "LayerNorm",
+    "parameters": 2
+  },
+  "encoder.layer.1.attention.self.query": {
+    "file": "data/prajjwal1_bert_tiny/modules/encoder_layer_1_attention_self_query.onnx",
+    "class": "Linear",
+    "parameters": 2
+  },
+  "encoder.layer.1.attention.self.key": {
+    "file": "data/prajjwal1_bert_tiny/modules/encoder_layer_1_attention_self_key.onnx",
+    "class": "Linear",
+    "parameters": 2
+  },
+  "encoder.layer.1.attention.self.value": {
+    "file": "data/prajjwal1_bert_tiny/modules/encoder_layer_1_attention_self_value.onnx",
+    "class": "Linear",
+    "parameters": 2
+  },
+  "encoder.layer.1.attention.output.dense": {
+    "file": "data/prajjwal1_bert_tiny/modules/encoder_layer_1_attention_output_dense.onnx",
+    "class": "Linear",
+    "parameters": 2
+  },
+  "encoder.layer.1.attention.output.LayerNorm": {
+    "file": "data/prajjwal1_bert_tiny/modules/encoder_layer_1_attention_output_LayerNorm.onnx",
+    "class": "LayerNorm",
+    "parameters": 2
+  },
+  "encoder.layer.1.intermediate.dense": {
+    "file": "data/prajjwal1_bert_tiny/modules/encoder_layer_1_intermediate_dense.onnx",
+    "class": "Linear",
+    "parameters": 2
+  },
+  "encoder.layer.1.output.dense": {
+    "file": "data/prajjwal1_bert_tiny/modules/encoder_layer_1_output_dense.onnx",
+    "class": "Linear",
+    "parameters": 2
+  },
+  "encoder.layer.1.output.LayerNorm": {
+    "file": "data/prajjwal1_bert_tiny/modules/encoder_layer_1_output_LayerNorm.onnx",
+    "class": "LayerNorm",
+    "parameters": 2
+  },
+  "pooler.dense": {
+    "file": "data/prajjwal1_bert_tiny/modules/pooler_dense.onnx",
+    "class": "Linear",
+    "parameters": 2
+  }
+}
