@@ -121,8 +121,8 @@ class UniversalHierarchyExporter:
         # Step 2: Set model to eval mode
         model.eval()
         
-        # Step 3: Skip dynamic hooks for now to avoid hanging
-        # self._register_dynamic_hooks(model)
+        # Step 3: Register dynamic hooks with selective approach
+        self._register_dynamic_hooks(model)
         
         # Step 4: Set up trace module map capture
         captured_trace_map = self._setup_trace_capture()
@@ -146,8 +146,8 @@ class UniversalHierarchyExporter:
         if captured_trace_map:
             self._process_trace_module_map(captured_trace_map)
         
-        # Step 6: Skip dynamic operation tags for now
-        # self._apply_dynamic_tags_to_onnx(output_path)
+        # Step 6: Apply dynamic operation tags to ONNX
+        self._apply_dynamic_tags_to_onnx(output_path)
         
         # Step 7: Load ONNX and inject hierarchy metadata
         self._inject_hierarchy_metadata(output_path)
@@ -547,39 +547,71 @@ class UniversalHierarchyExporter:
         self._operation_context.clear()
         self._onnx_operation_tags.clear()
         
-        if self.verbose:
-            logger.info(f"Registering dynamic hooks for {len(self._module_hierarchy)} modules")
+        # Count modules to hook
+        hf_modules = []
+        torch_nn_modules = []
         
         for full_path, module_data in self._module_hierarchy.items():
             if full_path == "__module":  # Skip root
                 continue
-                
+            
+            if not module_data['should_filter']:
+                hf_modules.append((full_path, module_data))
+            else:
+                torch_nn_modules.append((full_path, module_data))
+        
+        if self.verbose:
+            logger.info(f"Registering selective dynamic hooks:")
+            logger.info(f"  - HuggingFace modules: {len(hf_modules)}")
+            logger.info(f"  - torch.nn modules: {len(torch_nn_modules)} (limited hooks)")
+        
+        # Register hooks on HuggingFace modules only
+        for full_path, module_data in hf_modules:
             # Get the actual module
             module = self._get_module_by_path(model, full_path.replace("__module.", ""))
             if module is None:
                 continue
             
             module_name = module_data['name']
-            should_filter = module_data['should_filter']
             expected_tag = module_data['expected_tag']
             
-            if not should_filter:
-                # Create hierarchy-building hooks (push/pop tag stack)
-                pre_hook = module.register_forward_pre_hook(
-                    self._create_pre_hook(module_name, expected_tag)
-                )
-                self._pre_hooks.append(pre_hook)
+            # Create hierarchy-building hooks (push/pop tag stack)
+            pre_hook = module.register_forward_pre_hook(
+                self._create_pre_hook(module_name, expected_tag)
+            )
+            self._pre_hooks.append(pre_hook)
+            
+            post_hook = module.register_forward_hook(
+                self._create_post_hook(module_name, expected_tag)
+            )
+            self._post_hooks.append(post_hook)
+        
+        # For torch.nn modules, only register lightweight tagging hooks on a few
+        # This avoids potential conflicts with ONNX export
+        torch_nn_hook_count = 0
+        max_torch_nn_hooks = 5  # Limit to avoid issues
+        
+        for full_path, module_data in torch_nn_modules:
+            if torch_nn_hook_count >= max_torch_nn_hooks:
+                break
                 
-                post_hook = module.register_forward_hook(
-                    self._create_post_hook(module_name, expected_tag)
-                )
-                self._post_hooks.append(post_hook)
-            else:
-                # Create operation tagging hooks (use parent tag)
+            module = self._get_module_by_path(model, full_path.replace("__module.", ""))
+            if module is None:
+                continue
+            
+            # Only hook important torch.nn modules (LayerNorm, Embedding)
+            if module.__class__.__name__ in self.torch_nn_exceptions:
+                module_name = module_data['name']
+                expected_tag = module_data['expected_tag']
+                
                 tag_hook = module.register_forward_hook(
                     self._create_tagging_hook(module_name, expected_tag)
                 )
                 self._post_hooks.append(tag_hook)
+                torch_nn_hook_count += 1
+        
+        if self.verbose:
+            logger.info(f"Registered {len(self._pre_hooks)} pre-hooks and {len(self._post_hooks)} post-hooks")
     
     def _get_module_by_path(self, model: nn.Module, path: str) -> nn.Module:
         """Get module by its dotted path."""
@@ -650,15 +682,16 @@ class UniversalHierarchyExporter:
     
     def _apply_dynamic_tags_to_onnx(self, output_path: str) -> None:
         """
-        Apply the captured dynamic operation tags to the ONNX model.
+        Process the ONNX model and create operation tag mappings.
         
-        This method loads the ONNX model and injects the hierarchy tags
-        captured during the dynamic execution.
+        Note: We don't modify the ONNX file itself (which would break validation).
+        Instead, we build a mapping of operation names to hierarchy tags that
+        can be used for filtering and analysis.
         """
         try:
             import onnx
         except ImportError:
-            logger.warning("ONNX package not available for dynamic tagging")
+            logger.warning("ONNX package not available for operation analysis")
             return
         
         if not self._operation_context:
@@ -666,54 +699,99 @@ class UniversalHierarchyExporter:
                 logger.info("No dynamic operation context captured")
             return
         
-        # Load the ONNX model
-        onnx_model = onnx.load(output_path)
+        # Load the ONNX model for analysis
+        try:
+            onnx_model = onnx.load(output_path)
+        except Exception as e:
+            logger.warning(f"Could not load ONNX model for analysis: {e}")
+            return
         
-        # Create operation tag mapping
+        # Create operation tag mapping based on captured context
         operation_count = 0
         for node in onnx_model.graph.node:
-            # Use a simple strategy: map operations to hierarchy context
-            # This is a simplified version - in production we'd need more sophisticated mapping
             node_name = node.name or f"{node.op_type}_{operation_count}"
             
-            # Find best matching context based on operation type and timing
+            # Find best matching context based on operation type
             best_tag = self._find_best_tag_for_operation(node)
             if best_tag:
                 self._onnx_operation_tags[node_name] = best_tag
                 
-                # Add the tag as metadata to the node
-                if not hasattr(node, 'attribute'):
-                    node.attribute.append(onnx.helper.make_attribute("hierarchy_tag", best_tag))
-                else:
-                    # Check if tag already exists
-                    has_tag = any(attr.name == "hierarchy_tag" for attr in node.attribute)
-                    if not has_tag:
-                        node.attribute.append(onnx.helper.make_attribute("hierarchy_tag", best_tag))
+                # Also store in operation_tags for metadata
+                if node_name not in self._operation_tags:
+                    self._operation_tags[node_name] = []
+                self._operation_tags[node_name].append(best_tag)
             
             operation_count += 1
-        
-        # Save the updated model
-        onnx.save(onnx_model, output_path)
         
         # Update statistics
         self._export_stats['tagged_operations'] = len(self._onnx_operation_tags)
         
         if self.verbose:
-            logger.info(f"Applied {len(self._onnx_operation_tags)} dynamic operation tags to ONNX")
+            logger.info(f"Mapped {len(self._onnx_operation_tags)} operations to hierarchy tags")
     
     def _find_best_tag_for_operation(self, node) -> str:
         """
         Find the best hierarchy tag for an ONNX operation.
         
-        This is a simplified mapping strategy. In production, we would need
-        more sophisticated correlation between PyTorch modules and ONNX operations.
+        Uses the operation name structure to match with module hierarchy.
+        ONNX operations often have names like:
+        - /embeddings/word_embeddings/Gather
+        - /encoder/layer.0/attention/self/query/MatMul
+        - /pooler/dense/Gemm
         """
-        # Simple strategy: use the most recent non-empty tag from context
+        node_name = node.name or f"{node.op_type}_{id(node)}"
+        
+        # Strategy 1: Match operation path with module paths
+        # Remove leading slash and operation type suffix
+        op_path = node_name.lstrip('/')
+        
+        # Remove operation type from the end (e.g., /Gather, /MatMul)
+        path_parts = op_path.split('/')
+        if path_parts and path_parts[-1] in ['Gather', 'MatMul', 'Add', 'LayerNormalization', 
+                                              'Gemm', 'Tanh', 'Softmax', 'Div', 'Mul', 'Sub',
+                                              'Transpose', 'Reshape', 'Constant', 'Shape', 
+                                              'Unsqueeze', 'Concat', 'Slice', 'Where', 'Cast',
+                                              'Expand', 'Equal', 'ConstantOfShape', 'Sqrt', 'Erf']:
+            op_path = '/'.join(path_parts[:-1])
+        
+        # Try to find the best matching module based on path similarity
+        best_match = None
+        best_score = 0
+        
+        for module_name, context in self._operation_context.items():
+            if not context.get("tag"):
+                continue
+                
+            # Calculate match score based on common path components
+            module_path = module_name.lower().replace('.', '/')
+            op_path_lower = op_path.lower()
+            
+            # Check if operation path contains module path components
+            if module_path in op_path_lower:
+                score = len(module_path)
+                if score > best_score:
+                    best_score = score
+                    best_match = context["tag"]
+            
+            # Also check individual components
+            module_parts = module_path.split('/')
+            op_parts = op_path_lower.split('/')
+            common_parts = sum(1 for mp in module_parts if mp in op_parts)
+            if common_parts > best_score:
+                best_score = common_parts
+                best_match = context["tag"]
+        
+        # If we found a good match, use it
+        if best_match:
+            return best_match
+        
+        # Strategy 2: Use operation context if no path match
+        # This was the original approach - use as fallback
         for context in reversed(list(self._operation_context.values())):
             if context.get("tag"):
                 return context["tag"]
         
-        # Fallback to root tag
+        # Final fallback to root tag
         return f"/{self._get_root_class_name()}" if self._module_hierarchy else ""
     
     def _get_root_class_name(self) -> str:

@@ -1,0 +1,202 @@
+"""
+Tracing-based HF hierarchy builder using forward hooks.
+
+This version builds module hierarchy lazily during tracing to avoid
+including unused modules in the final hierarchy. Only processes modules
+that are actually executed (18 vs 48 total modules for BERT-tiny).
+
+Key insight: Execution order IS hierarchy order - parents always execute before children!
+"""
+from __future__ import annotations
+
+import torch
+import torch.nn as nn
+from typing import Any
+
+
+class TracingHierarchyBuilder:
+    """
+    Tracing-based hierarchy builder that builds hierarchy lazily.
+
+    Key improvements:
+    - Only includes modules that are actually executed (18 vs 48 modules for BERT-tiny)
+    - Leverages natural execution order (parents execute before children)
+    - Ultra-simple implementation using tag stack
+    - No complex parent tracking needed
+    """
+
+    def __init__(self):
+        self.tag_stack = []
+        self.execution_trace = []
+        self.operation_context = {}
+        self.hooks = []
+        self.module_hierarchy = {}  # Only populated for executed modules
+        self.traced_modules = set()  # Track which modules were traced
+
+    def is_hf_class(self, module: nn.Module) -> bool:
+        """Check if a module is a HuggingFace class - UNIVERSAL."""
+        module_path = module.__class__.__module__
+        return module_path.startswith("transformers")
+
+    def should_create_hierarchy_level(self, module: nn.Module) -> bool:
+        """
+        Determine if module should create a new hierarchy level - UNIVERSAL.
+
+        CARDINAL RULE: NO HARDCODED LOGIC - use only HuggingFace modules
+        """
+        return self.is_hf_class(module)
+
+    def create_pre_hook(self, module_name: str, module: nn.Module):
+        """Create pre-forward hook - ultra simple version."""
+
+        def pre_hook(module_ref, inputs):
+            # Extract class name and check for index
+            class_name = module.__class__.__name__
+            name_parts = module_name.split(".") if module_name else []
+
+            # Handle indexed modules (e.g., layer.0)
+            if name_parts and name_parts[-1].isdigit():
+                current_class_name = f"{class_name}.{name_parts[-1]}"
+            else:
+                current_class_name = class_name
+
+            # Build hierarchical tag
+            if self.tag_stack:  # Has parent
+                parent_tag = self.tag_stack[-1]
+                hierarchical_tag = f"{parent_tag}/{current_class_name}"
+            else:  # Root module
+                hierarchical_tag = f"/{current_class_name}"
+            
+            self.tag_stack.append(hierarchical_tag)
+
+            # Add to hierarchy (parents guaranteed to exist due to execution order!)
+            if module_name not in self.module_hierarchy:
+                self.module_hierarchy[module_name] = {
+                    "name": module_name,
+                    "class_name": class_name,
+                    "module_type": "huggingface",  # We only hook HF modules
+                    "traced_tag": hierarchical_tag,
+                    "execution_order": sum(
+                        1
+                        for trace in self.execution_trace
+                        if trace["action"] == "enter"
+                    ),  # Count only "enter" actions for execution order
+                }
+
+            # Record execution trace
+            self.execution_trace.append(
+                {
+                    "module_name": module_name,
+                    "tag": hierarchical_tag,
+                    "action": "enter",
+                    "stack_depth": len(self.tag_stack),
+                }
+            )
+
+            # Mark as traced
+            self.traced_modules.add(module_name)
+
+            # Operation context for compatibility
+            self.operation_context[module_name] = {
+                "tag": hierarchical_tag,
+                "module_class": class_name,
+            }
+
+        return pre_hook
+
+    def create_post_hook(self, module_name: str):
+        """Create post-forward hook - record exit and pop the stack."""
+
+        def post_hook(module, inputs, outputs):
+            # Record exit action
+            if self.tag_stack:
+                self.execution_trace.append(
+                    {
+                        "module_name": module_name,
+                        "tag": self.tag_stack[-1],
+                        "action": "exit",
+                        "stack_depth": len(self.tag_stack),
+                    }
+                )
+                self.tag_stack.pop()
+
+        return post_hook
+
+    def register_hooks(self, model: nn.Module) -> None:
+        """Register hooks - ultra simple version."""
+        # Initialize with empty tag stack (root will add itself)
+        self.tag_stack = []
+
+        # Register hooks on ALL HF modules including root
+        for name, module in model.named_modules():
+            if self.is_hf_class(module):  # Include root (name == '')
+                pre_hook = module.register_forward_pre_hook(
+                    self.create_pre_hook(name, module)
+                )
+                self.hooks.append(pre_hook)
+
+                post_hook = module.register_forward_hook(self.create_post_hook(name))
+                self.hooks.append(post_hook)
+
+    def remove_hooks(self) -> None:
+        """Remove all registered hooks."""
+        for hook in self.hooks:
+            hook.remove()
+        self.hooks.clear()
+
+    def trace_model_execution(
+        self, model: nn.Module, example_inputs: tuple[torch.Tensor, ...]
+    ) -> None:
+        """Trace model execution to build hierarchy mapping - UNIVERSAL."""
+        self.register_hooks(model)
+
+        try:
+            # Run model forward pass to trigger hooks
+            model.eval()
+            with torch.no_grad():
+                _ = model(*example_inputs)
+        finally:
+            self.remove_hooks()
+
+    def get_hierarchy_mapping(self) -> dict[str, str]:
+        """Get the traced hierarchy mapping."""
+        hierarchy_mapping = {}
+
+        for module_name, context in self.operation_context.items():
+            hierarchy_mapping[module_name] = context["tag"]
+
+        return hierarchy_mapping
+
+    def get_complete_hierarchy(self) -> dict[str, dict[str, Any]]:
+        """
+        Get the complete module hierarchy with traced tags.
+
+        Optimized version: Only includes modules that were actually executed.
+        """
+        # Add expected_tag for backward compatibility if needed
+        result = {}
+        for module_name, metadata in self.module_hierarchy.items():
+            result[module_name] = metadata.copy()
+            # Add expected_tag for backward compatibility
+            result[module_name]["expected_tag"] = metadata.get("traced_tag")
+        
+        return result
+
+    def get_execution_summary(self) -> dict[str, Any]:
+        """Get execution summary."""
+        return {
+            "total_modules_traced": len(self.traced_modules),
+            "total_modules": len(self.module_hierarchy),
+            "execution_steps": len(self.execution_trace),
+            "hierarchy_mapping": self.get_hierarchy_mapping(),
+            "module_hierarchy": self.get_complete_hierarchy(),
+        }
+
+    def clear(self) -> None:
+        """Clear all internal state."""
+        self.tag_stack.clear()
+        self.execution_trace.clear()
+        self.operation_context.clear()
+        self.module_hierarchy.clear()
+        self.traced_modules.clear()
+        self.remove_hooks()
