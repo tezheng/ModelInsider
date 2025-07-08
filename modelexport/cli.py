@@ -19,6 +19,7 @@ import shutil
 
 from .strategies.htp.htp_hierarchy_exporter import HierarchyExporter
 from .strategies.htp.htp_integrated_exporter import export_with_htp_integrated
+from .strategies.htp.htp_integrated_exporter_with_reporting import export_with_htp_integrated_reporting
 from .strategies.fx.fx_hierarchy_exporter import FXHierarchyExporter
 from .strategies.usage_based.usage_based_exporter import UsageBasedExporter
 from .core.enhanced_semantic_exporter import EnhancedSemanticExporter
@@ -239,7 +240,7 @@ def export(ctx, model_name_or_path, output_path, input_shape, strategy, opset_ve
             if verbose:
                 click.echo("🚀 Using HTP Integrated strategy (TracingHierarchyBuilder + ONNXNodeTagger)")
             
-            result = export_with_htp_integrated(
+            result = export_with_htp_integrated_reporting(
                 model=model,
                 example_inputs=inputs,
                 output_path=output_path,
