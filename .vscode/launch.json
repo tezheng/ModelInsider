@@ -43,6 +43,39 @@
       "console": "integratedTerminal",
       "cwd": "${workspaceFolder}",
       "justMyCode": false
+    },
+    {
+      "name": "Debug: uni_exporter",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "test_universal_export.py",
+      "args": [],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": false
+
+    },
+    {
+      "name": "Debug: hf_hierarchy",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "scripts/experimental/hf_module_hierarchy_tracing.py",
+      "args": [],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": false
+
+    },
+    {
+      "name": "Debug: sam_exporter",
+      "type": "debugpy",
+      "request": "launch",
+      "program": "scripts/verify_enhanced_semantic_bert_tiny.py",
+      "args": [],
+      "console": "integratedTerminal",
+      "cwd": "${workspaceFolder}",
+      "justMyCode": false
+
     }
   ]
 }

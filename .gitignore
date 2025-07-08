@@ -1,24 +1,113 @@
-# Temporary test data
+# =============================================================================
+# ModelExport .gitignore
+# =============================================================================
+
+# Temporary outputs and test data
 temp/
+outputs/
+benchmark/
+test_outputs/
+
+# Generated model files (exclude from version control)
 *.onnx
+*.pt
+*.pth
+*.safetensors
+
+# Generated metadata and config files (exclude test/temp ones)
 *_test_*.json
 *_dag_*.json
+*_metadata.json
+*_hierarchy.json
+*_fx_hierarchy.json
+*_fx_module_info.json
+*_enhanced_semantic_metadata.json
 
-# Debug outputs (keep debug/ folder but ignore generated files)
+# Debug outputs (keep debug/ folder structure but ignore generated files)
+debug/*/outputs/
 debug_*.onnx
 debug_*.json
 debug_graph_mutation/
+debug/sessions/*/temp/
+debug/active/*/outputs/
 
 # Python-generated files
 __pycache__/
 *.py[oc]
+*.pyo
+*.pyd
+*.so
 build/
 dist/
 wheels/
-*.egg-info
+*.egg-info/
+.Python
 
-# Virtual environments
-.venv
+# Virtual environments and tools
+.venv/
+.env
+.vscode/settings.json
+.vscode/.ropeproject/
+.idea/
 
-# External reference repositories
+# Jupyter Notebook checkpoints and outputs
+.ipynb_checkpoints/
+*/.ipynb_checkpoints/
+experiments/notebooks/*/outputs/
+experiments/notebooks/temp/
+
+# Testing and coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+coverage.xml
+*.cover
+.hypothesis/
+
+# OS-specific files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+*~
+
+# External reference repositories (archived)
 external/
+
+# Large datasets and model files (if any)
+data/models/
+data/checkpoints/
+datasets/
+
+# Temporary research artifacts
+experiments/temp/
+experiments/*/outputs/
+experiments/*/temp/
+notebooks/temp/
+
+# Environment and secrets
+.env.local
+.env.*.local
+secrets/
+*.key
+*.pem
+
+# Package lock files (keep uv.lock, ignore others)
+poetry.lock
+Pipfile.lock
+yarn.lock
+package-lock.json
+
+# Documentation build artifacts
+docs/_build/
+docs/site/
+
+# IDE and editor files
+*.swp
+*.swo
+*~
+.vscode/launch.json.bak

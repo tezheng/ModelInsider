@@ -1,0 +1,27 @@
+{
+  "input_specs": {
+    "input_ids": {
+      "dtype": "int",
+      "range": [0, 30522]
+    }
+  },
+  "input_names": ["input_ids"],
+  "output_names": ["last_hidden_state", "pooler_output"],
+  "dynamic_axes": {
+    "input_ids": {
+      "0": "batch_size",
+      "1": "sequence_length"
+    },
+    "last_hidden_state": {
+      "0": "batch_size",
+      "1": "sequence_length"
+    },
+    "pooler_output": {
+      "0": "batch_size"
+    }
+  },
+  "opset_version": 17,
+  "do_constant_folding": true,
+  "export_params": true,
+  "training": false
+}

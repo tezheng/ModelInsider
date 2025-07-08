@@ -18,8 +18,10 @@ import tempfile
 import shutil
 
 from .strategies.htp.htp_hierarchy_exporter import HierarchyExporter
+from .strategies.htp.htp_integrated_exporter import export_with_htp_integrated
 from .strategies.fx.fx_hierarchy_exporter import FXHierarchyExporter
 from .strategies.usage_based.usage_based_exporter import UsageBasedExporter
+from .core.enhanced_semantic_exporter import EnhancedSemanticExporter
 from .core import tag_utils
 
 
@@ -37,8 +39,8 @@ def cli(ctx, verbose):
 @click.argument('model_name_or_path')
 @click.argument('output_path')
 @click.option('--input-shape', help='Input shape as comma-separated values (e.g., 1,3,224,224) for vision models')
-@click.option('--strategy', default='usage_based', 
-              type=click.Choice(['usage_based', 'htp', 'fx_graph']), 
+@click.option('--strategy', default='htp_integrated', 
+              type=click.Choice(['htp_integrated', 'enhanced_semantic', 'usage_based', 'htp', 'fx_graph']), 
               help='Tagging strategy to use')
 @click.option('--opset-version', default=14, type=int,
               help='ONNX opset version to use')
@@ -50,8 +52,9 @@ def cli(ctx, verbose):
               help='Dump TorchScript graph information before ONNX export (preserves context)')
 @click.option('--fx-graph', type=click.Choice(['symbolic_trace', 'torch_export', 'both']),
               help='Export FX graph representation (dynamo=False alternative)')
+@click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
 @click.pass_context
-def export(ctx, model_name_or_path, output_path, input_shape, strategy, opset_version, config, temp_dir, jit_graph, fx_graph):
+def export(ctx, model_name_or_path, output_path, input_shape, strategy, opset_version, config, temp_dir, jit_graph, fx_graph, verbose):
     """
     Export a PyTorch model to ONNX with hierarchy preservation.
     
@@ -60,10 +63,16 @@ def export(ctx, model_name_or_path, output_path, input_shape, strategy, opset_ve
     
     Examples:
     \b
-        # Export BERT model with config
+        # Export BERT model with HTP Integrated strategy (default, recommended)
         modelexport export prajjwal1/bert-tiny bert.onnx --config export_config.json
         
-        # Export with HTP strategy and debug info
+        # Export with verbose output showing optimization details
+        modelexport export prajjwal1/bert-tiny bert.onnx --config config.json --verbose
+        
+        # Export with Enhanced Semantic mapping (alternative strategy)
+        modelexport export prajjwal1/bert-tiny bert.onnx --strategy enhanced_semantic --config config.json
+        
+        # Export with legacy HTP strategy
         modelexport export prajjwal1/bert-tiny bert.onnx --strategy htp --config config.json --jit-graph
         
         # Export with FX graph alternative (for analysis)
@@ -78,7 +87,6 @@ def export(ctx, model_name_or_path, output_path, input_shape, strategy, opset_ve
         # Full debug export with all features
         modelexport export prajjwal1/bert-tiny bert.onnx --config config.json --jit-graph --fx-graph both --verbose
     """
-    verbose = ctx.obj['verbose']
     
     try:
         # Set up temp directory
@@ -227,7 +235,38 @@ def export(ctx, model_name_or_path, output_path, input_shape, strategy, opset_ve
                     click.echo(traceback.format_exc(), err=True)
         
         # Export with hierarchy preservation using appropriate strategy
-        if strategy == 'fx_graph':
+        if strategy == 'htp_integrated':
+            if verbose:
+                click.echo("🚀 Using HTP Integrated strategy (TracingHierarchyBuilder + ONNXNodeTagger)")
+            
+            result = export_with_htp_integrated(
+                model=model,
+                example_inputs=inputs,
+                output_path=output_path,
+                verbose=verbose,
+                **export_kwargs
+            )
+        elif strategy == 'enhanced_semantic':
+            if verbose:
+                click.echo("🎯 Using Enhanced Semantic mapping with HuggingFace-level understanding")
+            
+            # For Enhanced Semantic, we need to prepare args tuple for the model
+            if isinstance(inputs, dict):
+                # Convert dict inputs to tuple of tensors for torch.onnx.export
+                args = tuple(inputs.values())
+            elif isinstance(inputs, torch.Tensor):
+                args = (inputs,)
+            else:
+                args = inputs
+            
+            exporter = EnhancedSemanticExporter(verbose=verbose)
+            result = exporter.export(
+                model=model,
+                args=args,
+                output_path=output_path,
+                **export_kwargs
+            )
+        elif strategy == 'fx_graph':
             if verbose:
                 click.echo("🚀 Using FX Graph-based hierarchy preservation")
             exporter = FXHierarchyExporter()
@@ -261,7 +300,34 @@ def export(ctx, model_name_or_path, output_path, input_shape, strategy, opset_ve
         # Output results
         click.echo(f"✅ Export completed successfully!")
         
-        if strategy == 'fx_graph':
+        if strategy == 'htp_integrated':
+            # HTP Integrated strategy specific output
+            click.echo(f"   ONNX Output: {output_path}")
+            sidecar_path = output_path.replace('.onnx', '_htp_integrated_metadata.json')
+            click.echo(f"   Metadata: {sidecar_path}")
+            click.echo(f"   Hierarchy modules: {result['hierarchy_modules']}")
+            click.echo(f"   Tagged nodes: {result['tagged_nodes']}")
+            click.echo(f"   Coverage: {result['coverage_percentage']:.1f}%")
+            click.echo(f"   Export time: {result['export_time']:.2f}s")
+            if verbose:
+                click.echo(f"   Statistics:")
+                click.echo(f"     ONNX nodes: {result['onnx_nodes']}")
+                click.echo(f"     Empty tags: {result['empty_tags']} (MUST be 0)")
+                click.echo(f"     Optimized hierarchy: {result['hierarchy_modules']} modules (vs ~48 total)")
+        elif strategy == 'enhanced_semantic':
+            # Enhanced Semantic strategy specific output
+            click.echo(f"   ONNX Output: {output_path}")
+            sidecar_path = output_path.replace('.onnx', '_enhanced_semantic_metadata.json')
+            click.echo(f"   Enhanced Metadata: {sidecar_path}")
+            click.echo(f"   Total ONNX nodes: {result['total_onnx_nodes']}")
+            click.echo(f"   HF module mappings: {result['hf_module_mappings']}")
+            click.echo(f"   Coverage: {(result['hf_module_mappings'] + result['operation_inferences'] + result['pattern_fallbacks'])/result['total_onnx_nodes']*100:.1f}%")
+            click.echo(f"   Export time: {result['export_time']:.2f}s")
+            if verbose:
+                click.echo(f"   Confidence levels:")
+                for conf, count in result['confidence_levels'].items():
+                    click.echo(f"     {conf}: {count} nodes")
+        elif strategy == 'fx_graph':
             # FX strategy specific output
             click.echo(f"   ONNX Output: {result['onnx_path']}")
             click.echo(f"   Sidecar: {result['sidecar_path']}")

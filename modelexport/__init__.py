@@ -15,7 +15,8 @@ Quick Start:
     >>> print(f"Exported using {report['summary']['final_strategy']} strategy")
 
 Strategies:
-- Usage-Based: Fastest strategy (2.5s), recommended for production
+- Enhanced Semantic: HuggingFace-level semantic mapping, 97% coverage (recommended)
+- Usage-Based: Fastest strategy (2.5s), good for production  
 - HTP: Comprehensive tracing for complex models (4-6s)
 - FX: Limited compatibility, not recommended for HuggingFace models
 """
@@ -31,6 +32,9 @@ from .core.unified_optimizer import UnifiedOptimizer, create_optimized_exporter
 from .strategies.usage_based import UsageBasedExporter
 from .strategies.htp import HTPHierarchyExporter
 from .strategies.fx import FXHierarchyExporter
+
+# Enhanced semantic mapping (Generation 3)
+from .core.enhanced_semantic_exporter import EnhancedSemanticExporter
 
 # Utilities
 from .core.base import BaseHierarchyExporter, should_tag_module, build_hierarchy_path
@@ -59,6 +63,7 @@ __all__ = [
     "UsageBasedExporter",
     "HTPHierarchyExporter", 
     "FXHierarchyExporter",
+    "EnhancedSemanticExporter",
     
     # Utilities
     "BaseHierarchyExporter",

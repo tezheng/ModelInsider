@@ -232,3 +232,6 @@ The HTP strategy now uses PyTorch's built-in `torch.jit._trace._trace_module_map
 - Use `uv run modelexport export prajjwal1/bert-tiny temp/bert-tiny/model.onnx --strategy htp --config export_config_bertmodel.json` to export prajjwal1/bert-tiny
 - Generate bert-tiny baseline with `uv run python tests/data/generate_test_data.py --model prajjwal1/bert-tiny --output-dir temp/baseline/bert-tiny/`
 - Prefer opset_version=17 when converting to onnx model
+
+### Critical Questioning
+- Always ask question before planning and executing if you have questions or uncertainties for the requirements
