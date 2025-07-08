@@ -75,6 +75,9 @@ ehthumbs.db
 Thumbs.db
 *~
 
+# Process and log files
+nohup.out
+
 # External reference repositories (archived)
 external/
 
