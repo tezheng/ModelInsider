@@ -370,8 +370,16 @@ class HTPIntegratedExporterWithReporting(HTPIntegratedExporter):
         self._print_section_header("Step 6: Complete HF Hierarchy with ONNX Nodes")
         
         if not self.verbose:
-            self._print_and_log("🌳 Complete hierarchy tree available in report file")
+            self._print_and_log("🌳 Complete hierarchy tree (see detailed version in report file)")
+            # Still generate the tree for the report, but don't show on console
+            self._generate_complete_hierarchy_tree(onnx_model, show_console=False)
             return
+        
+        # Generate and show tree for both console and report
+        self._generate_complete_hierarchy_tree(onnx_model, show_console=True)
+    
+    def _generate_complete_hierarchy_tree(self, onnx_model: onnx.ModelProto, show_console: bool = True) -> None:
+        """Generate complete hierarchy tree with ONNX nodes."""
         
         # Group nodes by their tags
         nodes_by_tag = defaultdict(list)
@@ -461,8 +469,78 @@ class HTPIntegratedExporterWithReporting(HTPIntegratedExporter):
                         group_text.append(f" ({len(op_nodes)} ops)", style="dim bright_white")
                         current_node.add(group_text)
         
-        # Render tree
-        self.console.print(tree)
+        # Render tree to console if requested
+        if show_console:
+            self.console.print(tree)
+        
+        # Always capture tree for report
+        with io.StringIO() as tree_buffer:
+            tree_console = Console(file=tree_buffer, width=120, legacy_windows=False)
+            tree_console.print(tree)
+            tree_text = tree_buffer.getvalue()
+        
+        # Store the complete hierarchy tree in detailed stats
+        self._detailed_stats["complete_hierarchy_tree"] = tree_text
+        
+        # Also log to report buffer if not verbose (so it appears in report)
+        if not self.verbose:
+            self._print_and_log("\n📊 Complete HF Hierarchy with ONNX Nodes:")
+            self._print_and_log("-" * 60)
+            # Add a simplified text version for the report
+            self._add_simplified_tree_to_report()
+    
+    def _add_simplified_tree_to_report(self) -> None:
+        """Add a simplified text version of the hierarchy tree to the report."""
+        # Find root class
+        root_class = "Model"
+        for module_path, module_info in self._hierarchy_data.items():
+            if not module_path:
+                root_class = module_info.get('class_name', 'Model')
+                break
+        
+        # Group nodes by their tags
+        nodes_by_tag = defaultdict(list)
+        for node_name, tag in self._tagged_nodes.items():
+            nodes_by_tag[tag].append(node_name)
+        
+        # Create simplified text tree
+        tree_lines = []
+        tree_lines.append(f"{root_class} ({len(self._tagged_nodes)} ONNX nodes)")
+        
+        sorted_hierarchy = sorted(
+            self._hierarchy_data.items(),
+            key=lambda x: x[1].get('execution_order', 999)
+        )
+        
+        for module_path, module_info in sorted_hierarchy:
+            if not module_path:
+                continue
+                
+            class_name = module_info.get('class_name', 'Unknown')
+            module_tag = module_info.get('traced_tag', '')
+            module_nodes = nodes_by_tag.get(module_tag, [])
+            node_count = len(module_nodes)
+            
+            depth = module_path.count('.')
+            indent = "  " * depth
+            tree_lines.append(f"{indent}└─ {class_name}: {module_path} ({node_count} nodes)")
+            
+            # Add top operation types for this module
+            if module_nodes:
+                ops_by_type = defaultdict(int)
+                for node_name in module_nodes:
+                    # Extract operation type from node name
+                    op_type = node_name.split('/')[-1].split('_')[0]
+                    ops_by_type[op_type] += 1
+                
+                # Show top 3 operation types
+                top_ops = sorted(ops_by_type.items(), key=lambda x: x[1], reverse=True)[:3]
+                for op_type, count in top_ops:
+                    tree_lines.append(f"{indent}    • {op_type}: {count} ops")
+        
+        # Add to report buffer
+        for line in tree_lines:
+            self._print_and_log(line)
     
     def _generate_export_report(self, output_path: str) -> None:
         """Generate comprehensive export report."""
@@ -530,6 +608,13 @@ class HTPIntegratedExporterWithReporting(HTPIntegratedExporter):
             for i, (tag, count) in enumerate(list(self._detailed_stats["tag_distribution"].items())[:20]):
                 percentage = (count / total_nodes) * 100
                 report_content.append(f"{i+1:2d}. {tag}: {count} nodes ({percentage:.1f}%)")
+            report_content.append("")
+        
+        # Add complete hierarchy tree (Step 6)
+        if self._detailed_stats.get("complete_hierarchy_tree"):
+            report_content.append("Complete HF Hierarchy with ONNX Nodes:")
+            report_content.append("-" * 30)
+            report_content.append(self._detailed_stats["complete_hierarchy_tree"])
             report_content.append("")
         
         # Add buffer content (console output)
