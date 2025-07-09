@@ -469,10 +469,6 @@ class HTPIntegratedExporterWithReporting(HTPIntegratedExporter):
                         group_text.append(f" ({len(op_nodes)} ops)", style="dim bright_white")
                         current_node.add(group_text)
         
-        # Render tree to console if requested
-        if show_console:
-            self.console.print(tree)
-        
         # Always capture tree for report
         with io.StringIO() as tree_buffer:
             tree_console = Console(file=tree_buffer, width=120, legacy_windows=False)
@@ -482,11 +478,15 @@ class HTPIntegratedExporterWithReporting(HTPIntegratedExporter):
         # Store the complete hierarchy tree in detailed stats
         self._detailed_stats["complete_hierarchy_tree"] = tree_text
         
-        # Also log to report buffer if not verbose (so it appears in report)
-        if not self.verbose:
+        # Render tree to console if requested
+        if show_console:
+            self.console.print(tree)
+            # Also capture the tree text in the report buffer for console output section
+            self._print_and_log("(Tree visualization shown above)")
+        else:
+            # For quiet mode, add simplified text version to report buffer
             self._print_and_log("\n📊 Complete HF Hierarchy with ONNX Nodes:")
             self._print_and_log("-" * 60)
-            # Add a simplified text version for the report
             self._add_simplified_tree_to_report()
     
     def _add_simplified_tree_to_report(self) -> None:
