@@ -8,22 +8,19 @@ validation, and analysis. All commands are designed to be:
 3. User-friendly with clear help text
 """
 
-import click
 import json
 import sys
-import torch
 from pathlib import Path
-from typing import Optional, Dict, Any
-import tempfile
-import shutil
 
-from .strategies.htp.htp_hierarchy_exporter import HierarchyExporter
-from .strategies.htp.htp_integrated_exporter import export_with_htp_integrated
-from .strategies.htp.htp_integrated_exporter_with_reporting import export_with_htp_integrated_reporting
-from .strategies.fx.fx_hierarchy_exporter import FXHierarchyExporter
-from .strategies.usage_based.usage_based_exporter import UsageBasedExporter
-from .core.enhanced_semantic_exporter import EnhancedSemanticExporter
+import click
+import torch
+
 from .core import tag_utils
+from .core.enhanced_semantic_exporter import EnhancedSemanticExporter
+from .strategies.fx.fx_hierarchy_exporter import FXHierarchyExporter
+from .strategies.htp.htp_hierarchy_exporter import HierarchyExporter
+from .strategies.htp.htp_exporter import export_with_htp_integrated_reporting
+from .strategies.usage_based.usage_based_exporter import UsageBasedExporter
 
 
 @click.group()
@@ -39,7 +36,7 @@ def cli(ctx, verbose):
 @cli.command()
 @click.argument('model_name_or_path')
 @click.argument('output_path')
-@click.option('--input-shape', help='Input shape as comma-separated values (e.g., 1,3,224,224) for vision models')
+@click.option('--input-specs', type=click.Path(exists=True), help='JSON file with input specifications (optional, auto-generates if not provided)')
 @click.option('--strategy', default='htp_integrated', 
               type=click.Choice(['htp_integrated', 'enhanced_semantic', 'usage_based', 'htp', 'fx_graph']), 
               help='Tagging strategy to use')
@@ -55,7 +52,7 @@ def cli(ctx, verbose):
               help='Export FX graph representation (dynamo=False alternative)')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
 @click.pass_context
-def export(ctx, model_name_or_path, output_path, input_shape, strategy, opset_version, config, temp_dir, jit_graph, fx_graph, verbose):
+def export(ctx, model_name_or_path, output_path, input_specs, strategy, opset_version, config, temp_dir, jit_graph, fx_graph, verbose):
     """
     Export a PyTorch model to ONNX with hierarchy preservation.
     
@@ -64,26 +61,26 @@ def export(ctx, model_name_or_path, output_path, input_shape, strategy, opset_ve
     
     Examples:
     \b
-        # Export BERT model with HTP Integrated strategy (default, recommended)
-        modelexport export prajjwal1/bert-tiny bert.onnx --config export_config.json
+        # Export BERT model with auto-generated inputs (default, recommended)
+        modelexport export prajjwal1/bert-tiny bert.onnx
+        
+        # Export with custom input specifications
+        modelexport export prajjwal1/bert-tiny bert.onnx --input-specs input_specs.json
         
         # Export with verbose output showing optimization details
-        modelexport export prajjwal1/bert-tiny bert.onnx --config config.json --verbose
+        modelexport export prajjwal1/bert-tiny bert.onnx --verbose
+        
+        # Export with export configuration (for ONNX export settings)
+        modelexport export prajjwal1/bert-tiny bert.onnx --config export_config.json
         
         # Export with Enhanced Semantic mapping (alternative strategy)
-        modelexport export prajjwal1/bert-tiny bert.onnx --strategy enhanced_semantic --config config.json
+        modelexport export prajjwal1/bert-tiny bert.onnx --strategy enhanced_semantic
         
         # Export with legacy HTP strategy
-        modelexport export prajjwal1/bert-tiny bert.onnx --strategy htp --config config.json --jit-graph
+        modelexport export prajjwal1/bert-tiny bert.onnx --strategy htp --jit-graph
         
         # Export with FX graph alternative (for analysis)
-        modelexport export prajjwal1/bert-tiny bert.onnx --config config.json --fx-graph both
-        
-        # Export with FX Graph strategy (structural analysis)
-        modelexport export prajjwal1/bert-tiny bert.onnx --strategy fx_graph
-        
-        # Export vision model with input shape
-        modelexport export resnet50 resnet.onnx --input-shape 1,3,224,224
+        modelexport export prajjwal1/bert-tiny bert.onnx --fx-graph both
         
         # Full debug export with all features
         modelexport export prajjwal1/bert-tiny bert.onnx --config config.json --jit-graph --fx-graph both --verbose
@@ -100,46 +97,18 @@ def export(ctx, model_name_or_path, output_path, input_shape, strategy, opset_ve
         
         # Dynamic import to avoid heavy dependencies if not needed
         try:
-            from transformers import AutoModel, AutoTokenizer
+            from transformers import AutoModel
             
             # Load model
             model = AutoModel.from_pretrained(model_name_or_path)
             
-            # Prepare inputs
-            if config and Path(config).exists():
-                with open(config, 'r') as f:
-                    config_data = json.load(f)
-                if 'input_specs' in config_data:
-                    # Generate dummy inputs from specs
-                    inputs = {}
-                    for name, spec in config_data['input_specs'].items():
-                        dtype = torch.long if spec.get('dtype') == 'int' else torch.float32
-                        # Create dummy tensor with shape from dynamic_axes or default
-                        if 'dynamic_axes' in config_data and name in config_data['dynamic_axes']:
-                            # Default shape: batch_size=1, sequence_length=128
-                            shape = [1, 128]  # Common for BERT-like models
-                        else:
-                            shape = [1, 128]  # Default fallback
-                        
-                        # Generate values within specified range
-                        if 'range' in spec:
-                            min_val, max_val = spec['range']
-                            if dtype == torch.long:
-                                inputs[name] = torch.randint(min_val, max_val + 1, shape, dtype=dtype)
-                            else:
-                                inputs[name] = torch.rand(shape, dtype=dtype) * (max_val - min_val) + min_val
-                        else:
-                            inputs[name] = torch.ones(shape, dtype=dtype)
-                else:
-                    click.echo("Error: Config file must contain 'input_specs' to generate inputs", err=True)
-                    sys.exit(1)
-            elif input_shape:
-                # Use provided input shape for vision models
-                shape = [int(x) for x in input_shape.split(',')]
-                inputs = torch.randn(shape)
-            else:
-                click.echo("Error: Either --config with input_specs or --input-shape is required", err=True)
-                sys.exit(1)
+            # Load input specs if provided
+            input_specs_dict = None
+            if input_specs:
+                with open(input_specs) as f:
+                    input_specs_dict = json.load(f)
+                if verbose:
+                    click.echo(f"Loaded input specs from: {input_specs}")
             
         except ImportError:
             click.echo("Error: transformers library required for HuggingFace models", err=True)
@@ -156,8 +125,14 @@ def export(ctx, model_name_or_path, output_path, input_shape, strategy, opset_ve
             # Load config file
             if verbose:
                 click.echo(f"Loading export config: {config}")
-            with open(config, 'r') as f:
+            with open(config) as f:
                 export_kwargs = json.load(f)
+            
+            # Extract input_specs from config if available and not provided via CLI
+            if 'input_specs' in export_kwargs and not input_specs_dict:
+                input_specs_dict = export_kwargs.pop('input_specs')
+                if verbose:
+                    click.echo(f"Using input_specs from config: {list(input_specs_dict.keys())}")
             
             # Convert dynamic_axes string keys to integers (JSON limitation workaround)
             if 'dynamic_axes' in export_kwargs:
@@ -213,7 +188,6 @@ def export(ctx, model_name_or_path, output_path, input_shape, strategy, opset_ve
             
             try:
                 # Import the FX graph exporter
-                import sys
                 sys.path.append(str(Path(__file__).parent.parent))
                 from fx_graph_exporter import export_fx_graph_cli
                 
@@ -235,6 +209,21 @@ def export(ctx, model_name_or_path, output_path, input_shape, strategy, opset_ve
                     import traceback
                     click.echo(traceback.format_exc(), err=True)
         
+        # Generate inputs for strategies that don't have built-in generation
+        inputs = None
+        if strategy != 'htp_integrated':
+            from .core.model_input_generator import generate_dummy_inputs
+            
+            inputs = generate_dummy_inputs(
+                model_name_or_path=model_name_or_path,
+                input_specs=input_specs_dict,
+                exporter="onnx",
+                **export_kwargs.get("input_generation_kwargs", {})
+            )
+            
+            if verbose:
+                click.echo(f"✅ Generated inputs: {list(inputs.keys())}")
+        
         # Export with hierarchy preservation using appropriate strategy
         if strategy == 'htp_integrated':
             if verbose:
@@ -242,8 +231,9 @@ def export(ctx, model_name_or_path, output_path, input_shape, strategy, opset_ve
             
             result = export_with_htp_integrated_reporting(
                 model=model,
-                example_inputs=inputs,
                 output_path=output_path,
+                model_name_or_path=model_name_or_path,
+                input_specs=input_specs_dict,
                 verbose=verbose,
                 **export_kwargs
             )
@@ -390,6 +380,7 @@ def export(ctx, model_name_or_path, output_path, input_shape, strategy, opset_ve
                     click.echo(f"   Node types: {len(analysis.get('node_types', {}))}")
         
     except Exception as e:
+        import sys
         click.echo(f"Error during export: {e}", err=True)
         if verbose:
             import traceback

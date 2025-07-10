@@ -11,13 +11,10 @@ from .semantic_mapper import (
     ScopePathParser,
     HFModuleMapper
 )
-from .semantic_exporter import SemanticONNXExporter, export_hf_model_with_semantics
 
 __all__ = [
     'SemanticMapper',
     'SemanticQueryInterface',
     'ScopePathParser', 
     'HFModuleMapper',
-    'SemanticONNXExporter',
-    'export_hf_model_with_semantics'
 ]
