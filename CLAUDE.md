@@ -86,6 +86,26 @@ Execute → Proceed with confirmed understanding
 **After every test fix**: Review the diff for model-specific assumptions  
 **When tests fail**: Fix with universal logic, never hardcoded patches
 
+## ⚠️ CARDINAL RULE #4 - MANDATORY TEST VERIFICATION
+
+**THIS IS THE FOURTH CARDINAL RULE - NO EXCEPTIONS!**
+
+❌ **NEVER**:
+- Implement features without running test verification
+- Revise test cases without confirming they pass
+- Skip pytest validation after code changes
+- Assume tests pass without verification
+
+✅ **ALWAYS**:
+- Run `uv run pytest tests/` after implementing features
+- Run `uv run pytest tests/` after revising test cases
+- Verify test results before marking tasks complete
+- Use pytest to validate any code modifications
+
+**After every implementation**: Run `uv run pytest tests/` to verify  
+**After every test revision**: Run `uv run pytest tests/` to confirm  
+**Before marking complete**: Ensure pytest verification passes
+
 ## MUST-RULES
 
 Always follow MUST-RULES
@@ -235,3 +255,9 @@ The HTP strategy now uses PyTorch's built-in `torch.jit._trace._trace_module_map
 
 ### Critical Questioning
 - Always ask question before planning and executing if you have questions or uncertainties for the requirements
+
+### Code Quality
+- Always ruff lint after revise the python code
+
+### Git Commit Guidelines
+- Never add `Co-Authored-By: Claude mailto:noreply@anthropic.com` when doing git commit

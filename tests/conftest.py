@@ -8,7 +8,6 @@ import pytest
 import torch
 from transformers import AutoModel, AutoTokenizer
 
-
 # Test configurations for BERT input shapes
 BERT_TEST_CONFIGS = {
     "default": {
@@ -231,8 +230,8 @@ def test_models():
 @pytest.fixture(scope="function")
 def temp_dir():
     """Provide a temporary directory for each test."""
-    import tempfile
     import shutil
+    import tempfile
     from pathlib import Path
     
     temp_dir = tempfile.mkdtemp()
@@ -251,9 +250,7 @@ def pytest_configure(config):
     config.addinivalue_line("markers", "unit: Unit tests for individual components")
     config.addinivalue_line("markers", "integration: Integration tests across components")
     config.addinivalue_line("markers", "strategy: Strategy-specific tests")
-    config.addinivalue_line("markers", "fx: FX strategy tests")
     config.addinivalue_line("markers", "htp: HTP strategy tests")
-    config.addinivalue_line("markers", "usage_based: Usage-based strategy tests")
     config.addinivalue_line("markers", "cli: CLI integration tests")
     config.addinivalue_line("markers", "slow: Tests that take longer to run")
     config.addinivalue_line("markers", "requires_transformers: Tests requiring transformers")
@@ -274,12 +271,8 @@ def pytest_collection_modifyitems(config, items):
         if "/test_strategies/" in test_path:
             item.add_marker(pytest.mark.strategy)
             
-        if "/fx/" in test_path:
-            item.add_marker(pytest.mark.fx)
         elif "/htp/" in test_path:
             item.add_marker(pytest.mark.htp)
-        elif "/usage_based/" in test_path:
-            item.add_marker(pytest.mark.usage_based)
             
         if "/test_cli" in test_path:
             item.add_marker(pytest.mark.cli)

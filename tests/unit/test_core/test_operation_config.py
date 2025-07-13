@@ -4,7 +4,6 @@ Operation Configuration Unit Tests
 Tests for the centralized operation configuration system.
 """
 
-import pytest
 from modelexport.core.operation_config import OperationConfig
 
 

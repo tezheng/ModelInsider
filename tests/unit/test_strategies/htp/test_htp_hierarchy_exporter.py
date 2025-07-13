@@ -4,9 +4,9 @@ HTP Hierarchy Exporter Unit Tests
 Tests specific to the HTP (Hierarchical Trace-and-Project) export strategy.
 """
 
-import pytest
-import torch
 from pathlib import Path
+
+import torch
 
 from modelexport.strategies.htp import HTPHierarchyExporter
 from tests.fixtures.base_test import BaseStrategyTest, StrategyCompatibilityTest
@@ -61,7 +61,7 @@ class TestHTPHierarchyExporter(BaseStrategyTest, StrategyCompatibilityTest):
     
     def test_htp_builtin_strategy(self):
         """Test HTP with built-in module tracking."""
-        exporter = HTPHierarchyExporter(strategy='htp_builtin')
+        exporter = HTPHierarchyExporter(strategy='htp')
         
         model, inputs = self.fixtures.get_complex_mlp()
         output_path = self.get_output_path("htp_builtin")
@@ -117,8 +117,9 @@ class TestHTPHierarchyExporter(BaseStrategyTest, StrategyCompatibilityTest):
         with open(sidecar_path) as f:
             sidecar_data = json.load(f)
         
-        assert 'strategy' in sidecar_data
-        assert sidecar_data['strategy'] in ['htp', 'htp_builtin']
+        assert 'exporter' in sidecar_data
+        assert 'strategy' in sidecar_data['exporter']
+        assert sidecar_data['exporter']['strategy'] in ['htp', 'htp_builtin']
         assert 'node_tags' in sidecar_data
 
 

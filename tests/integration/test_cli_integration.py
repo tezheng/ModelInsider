@@ -4,12 +4,13 @@ CLI Integration Tests
 Tests for the command-line interface across all strategies.
 """
 
-import pytest
+import json
+import shutil
 import subprocess
 import tempfile
-import shutil
-import json
 from pathlib import Path
+
+import pytest
 from click.testing import CliRunner
 
 from modelexport.cli import cli
@@ -80,33 +81,29 @@ class TestCLIIntegration:
         
         config_path = self.create_test_config()
         
-        # Test different strategies
-        strategies = ['usage_based', 'htp']  # Skip fx for HF models
+        # Test HTP strategy (only available strategy)
+        output_path = self.temp_path / "test_htp.onnx"
         
-        for strategy in strategies:
-            output_path = self.temp_path / f"test_{strategy}.onnx"
+        # Use a very small model for testing
+        result = self.runner.invoke(cli, [
+            'export',
+            'prajjwal1/bert-tiny',  # Small BERT model
+            str(output_path),
+            '--config', config_path,
+            '--verbose'
+        ])
             
-            # Use a very small model for testing
-            result = self.runner.invoke(cli, [
-                'export',
-                'prajjwal1/bert-tiny',  # Small BERT model
-                str(output_path),
-                '--strategy', strategy,
-                '--config', config_path,
-                '--verbose'
-            ])
-            
-            if result.exit_code != 0:
-                print(f"Export failed for {strategy}:")
-                print(f"Output: {result.output}")
-                print(f"Exception: {result.exception}")
-                # Don't fail the test immediately - some models might not be available
-                continue
-            
-            # Check output
-            assert result.exit_code == 0, f"Export failed for strategy {strategy}: {result.output}"
-            assert "Export completed successfully" in result.output
-            assert Path(output_path).exists()
+        if result.exit_code != 0:
+            print(f"Export failed for HTP:")
+            print(f"Output: {result.output}")
+            print(f"Exception: {result.exception}")
+            # Don't fail the test immediately - model might not be available
+            return
+        
+        # Check output
+        assert result.exit_code == 0, f"Export failed for HTP: {result.output}"
+        assert "Export completed successfully" in result.output
+        assert Path(output_path).exists()
     
     def test_export_with_input_shape(self):
         """Test export with input shape (vision models)."""
@@ -129,7 +126,6 @@ class TestCLIIntegration:
             'export',
             'prajjwal1/bert-tiny',
             str(output_path),
-            '--strategy', 'usage_based',
             '--config', config_path
         ])
         
@@ -171,7 +167,6 @@ class TestCLIIntegration:
             'export',
             'prajjwal1/bert-tiny',
             str(output_path),
-            '--strategy', 'usage_based',
             '--config', config_path
         ])
         
@@ -205,17 +200,16 @@ class TestCLIIntegration:
         
         config_path = self.create_test_config()
         
-        # Export two models with different strategies
+        # Export two models (same strategy, for comparison testing)
         output_path1 = self.temp_path / "compare1.onnx"
         output_path2 = self.temp_path / "compare2.onnx"
         
-        # Export with different strategies
-        for i, (output_path, strategy) in enumerate([(output_path1, 'usage_based'), (output_path2, 'htp')]):
+        # Export with HTP strategy (twice for comparison)
+        for i, output_path in enumerate([output_path1, output_path2]):
             result = self.runner.invoke(cli, [
                 'export',
                 'prajjwal1/bert-tiny',
                 str(output_path),
-                '--strategy', strategy,
                 '--config', config_path
             ])
             
@@ -242,12 +236,11 @@ class TestCLIIntegration:
     
     def test_invalid_arguments(self):
         """Test handling of invalid arguments."""
-        # Invalid strategy
+        # Invalid model
         result = self.runner.invoke(cli, [
             'export',
-            'dummy_model',
-            'dummy_output.onnx',
-            '--strategy', 'invalid_strategy'
+            'nonexistent/model',
+            'dummy_output.onnx'
         ])
         assert result.exit_code != 0
         
@@ -268,8 +261,7 @@ class TestCLIIntegration:
         result = self.runner.invoke(cli, [
             'export',
             'nonexistent/model',
-            'output.onnx',
-            '--strategy', 'usage_based'
+            'output.onnx'
         ])
         
         assert result.exit_code != 0
@@ -331,9 +323,7 @@ class TestCLIProcessIntegration:
         ], capture_output=True, text=True, cwd='/mnt/d/BYOM/modelexport')
         
         assert result.returncode == 0
-        assert 'usage_based' in result.stdout
-        assert 'htp' in result.stdout
-        assert 'fx_graph' in result.stdout
+        assert 'htp' in result.stdout.lower() or 'hierarchy' in result.stdout.lower()
 
 
 class TestCLIConfigurationFiles:

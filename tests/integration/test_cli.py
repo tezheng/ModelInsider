@@ -5,11 +5,11 @@ Tests all CLI subcommands with proper temp directory structure
 and code-generated results validation.
 """
 
-import pytest
 import json
 import tempfile
-import shutil
 from pathlib import Path
+
+import pytest
 from click.testing import CliRunner
 
 from modelexport.cli import cli
@@ -60,8 +60,7 @@ class TestCLIExport:
             '--verbose',
             'export', 
             'prajjwal1/bert-tiny',
-            str(output_path),
-            '--input-text', 'CLI test input'
+            str(output_path)
         ])
         
         # Check command succeeded
@@ -70,28 +69,31 @@ class TestCLIExport:
         
         # Verify files were created
         assert output_path.exists(), "ONNX file was not created"
-        sidecar_path = output_path.with_suffix('').with_suffix('.onnx').parent / (output_path.stem + '_hierarchy.json')
-        assert sidecar_path.exists(), "Sidecar file was not created"
+        # Check for HTP metadata file
+        metadata_path = output_path.parent / (output_path.stem + '_htp_metadata.json')
+        assert metadata_path.exists(), "Metadata file was not created"
         
         # Validate ONNX file
         import onnx
         model = onnx.load(str(output_path))
         assert len(model.graph.node) > 0, "ONNX model has no operations"
         
-        # Validate sidecar structure
-        with open(sidecar_path) as f:
-            sidecar_data = json.load(f)
+        # Validate metadata structure
+        with open(metadata_path) as f:
+            metadata = json.load(f)
         
-        required_fields = ['version', 'format', 'model_path', 'generated_at', 'summary', 'node_tags']
-        for field in required_fields:
-            assert field in sidecar_data, f"Missing required field: {field}"
+        # Check for required fields in metadata
+        assert 'export_info' in metadata, "Missing export_info in metadata"
+        assert 'statistics' in metadata, "Missing statistics in metadata"
+        assert 'hierarchy_data' in metadata, "Missing hierarchy_data in metadata"
+        assert 'tagged_nodes' in metadata, "Missing tagged_nodes in metadata"
         
         # Validate tag statistics make sense
-        summary = sidecar_data['summary']
-        assert summary['total_operations'] > 0
-        assert summary['tagged_operations'] > 0
-        assert summary['tagged_operations'] <= summary['total_operations']
-        assert summary['unique_tags'] > 0
+        stats = metadata['statistics']
+        assert stats['onnx_nodes'] > 0
+        assert stats['tagged_nodes'] > 0
+        assert stats['empty_tags'] == 0
+        assert stats['coverage_percentage'] == 100.0
     
     def test_export_with_custom_options(self, cli_runner, temp_workspace):
         """Test export with custom options."""
@@ -101,9 +103,7 @@ class TestCLIExport:
             'export',
             'prajjwal1/bert-tiny', 
             str(output_path),
-            '--input-text', 'Custom input for testing CLI options',
             '--opset-version', '16',
-            '--strategy', 'usage_based',
             '--temp-dir', str(temp_workspace['models'])
         ])
         
@@ -126,7 +126,7 @@ class TestCLIExport:
         ])
         
         assert result.exit_code != 0
-        assert 'Error loading model' in result.output
+        assert 'not a local folder and is not a valid model identifier' in result.output
         assert not output_path.exists()
 
 
@@ -136,8 +136,9 @@ class TestCLIAnalyze:
     @pytest.fixture
     def sample_onnx_model(self, temp_workspace):
         """Create a sample ONNX model for analysis tests."""
-        from modelexport import HierarchyExporter
         from transformers import AutoModel, AutoTokenizer
+
+        from modelexport.strategies.htp.htp_hierarchy_exporter import HierarchyExporter
         
         model = AutoModel.from_pretrained('prajjwal1/bert-tiny')
         tokenizer = AutoTokenizer.from_pretrained('prajjwal1/bert-tiny')
@@ -145,7 +146,9 @@ class TestCLIAnalyze:
         
         output_path = temp_workspace['models'] / 'sample_for_analysis.onnx'
         exporter = HierarchyExporter()
-        exporter.export(model, inputs, str(output_path))
+        # Convert tokenizer output to tuple of tensors
+        input_values = tuple(inputs.values())
+        exporter.export(model, input_values, str(output_path))
         
         return output_path
     
@@ -231,7 +234,7 @@ class TestCLIAnalyze:
         ])
         
         assert result.exit_code != 0
-        assert 'ONNX file not found' in result.output
+        assert 'No such file or directory' in result.output
 
 
 class TestCLIValidate:
@@ -240,8 +243,9 @@ class TestCLIValidate:
     @pytest.fixture
     def sample_onnx_model(self, temp_workspace):
         """Create a sample ONNX model for validation tests."""
-        from modelexport import HierarchyExporter
         from transformers import AutoModel, AutoTokenizer
+
+        from modelexport.strategies.htp.htp_hierarchy_exporter import HierarchyExporter
         
         model = AutoModel.from_pretrained('prajjwal1/bert-tiny')
         tokenizer = AutoTokenizer.from_pretrained('prajjwal1/bert-tiny')
@@ -249,7 +253,9 @@ class TestCLIValidate:
         
         output_path = temp_workspace['models'] / 'sample_for_validation.onnx'
         exporter = HierarchyExporter()
-        exporter.export(model, inputs, str(output_path))
+        # Convert tokenizer output to tuple of tensors
+        input_values = tuple(inputs.values())
+        exporter.export(model, input_values, str(output_path))
         
         return output_path
     
@@ -257,7 +263,7 @@ class TestCLIValidate:
         """Test validate command help."""
         result = cli_runner.invoke(cli, ['validate', '--help'])
         assert result.exit_code == 0
-        assert 'Validate hierarchy tags' in result.output
+        assert 'Validate an ONNX model with hierarchy tags' in result.output
     
     def test_validate_basic(self, cli_runner, sample_onnx_model):
         """Test basic validation."""
@@ -295,7 +301,7 @@ class TestCLIValidate:
         ])
         
         assert result.exit_code != 0
-        assert 'ONNX file not found' in result.output
+        assert 'No such file or directory' in result.output
 
 
 class TestCLICompare:
@@ -304,8 +310,9 @@ class TestCLICompare:
     @pytest.fixture
     def two_sample_models(self, temp_workspace):
         """Create two sample ONNX models for comparison."""
-        from modelexport import HierarchyExporter
         from transformers import AutoModel, AutoTokenizer
+
+        from modelexport.strategies.htp.htp_hierarchy_exporter import HierarchyExporter
         
         model = AutoModel.from_pretrained('prajjwal1/bert-tiny')
         tokenizer = AutoTokenizer.from_pretrained('prajjwal1/bert-tiny')
@@ -314,12 +321,14 @@ class TestCLICompare:
         # Create first model
         inputs1 = tokenizer('First model input', return_tensors='pt')
         path1 = temp_workspace['models'] / 'model1.onnx'
-        exporter.export(model, inputs1, str(path1))
+        input_values1 = tuple(inputs1.values())
+        exporter.export(model, input_values1, str(path1))
         
         # Create second model (with different input to potentially get different graphs)
         inputs2 = tokenizer('Second model with different input text', return_tensors='pt')
         path2 = temp_workspace['models'] / 'model2.onnx'
-        exporter.export(model, inputs2, str(path2))
+        input_values2 = tuple(inputs2.values())
+        exporter.export(model, input_values2, str(path2))
         
         return path1, path2
     
@@ -377,7 +386,7 @@ class TestCLICompare:
         ])
         
         assert result.exit_code != 0
-        assert 'ONNX file not found' in result.output
+        assert 'No such file or directory' in result.output
 
 
 class TestCLIGeneral:

@@ -5,13 +5,13 @@ Tests for enhanced auxiliary operations tagging functionality implemented
 in iterations 1-5.
 """
 
-import pytest
+import json
+import tempfile
+from pathlib import Path
+
+import onnx
 import torch
 import torch.nn as nn
-import onnx
-from pathlib import Path
-import tempfile
-import json
 
 from modelexport.strategies.htp.htp_hierarchy_exporter import HierarchyExporter
 
@@ -34,7 +34,7 @@ class AuxiliaryOperationsTestModel(nn.Module):
     def __init__(self):
         super().__init__()
         self.embedding = nn.Embedding(100, 20)
-        self.linear = nn.Linear(100, 10)  # max_seq_len(5) * embed_dim(20) = 100
+        self.linear = nn.Linear(200, 10)  # max_seq_len(10) * embed_dim(20) = 200
         self.layer_norm = nn.LayerNorm(10)
         
     def forward(self, input_ids):
@@ -217,7 +217,7 @@ class TestAuxiliaryOperationsIntegration:
         hierarchy_path = str(output_path).replace('.onnx', '_hierarchy.json')
         
         if Path(hierarchy_path).exists():
-            with open(hierarchy_path, 'r') as f:
+            with open(hierarchy_path) as f:
                 hierarchy_data = json.load(f)
             
             # Should have node tags information

@@ -6,9 +6,10 @@ Performance optimizations specifically for HuggingFace models.
 
 import json
 import time
-from typing import Dict, Any, Set
 from collections import Counter
 from datetime import datetime
+from typing import Any
+
 import onnx
 
 
@@ -100,7 +101,7 @@ class HTPOptimizedMethods:
             return onnx.load(onnx_path)
     
     @staticmethod
-    def batch_tag_operations(tag_mapping: Dict[str, Any]) -> Dict[str, Any]:
+    def batch_tag_operations(tag_mapping: dict[str, Any]) -> dict[str, Any]:
         """
         Batch process tag operations for better performance.
         
@@ -156,7 +157,7 @@ class HuggingFaceSpecificOptimizations:
     """HuggingFace model-specific optimizations for HTP strategy."""
     
     @staticmethod
-    def detect_transformer_architecture(model) -> Dict[str, Any]:
+    def detect_transformer_architecture(model) -> dict[str, Any]:
         """
         Detect transformer architecture for targeted optimizations.
         """
@@ -209,7 +210,7 @@ class HuggingFaceSpecificOptimizations:
         return architecture_info
     
     @staticmethod
-    def apply_transformer_optimizations(exporter, model, architecture_info: Dict[str, Any]):
+    def apply_transformer_optimizations(exporter, model, architecture_info: dict[str, Any]):
         """
         Apply transformer-specific optimizations based on architecture detection.
         """

@@ -7,16 +7,14 @@ test data and ensures compliance with MUST rules and design principles.
 
 from __future__ import annotations
 
-import pytest
 import json
-import onnx
-import torch
 from pathlib import Path
-from typing import Dict, List, Any, Set
-import tempfile
 
-from modelexport import HierarchyExporter
-from modelexport import tag_utils
+import onnx
+import pytest
+import torch
+
+from modelexport.strategies.htp.htp_hierarchy_exporter import HierarchyExporter
 
 
 class TestMustRuleCompliance:
@@ -29,7 +27,7 @@ class TestMustRuleCompliance:
         inputs = test_data['inputs']
         
         # Export model
-        exporter = HierarchyExporter(strategy="usage_based")
+        exporter = HierarchyExporter(strategy="htp")
         output_path = tmp_path / "must_001_test.onnx"
         
         result = exporter.export(model, inputs, str(output_path))
@@ -53,7 +51,7 @@ class TestMustRuleCompliance:
         assert len(violations) == 0, f"MUST-001 violations found: {violations}"
         
         # Verify universal approach: same logic should work with any model
-        assert result['strategy'] == 'usage_based', "Should use universal usage-based strategy"
+        assert result['strategy'] == 'htp', "Should use universal usage-based strategy"
         assert result['total_operations'] > 0, "Should have tagged some operations universally"
     
     def _is_legitimate_class_name(self, tag: str, pattern: str) -> bool:
@@ -74,7 +72,7 @@ class TestMustRuleCompliance:
         inputs = test_data['inputs']
         
         # Export model
-        exporter = HierarchyExporter(strategy="usage_based")
+        exporter = HierarchyExporter(strategy="htp")
         output_path = tmp_path / "must_002_test.onnx"
         
         exporter.export(model, inputs, str(output_path))
@@ -132,7 +130,7 @@ class TestMustRuleCompliance:
             }
         ]
         
-        exporter = HierarchyExporter(strategy="usage_based")
+        exporter = HierarchyExporter(strategy="htp")
         results = []
         
         for config in test_configs:
@@ -161,7 +159,7 @@ class TestMustRuleCompliance:
                 }
                 
                 # Universal validation: same exporter, consistent results
-                assert result['strategy'] == 'usage_based', "Should use same strategy universally"
+                assert result['strategy'] == 'htp', "Should use same strategy universally"
                 assert result['total_operations'] > 0, "Should work with any input configuration"
                 
             except Exception as e:
@@ -188,7 +186,7 @@ class TestTagFormatValidation:
         model = test_data['model']
         inputs = test_data['inputs']
         
-        exporter = HierarchyExporter(strategy="usage_based")
+        exporter = HierarchyExporter(strategy="htp")
         output_path = tmp_path / "empty_tags_test.onnx"
         
         result = exporter.export(model, inputs, str(output_path))
@@ -254,7 +252,7 @@ class TestTagFormatValidation:
         model = test_data['model']
         inputs = test_data['inputs']
         
-        exporter = HierarchyExporter(strategy="usage_based")
+        exporter = HierarchyExporter(strategy="htp")
         output_path = tmp_path / "tag_format_test.onnx"
         
         exporter.export(model, inputs, str(output_path))
@@ -295,7 +293,7 @@ class TestTagFormatValidation:
         model = test_data['model']
         inputs = test_data['inputs']
         
-        exporter = HierarchyExporter(strategy="usage_based")
+        exporter = HierarchyExporter(strategy="htp")
         output_path = tmp_path / "hierarchy_structure_test.onnx"
         
         exporter.export(model, inputs, str(output_path))
@@ -336,7 +334,7 @@ class TestDataComparisonValidation:
         inputs = test_data['inputs']
         
         # Export our model
-        exporter = HierarchyExporter(strategy="usage_based")
+        exporter = HierarchyExporter(strategy="htp")
         output_path = tmp_path / "comparison_test.onnx"
         
         exporter.export(model, inputs, str(output_path))
@@ -348,7 +346,7 @@ class TestDataComparisonValidation:
         if not expected_data_path.exists():
             pytest.skip("Expected test data not available")
         
-        with open(expected_data_path, 'r') as f:
+        with open(expected_data_path) as f:
             expected_data = json.load(f)
         
         # Extract our tag statistics
@@ -367,7 +365,7 @@ class TestDataComparisonValidation:
         for expected_pattern in expected_hierarchy.keys():
             # Check if any of our tags match this pattern
             found_match = False
-            for our_tag in our_tag_stats.keys():
+            for our_tag in our_tag_stats:
                 if self._tags_match_pattern(our_tag, expected_pattern):
                     found_match = True
                     pattern_matches += 1
@@ -439,7 +437,7 @@ class TestONNXIntegrityValidation:
         
         # Export tagged model  
         tagged_path = tmp_path / "tagged_structure.onnx"
-        exporter = HierarchyExporter(strategy="usage_based")
+        exporter = HierarchyExporter(strategy="htp")
         exporter.export(model, inputs, str(tagged_path), opset_version=14)
         
         # Load both models
@@ -526,7 +524,7 @@ class TestONNXIntegrityValidation:
         model = test_data['model']
         inputs = test_data['inputs']
         
-        exporter = HierarchyExporter(strategy="usage_based")
+        exporter = HierarchyExporter(strategy="htp")
         output_path = tmp_path / "onnx_validity_test.onnx"
         
         # Export model
@@ -565,7 +563,7 @@ class TestONNXIntegrityValidation:
         model = test_data['model']
         inputs = test_data['inputs']
         
-        exporter = HierarchyExporter(strategy="usage_based")
+        exporter = HierarchyExporter(strategy="htp")
         output_path = tmp_path / "sidecar_test.onnx"
         
         exporter.export(model, inputs, str(output_path))
@@ -575,7 +573,7 @@ class TestONNXIntegrityValidation:
         assert Path(sidecar_path).exists(), "Sidecar file should be created"
         
         # Load and validate sidecar
-        with open(sidecar_path, 'r') as f:
+        with open(sidecar_path) as f:
             sidecar_data = json.load(f)
         
         # Required fields validation
@@ -623,7 +621,7 @@ class TestIntegrationValidation:
         
         # Validate sidecar if exists
         if sidecar_path.exists():
-            with open(sidecar_path, 'r') as f:
+            with open(sidecar_path) as f:
                 sidecar_data = json.load(f)
             
             # Check key metrics - Updated for multi-consumer tagging approach

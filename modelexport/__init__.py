@@ -29,12 +29,7 @@ from .core.strategy_selector import ExportStrategy, StrategySelector, select_bes
 from .core.unified_optimizer import UnifiedOptimizer, create_optimized_exporter
 
 # Individual strategies for direct access
-from .strategies.usage_based import UsageBasedExporter
 from .strategies.htp import HTPHierarchyExporter
-from .strategies.fx import FXHierarchyExporter
-
-# Enhanced semantic mapping (Generation 3)
-from .core.enhanced_semantic_exporter import EnhancedSemanticExporter
 
 # Utilities
 from .core.base import BaseHierarchyExporter, should_tag_module, build_hierarchy_path
@@ -60,10 +55,7 @@ __all__ = [
     "create_optimized_exporter",
     
     # Individual strategies
-    "UsageBasedExporter",
-    "HTPHierarchyExporter", 
-    "FXHierarchyExporter",
-    "EnhancedSemanticExporter",
+    "HTPHierarchyExporter",
     
     # Utilities
     "BaseHierarchyExporter",

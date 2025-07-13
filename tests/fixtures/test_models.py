@@ -4,9 +4,10 @@ Test Model Fixtures
 Provides standard test models for consistent testing across all strategies.
 """
 
+from typing import Any
+
 import torch
 import torch.nn as nn
-from typing import Dict, Any, Tuple
 
 
 class SimpleCNN(nn.Module):
@@ -99,7 +100,7 @@ class TestModelFixtures:
     """Central fixture provider for test models."""
     
     @staticmethod
-    def get_simple_cnn() -> Tuple[nn.Module, torch.Tensor]:
+    def get_simple_cnn() -> tuple[nn.Module, torch.Tensor]:
         """Get SimpleCNN model with appropriate input."""
         model = SimpleCNN()
         model.eval()
@@ -107,7 +108,7 @@ class TestModelFixtures:
         return model, input_tensor
     
     @staticmethod
-    def get_complex_mlp() -> Tuple[nn.Module, torch.Tensor]:
+    def get_complex_mlp() -> tuple[nn.Module, torch.Tensor]:
         """Get ComplexMLP model with appropriate input."""
         model = ComplexMLP()
         model.eval()
@@ -115,7 +116,7 @@ class TestModelFixtures:
         return model, input_tensor
     
     @staticmethod
-    def get_attention_model() -> Tuple[nn.Module, torch.Tensor]:
+    def get_attention_model() -> tuple[nn.Module, torch.Tensor]:
         """Get AttentionModel with appropriate input."""
         model = AttentionModel()
         model.eval()
@@ -123,7 +124,7 @@ class TestModelFixtures:
         return model, input_tensor
     
     @staticmethod
-    def get_conditional_model() -> Tuple[nn.Module, torch.Tensor]:
+    def get_conditional_model() -> tuple[nn.Module, torch.Tensor]:
         """Get ConditionalModel with appropriate input (FX incompatible)."""
         model = ConditionalModel()
         model.eval()
@@ -131,7 +132,7 @@ class TestModelFixtures:
         return model, input_tensor
     
     @staticmethod
-    def get_all_models() -> Dict[str, Tuple[nn.Module, torch.Tensor]]:
+    def get_all_models() -> dict[str, tuple[nn.Module, torch.Tensor]]:
         """Get all test models as a dictionary."""
         return {
             'simple_cnn': TestModelFixtures.get_simple_cnn(),
@@ -141,43 +142,31 @@ class TestModelFixtures:
         }
     
     @staticmethod
-    def get_fx_compatible_models() -> Dict[str, Tuple[nn.Module, torch.Tensor]]:
-        """Get only FX-compatible models."""
-        return {
-            'simple_cnn': TestModelFixtures.get_simple_cnn(),
-            'complex_mlp': TestModelFixtures.get_complex_mlp(),
-            'attention_model': TestModelFixtures.get_attention_model()
-        }
-    
     @staticmethod
-    def get_model_metadata() -> Dict[str, Dict[str, Any]]:
+    def get_model_metadata() -> dict[str, dict[str, Any]]:
         """Get metadata about test models."""
         return {
             'simple_cnn': {
                 'name': 'SimpleCNN',
                 'type': 'vision',
-                'fx_compatible': True,
                 'expected_coverage': 0.95,
                 'architecture': 'cnn'
             },
             'complex_mlp': {
                 'name': 'ComplexMLP',
                 'type': 'feedforward',
-                'fx_compatible': True,
                 'expected_coverage': 0.90,
                 'architecture': 'mlp'
             },
             'attention_model': {
                 'name': 'AttentionModel',
                 'type': 'attention',
-                'fx_compatible': True,
                 'expected_coverage': 0.85,
                 'architecture': 'transformer'
             },
             'conditional_model': {
                 'name': 'ConditionalModel',
                 'type': 'conditional',
-                'fx_compatible': False,
                 'expected_coverage': None,
                 'architecture': 'control_flow'
             }
