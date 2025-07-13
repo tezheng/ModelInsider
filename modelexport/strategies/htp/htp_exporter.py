@@ -73,6 +73,7 @@ class HTPExporter:
             "empty_tags": 0,
             "coverage_percentage": 0.0,
         }
+        self._metadata_path = None
 
         # Reporting components (optional)
         if self.enable_reporting:
@@ -103,6 +104,7 @@ class HTPExporter:
         dynamic_axes: dict[str, dict[int, str]] | None = None,
         opset_version: int = 17,
         enable_operation_fallback: bool = False,
+        metadata_filename: str | None = None,
         **export_kwargs,
     ) -> dict[str, Any]:
         """
@@ -118,6 +120,7 @@ class HTPExporter:
             dynamic_axes: Dynamic axes configuration
             opset_version: ONNX opset version
             enable_operation_fallback: Enable operation-based fallback in tagging
+            metadata_filename: Custom metadata filename (default: *_htp_metadata.json)
             **export_kwargs: Additional arguments for torch.onnx.export
 
         Returns:
@@ -169,7 +172,7 @@ class HTPExporter:
         self._inject_tags_into_onnx(output_path, onnx_model)
 
         # Step 8: Create metadata file
-        self._create_metadata_file(output_path)
+        self._create_metadata_file(output_path, metadata_filename)
 
         # Step 9: Generate final report
         if self.enable_reporting:
@@ -429,9 +432,18 @@ class HTPExporter:
             self._print_and_log("✅ Tags injected into ONNX model successfully")
             self._print_and_log(f"📄 Updated ONNX file: {Path(output_path).name}")
 
-    def _create_metadata_file(self, onnx_path: str) -> None:
+    def _create_metadata_file(self, onnx_path: str, metadata_filename: str | None = None) -> None:
         """Create comprehensive metadata file."""
-        metadata_path = str(onnx_path).replace(".onnx", "_htp_integrated_metadata.json")
+        if metadata_filename:
+            # Use custom filename (can be absolute or relative to ONNX file)
+            if "/" in metadata_filename or "\\" in metadata_filename:
+                metadata_path = metadata_filename
+            else:
+                # Relative to ONNX file directory
+                metadata_path = str(Path(onnx_path).parent / metadata_filename)
+        else:
+            # Default filename: *_htp_metadata.json
+            metadata_path = str(onnx_path).replace(".onnx", "_htp_metadata.json")
 
         metadata = {
             "export_info": {
@@ -459,6 +471,9 @@ class HTPExporter:
         with open(metadata_path, "w") as f:
             json.dump(metadata, f, indent=2)
 
+        # Store metadata path for reporting
+        self._metadata_path = metadata_path
+
         if self.verbose:
             logger.info(f"Created metadata file: {Path(metadata_path).name}")
 
@@ -485,8 +500,12 @@ class HTPExporter:
 
         self._print_and_log(f"\n📁 Output Files:")
         self._print_and_log(f"   • ONNX model: {Path(output_path).name}")
-        metadata_path = str(output_path).replace(".onnx", "_htp_integrated_metadata.json")
-        self._print_and_log(f"   • Metadata: {Path(metadata_path).name}")
+        if self._metadata_path:
+            self._print_and_log(f"   • Metadata: {Path(self._metadata_path).name}")
+        else:
+            # Fallback (should not happen)
+            metadata_path = str(output_path).replace(".onnx", "_htp_metadata.json")
+            self._print_and_log(f"   • Metadata: {Path(metadata_path).name}")
         
         if self.enable_reporting:
             report_path = str(output_path).replace(".onnx", "_htp_export_report.txt")
@@ -586,6 +605,7 @@ def export_with_htp_integrated(
     model_name_or_path: str | None = None,
     input_specs: dict[str, dict[str, Any]] | None = None,
     verbose: bool = False,
+    metadata_filename: str | None = None,
     **kwargs,
 ) -> dict[str, Any]:
     """
@@ -597,6 +617,7 @@ def export_with_htp_integrated(
         model_name_or_path: HuggingFace model name/path for auto-input generation
         input_specs: Manual input specifications (overrides auto-generation)
         verbose: Enable verbose logging
+        metadata_filename: Custom metadata filename (default: *_htp_metadata.json)
         **kwargs: Additional export arguments
 
     Returns:
@@ -608,6 +629,7 @@ def export_with_htp_integrated(
         output_path=output_path,
         model_name_or_path=model_name_or_path,
         input_specs=input_specs,
+        metadata_filename=metadata_filename,
         **kwargs,
     )
 
@@ -618,6 +640,7 @@ def export_with_htp_integrated_reporting(
     model_name_or_path: str | None = None,
     input_specs: dict[str, dict[str, Any]] | None = None,
     verbose: bool = False,
+    metadata_filename: str | None = None,
     **kwargs,
 ) -> dict[str, Any]:
     """
@@ -629,6 +652,7 @@ def export_with_htp_integrated_reporting(
         model_name_or_path: HuggingFace model name/path for auto-input generation
         input_specs: Manual input specifications (overrides auto-generation)
         verbose: Enable verbose console output
+        metadata_filename: Custom metadata filename (default: *_htp_metadata.json)
         **kwargs: Additional export arguments
 
     Returns:
@@ -640,5 +664,6 @@ def export_with_htp_integrated_reporting(
         output_path=output_path,
         model_name_or_path=model_name_or_path,
         input_specs=input_specs,
+        metadata_filename=metadata_filename,
         **kwargs,
     )

@@ -7,16 +7,14 @@ This addresses the critical questions:
 3. Proper comparison methodology
 """
 
+import json
+
+import onnx
 import pytest
 import torch
-import onnx
-import numpy as np
-import tempfile
-import json
-from pathlib import Path
 from transformers import AutoModel, AutoTokenizer
 
-from modelexport import HierarchyExporter
+from modelexport.strategies.htp.htp_hierarchy_exporter import HierarchyExporter
 
 
 @pytest.fixture

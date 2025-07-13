@@ -16,17 +16,18 @@ Key Principles:
 
 from __future__ import annotations
 
-import torch
-import torch.onnx
-import onnx
 import re
-from typing import Dict, List, Any, Optional, Union, Tuple
 from collections import defaultdict, deque
 from dataclasses import dataclass
+from typing import Any
+
+import onnx
+import torch
+import torch.onnx
 
 # Import performance measurement utilities
 try:
-    from ...utils import profile_function, ModelSizeAnalyzer
+    from ...utils import ModelSizeAnalyzer, profile_function
 except ImportError:
     # Fallback if utils not available
     def profile_function(name=None):
@@ -331,7 +332,7 @@ class OperationConfig:
     }
     
     @classmethod
-    def get_operations_to_patch(cls) -> List[Tuple]:
+    def get_operations_to_patch(cls) -> list[tuple]:
         """
         Get list of (module_name, operation_name) tuples for patching.
         
@@ -352,7 +353,7 @@ class OperationConfig:
         return operations
     
     @classmethod
-    def get_torch_to_onnx_mapping(cls) -> Dict[str, List[str]]:
+    def get_torch_to_onnx_mapping(cls) -> dict[str, list[str]]:
         """
         Get mapping from PyTorch operation names to ONNX operation types.
         
@@ -365,8 +366,8 @@ class OperationConfig:
         }
     
     @classmethod
-    def add_operation(cls, op_name: str, patch_targets: List[Tuple[str, str]], 
-                      onnx_types: List[str], priority: int = 5):
+    def add_operation(cls, op_name: str, patch_targets: list[tuple[str, str]], 
+                      onnx_types: list[str], priority: int = 5):
         """
         Add a new operation to the registry.
         
@@ -391,20 +392,10 @@ class HierarchyExporter:
     nn.Module hierarchy structure and forward hooks for execution tracing.
     """
     
-    # Semantically important torch.nn modules that should create hierarchy levels
-    TORCH_NN_HIERARCHY_EXCEPTIONS = {
-        "LayerNorm",      # Normalization layers are architecturally significant
-        "Embedding",      # Embedding layers represent major components
-        "BatchNorm1d",    # Batch normalization variants
-        "BatchNorm2d",
-        "BatchNorm3d",
-        "GroupNorm",
-        "InstanceNorm1d",
-        "InstanceNorm2d",
-        "InstanceNorm3d",
-    }
+    # MUST-002: No torch.nn modules should appear in hierarchy tags
+    TORCH_NN_HIERARCHY_EXCEPTIONS = set()  # Empty set - MUST-002 compliance
 
-    def __init__(self, strategy: str = "usage_based", torch_nn_exceptions: Optional[List[str]] = None):
+    def __init__(self, strategy: str = "usage_based", torch_nn_exceptions: list[str] | None = None):
         """
         Initialize the HierarchyExporter.
 
@@ -418,24 +409,24 @@ class HierarchyExporter:
             )
 
         self.strategy = strategy
-        self._tag_mapping: Dict[str, Dict[str, Any]] = {}
-        self._tag_stack: List[str] = []  # Stack for hierarchical tags
-        self._operation_context: Dict[str, List[str]] = defaultdict(list)
-        self._tensor_producers: Dict[str, str] = {}
-        self._tensor_consumer_mapping: Dict[str, List[str]] = {}
-        self._tensor_to_tag: Dict[str, List[str]] = {}  # Tensor-to-tag mapping for filtering
+        self._tag_mapping: dict[str, dict[str, Any]] = {}
+        self._tag_stack: list[str] = []  # Stack for hierarchical tags
+        self._operation_context: dict[str, list[str]] = defaultdict(list)
+        self._tensor_producers: dict[str, str] = {}
+        self._tensor_consumer_mapping: dict[str, list[str]] = {}
+        self._tensor_to_tag: dict[str, list[str]] = {}  # Tensor-to-tag mapping for filtering
         self._pre_hooks = []  # Pre-forward hooks
         self._post_hooks = []  # Post-forward hooks
         self._model = None  # Track the root model
         
         # HTP-specific state variables
-        self._operation_trace: List[Dict[str, Any]] = []  # Operation execution trace
-        self._native_op_regions: List[Dict[str, Any]] = []  # Native operation boundaries
-        self._patched_operations: Dict[str, Any] = {}  # Store original operations
-        self._tensor_tags: Dict[str, Dict[str, Any]] = {}  # Tensor tagging information
+        self._operation_trace: list[dict[str, Any]] = []  # Operation execution trace
+        self._native_op_regions: list[dict[str, Any]] = []  # Native operation boundaries
+        self._patched_operations: dict[str, Any] = {}  # Store original operations
+        self._tensor_tags: dict[str, dict[str, Any]] = {}  # Tensor tagging information
         
         # Slice operation tracking
-        self._slice_operations: List[Dict[str, Any]] = []  # Track slice operations with context
+        self._slice_operations: list[dict[str, Any]] = []  # Track slice operations with context
         self._original_getitem = None  # Store original __getitem__ method
         
         # Allow customization of torch.nn exceptions
@@ -446,15 +437,15 @@ class HierarchyExporter:
         
         # New approach: PyTorch built-in module tracking (default enabled)
         self._use_builtin_module_tracking = True  # Default enabled - significant improvements validated
-        self._builtin_module_map: Optional[Dict[Any, str]] = None
+        self._builtin_module_map: dict[Any, str] | None = None
 
     def export(
         self,
         model: torch.nn.Module,
-        example_inputs: Union[torch.Tensor, Tuple, Dict],
+        example_inputs: torch.Tensor | tuple | dict,
         output_path: str,
         **kwargs,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Export PyTorch model to ONNX with hierarchy-preserving tags.
 
@@ -627,7 +618,7 @@ class HierarchyExporter:
             "native_op_regions": len(self._native_op_regions),
         }
 
-    def get_tag_mapping(self) -> Dict[str, Dict[str, Any]]:
+    def get_tag_mapping(self) -> dict[str, dict[str, Any]]:
         """
         Get the current tag mapping for all operations.
 
@@ -654,7 +645,7 @@ class HierarchyExporter:
         root_tag = f"/{model.__class__.__name__}"
         self._tag_stack.append(root_tag)
         
-        def create_incremental_pre_hook(module_info: Dict[str, Any]):
+        def create_incremental_pre_hook(module_info: dict[str, Any]):
             """Create pre-forward hook with bound module information for incremental tag building."""
             def pre_hook(module, inputs):
                 # Get parent context from stack (guaranteed non-empty due to root initialization)
@@ -680,7 +671,7 @@ class HierarchyExporter:
                 }
             return pre_hook
 
-        def create_incremental_post_hook(module_info: Dict[str, Any]):
+        def create_incremental_post_hook(module_info: dict[str, Any]):
             """Create post-forward hook with bound module information."""
             def post_hook(module, inputs, outputs):
                 # Pop the tag when module execution completes
@@ -688,7 +679,7 @@ class HierarchyExporter:
                     self._tag_stack.pop()
             return post_hook
 
-        def create_incremental_tagging_hook(module_info: Dict[str, Any]):
+        def create_incremental_tagging_hook(module_info: dict[str, Any]):
             """Create hook for non-hierarchy modules that still need operation tagging."""
             def tagging_hook(module, inputs, outputs):
                 # Record execution context for operation tagging but don't affect stack
@@ -734,7 +725,7 @@ class HierarchyExporter:
                         )
                         self._post_hooks.append(tag_hook)
 
-    def _extract_module_info(self, module_name: str, module: torch.nn.Module) -> Dict[str, Any]:
+    def _extract_module_info(self, module_name: str, module: torch.nn.Module) -> dict[str, Any]:
         """Extract and bind module information at registration time for efficient hook processing."""
         name_parts = module_name.split(".")
         
@@ -764,7 +755,7 @@ class HierarchyExporter:
             'name_parts': name_parts,
         }
 
-    def _validate_tag_propagation_compatibility(self, producer_tags: List[str], consumer_tags: List[str]) -> List[str]:
+    def _validate_tag_propagation_compatibility(self, producer_tags: list[str], consumer_tags: list[str]) -> list[str]:
         """Validate and filter tag propagation based on hierarchical compatibility."""
         compatible_tags = []
         
@@ -795,7 +786,7 @@ class HierarchyExporter:
         # Check parent-child relationship
         return self._is_hierarchical_parent_child(components1, components2)
     
-    def _extract_layer_info_from_path(self, path_components: List[str]) -> Optional[Dict[str, Any]]:
+    def _extract_layer_info_from_path(self, path_components: list[str]) -> dict[str, Any] | None:
         """Extract layer information from hierarchical path components."""
         
         # Universal layer detection patterns (no hardcoding)
@@ -819,14 +810,14 @@ class HierarchyExporter:
                     }
         return None
     
-    def _is_hierarchical_parent_child(self, components1: List[str], components2: List[str]) -> bool:
+    def _is_hierarchical_parent_child(self, components1: list[str], components2: list[str]) -> bool:
         """Check if one path is ancestor/descendant of another."""
         shorter, longer = (components1, components2) if len(components1) < len(components2) else (components2, components1)
         
         # Check if shorter path is prefix of longer path
         return longer[:len(shorter)] == shorter
     
-    def _validate_self_consistency(self, tags: List[str]) -> List[str]:
+    def _validate_self_consistency(self, tags: list[str]) -> list[str]:
         """Validate that a set of tags are mutually compatible (no cross-layer contamination)."""
         if len(tags) <= 1:
             return tags
@@ -888,7 +879,7 @@ class HierarchyExporter:
         # Tag all other modules - operations need attribution
         return True
 
-    def get_current_tag(self) -> Optional[str]:
+    def get_current_tag(self) -> str | None:
         """Get current execution context tag from stack."""
         if self._tag_stack:
             return self._tag_stack[-1]
@@ -919,7 +910,7 @@ class HierarchyExporter:
         self._builtin_hooks = []
         self._current_module_context = None
         
-        for module in self._builtin_module_map.keys():
+        for module in self._builtin_module_map:
             if module != model:  # Skip root module
                 def create_context_hook(target_module):
                     def pre_hook(module, inputs):
@@ -933,7 +924,7 @@ class HierarchyExporter:
                 post_handle = module.register_forward_hook(post_hook)
                 self._builtin_hooks.extend([pre_handle, post_handle])
     
-    def _get_module_name_from_builtin_tracking(self, module: torch.nn.Module) -> Optional[str]:
+    def _get_module_name_from_builtin_tracking(self, module: torch.nn.Module) -> str | None:
         """Get module name using PyTorch's built-in module tracking."""
         if self._builtin_module_map is None:
             return None
@@ -986,7 +977,7 @@ class HierarchyExporter:
                     if isinstance(v, torch.Tensor)
                 }
             _ = model(**tensor_inputs)
-        elif isinstance(example_inputs, (tuple, list)):
+        elif isinstance(example_inputs, tuple | list):
             # For models expecting multiple positional arguments
             _ = model(*example_inputs)
         else:
@@ -1015,7 +1006,7 @@ class HierarchyExporter:
                     if isinstance(v, torch.Tensor)
                 }
             input_args = tuple(tensor_inputs.values())
-        elif isinstance(example_inputs, (tuple, list)):
+        elif isinstance(example_inputs, tuple | list):
             input_args = tuple(example_inputs)
         else:
             input_args = (example_inputs,)
@@ -1110,7 +1101,7 @@ class HierarchyExporter:
         
         # Method 2: Tag operations based on parameter usage
         for node in onnx_model.graph.node:
-            node_name = node.name or f"{node.op_type}_{len([n for n in self._tag_mapping.keys() if node.op_type in n])}"
+            node_name = node.name or f"{node.op_type}_{len([n for n in self._tag_mapping if node.op_type in n])}"
             
             # Find parameters used by this operation
             operation_tags = set()
@@ -1122,7 +1113,7 @@ class HierarchyExporter:
             if operation_tags:
                 self._tag_mapping[node_name]["tags"] = list(operation_tags)
     
-    def _find_parent_module_in_context(self, module_name: str) -> Optional[str]:
+    def _find_parent_module_in_context(self, module_name: str) -> str | None:
         """Find parent module context for a given module name."""
         parts = module_name.split(".")
         
@@ -1139,11 +1130,11 @@ class HierarchyExporter:
         # This fills in operations that don't use parameters but process tagged tensors
         
         max_iterations = 10  # Prevent infinite loops
-        for iteration in range(max_iterations):
+        for _iteration in range(max_iterations):
             tags_changed = False
             
             for node in onnx_model.graph.node:
-                node_name = node.name or f"{node.op_type}_{len([n for n in self._tag_mapping.keys() if node.op_type in n])}"
+                node_name = node.name or f"{node.op_type}_{len([n for n in self._tag_mapping if node.op_type in n])}"
                 current_tags = set(self._tag_mapping[node_name].get('tags', []))
                 
                 # Collect tags from input tensors
@@ -1182,7 +1173,7 @@ class HierarchyExporter:
         tensor_consumers = defaultdict(set)
         
         for node in onnx_model.graph.node:
-            node_name = node.name or f"{node.op_type}_{len([n for n in self._tag_mapping.keys() if node.op_type in n])}"
+            node_name = node.name or f"{node.op_type}_{len([n for n in self._tag_mapping if node.op_type in n])}"
             node_tags = self._tag_mapping.get(node_name, {}).get('tags', [])
             
             # For each input tensor this operation uses
@@ -1193,7 +1184,7 @@ class HierarchyExporter:
         
         # Propagate consumer tags back to producing operations with validation
         for node in onnx_model.graph.node:
-            node_name = node.name or f"{node.op_type}_{len([n for n in self._tag_mapping.keys() if node.op_type in n])}"
+            node_name = node.name or f"{node.op_type}_{len([n for n in self._tag_mapping if node.op_type in n])}"
             
             for output_tensor in node.output:
                 if output_tensor in tensor_consumers:
@@ -1220,7 +1211,7 @@ class HierarchyExporter:
         self._tensor_to_tag = {}
         
         for node in onnx_model.graph.node:
-            node_name = node.name or f"{node.op_type}_{len([n for n in self._tag_mapping.keys() if node.op_type in n])}"
+            node_name = node.name or f"{node.op_type}_{len([n for n in self._tag_mapping if node.op_type in n])}"
             node_tags = self._tag_mapping.get(node_name, {}).get('tags', [])
             
             # Tag all input tensors with the operation's tags
@@ -1269,7 +1260,7 @@ class HierarchyExporter:
         for node in onnx_model.graph.node:
             node_name = (
                 node.name
-                or f"{node.op_type}_{len([n for n in self._tag_mapping.keys() if node.op_type in n])}"
+                or f"{node.op_type}_{len([n for n in self._tag_mapping if node.op_type in n])}"
             )
 
             # Try to infer module from operation name pattern
@@ -1283,7 +1274,7 @@ class HierarchyExporter:
         for node in onnx_model.graph.node:
             node_name = (
                 node.name
-                or f"{node.op_type}_{len([n for n in self._tag_mapping.keys() if node.op_type in n])}"
+                or f"{node.op_type}_{len([n for n in self._tag_mapping if node.op_type in n])}"
             )
 
             if node_name in operation_to_module:
@@ -1297,7 +1288,7 @@ class HierarchyExporter:
 
         self._param_to_module = param_to_module
 
-    def _infer_module_from_operation_name(self, operation_name: str) -> Optional[str]:
+    def _infer_module_from_operation_name(self, operation_name: str) -> str | None:
         """Infer module name from ONNX operation name using universal approach."""
         # UNIVERSAL APPROACH: Only use actual module hierarchy captured during execution
         # No hardcoded patterns - rely entirely on execution context
@@ -1318,7 +1309,7 @@ class HierarchyExporter:
         # No inference possible - rely on parameter-based mapping only
         return None
 
-    def _find_parent_module(self, module_name: str) -> Optional[str]:
+    def _find_parent_module(self, module_name: str) -> str | None:
         """
         Find the nearest parent module for a given module name (universal approach).
 
@@ -1360,7 +1351,7 @@ class HierarchyExporter:
         for node in onnx_model.graph.node:
             node_name = (
                 node.name
-                or f"{node.op_type}_{len([n for n in self._tag_mapping.keys() if node.op_type in n])}"
+                or f"{node.op_type}_{len([n for n in self._tag_mapping if node.op_type in n])}"
             )
 
             # Check if this operation uses any parameters
@@ -1384,7 +1375,7 @@ class HierarchyExporter:
         for node in onnx_model.graph.node:
             node_name = (
                 node.name
-                or f"{node.op_type}_{len([n for n in self._tag_mapping.keys() if node.op_type in n])}"
+                or f"{node.op_type}_{len([n for n in self._tag_mapping if node.op_type in n])}"
             )
             for inp in node.input:
                 tensor_consumers[inp].append(node_name)
@@ -1412,7 +1403,7 @@ class HierarchyExporter:
         for node in onnx_model.graph.node:
             node_name = (
                 node.name
-                or f"{node.op_type}_{len([n for n in self._tag_mapping.keys() if node.op_type in n])}"
+                or f"{node.op_type}_{len([n for n in self._tag_mapping if node.op_type in n])}"
             )
             
             # Get all tags for this consuming operation
@@ -1429,7 +1420,7 @@ class HierarchyExporter:
         for node in onnx_model.graph.node:
             node_name = (
                 node.name
-                or f"{node.op_type}_{len([n for n in self._tag_mapping.keys() if node.op_type in n])}"
+                or f"{node.op_type}_{len([n for n in self._tag_mapping if node.op_type in n])}"
             )
             for output_tensor in node.output:
                 tensor_producers[output_tensor] = node_name
@@ -1539,7 +1530,7 @@ class HierarchyExporter:
         # Find operations that are clearly support operations for tagged operations
         support_ops = ['Shape', 'Constant', 'Gather', 'Unsqueeze', 'Slice', 'Concat']
 
-        for node_name, node_info in self._tag_mapping.items():
+        for _node_name, node_info in self._tag_mapping.items():
             if node_info["op_type"] in support_ops and not node_info["tags"]:
                 # Check if this support operation feeds into tagged operations
                 node_outputs = node_info["outputs"]
@@ -1556,7 +1547,7 @@ class HierarchyExporter:
                                             node_info["tags"].append(tag)
                                     break  # Found a tagged consumer, stop looking
 
-    def _tags_are_incompatible(self, existing_tags: List[str], new_tag: str) -> bool:
+    def _tags_are_incompatible(self, existing_tags: list[str], new_tag: str) -> bool:
         """Check if a new tag is incompatible with existing tags."""
         if not existing_tags:
             return False
@@ -1602,11 +1593,7 @@ class HierarchyExporter:
         min_len = min(len(existing_parts), len(new_parts))
 
         # Allow propagation within the same major module (first 2-3 levels)
-        for i in range(min(3, min_len)):
-            if existing_parts[i] != new_parts[i]:
-                return False
-
-        return True
+        return all(existing_parts[i] == new_parts[i] for i in range(min(3, min_len)))
 
     def _should_propagate_tag(
         self, tag: str, producer_node: str, tensor_name: str
@@ -1699,8 +1686,8 @@ class HierarchyExporter:
         1. Store tags in node doc_string field (ONNX compliant)
         2. Create JSON sidecar file for tooling and debugging
         """
-        from datetime import datetime
         import json
+        from datetime import datetime
 
         # Load ONNX model
         onnx_model = onnx.load(onnx_path)
@@ -1751,11 +1738,11 @@ class HierarchyExporter:
                 ),
                 "nodes_with_attributes": nodes_with_tags,
                 "unique_tags": len(
-                    set(
+                    {
                         tag
                         for op in self._tag_mapping.values()
                         for tag in op.get("tags", [])
-                    )
+                    }
                 ),
             },
             "tag_statistics": self._compute_tag_statistics(),
@@ -1785,7 +1772,7 @@ class HierarchyExporter:
 
         return sidecar_path
 
-    def extract_module_subgraph(self, onnx_path: str, target_module: str) -> Dict[str, Any]:
+    def extract_module_subgraph(self, onnx_path: str, target_module: str) -> dict[str, Any]:
         """
         Extract complete subgraph for a specific module hierarchy.
         
@@ -1888,7 +1875,7 @@ class HierarchyExporter:
             }
         }
 
-    def _compute_tag_statistics(self) -> Dict[str, int]:
+    def _compute_tag_statistics(self) -> dict[str, int]:
         """Compute statistics about tag distribution."""
         tag_counts = {}
         for node_info in self._tag_mapping.values():
@@ -2366,7 +2353,7 @@ class HierarchyExporter:
                     
                     for output_tensor in constant_outputs:
                         # Find operations that use this tensor as input
-                        for other_node_name, other_node_info in self._tag_mapping.items():
+                        for _other_node_name, other_node_info in self._tag_mapping.items():
                             if output_tensor in other_node_info.get("inputs", []):
                                 other_tags = other_node_info.get("tags", [])
                                 if other_tags:  # Only consider tagged consumers
@@ -2777,7 +2764,6 @@ class HierarchyExporter:
         
         Prevents cross-layer context inheritance that causes layer misassignment.
         """
-        import re
         
         # Extract layer information from node names
         node_layer = self._extract_layer_info(node_name)
@@ -2943,7 +2929,7 @@ class HierarchyExporter:
     def _get_model_name(self):
         """Get model name for tagging, with fallback."""
         # Try to extract from existing tags
-        for node_name, tag_info in self._tag_mapping.items():
+        for _node_name, tag_info in self._tag_mapping.items():
             tags = tag_info.get("tags", [])
             if tags and isinstance(tags[0], str) and tags[0].startswith('/'):
                 parts = tags[0].split('/')
@@ -3106,8 +3092,8 @@ class HierarchyExporter:
 
     def _inject_htp_tags_into_onnx(self, onnx_path: str, onnx_model):
         """Inject HTP tags into ONNX model and create comprehensive sidecar file."""
-        from datetime import datetime
         import json
+        from datetime import datetime
 
         # 1. Inject tags as node doc_strings (ONNX-compliant approach)
         nodes_with_tags = 0
@@ -3147,7 +3133,7 @@ class HierarchyExporter:
                 "total_operations": len(self._tag_mapping),
                 "tagged_operations": len([op for op in self._tag_mapping.values() if op.get("tags", [])]),
                 "nodes_with_attributes": nodes_with_tags,
-                "unique_tags": len(set(tag for op in self._tag_mapping.values() for tag in op.get("tags", []))),
+                "unique_tags": len({tag for op in self._tag_mapping.values() for tag in op.get("tags", [])}),
                 "operation_trace_length": len(self._operation_trace),
                 "native_op_regions": len(self._native_op_regions),
                 "slice_operations_tracked": len(self._slice_operations),
@@ -3159,7 +3145,7 @@ class HierarchyExporter:
                 "operation_trace": self._operation_trace[:100],  # Limit for size
                 "native_op_regions": self._native_op_regions,
                 "slice_operations": self._slice_operations,  # Include slice operation tracking
-                "patched_operations": [f"{module.__name__}.{op_name}" for (module, op_name) in self._patched_operations.keys()]
+                "patched_operations": [f"{module.__name__}.{op_name}" for (module, op_name) in self._patched_operations]
             }
         }
 
@@ -3265,7 +3251,7 @@ class HierarchyExporter:
         # Replace __getitem__ method
         torch.Tensor.__getitem__ = context_aware_getitem_builtin
     
-    def _get_current_executing_module_builtin(self) -> Optional[torch.nn.Module]:
+    def _get_current_executing_module_builtin(self) -> torch.nn.Module | None:
         """Get current executing module using PyTorch's built-in tracking."""
         # Simplified approach: use thread-local context storage instead of frame inspection
         # This avoids the complexity and potential issues with frame walking
@@ -3317,7 +3303,7 @@ class HierarchyExporter:
         else:
             return "/" + "/".join(tag_parts)
     
-    def _create_direct_hierarchy_metadata_builtin(self, onnx_model, model) -> Dict[str, Any]:
+    def _create_direct_hierarchy_metadata_builtin(self, onnx_model, model) -> dict[str, Any]:
         """Create hierarchy metadata using direct built-in tracking approach."""
         
         # Use the existing operation trace but with improved context from built-in tracking
@@ -3332,10 +3318,10 @@ class HierarchyExporter:
         # Calculate statistics
         total_operations = len(onnx_model.graph.node)
         tagged_operations = len([node for node in tag_mapping.values() if node.get('tags')])
-        unique_tags = len(set(
+        unique_tags = len({
             tag for node in tag_mapping.values() 
             for tag in node.get('tags', [])
-        ))
+        })
         
         return {
             "version": "1.0",
@@ -3383,8 +3369,8 @@ class HierarchyExporter:
     
     def _inject_builtin_tags_into_onnx(self, onnx_path: str, onnx_model):
         """Simplified tag injection for builtin tracking approach."""
-        from datetime import datetime
         import json
+        from datetime import datetime
         
         # Create sidecar metadata file
         sidecar_path = onnx_path.replace('.onnx', '_hierarchy.json')
@@ -3403,10 +3389,10 @@ class HierarchyExporter:
                 "total_operations": len(onnx_model.graph.node),
                 "tagged_operations": len([node for node in self._tag_mapping.values() if node.get('tags')]),
                 "nodes_with_attributes": len(onnx_model.graph.node),
-                "unique_tags": len(set(
+                "unique_tags": len({
                     tag for node in self._tag_mapping.values() 
                     for tag in node.get('tags', [])
-                )),
+                }),
                 "operation_trace_length": len(self._operation_trace),
                 "native_op_regions": len(self._native_op_regions),
                 "slice_operations_tracked": len(self._slice_operations),

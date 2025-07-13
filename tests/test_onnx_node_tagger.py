@@ -6,10 +6,14 @@ Verifies the corrected implementation follows all CARDINAL RULES:
 - MUST-002: TORCH.NN FILTERING  
 - MUST-003: UNIVERSAL DESIGN
 """
-import pytest
-import onnx
 from unittest.mock import MagicMock
-from modelexport.core.onnx_node_tagger import ONNXNodeTagger, create_node_tagger_from_hierarchy
+
+import pytest
+
+from modelexport.core.onnx_node_tagger import (
+    ONNXNodeTagger,
+    create_node_tagger_from_hierarchy,
+)
 
 
 class TestONNXNodeTagger:

@@ -4,11 +4,13 @@ Complete demonstration of how to get all operations from each piece
 and map them back to the whole model for validation
 """
 
-import onnx
 import json
-from typing import Dict, List, Any
+from typing import Any
 
-def get_all_operations_from_piece(onnx_file: str) -> List[Dict[str, Any]]:
+import onnx
+
+
+def get_all_operations_from_piece(onnx_file: str) -> list[dict[str, Any]]:
     """
     Extract every single operation from an ONNX component piece
     

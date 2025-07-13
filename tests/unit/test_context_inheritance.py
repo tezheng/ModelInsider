@@ -5,14 +5,12 @@ Tests for context inheritance functionality implemented in iteration 2,
 including producer-consumer analysis and semantic accuracy validation.
 """
 
-import pytest
+import tempfile
+from pathlib import Path
+
+import onnx
 import torch
 import torch.nn as nn
-import onnx
-from pathlib import Path
-import tempfile
-import json
-from unittest.mock import patch, MagicMock
 
 from modelexport.strategies.htp.htp_hierarchy_exporter import HierarchyExporter
 

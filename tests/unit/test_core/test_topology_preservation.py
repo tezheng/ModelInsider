@@ -4,11 +4,11 @@ Test topology preservation between baseline and hierarchy exports.
 Ensures our hierarchy exporter produces identical ONNX topology to standard torch.onnx.export.
 """
 
-import pytest
-import onnx
-from pathlib import Path
 from collections import Counter
-from typing import List, Dict, Tuple
+from pathlib import Path
+
+import onnx
+import pytest
 
 
 class TestTopologyPreservation:
@@ -108,7 +108,7 @@ class TestTopologyPreservation:
         
         mismatches = []
         
-        for i, (baseline_node, hierarchy_node) in enumerate(zip(baseline_nodes, hierarchy_nodes)):
+        for i, (baseline_node, hierarchy_node) in enumerate(zip(baseline_nodes, hierarchy_nodes, strict=False)):
             # Check operation type
             if baseline_node.op_type != hierarchy_node.op_type:
                 mismatches.append(
@@ -145,7 +145,7 @@ class TestTopologyPreservation:
         # This test always passes but provides useful debug info
         assert True
     
-    def _get_model_summary(self, model) -> Dict:
+    def _get_model_summary(self, model) -> dict:
         """Get model summary statistics."""
         nodes = model.graph.node
         op_types = [node.op_type for node in nodes]

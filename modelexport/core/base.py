@@ -12,10 +12,11 @@ Components:
 
 from __future__ import annotations
 
-import torch
 from abc import ABC, abstractmethod
-from typing import Dict, List, Any, Optional, Union, Tuple
 from pathlib import Path
+from typing import Any
+
+import torch
 
 
 class BaseHierarchyExporter(ABC):
@@ -28,17 +29,17 @@ class BaseHierarchyExporter(ABC):
     
     def __init__(self):
         """Initialize base exporter with common state tracking."""
-        self._model_root: Optional[torch.nn.Module] = None
-        self._export_stats: Dict[str, Any] = {}
+        self._model_root: torch.nn.Module | None = None
+        self._export_stats: dict[str, Any] = {}
         
     @abstractmethod
     def export(
         self,
         model: torch.nn.Module,
-        example_inputs: Union[torch.Tensor, Tuple, Dict],
+        example_inputs: torch.Tensor | tuple | dict,
         output_path: str,
         **kwargs
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Export PyTorch model to ONNX with hierarchy preservation.
         
@@ -58,7 +59,7 @@ class BaseHierarchyExporter(ABC):
         self, 
         onnx_path: str, 
         target_module: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Extract subgraph for specific module hierarchy.
         
@@ -71,12 +72,12 @@ class BaseHierarchyExporter(ABC):
         """
         pass
     
-    def get_export_stats(self) -> Dict[str, Any]:
+    def get_export_stats(self) -> dict[str, Any]:
         """Get statistics from the last export operation."""
         return self._export_stats.copy()
 
 
-def should_tag_module(module: torch.nn.Module, exceptions: Optional[List[str]] = None) -> bool:
+def should_tag_module(module: torch.nn.Module, exceptions: list[str] | None = None) -> bool:
     """
     Determine if a module should be tagged in the hierarchy based on semantic importance.
     
@@ -85,7 +86,7 @@ def should_tag_module(module: torch.nn.Module, exceptions: Optional[List[str]] =
     Args:
         module: PyTorch module to evaluate
         exceptions: List of torch.nn class names to include despite being infrastructure.
-                   If None, uses default exceptions: ["LayerNorm"]
+                   If None, uses default exceptions: [] (MUST-002 compliance)
         
     Returns:
         True if module should be tagged in hierarchy, False otherwise
@@ -95,8 +96,8 @@ def should_tag_module(module: torch.nn.Module, exceptions: Optional[List[str]] =
         >>> should_tag_module(bert_embeddings)  # BertEmbeddings -> True
         >>> should_tag_module(bert_attention)   # BertAttention -> True
         
-        >>> # torch.nn with semantic importance - included by default
-        >>> should_tag_module(layer_norm)       # LayerNorm -> True
+        >>> # torch.nn modules - excluded by default (MUST-002)
+        >>> should_tag_module(layer_norm)       # LayerNorm -> False
         
         >>> # torch.nn infrastructure - excluded
         >>> should_tag_module(embedding)        # Embedding -> False
@@ -109,10 +110,9 @@ def should_tag_module(module: torch.nn.Module, exceptions: Optional[List[str]] =
     """
     # Default exception for semantically important torch.nn modules
     if exceptions is None:
-        exceptions = ["LayerNorm"]
+        exceptions = []  # MUST-002: No torch.nn classes should appear in hierarchy tags
     
     module_class_name = module.__class__.__name__
-    module_full_path = f"{module.__class__.__module__}.{module.__class__.__name__}"
     
     # Check if it's torch.nn infrastructure
     is_torch_infrastructure = (
@@ -172,13 +172,15 @@ def build_hierarchy_path(model_root: torch.nn.Module, module_path: str, all_modu
             module = all_modules[current_path]
             class_name = module.__class__.__name__
             
-            # Handle numeric indices in the path (e.g., "layer.0" -> "BertLayer.0")
-            if i > 0 and path_parts[i-1] in ['layer'] and part.isdigit():
-                # Previous part was "layer" and current part is a number
-                # Combine with the class name: "BertLayer.0"
-                hierarchy_parts[-1] = f"{class_name}.{part}"
-            else:
-                hierarchy_parts.append(class_name)
+            # MUST-002: Filter out torch.nn modules from hierarchy paths
+            if should_tag_module(module):
+                # Handle numeric indices in the path (e.g., "layer.0" -> "BertLayer.0")
+                if i > 0 and path_parts[i-1] in ['layer'] and part.isdigit():
+                    # Previous part was "layer" and current part is a number
+                    # Combine with the class name: "BertLayer.0"
+                    hierarchy_parts[-1] = f"{class_name}.{part}"
+                else:
+                    hierarchy_parts.append(class_name)
     
     return "/" + "/".join(hierarchy_parts)
 
@@ -227,7 +229,7 @@ def get_model_signature(model: torch.nn.Module) -> str:
     return f"{class_name}_{module_count}_{param_count}"
 
 
-def extract_forward_signature(module: torch.nn.Module) -> Dict[str, Any]:
+def extract_forward_signature(module: torch.nn.Module) -> dict[str, Any]:
     """
     Extract forward method signature for module metadata.
     

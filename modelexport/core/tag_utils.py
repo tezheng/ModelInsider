@@ -16,7 +16,7 @@ from pathlib import Path
 
 def load_tags_from_onnx(onnx_path: str) -> Dict[str, Dict[str, any]]:
     """
-    Load hierarchy tags from ONNX node doc_string fields.
+    Load hierarchy tags from ONNX node attributes and doc_string fields.
     
     Args:
         onnx_path: Path to ONNX model file
@@ -31,18 +31,31 @@ def load_tags_from_onnx(onnx_path: str) -> Dict[str, Dict[str, any]]:
         node_name = node.name or f"{node.op_type}_{hash(str(node))}"
         node_info = {"op_type": node.op_type}
         
-        # Extract hierarchy information from doc_string
-        if node.doc_string:
-            try:
-                hierarchy_info = json.loads(node.doc_string)
-                if isinstance(hierarchy_info, dict) and "hierarchy_tags" in hierarchy_info:
-                    node_info["tags"] = hierarchy_info.get("hierarchy_tags", [])
-                    node_info["primary_path"] = hierarchy_info.get("hierarchy_path", "")
-                    node_info["tag_count"] = hierarchy_info.get("hierarchy_count", 0)
-                    node_info["method"] = hierarchy_info.get("hierarchy_method", "unknown")
-            except (json.JSONDecodeError, TypeError):
-                # Skip nodes with invalid JSON in doc_string
-                pass
+        # First, check for hierarchy_tag attribute (HTP format)
+        hierarchy_tag = None
+        for attr in node.attribute:
+            if attr.name == "hierarchy_tag" and attr.type == onnx.AttributeProto.STRING:
+                hierarchy_tag = attr.s.decode('utf-8')
+                break
+        
+        if hierarchy_tag:
+            node_info["tags"] = [hierarchy_tag]
+            node_info["primary_path"] = hierarchy_tag
+            node_info["tag_count"] = 1
+            node_info["method"] = "htp"
+        else:
+            # Fallback: Extract hierarchy information from doc_string (legacy format)
+            if node.doc_string:
+                try:
+                    hierarchy_info = json.loads(node.doc_string)
+                    if isinstance(hierarchy_info, dict) and "hierarchy_tags" in hierarchy_info:
+                        node_info["tags"] = hierarchy_info.get("hierarchy_tags", [])
+                        node_info["primary_path"] = hierarchy_info.get("hierarchy_path", "")
+                        node_info["tag_count"] = hierarchy_info.get("hierarchy_count", 0)
+                        node_info["method"] = hierarchy_info.get("hierarchy_method", "unknown")
+                except (json.JSONDecodeError, TypeError):
+                    # Skip nodes with invalid JSON in doc_string
+                    pass
         
         # Only include nodes that have hierarchy tags
         if "tags" in node_info:
@@ -56,18 +69,30 @@ def load_tags_from_sidecar(onnx_path: str) -> Dict[str, any]:
     Load hierarchy tags from sidecar JSON file.
     
     Args:
-        onnx_path: Path to ONNX model file (sidecar assumed to be *_hierarchy.json)
+        onnx_path: Path to ONNX model file (sidecar assumed to be *_hierarchy.json or *_htp_metadata.json)
         
     Returns:
         Complete sidecar data including metadata and tag mappings
     """
-    sidecar_path = onnx_path.replace('.onnx', '_hierarchy.json')
+    # Try HTP metadata format first (new format)
+    htp_sidecar_path = onnx_path.replace('.onnx', '_htp_metadata.json')
+    if Path(htp_sidecar_path).exists():
+        with open(htp_sidecar_path, 'r') as f:
+            return json.load(f)
     
-    if not Path(sidecar_path).exists():
-        raise FileNotFoundError(f"Sidecar file not found: {sidecar_path}")
+    # Try legacy integrated format
+    htp_integrated_path = onnx_path.replace('.onnx', '_htp_integrated_metadata.json')
+    if Path(htp_integrated_path).exists():
+        with open(htp_integrated_path, 'r') as f:
+            return json.load(f)
     
-    with open(sidecar_path, 'r') as f:
-        return json.load(f)
+    # Try legacy hierarchy format
+    legacy_sidecar_path = onnx_path.replace('.onnx', '_hierarchy.json')
+    if Path(legacy_sidecar_path).exists():
+        with open(legacy_sidecar_path, 'r') as f:
+            return json.load(f)
+    
+    raise FileNotFoundError(f"Sidecar file not found. Tried: {htp_sidecar_path}, {htp_integrated_path}, {legacy_sidecar_path}")
 
 
 def validate_tag_consistency(onnx_path: str) -> Dict[str, any]:
@@ -83,7 +108,17 @@ def validate_tag_consistency(onnx_path: str) -> Dict[str, any]:
     try:
         onnx_tags = load_tags_from_onnx(onnx_path)
         sidecar_data = load_tags_from_sidecar(onnx_path)
-        sidecar_tags = sidecar_data.get("node_tags", {})
+        
+        # Handle different sidecar formats
+        if "tagged_nodes" in sidecar_data:
+            # HTP format: convert to legacy format for comparison
+            sidecar_tags = {}
+            for node_name, tag in sidecar_data["tagged_nodes"].items():
+                if tag:  # Only include non-empty tags
+                    sidecar_tags[node_name] = {"tags": [tag]}
+        else:
+            # Legacy format
+            sidecar_tags = sidecar_data.get("node_tags", {})
         
         # Compare tag consistency
         mismatches = []
@@ -131,7 +166,17 @@ def query_operations_by_tag(onnx_path: str, tag_pattern: str, use_sidecar: bool 
     """
     if use_sidecar:
         sidecar_data = load_tags_from_sidecar(onnx_path)
-        node_tags = sidecar_data.get("node_tags", {})
+        
+        # Handle different sidecar formats
+        if "tagged_nodes" in sidecar_data:
+            # HTP format: convert to legacy format for processing
+            node_tags = {}
+            for node_name, tag in sidecar_data["tagged_nodes"].items():
+                if tag:  # Only include non-empty tags
+                    node_tags[node_name] = {"tags": [tag]}
+        else:
+            # Legacy format
+            node_tags = sidecar_data.get("node_tags", {})
     else:
         node_tags = load_tags_from_onnx(onnx_path)
     
@@ -168,7 +213,29 @@ def get_tag_statistics(onnx_path: str, use_sidecar: bool = True) -> Dict[str, an
     if use_sidecar:
         try:
             sidecar_data = load_tags_from_sidecar(onnx_path)
-            return sidecar_data.get("tag_statistics", {})
+            
+            # Check if it has pre-computed tag_statistics (legacy format)
+            if "tag_statistics" in sidecar_data:
+                return sidecar_data["tag_statistics"]
+            
+            # If it's HTP format, compute statistics from tagged_nodes
+            if "tagged_nodes" in sidecar_data:
+                tagged_nodes = sidecar_data["tagged_nodes"]
+                tag_counts = {}
+                for node_name, tag in tagged_nodes.items():
+                    if tag:  # Skip empty tags
+                        tag_counts[tag] = tag_counts.get(tag, 0) + 1
+                return tag_counts
+            
+            # Fall back to node_tags format (legacy)
+            if "node_tags" in sidecar_data:
+                node_tags = sidecar_data["node_tags"]
+                tag_counts = {}
+                for node_info in node_tags.values():
+                    for tag in node_info.get("tags", []):
+                        tag_counts[tag] = tag_counts.get(tag, 0) + 1
+                return tag_counts
+                
         except FileNotFoundError:
             # Fall back to ONNX attributes if sidecar not found
             pass
@@ -197,7 +264,17 @@ def export_tags_to_csv(onnx_path: str, output_csv: str, use_sidecar: bool = True
     
     if use_sidecar:
         sidecar_data = load_tags_from_sidecar(onnx_path)
-        node_tags = sidecar_data.get("node_tags", {})
+        
+        # Handle different sidecar formats
+        if "tagged_nodes" in sidecar_data:
+            # HTP format: convert to legacy format for processing
+            node_tags = {}
+            for node_name, tag in sidecar_data["tagged_nodes"].items():
+                if tag:  # Only include non-empty tags
+                    node_tags[node_name] = {"tags": [tag]}
+        else:
+            # Legacy format
+            node_tags = sidecar_data.get("node_tags", {})
     else:
         node_tags = load_tags_from_onnx(onnx_path)
     

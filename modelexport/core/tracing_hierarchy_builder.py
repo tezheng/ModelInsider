@@ -42,9 +42,11 @@ class TracingHierarchyBuilder:
         """
         Determine if module should create a new hierarchy level - UNIVERSAL.
 
-        CARDINAL RULE: NO HARDCODED LOGIC - use only HuggingFace modules
+        CARDINAL RULE: NO HARDCODED LOGIC - use ALL PyTorch modules
         """
-        return self.is_hf_class(module)
+        # Universal approach: Include ALL nn.Module subclasses
+        # This ensures we capture hierarchy for any PyTorch model
+        return isinstance(module, nn.Module)
 
     def create_pre_hook(self, module_name: str, module: nn.Module):
         """Create pre-forward hook - ultra simple version."""
@@ -71,10 +73,13 @@ class TracingHierarchyBuilder:
 
             # Add to hierarchy (parents guaranteed to exist due to execution order!)
             if module_name not in self.module_hierarchy:
+                # Determine module type universally
+                module_type = "huggingface" if self.is_hf_class(module) else "pytorch"
+                
                 self.module_hierarchy[module_name] = {
                     "name": module_name,
                     "class_name": class_name,
-                    "module_type": "huggingface",  # We only hook HF modules
+                    "module_type": module_type,  # Universal module typing
                     "traced_tag": hierarchical_tag,
                     "execution_order": sum(
                         1
@@ -127,9 +132,9 @@ class TracingHierarchyBuilder:
         # Initialize with empty tag stack (root will add itself)
         self.tag_stack = []
 
-        # Register hooks on ALL HF modules including root
+        # Register hooks on ALL PyTorch modules including root - UNIVERSAL APPROACH
         for name, module in model.named_modules():
-            if self.is_hf_class(module):  # Include root (name == '')
+            if self.should_create_hierarchy_level(module):  # Include ALL nn.Module instances
                 pre_hook = module.register_forward_pre_hook(
                     self.create_pre_hook(name, module)
                 )

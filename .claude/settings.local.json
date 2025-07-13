@@ -40,7 +40,26 @@
       "Bash(# Count files before deletion\necho \"\"Before deletion:\"\"\necho \"\"ONNX files: $(find . -maxdepth 1 -name \"\"*.onnx\"\" | wc -l)\"\"\necho \"\"JSON metadata files: $(find . -maxdepth 1 -name \"\"*_metadata.json\"\" -o -name \"\"*_fx_hierarchy.json\"\" -o -name \"\"*_fx_module_info.json\"\" | wc -l)\"\")",
       "Bash(# Delete temp ONNX files (keep configs)\nrm -f *.onnx 2>/dev/null\n\n# Delete temp JSON metadata files (preserve config files)\nrm -f *_enhanced_semantic_metadata.json *_fx_hierarchy.json *_fx_module_info.json 2>/dev/null\n\necho \"\"Deleted temp files, preserved config files:\"\"\nls -la *.json 2>/dev/null | grep config)",
       "Bash(# Move remaining analysis and prototype files\nmv *_analysis.py htp_hierarchy_exporter_v2.py integration_prototype.py experiments/prototypes/ 2>/dev/null\n\n# Move remaining debug files\nmv debug_*.py debug/sessions/2025-06-24-slice-context-investigation/ 2>/dev/null\n\n# Clean up now-empty temp folders in notebooks\nrm -rf notebooks/experimental/output/ notebooks/experimental/temp/ 2>/dev/null\nrm -rf notebooks/ 2>/dev/null\n\necho \"\"Cleanup completed\"\")",
-      "Bash(# Move research documents to docs/\nmv APPROACH_COMPARISON.md ENHANCED_SEMANTIC_SOLUTION.md ONNX_TAGGING_STRATEGIES_COMPARISON.md REFINED_ONNX_TAGGING_DESIGN.md SEMANTIC_PRESERVATION_CONCLUSION.md docs/design/\n\n# Move V2 documents to archive\nmv V2_*.md archive/\n\n# Move remaining Python files to appropriate locations\nmv ground_truth_bert_tiny.py experiments/prototypes/\nmv advanced_context_resolver.py analyze_contamination_patterns.py experiments/prototypes/\n\necho \"\"Moved remaining loose files\"\")"
+      "Bash(# Move research documents to docs/\nmv APPROACH_COMPARISON.md ENHANCED_SEMANTIC_SOLUTION.md ONNX_TAGGING_STRATEGIES_COMPARISON.md REFINED_ONNX_TAGGING_DESIGN.md SEMANTIC_PRESERVATION_CONCLUSION.md docs/design/\n\n# Move V2 documents to archive\nmv V2_*.md archive/\n\n# Move remaining Python files to appropriate locations\nmv ground_truth_bert_tiny.py experiments/prototypes/\nmv advanced_context_resolver.py analyze_contamination_patterns.py experiments/prototypes/\n\necho \"\"Moved remaining loose files\"\")",
+      "mcp__sequential-thinking__sequentialthinking",
+      "Bash(git rm:*)",
+      "Bash(timeout:*)",
+      "Bash(time:*)",
+      "Bash(tests/integration/test_cli.py::TestCLIGeneral )",
+      "Bash(tests/integration/test_cli.py::TestCLIAnalyze::test_analyze_help )",
+      "Bash(tests/integration/test_cli.py::TestCLIValidate::test_validate_help )",
+      "Bash(tests/integration/test_cli.py::TestCLICompare::test_compare_help )",
+      "Bash(tests/unit/test_core/test_operation_config.py::TestOperationConfig::test_operation_registry_structure )",
+      "Bash(-v)",
+      "Bash(tests/integration/test_cli.py::TestCLIAnalyze::test_analyze_help )",
+      "Bash(tests/integration/test_cli.py::TestCLIAnalyze::test_analyze_nonexistent_file )",
+      "Bash(tests/integration/test_cli.py::TestCLIValidate::test_validate_help )",
+      "Bash(tests/integration/test_cli.py::TestCLIValidate::test_validate_nonexistent_file )",
+      "Bash(tests/integration/test_cli.py::TestCLICompare::test_compare_help )",
+      "Bash(tests/integration/test_cli.py::TestCLICompare::test_compare_nonexistent_files )",
+      "Bash(tests/integration/test_cli.py::TestCLIAnalyze::test_analyze_nonexistent_file )",
+      "Bash(tests/integration/test_cli.py::TestCLIValidate::test_validate_nonexistent_file )",
+      "Bash(tests/integration/test_cli.py::TestCLICompare::test_compare_nonexistent_files )"
     ],
     "deny": []
   }

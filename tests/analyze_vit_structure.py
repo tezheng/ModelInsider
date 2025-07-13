@@ -3,11 +3,11 @@
 Analyze ViT model structure to understand hierarchy
 """
 
-import torch
-import torch.nn as nn
-from transformers import AutoModel
 import json
-from typing import Dict, List, Any
+from typing import Any
+
+from transformers import AutoModel
+
 
 def analyze_vit_structure():
     """Analyze the hierarchical structure of google/vit-base-patch16-224"""
@@ -78,8 +78,8 @@ def analyze_vit_structure():
         print(f"  {module_type}: {count}")
     
     # Extract specific patterns for ViT
-    attention_modules = [name for name in hierarchy.keys() if 'attention' in name]
-    layer_modules = [name for name in hierarchy.keys() if 'layer.' in name]
+    attention_modules = [name for name in hierarchy if 'attention' in name]
+    layer_modules = [name for name in hierarchy if 'layer.' in name]
     
     print(f"\nViT-specific patterns:")
     print(f"  Attention modules: {len(attention_modules)}")
@@ -87,13 +87,13 @@ def analyze_vit_structure():
     
     # Show sample attention hierarchy
     print(f"\nSample attention hierarchy (first layer):")
-    layer_0_modules = [name for name in hierarchy.keys() if name.startswith('encoder.layer.0')]
+    layer_0_modules = [name for name in hierarchy if name.startswith('encoder.layer.0')]
     for name in sorted(layer_0_modules):
         print(f"  {name}: {hierarchy[name]['type']} (leaf: {hierarchy[name]['is_leaf']})")
     
     return model, hierarchy
 
-def create_hierarchy_mapping(hierarchy: Dict[str, Any]) -> Dict[str, List[str]]:
+def create_hierarchy_mapping(hierarchy: dict[str, Any]) -> dict[str, list[str]]:
     """Create mapping from parent modules to their children"""
     parent_to_children = {}
     
@@ -105,7 +105,7 @@ def create_hierarchy_mapping(hierarchy: Dict[str, Any]) -> Dict[str, List[str]]:
     
     return parent_to_children
 
-def save_hierarchy_analysis(hierarchy: Dict[str, Any], filename: str = "vit_hierarchy.json"):
+def save_hierarchy_analysis(hierarchy: dict[str, Any], filename: str = "vit_hierarchy.json"):
     """Save hierarchy analysis to JSON file"""
     # Convert to serializable format
     serializable_hierarchy = {}

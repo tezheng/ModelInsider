@@ -5,13 +5,12 @@ Tests for enhanced edge case handling and multi-level fallback strategies
 implemented in iteration 7.
 """
 
+import tempfile
+from pathlib import Path
+
 import pytest
 import torch
 import torch.nn as nn
-import onnx
-from pathlib import Path
-import tempfile
-import json
 
 from modelexport.strategies.htp.htp_hierarchy_exporter import HierarchyExporter
 

@@ -5,13 +5,13 @@ Prevents regressions in enhanced auxiliary operations functionality
 implemented during iterations 1-5.
 """
 
+import tempfile
+from pathlib import Path
+
+import onnx
 import pytest
 import torch
 import torch.nn as nn
-import onnx
-from pathlib import Path
-import tempfile
-import json
 
 from modelexport.strategies.htp.htp_hierarchy_exporter import HierarchyExporter
 
