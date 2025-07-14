@@ -160,7 +160,11 @@ class TracingHierarchyBuilder:
             # Run model forward pass to trigger hooks
             model.eval()
             with torch.no_grad():
-                _ = model(*example_inputs)
+                # Handle both dict inputs (keyword args) and list/tuple inputs (positional args)
+                if isinstance(example_inputs, dict):
+                    _ = model(**example_inputs)
+                else:
+                    _ = model(*example_inputs)
         finally:
             self.remove_hooks()
 
