@@ -246,14 +246,14 @@ class HTPExporter:
 
         self._hierarchy_builder = TracingHierarchyBuilder()
 
-        # Convert example_inputs to tuple for tracing
+        # Convert example_inputs for tracing (preserve dict format for keyword args)
         if isinstance(example_inputs, torch.Tensor):
             input_args = (example_inputs,)
         elif isinstance(example_inputs, tuple | list):
             input_args = tuple(example_inputs)
         elif isinstance(example_inputs, dict):
-            # For dict inputs, convert to tuple of values
-            input_args = tuple(example_inputs.values())
+            # Keep dict format for models that need keyword arguments (like SAM)
+            input_args = example_inputs
         else:
             input_args = (example_inputs,)
 
