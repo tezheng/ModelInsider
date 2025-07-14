@@ -16,7 +16,6 @@ Key Features:
 
 from __future__ import annotations
 
-from typing import Dict, List, Tuple
 from dataclasses import dataclass
 
 
@@ -308,7 +307,7 @@ class OperationConfig:
     }
     
     @classmethod
-    def get_operations_to_patch(cls) -> List[Tuple]:
+    def get_operations_to_patch(cls) -> list[tuple]:
         """
         Get list of (module_name, operation_name) tuples for patching.
         
@@ -329,7 +328,7 @@ class OperationConfig:
         return operations
     
     @classmethod
-    def get_torch_to_onnx_mapping(cls) -> Dict[str, List[str]]:
+    def get_torch_to_onnx_mapping(cls) -> dict[str, list[str]]:
         """
         Get mapping from PyTorch operation names to ONNX operation types.
         
@@ -342,8 +341,8 @@ class OperationConfig:
         }
     
     @classmethod
-    def add_operation(cls, op_name: str, patch_targets: List[Tuple[str, str]], 
-                      onnx_types: List[str], priority: int = 5):
+    def add_operation(cls, op_name: str, patch_targets: list[tuple[str, str]], 
+                      onnx_types: list[str], priority: int = 5):
         """
         Add a new operation to the registry.
         

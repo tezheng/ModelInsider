@@ -2,13 +2,14 @@
 Utility functions for ModelExport including performance measurement and profiling.
 """
 
-import time
 import functools
-import psutil
-import os
-from typing import Dict, Any, Optional, List
 import json
+import os
+import time
 from pathlib import Path
+from typing import Any
+
+import psutil
 
 
 class PerformanceMeasurement:
@@ -21,7 +22,7 @@ class PerformanceMeasurement:
         self.process = psutil.Process(os.getpid())
         self.initial_memory = self.get_memory_usage()
     
-    def get_memory_usage(self) -> Dict[str, float]:
+    def get_memory_usage(self) -> dict[str, float]:
         """Get current memory usage in MB."""
         memory_info = self.process.memory_info()
         return {
@@ -29,7 +30,7 @@ class PerformanceMeasurement:
             'vms': memory_info.vms / 1024 / 1024,  # Virtual Memory Size in MB
         }
     
-    def timing_decorator(self, func_name: Optional[str] = None):
+    def timing_decorator(self, func_name: str | None = None):
         """
         Decorator to measure function execution time and memory usage.
         
@@ -105,7 +106,7 @@ class PerformanceMeasurement:
             return wrapper
         return decorator
     
-    def _log_performance(self, func_name: str, measurement: Dict[str, Any]):
+    def _log_performance(self, func_name: str, measurement: dict[str, Any]):
         """Log performance measurement."""
         execution_time = measurement['execution_time']
         memory_delta = measurement['memory_delta']
@@ -114,7 +115,7 @@ class PerformanceMeasurement:
               f"(Memory: {memory_delta['rss_delta']:+.1f}MB RSS, "
               f"{memory_delta['vms_delta']:+.1f}MB VMS)")
     
-    def get_summary(self, func_name: Optional[str] = None) -> Dict[str, Any]:
+    def get_summary(self, func_name: str | None = None) -> dict[str, Any]:
         """
         Get performance summary for a function or all functions.
         
@@ -197,7 +198,7 @@ class PerformanceMeasurement:
 perf_monitor = PerformanceMeasurement()
 
 
-def profile_function(func_name: Optional[str] = None):
+def profile_function(func_name: str | None = None):
     """
     Decorator for profiling function performance.
     
@@ -209,7 +210,7 @@ def profile_function(func_name: Optional[str] = None):
     return perf_monitor.timing_decorator(func_name)
 
 
-def get_performance_summary(func_name: Optional[str] = None) -> Dict[str, Any]:
+def get_performance_summary(func_name: str | None = None) -> dict[str, Any]:
     """Get performance summary."""
     return perf_monitor.get_summary(func_name)
 
@@ -230,7 +231,7 @@ class ModelSizeAnalyzer:
     """
     
     @staticmethod
-    def analyze_onnx_model(onnx_model) -> Dict[str, Any]:
+    def analyze_onnx_model(onnx_model) -> dict[str, Any]:
         """Analyze ONNX model characteristics."""
         total_nodes = len(onnx_model.graph.node)
         
@@ -265,7 +266,7 @@ class ModelSizeAnalyzer:
         }
     
     @staticmethod
-    def print_model_analysis(analysis: Dict[str, Any], model_name: str = "Model"):
+    def print_model_analysis(analysis: dict[str, Any], model_name: str = "Model"):
         """Print formatted model analysis."""
         print(f"\n📋 {model_name.upper()} ANALYSIS")
         print("=" * 40)

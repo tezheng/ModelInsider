@@ -14,17 +14,18 @@ Key Principles:
 
 from __future__ import annotations
 
-import torch
-import torch.fx
-import onnx
+import inspect
 import json
 import logging
 import time
-from typing import Dict, List, Any, Optional, Union, Tuple, Set
-from collections import defaultdict, deque
+from collections import defaultdict
 from dataclasses import dataclass
 from pathlib import Path
-import inspect
+from typing import Any
+
+import onnx
+import torch
+import torch.fx
 
 from ...core.base import BaseHierarchyExporter
 
@@ -35,10 +36,10 @@ logger = logging.getLogger(__name__)
 class FXHierarchyResult:
     """Result from FX-based hierarchy analysis."""
     fx_graph: torch.fx.GraphModule
-    node_hierarchy: Dict[str, str]  # FX node name -> hierarchy path
-    module_mapping: Dict[str, List[str]]  # module path -> FX node names
-    hierarchy_stats: Dict[str, Any]
-    instance_mapping: Dict[str, str]  # Handle .0, .1 instances
+    node_hierarchy: dict[str, str]  # FX node name -> hierarchy path
+    module_mapping: dict[str, list[str]]  # module path -> FX node names
+    hierarchy_stats: dict[str, Any]
+    instance_mapping: dict[str, str]  # Handle .0, .1 instances
 
 
 class FXHierarchyExporter(BaseHierarchyExporter):
@@ -68,7 +69,7 @@ class FXHierarchyExporter(BaseHierarchyExporter):
         "Conv3d",
     }
     
-    def __init__(self, torch_nn_exceptions: Optional[Set[str]] = None, auto_fallback: bool = True):
+    def __init__(self, torch_nn_exceptions: set[str] | None = None, auto_fallback: bool = True):
         """
         Initialize FX-based hierarchy exporter.
         
@@ -85,19 +86,19 @@ class FXHierarchyExporter(BaseHierarchyExporter):
         self._auto_fallback = auto_fallback
         
         # State tracking
-        self._fx_result: Optional[FXHierarchyResult] = None
-        self._hierarchy_mapping: Dict[str, Dict[str, Any]] = {}
+        self._fx_result: FXHierarchyResult | None = None
+        self._hierarchy_mapping: dict[str, dict[str, Any]] = {}
         
         # Architecture compatibility cache
-        self._compatibility_cache: Dict[str, Dict[str, Any]] = {}
+        self._compatibility_cache: dict[str, dict[str, Any]] = {}
         
     def export(
         self,
         model: torch.nn.Module,
-        example_inputs: Union[torch.Tensor, Tuple, Dict],
+        example_inputs: torch.Tensor | tuple | dict,
         output_path: str,
         **kwargs
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Export PyTorch model to ONNX with FX-based hierarchy preservation.
         
@@ -423,8 +424,8 @@ class FXHierarchyExporter(BaseHierarchyExporter):
     def _collect_input_hierarchy(
         self, 
         node: torch.fx.Node, 
-        existing_hierarchy: Dict[str, str]
-    ) -> List[str]:
+        existing_hierarchy: dict[str, str]
+    ) -> list[str]:
         """
         R13: Collect hierarchy information from input nodes for multi-consumer tagging.
         """
@@ -436,7 +437,7 @@ class FXHierarchyExporter(BaseHierarchyExporter):
                 
         return input_hierarchy
     
-    def _analyze_module_types(self, fx_graph: torch.fx.GraphModule) -> Dict[str, int]:
+    def _analyze_module_types(self, fx_graph: torch.fx.GraphModule) -> dict[str, int]:
         """Analyze types of modules found in FX graph for statistics."""
         module_types = defaultdict(int)
         
@@ -447,7 +448,7 @@ class FXHierarchyExporter(BaseHierarchyExporter):
                 
         return dict(module_types)
     
-    def _analyze_hierarchy_categories(self, module_mapping: Dict[str, List[str]]) -> Dict[str, int]:
+    def _analyze_hierarchy_categories(self, module_mapping: dict[str, list[str]]) -> dict[str, int]:
         """Analyze the categories of hierarchy paths for enhanced coverage insights."""
         categories = {
             'torch_modules': 0,     # Paths from actual torch.nn modules
@@ -459,7 +460,7 @@ class FXHierarchyExporter(BaseHierarchyExporter):
             'custom_modules': 0     # Paths from custom user modules
         }
         
-        for hierarchy_path in module_mapping.keys():
+        for hierarchy_path in module_mapping:
             if '/Functions/' in hierarchy_path:
                 categories['functions'] += 1
             elif '/Methods/' in hierarchy_path or '/method_' in hierarchy_path:
@@ -522,7 +523,7 @@ class FXHierarchyExporter(BaseHierarchyExporter):
         self, 
         fx_result: FXHierarchyResult, 
         onnx_model: onnx.ModelProto
-    ) -> Dict[str, List[onnx.NodeProto]]:
+    ) -> dict[str, list[onnx.NodeProto]]:
         """
         Enhanced FX→ONNX mapping with improved accuracy.
         
@@ -792,7 +793,7 @@ class FXHierarchyExporter(BaseHierarchyExporter):
         
         return onnx_op_type in matches.get(fx_signature, [])
     
-    def _analyze_fx_execution_order(self, fx_graph: torch.fx.GraphModule) -> Dict[str, int]:
+    def _analyze_fx_execution_order(self, fx_graph: torch.fx.GraphModule) -> dict[str, int]:
         """
         Analyze FX graph execution order and data dependencies.
         
@@ -811,10 +812,10 @@ class FXHierarchyExporter(BaseHierarchyExporter):
     
     def _match_onnx_pattern(
         self, 
-        onnx_nodes: List[onnx.NodeProto], 
-        pattern_info: Dict[str, Any],
+        onnx_nodes: list[onnx.NodeProto], 
+        pattern_info: dict[str, Any],
         fx_node: torch.fx.Node
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Enhanced pattern matching for FX→ONNX correspondence.
         
@@ -872,7 +873,7 @@ class FXHierarchyExporter(BaseHierarchyExporter):
         
         return {'matched': False, 'nodes': [], 'confidence': 0.0}
     
-    def _calculate_pattern_similarity(self, actual: List[str], expected: List[str]) -> float:
+    def _calculate_pattern_similarity(self, actual: list[str], expected: list[str]) -> float:
         """Calculate similarity between actual ONNX pattern and expected pattern."""
         if not actual or not expected:
             return 0.0
@@ -895,11 +896,11 @@ class FXHierarchyExporter(BaseHierarchyExporter):
     
     def _validate_and_improve_mapping(
         self, 
-        mapping: Dict[str, List[onnx.NodeProto]], 
-        confidence: Dict[str, float],
+        mapping: dict[str, list[onnx.NodeProto]], 
+        confidence: dict[str, float],
         fx_result: FXHierarchyResult,
         onnx_model: onnx.ModelProto
-    ) -> Dict[str, List[onnx.NodeProto]]:
+    ) -> dict[str, list[onnx.NodeProto]]:
         """
         Post-process and validate the FX→ONNX mapping.
         
@@ -959,8 +960,8 @@ class FXHierarchyExporter(BaseHierarchyExporter):
     def _semantic_onnx_matching(
         self, 
         fx_node: torch.fx.Node, 
-        candidate_onnx_nodes: List[onnx.NodeProto]
-    ) -> Optional[onnx.NodeProto]:
+        candidate_onnx_nodes: list[onnx.NodeProto]
+    ) -> onnx.NodeProto | None:
         """
         Semantic matching between FX node and ONNX nodes.
         
@@ -992,7 +993,7 @@ class FXHierarchyExporter(BaseHierarchyExporter):
         self, 
         onnx_path: str, 
         fx_result: FXHierarchyResult
-    ) -> Dict[str, str]:
+    ) -> dict[str, str]:
         """
         R9: Generate module information persistence files and analysis.
         """
@@ -1026,7 +1027,7 @@ class FXHierarchyExporter(BaseHierarchyExporter):
             'module_info_path': module_info_path
         }
     
-    def _extract_module_metadata(self) -> Dict[str, Any]:
+    def _extract_module_metadata(self) -> dict[str, Any]:
         """
         R9: Extract module metadata including forward_args, parameters, children.
         """
@@ -1111,7 +1112,7 @@ class FXHierarchyExporter(BaseHierarchyExporter):
                 logger.error(f"All transformers tracing attempts failed: {e2}")
                 raise e2
     
-    def _extract_forward_signature(self, module: torch.nn.Module) -> Dict[str, Any]:
+    def _extract_forward_signature(self, module: torch.nn.Module) -> dict[str, Any]:
         """Extract forward method signature for module metadata."""
         try:
             sig = inspect.signature(module.forward)
@@ -1129,7 +1130,7 @@ class FXHierarchyExporter(BaseHierarchyExporter):
         self, 
         onnx_path: str, 
         target_module: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         R13: Extract subgraph for specific module hierarchy.
         
@@ -1166,7 +1167,7 @@ class FXHierarchyExporter(BaseHierarchyExporter):
         self, 
         model: torch.nn.Module, 
         example_inputs: Any
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Iteration 7: Analyze model architecture compatibility with FX tracing.
         
@@ -1228,7 +1229,7 @@ class FXHierarchyExporter(BaseHierarchyExporter):
         
         return f"{class_name}_{module_count}_{param_count}"
     
-    def _detect_architecture_patterns(self, model: torch.nn.Module) -> Dict[str, Any]:
+    def _detect_architecture_patterns(self, model: torch.nn.Module) -> dict[str, Any]:
         """
         Detect known architecture patterns that indicate FX compatibility.
         
@@ -1296,7 +1297,7 @@ class FXHierarchyExporter(BaseHierarchyExporter):
         
         return result
     
-    def _analyze_module_complexity(self, model: torch.nn.Module) -> Dict[str, Any]:
+    def _analyze_module_complexity(self, model: torch.nn.Module) -> dict[str, Any]:
         """Analyze module complexity factors that affect FX compatibility."""
         analysis = {
             'high_risk': False,
@@ -1338,7 +1339,7 @@ class FXHierarchyExporter(BaseHierarchyExporter):
         
         return analysis
     
-    def _quick_fx_tracing_test(self, model: torch.nn.Module, example_inputs: Any) -> Dict[str, Any]:
+    def _quick_fx_tracing_test(self, model: torch.nn.Module, example_inputs: Any) -> dict[str, Any]:
         """
         Perform a quick FX tracing test without full export.
         
@@ -1372,10 +1373,10 @@ class FXHierarchyExporter(BaseHierarchyExporter):
     
     def _convert_htp_result_to_fx_format(
         self, 
-        htp_result: Dict[str, Any], 
+        htp_result: dict[str, Any], 
         output_path: str,
-        compatibility: Dict[str, Any]
-    ) -> Dict[str, Any]:
+        compatibility: dict[str, Any]
+    ) -> dict[str, Any]:
         """
         Convert HTP exporter result to FX exporter result format for consistency.
         

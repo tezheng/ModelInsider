@@ -14,9 +14,9 @@ CARDINAL RULES:
 """
 from __future__ import annotations
 
-import onnx
-from typing import Dict, List, Optional, Set
 from collections import defaultdict
+
+import onnx
 
 
 class ONNXNodeTagger:
@@ -28,7 +28,7 @@ class ONNXNodeTagger:
     
     # Whitelisted operation types that can be added to tags
     # These are fundamental ONNX operations that provide semantic value
-    WHITELISTED_OPERATIONS: Set[str] = {
+    WHITELISTED_OPERATIONS: set[str] = {
         'MatMul', 'Gemm',           # Matrix operations
         'LayerNormalization',        # Normalization
         'Softmax', 'Gelu', 'Relu',  # Activations
@@ -38,7 +38,7 @@ class ONNXNodeTagger:
     
     def __init__(
         self, 
-        hierarchy_data: Dict[str, Dict], 
+        hierarchy_data: dict[str, dict], 
         enable_operation_fallback: bool = False
     ):
         """
@@ -80,7 +80,7 @@ class ONNXNodeTagger:
         root_parts = shortest_tag.strip('/').split('/')
         return f"/{root_parts[0]}" if root_parts else "/UnknownModel"
     
-    def bucketize_nodes_by_scope(self, onnx_model: onnx.ModelProto) -> Dict[str, List[onnx.NodeProto]]:
+    def bucketize_nodes_by_scope(self, onnx_model: onnx.ModelProto) -> dict[str, list[onnx.NodeProto]]:
         """
         Bucketize ONNX nodes by their scope names.
         Nodes without scope belong to root module.
@@ -120,7 +120,7 @@ class ONNXNodeTagger:
         scope_parts = parts[:-1]
         return '.'.join(scope_parts) if scope_parts else "__root__"
     
-    def tag_all_nodes(self, onnx_model: onnx.ModelProto) -> Dict[str, str]:
+    def tag_all_nodes(self, onnx_model: onnx.ModelProto) -> dict[str, str]:
         """
         Tag all ONNX nodes using the 4-priority system.
         
@@ -177,7 +177,7 @@ class ONNXNodeTagger:
         # PRIORITY 4: Root fallback (NEVER EMPTY)
         return self.model_root_tag
     
-    def _find_parent_scope_tag(self, scope_name: str) -> Optional[str]:
+    def _find_parent_scope_tag(self, scope_name: str) -> str | None:
         """
         Find parent scope tag by walking up the hierarchy.
         
@@ -196,7 +196,7 @@ class ONNXNodeTagger:
         
         return None
     
-    def _find_operation_based_tag(self, scope_name: str) -> Optional[str]:
+    def _find_operation_based_tag(self, scope_name: str) -> str | None:
         """
         Find tag using operation-based similarity.
         Only used if enable_operation_fallback=True.
@@ -213,7 +213,7 @@ class ONNXNodeTagger:
             
             # Calculate common prefix length
             common_length = 0
-            for a, b in zip(scope_parts, hierarchy_parts):
+            for a, b in zip(scope_parts, hierarchy_parts, strict=False):
                 if a == b:
                     common_length += 1
                 else:
@@ -232,7 +232,7 @@ class ONNXNodeTagger:
         
         return None
     
-    def get_tagging_statistics(self, onnx_model: onnx.ModelProto) -> Dict[str, int]:
+    def get_tagging_statistics(self, onnx_model: onnx.ModelProto) -> dict[str, int]:
         """Get statistics about the tagging process."""
         scope_buckets = self.bucketize_nodes_by_scope(onnx_model)
         
@@ -264,7 +264,7 @@ class ONNXNodeTagger:
 
 
 def create_node_tagger_from_hierarchy(
-    hierarchy_data: Dict[str, Dict], 
+    hierarchy_data: dict[str, dict], 
     enable_operation_fallback: bool = False
 ) -> ONNXNodeTagger:
     """

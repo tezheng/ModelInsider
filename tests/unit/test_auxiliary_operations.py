@@ -107,7 +107,7 @@ class TestAuxiliaryOperationsDetection:
             if i == 0:
                 inputs = torch.randn(3, 10)
             else:
-                inputs = torch.randint(0, 100, (2, 5))
+                inputs = torch.randint(0, 100, (2, 10))  # seq_len=10 to match linear layer (10*20=200)
                 
             output_path = Path(self.temp_dir) / f"coverage_test_{i}.onnx"
             
@@ -127,7 +127,7 @@ class TestAuxiliaryOperationsDetection:
         """Test that all expected auxiliary operation types are handled."""
         model = AuxiliaryOperationsTestModel()
         model.eval()
-        inputs = torch.randint(0, 100, (2, 8))
+        inputs = torch.randint(0, 100, (2, 10))  # seq_len=10 to match linear layer
         
         output_path = Path(self.temp_dir) / "aux_types_test.onnx"
         result = self.exporter.export(model, inputs, str(output_path))
@@ -208,7 +208,7 @@ class TestAuxiliaryOperationsIntegration:
         """Test that auxiliary operations are included in hierarchy metadata."""
         model = AuxiliaryOperationsTestModel()
         model.eval()
-        inputs = torch.randint(0, 100, (2, 6))
+        inputs = torch.randint(0, 100, (2, 10))  # seq_len=10 to match linear layer
         
         output_path = Path(self.temp_dir) / "hierarchy_aux_test.onnx"
         result = self.exporter.export(model, inputs, str(output_path))
@@ -359,7 +359,7 @@ class TestAuxiliaryOperationsValidation:
         """Test that models with auxiliary operations produce valid ONNX."""
         model = AuxiliaryOperationsTestModel()
         model.eval()
-        inputs = torch.randint(0, 100, (2, 8))
+        inputs = torch.randint(0, 100, (2, 10))  # seq_len=10 to match linear layer
         
         output_path = Path(self.temp_dir) / "validity_test.onnx"
         result = self.exporter.export(model, inputs, str(output_path))
@@ -386,7 +386,7 @@ class TestAuxiliaryOperationsValidation:
         """Test that auxiliary operations tags are consistent."""
         model = AuxiliaryOperationsTestModel()
         model.eval()
-        inputs = torch.randint(0, 100, (2, 6))
+        inputs = torch.randint(0, 100, (2, 10))  # seq_len=10 to match linear layer
         
         output_path = Path(self.temp_dir) / "consistency_test.onnx"
         result = self.exporter.export(model, inputs, str(output_path))

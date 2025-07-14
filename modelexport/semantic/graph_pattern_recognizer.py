@@ -6,22 +6,21 @@ subgraphs in ONNX models, enhancing semantic understanding through structural
 analysis.
 """
 
-import onnx
-from typing import Dict, List, Tuple, Set, Optional, Any
 from collections import defaultdict
-import numpy as np
 from dataclasses import dataclass
-import json
+from typing import Any
+
+import onnx
 
 
 @dataclass
 class GraphPattern:
     """Represents a recognized graph pattern."""
     pattern_type: str
-    nodes: List[str]
+    nodes: list[str]
     semantic_type: str
     confidence: float
-    metadata: Dict[str, Any]
+    metadata: dict[str, Any]
 
 
 class GraphPatternRecognizer:
@@ -31,7 +30,7 @@ class GraphPatternRecognizer:
         self._patterns = self._define_patterns()
         self._pattern_stats = defaultdict(int)
         
-    def _define_patterns(self) -> Dict[str, Dict[str, Any]]:
+    def _define_patterns(self) -> dict[str, dict[str, Any]]:
         """Define common ONNX graph patterns and their semantic meanings."""
         return {
             # Attention patterns
@@ -157,7 +156,7 @@ class GraphPatternRecognizer:
             }
         }
     
-    def recognize_patterns(self, onnx_model: onnx.ModelProto) -> List[GraphPattern]:
+    def recognize_patterns(self, onnx_model: onnx.ModelProto) -> list[GraphPattern]:
         """Recognize patterns in the ONNX model graph."""
         recognized_patterns = []
         graph = onnx_model.graph
@@ -183,7 +182,7 @@ class GraphPatternRecognizer:
         
         return recognized_patterns
     
-    def _build_output_to_producer_map(self, graph: onnx.GraphProto) -> Dict[str, str]:
+    def _build_output_to_producer_map(self, graph: onnx.GraphProto) -> dict[str, str]:
         """Build mapping from output names to producer node names."""
         output_to_producer = {}
         for node in graph.node:
@@ -191,7 +190,7 @@ class GraphPatternRecognizer:
                 output_to_producer[output] = node.name
         return output_to_producer
     
-    def _build_input_to_consumers_map(self, graph: onnx.GraphProto) -> Dict[str, List[str]]:
+    def _build_input_to_consumers_map(self, graph: onnx.GraphProto) -> dict[str, list[str]]:
         """Build mapping from input names to consumer node names."""
         input_to_consumers = defaultdict(list)
         for node in graph.node:
@@ -202,12 +201,12 @@ class GraphPatternRecognizer:
     def _find_pattern_matches(
         self, 
         graph: onnx.GraphProto,
-        node_map: Dict[str, onnx.NodeProto],
-        output_to_producer: Dict[str, str],
-        input_to_consumers: Dict[str, List[str]],
+        node_map: dict[str, onnx.NodeProto],
+        output_to_producer: dict[str, str],
+        input_to_consumers: dict[str, list[str]],
         pattern_name: str,
-        pattern_def: Dict[str, Any]
-    ) -> List[GraphPattern]:
+        pattern_def: dict[str, Any]
+    ) -> list[GraphPattern]:
         """Find all matches of a specific pattern in the graph."""
         matches = []
         visited = set()
@@ -259,13 +258,13 @@ class GraphPatternRecognizer:
     def _match_sequence(
         self,
         start_node: onnx.NodeProto,
-        node_map: Dict[str, onnx.NodeProto],
-        output_to_producer: Dict[str, str],
-        input_to_consumers: Dict[str, List[str]],
-        sequence: List[str],
-        pattern_def: Dict[str, Any],
-        visited: Set[str]
-    ) -> Optional[List[str]]:
+        node_map: dict[str, onnx.NodeProto],
+        output_to_producer: dict[str, str],
+        input_to_consumers: dict[str, list[str]],
+        sequence: list[str],
+        pattern_def: dict[str, Any],
+        visited: set[str]
+    ) -> list[str] | None:
         """Match a sequence pattern starting from a node."""
         if not sequence:
             return []
@@ -316,10 +315,10 @@ class GraphPatternRecognizer:
     def _check_constraints(
         self,
         node: onnx.NodeProto,
-        node_map: Dict[str, onnx.NodeProto],
-        output_to_producer: Dict[str, str],
-        input_to_consumers: Dict[str, List[str]],
-        constraints: Dict[str, Any]
+        node_map: dict[str, onnx.NodeProto],
+        output_to_producer: dict[str, str],
+        input_to_consumers: dict[str, list[str]],
+        constraints: dict[str, Any]
     ) -> bool:
         """Check if node satisfies pattern constraints."""
         if 'inputs_from_different_branches' in constraints:
@@ -347,7 +346,7 @@ class GraphPatternRecognizer:
         
         return True
     
-    def _filter_overlapping_patterns(self, patterns: List[GraphPattern]) -> List[GraphPattern]:
+    def _filter_overlapping_patterns(self, patterns: list[GraphPattern]) -> list[GraphPattern]:
         """Remove overlapping patterns, keeping higher confidence ones."""
         # Sort by confidence (descending)
         patterns.sort(key=lambda p: p.confidence, reverse=True)
@@ -366,8 +365,8 @@ class GraphPatternRecognizer:
     def enhance_semantic_mappings(
         self, 
         onnx_model: onnx.ModelProto,
-        existing_mappings: Dict[str, Dict[str, Any]]
-    ) -> Dict[str, Dict[str, Any]]:
+        existing_mappings: dict[str, dict[str, Any]]
+    ) -> dict[str, dict[str, Any]]:
         """Enhance existing semantic mappings with pattern recognition."""
         patterns = self.recognize_patterns(onnx_model)
         enhanced_mappings = existing_mappings.copy()
@@ -413,7 +412,7 @@ class GraphPatternRecognizer:
         
         return enhanced_mappings
     
-    def get_pattern_statistics(self) -> Dict[str, Any]:
+    def get_pattern_statistics(self) -> dict[str, Any]:
         """Get statistics about recognized patterns."""
         return {
             'total_patterns_matched': sum(self._pattern_stats.values()),

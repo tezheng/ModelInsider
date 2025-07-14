@@ -6,11 +6,10 @@ This module provides direct mapping from ONNX nodes to their originating
 HuggingFace modules using PyTorch's built-in scoping information.
 """
 
-import torch
-import torch.nn as nn
-from typing import Dict, List, Optional, Tuple, Any, Union
-from pathlib import Path
+from typing import Any
+
 import onnx
+import torch.nn as nn
 from transformers import PreTrainedModel
 
 
@@ -18,7 +17,7 @@ class ScopePathParser:
     """Parse ONNX node names to extract semantic scope information."""
     
     @staticmethod
-    def parse_onnx_node_name(node_name: str) -> Optional[Dict[str, Any]]:
+    def parse_onnx_node_name(node_name: str) -> dict[str, Any] | None:
         """
         Parse ONNX node name into semantic components.
         
@@ -46,7 +45,7 @@ class ScopePathParser:
         }
     
     @staticmethod
-    def _extract_layer_id(path_parts: List[str]) -> Optional[int]:
+    def _extract_layer_id(path_parts: list[str]) -> int | None:
         """Extract transformer layer ID from scope path parts."""
         for part in path_parts:
             if 'layer.' in part:
@@ -88,7 +87,7 @@ class HFModuleMapper:
         self.name_to_module = dict(hf_model.named_modules())
         self.module_to_name = {module: name for name, module in self.name_to_module.items()}
     
-    def get_module_by_scope_path(self, scope_path: str) -> Optional[nn.Module]:
+    def get_module_by_scope_path(self, scope_path: str) -> nn.Module | None:
         """
         Get HuggingFace module by scope path.
         
@@ -101,11 +100,11 @@ class HFModuleMapper:
         hf_name = ScopePathParser.scope_path_to_hf_name(scope_path)
         return self.name_to_module.get(hf_name)
     
-    def get_module_name(self, module: nn.Module) -> Optional[str]:
+    def get_module_name(self, module: nn.Module) -> str | None:
         """Get HuggingFace module name for a module instance."""
         return self.module_to_name.get(module)
     
-    def get_module_info(self, module: nn.Module) -> Dict[str, Any]:
+    def get_module_info(self, module: nn.Module) -> dict[str, Any]:
         """
         Get detailed information about a HuggingFace module.
         
@@ -170,7 +169,7 @@ class SemanticMapper:
         self.module_mapper = HFModuleMapper(hf_model)
         self._node_to_module_cache = {}
     
-    def get_hf_module_for_onnx_node(self, onnx_node: onnx.NodeProto) -> Optional[nn.Module]:
+    def get_hf_module_for_onnx_node(self, onnx_node: onnx.NodeProto) -> nn.Module | None:
         """
         Get the HuggingFace module that produced this ONNX node.
         
@@ -192,7 +191,7 @@ class SemanticMapper:
         
         return hf_module
     
-    def get_semantic_info_for_node(self, onnx_node: onnx.NodeProto) -> Dict[str, Any]:
+    def get_semantic_info_for_node(self, onnx_node: onnx.NodeProto) -> dict[str, Any]:
         """
         Get complete semantic information for an ONNX node.
         
@@ -218,7 +217,7 @@ class SemanticMapper:
         
         return result
     
-    def build_complete_mapping(self) -> Dict[str, Dict[str, Any]]:
+    def build_complete_mapping(self) -> dict[str, dict[str, Any]]:
         """Build complete mapping from all ONNX nodes to HF modules."""
         mapping = {}
         
@@ -228,7 +227,7 @@ class SemanticMapper:
         
         return mapping
     
-    def get_mapping_statistics(self) -> Dict[str, Any]:
+    def get_mapping_statistics(self) -> dict[str, Any]:
         """Get statistics about the semantic mapping coverage."""
         total_nodes = len(self.onnx_model.graph.node)
         mapped_nodes = 0
@@ -272,7 +271,7 @@ class SemanticQueryInterface:
         """
         self.mapper = semantic_mapper
     
-    def find_nodes_by_module_type(self, module_type: str) -> List[Tuple[onnx.NodeProto, nn.Module]]:
+    def find_nodes_by_module_type(self, module_type: str) -> list[tuple[onnx.NodeProto, nn.Module]]:
         """Find all ONNX nodes from modules of specific type."""
         matching_nodes = []
         
@@ -285,7 +284,7 @@ class SemanticQueryInterface:
         
         return matching_nodes
     
-    def find_nodes_by_layer(self, layer_id: int) -> List[Tuple[onnx.NodeProto, Optional[nn.Module]]]:
+    def find_nodes_by_layer(self, layer_id: int) -> list[tuple[onnx.NodeProto, nn.Module | None]]:
         """Find all ONNX nodes from specific transformer layer."""
         matching_nodes = []
         
@@ -297,7 +296,7 @@ class SemanticQueryInterface:
         
         return matching_nodes
     
-    def get_attention_components(self, layer_id: Optional[int] = None) -> Dict[str, Dict[str, Any]]:
+    def get_attention_components(self, layer_id: int | None = None) -> dict[str, dict[str, Any]]:
         """Get all attention-related ONNX nodes with their HF modules."""
         attention_nodes = {}
         
@@ -310,7 +309,7 @@ class SemanticQueryInterface:
         
         return attention_nodes
     
-    def find_nodes_by_hf_module_name(self, module_name: str) -> List[onnx.NodeProto]:
+    def find_nodes_by_hf_module_name(self, module_name: str) -> list[onnx.NodeProto]:
         """Find all ONNX nodes that originate from a specific HF module name."""
         target_module = self.mapper.module_mapper.name_to_module.get(module_name)
         if not target_module:
@@ -324,7 +323,7 @@ class SemanticQueryInterface:
         
         return matching_nodes
     
-    def get_module_hierarchy_for_node(self, onnx_node: onnx.NodeProto) -> List[str]:
+    def get_module_hierarchy_for_node(self, onnx_node: onnx.NodeProto) -> list[str]:
         """Get the complete module hierarchy path for an ONNX node."""
         scope_info = self.mapper.scope_parser.parse_onnx_node_name(onnx_node.name)
         if not scope_info:
@@ -332,7 +331,7 @@ class SemanticQueryInterface:
         
         return scope_info['hierarchy_levels']
     
-    def find_similar_nodes(self, onnx_node: onnx.NodeProto) -> List[onnx.NodeProto]:
+    def find_similar_nodes(self, onnx_node: onnx.NodeProto) -> list[onnx.NodeProto]:
         """Find ONNX nodes that come from the same HF module."""
         hf_module = self.mapper.get_hf_module_for_onnx_node(onnx_node)
         if not hf_module:

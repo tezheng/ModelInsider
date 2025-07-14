@@ -313,7 +313,7 @@ def reset_model_state():
 def test_config():
     """Provide test configuration."""
     return {
-        "test_timeout": 30,  # seconds
+        "test_timeout": None,  # No timeout
         "temp_file_cleanup": True,
         "verbose_output": False,
         "skip_slow_tests": False

@@ -9,9 +9,10 @@ Key insight: Execution order IS hierarchy order - parents always execute before 
 """
 from __future__ import annotations
 
+from typing import Any
+
 import torch
 import torch.nn as nn
-from typing import Any
 
 
 class TracingHierarchyBuilder:

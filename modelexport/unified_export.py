@@ -5,20 +5,19 @@ This module provides a high-level, user-friendly interface for exporting PyTorch
 models to ONNX with automatic strategy selection and optimization.
 """
 
-import torch
 import logging
 from pathlib import Path
-from typing import Dict, Any, Optional, Union, Tuple, List
+from typing import Any
+
+import torch
 
 from .core.strategy_selector import (
-    ExportStrategy, 
-    StrategySelector, 
-    select_best_strategy
+    ExportStrategy,
+    select_best_strategy,
 )
 from .core.unified_optimizer import (
-    UnifiedOptimizer,
+    PerformanceMonitor,
     create_optimized_exporter,
-    PerformanceMonitor
 )
 
 logger = logging.getLogger(__name__)
@@ -37,7 +36,7 @@ class UnifiedExporter:
     
     def __init__(
         self,
-        strategy: Union[str, ExportStrategy] = ExportStrategy.AUTO,
+        strategy: str | ExportStrategy = ExportStrategy.AUTO,
         enable_optimizations: bool = True,
         enable_monitoring: bool = True,
         verbose: bool = False
@@ -65,10 +64,10 @@ class UnifiedExporter:
     def export(
         self,
         model: torch.nn.Module,
-        example_inputs: Union[torch.Tensor, Tuple, Dict],
-        output_path: Union[str, Path],
+        example_inputs: torch.Tensor | tuple | dict,
+        output_path: str | Path,
         **kwargs
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Export a PyTorch model to ONNX with intelligent strategy selection.
         
@@ -101,10 +100,10 @@ class UnifiedExporter:
     def _perform_export(
         self,
         model: torch.nn.Module,
-        example_inputs: Union[torch.Tensor, Tuple, Dict],
+        example_inputs: torch.Tensor | tuple | dict,
         output_path: Path,
         **kwargs
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Perform the actual export with strategy selection and optimization."""
         
         report = {
@@ -241,16 +240,16 @@ class UnifiedExporter:
         else:
             raise ValueError(f"Unknown strategy: {strategy}")
     
-    def get_performance_report(self) -> Optional[Dict[str, Any]]:
+    def get_performance_report(self) -> dict[str, Any] | None:
         """Get detailed performance report from last export."""
         return self.last_export_report
     
     def benchmark_strategies(
         self,
         model: torch.nn.Module,
-        example_inputs: Union[torch.Tensor, Tuple, Dict],
-        strategies: Optional[List[str]] = None
-    ) -> Dict[str, Any]:
+        example_inputs: torch.Tensor | tuple | dict,
+        strategies: list[str] | None = None
+    ) -> dict[str, Any]:
         """
         Benchmark multiple strategies on the same model.
         
@@ -328,13 +327,13 @@ class UnifiedExporter:
 
 def export_model(
     model: torch.nn.Module,
-    example_inputs: Union[torch.Tensor, Tuple, Dict],
-    output_path: Union[str, Path],
-    strategy: Union[str, ExportStrategy] = "auto",
+    example_inputs: torch.Tensor | tuple | dict,
+    output_path: str | Path,
+    strategy: str | ExportStrategy = "auto",
     optimize: bool = True,
     verbose: bool = False,
     **kwargs
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Convenience function to export a model with intelligent defaults.
     

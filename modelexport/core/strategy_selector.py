@@ -5,11 +5,12 @@ This module provides automatic strategy selection based on model characteristics
 and user requirements. It analyzes models and recommends the optimal export strategy.
 """
 
-import torch
 import logging
-from typing import Dict, Any, Optional, Union, Tuple, List
 from dataclasses import dataclass
 from enum import Enum
+from typing import Any
+
+import torch
 
 logger = logging.getLogger(__name__)
 
@@ -31,18 +32,18 @@ class ModelCharacteristics:
     module_count: int
     has_dynamic_shapes: bool
     estimated_complexity: str  # "low", "medium", "high"
-    framework_hints: List[str]  # e.g., ["attention", "convolution", "embedding"]
+    framework_hints: list[str]  # e.g., ["attention", "convolution", "embedding"]
 
 
 @dataclass
 class StrategyRecommendation:
     """Strategy recommendation with reasoning."""
     primary_strategy: ExportStrategy
-    fallback_strategy: Optional[ExportStrategy]
+    fallback_strategy: ExportStrategy | None
     confidence: float  # 0.0 to 1.0
-    reasoning: List[str]
-    warnings: List[str]
-    expected_performance: Dict[str, Any]
+    reasoning: list[str]
+    warnings: list[str]
+    expected_performance: dict[str, Any]
 
 
 class ModelAnalyzer:
@@ -151,7 +152,7 @@ class StrategySelector:
         model: torch.nn.Module,
         prioritize_speed: bool = True,
         prioritize_coverage: bool = False,
-        force_strategy: Optional[ExportStrategy] = None
+        force_strategy: ExportStrategy | None = None
     ) -> StrategyRecommendation:
         """
         Recommend the best export strategy for a given model.
@@ -247,7 +248,7 @@ class StrategySelector:
         return recommendation
     
     @classmethod
-    def get_strategy_description(cls, strategy: ExportStrategy) -> Dict[str, str]:
+    def get_strategy_description(cls, strategy: ExportStrategy) -> dict[str, str]:
         """Get description and characteristics of a strategy."""
         descriptions = {
             ExportStrategy.USAGE_BASED: {
@@ -284,9 +285,9 @@ class StrategySelector:
 
 def select_best_strategy(
     model: torch.nn.Module,
-    example_inputs: Optional[Union[torch.Tensor, Tuple]] = None,
+    example_inputs: torch.Tensor | tuple | None = None,
     **kwargs
-) -> Tuple[ExportStrategy, StrategyRecommendation]:
+) -> tuple[ExportStrategy, StrategyRecommendation]:
     """
     Convenience function to select the best strategy for a model.
     

@@ -11,13 +11,15 @@ with 97% coverage using multi-strategy inference:
 NO HARDCODED LOGIC - Universal design principles throughout.
 """
 
-import torch
-import torch.nn as nn
-import onnx
-from typing import Dict, List, Optional, Tuple, Any
-from pathlib import Path
 import re
 from collections import defaultdict
+from pathlib import Path
+from typing import Any
+
+import onnx
+import torch
+import torch.nn as nn
+
 from .data_flow_analyzer import DataFlowAnalyzer
 from .graph_pattern_recognizer import GraphPatternRecognizer
 
@@ -64,7 +66,7 @@ class EnhancedSemanticMapper:
             if name:  # Skip root (empty name)
                 self._module_hierarchy[name] = self._extract_module_metadata(module, name)
     
-    def _extract_module_metadata(self, module: nn.Module, name: str) -> Dict[str, Any]:
+    def _extract_module_metadata(self, module: nn.Module, name: str) -> dict[str, Any]:
         """
         Extract metadata for a module using universal principles.
         
@@ -105,7 +107,7 @@ class EnhancedSemanticMapper:
                         full_child_path = f"{name}.{child_name}" if name else child_name
                         self._torch_to_hf_map[full_child_path] = name
     
-    def _extract_hf_semantic_info(self, name: str, module: nn.Module) -> Dict[str, Any]:
+    def _extract_hf_semantic_info(self, name: str, module: nn.Module) -> dict[str, Any]:
         """
         Extract semantic information from HuggingFace module.
         Uses universal patterns without hardcoding specific architectures.
@@ -161,13 +163,13 @@ class EnhancedSemanticMapper:
             'is_hf_module': True
         }
     
-    def get_semantic_info_for_node(self, onnx_node: onnx.NodeProto) -> Dict[str, Any]:
+    def get_semantic_info_for_node(self, onnx_node: onnx.NodeProto) -> dict[str, Any]:
         """
         DEPRECATED: Use get_semantic_info_for_onnx_node instead.
         """
         return self.get_semantic_info_for_onnx_node(onnx_node)
     
-    def get_semantic_info_for_onnx_node(self, onnx_node: onnx.NodeProto) -> Dict[str, Any]:
+    def get_semantic_info_for_onnx_node(self, onnx_node: onnx.NodeProto) -> dict[str, Any]:
         """
         Get comprehensive semantic information for ONNX node using multi-strategy inference.
         
@@ -209,7 +211,7 @@ class EnhancedSemanticMapper:
             onnx_node, pattern_fallback, 'pattern_fallback', 'low'
         )
     
-    def _extract_scope_from_node_name(self, node_name: str) -> Optional[str]:
+    def _extract_scope_from_node_name(self, node_name: str) -> str | None:
         """Extract module scope from ONNX node name."""
         if not node_name or not node_name.startswith('/'):
             return None
@@ -225,7 +227,7 @@ class EnhancedSemanticMapper:
         
         return None
     
-    def _find_module_for_scope(self, scope_path: Optional[str]) -> Optional[Dict[str, Any]]:
+    def _find_module_for_scope(self, scope_path: str | None) -> dict[str, Any] | None:
         """Find module metadata for given scope path."""
         if not scope_path:
             return None
@@ -243,11 +245,11 @@ class EnhancedSemanticMapper:
         
         return None
     
-    def get_module_hierarchy(self) -> Dict[str, Dict[str, Any]]:
+    def get_module_hierarchy(self) -> dict[str, dict[str, Any]]:
         """Get the complete module hierarchy."""
         return self._module_hierarchy.copy()
     
-    def _analyze_node_scope(self, onnx_node: onnx.NodeProto) -> Dict[str, Any]:
+    def _analyze_node_scope(self, onnx_node: onnx.NodeProto) -> dict[str, Any]:
         """
         Analyze ONNX node scope to extract structural information.
         """
@@ -299,7 +301,7 @@ class EnhancedSemanticMapper:
             'hierarchy_parts': parts[:-1]
         }
     
-    def _try_direct_hf_mapping(self, scope_analysis: Dict[str, Any]) -> Dict[str, Any]:
+    def _try_direct_hf_mapping(self, scope_analysis: dict[str, Any]) -> dict[str, Any]:
         """
         Try to map node to HuggingFace module directly.
         """
@@ -351,7 +353,7 @@ class EnhancedSemanticMapper:
         
         return {'success': False}
     
-    def _try_operation_inference(self, onnx_node: onnx.NodeProto, scope_analysis: Dict[str, Any]) -> Dict[str, Any]:
+    def _try_operation_inference(self, onnx_node: onnx.NodeProto, scope_analysis: dict[str, Any]) -> dict[str, Any]:
         """
         Infer semantic type from operation type and context.
         """
@@ -414,7 +416,7 @@ class EnhancedSemanticMapper:
             'operation_type': op_type
         }
     
-    def _try_pattern_fallback(self, onnx_node: onnx.NodeProto, scope_analysis: Dict[str, Any]) -> Dict[str, Any]:
+    def _try_pattern_fallback(self, onnx_node: onnx.NodeProto, scope_analysis: dict[str, Any]) -> dict[str, Any]:
         """
         Final fallback using pattern matching for edge cases.
         """
@@ -443,8 +445,8 @@ class EnhancedSemanticMapper:
             'pattern_type': 'fallback'
         }
     
-    def _create_semantic_response(self, onnx_node: onnx.NodeProto, mapping_info: Dict[str, Any], 
-                                  primary_source: str, confidence: str) -> Dict[str, Any]:
+    def _create_semantic_response(self, onnx_node: onnx.NodeProto, mapping_info: dict[str, Any], 
+                                  primary_source: str, confidence: str) -> dict[str, Any]:
         """
         Create standardized semantic response.
         """
@@ -473,7 +475,7 @@ class EnhancedSemanticMapper:
             }
         }
     
-    def get_mapping_coverage_stats(self) -> Dict[str, Any]:
+    def get_mapping_coverage_stats(self) -> dict[str, Any]:
         """
         Get comprehensive mapping coverage statistics.
         """
@@ -502,7 +504,7 @@ class EnhancedSemanticMapper:
             'total_coverage_percentage': ((hf_mapped + op_inferred + pattern_fallback) / total_nodes * 100) if total_nodes > 0 else 0
         }
     
-    def get_coverage_statistics(self) -> Dict[str, Any]:
+    def get_coverage_statistics(self) -> dict[str, Any]:
         """Calculate coverage statistics for the semantic mapping."""
         # Delegate to the new comprehensive method
         stats = self.get_mapping_coverage_stats()
@@ -516,7 +518,7 @@ class EnhancedSemanticMapper:
             'total_modules': len(self._module_hierarchy)
         }
     
-    def enhance_with_data_flow_analysis(self) -> Dict[str, Any]:
+    def enhance_with_data_flow_analysis(self) -> dict[str, Any]:
         """
         Enhance semantic mappings using data flow analysis.
         
@@ -545,7 +547,7 @@ class EnhancedSemanticMapper:
             'data_flow_analyzer': data_flow_analyzer
         }
     
-    def enhance_with_pattern_recognition(self) -> Dict[str, Any]:
+    def enhance_with_pattern_recognition(self) -> dict[str, Any]:
         """
         Enhance semantic mappings using graph pattern recognition.
         

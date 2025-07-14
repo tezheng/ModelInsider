@@ -18,16 +18,15 @@ REQUIREMENTS:
 Based on insights from pytorch_internals_investigation.ipynb and ground truth analysis.
 """
 
+import json
+import logging
+import time
+from pathlib import Path
+from typing import Any
+
+import onnx
 import torch
 import torch.nn as nn
-from typing import Dict, List, Any, Optional, Tuple, Union
-import json
-from pathlib import Path
-import onnx
-import tempfile
-import time
-import logging
-from collections import defaultdict
 
 logger = logging.getLogger(__name__)
 
@@ -47,7 +46,7 @@ class UniversalHierarchyExporter:
     
     def __init__(
         self,
-        torch_nn_exceptions: Optional[List[str]] = None,
+        torch_nn_exceptions: list[str] | None = None,
         verbose: bool = False
     ):
         """
@@ -61,9 +60,9 @@ class UniversalHierarchyExporter:
         self.verbose = verbose
         
         # Internal state
-        self._trace_module_map: Dict[nn.Module, str] = {}
-        self._module_hierarchy: Dict[str, Dict[str, Any]] = {}
-        self._operation_tags: Dict[str, List[str]] = {}
+        self._trace_module_map: dict[nn.Module, str] = {}
+        self._module_hierarchy: dict[str, dict[str, Any]] = {}
+        self._operation_tags: dict[str, list[str]] = {}
         self._export_stats = {
             'total_modules': 0,
             'tagged_operations': 0,
@@ -72,11 +71,11 @@ class UniversalHierarchyExporter:
         }
         
         # Dynamic tagging state (hybrid approach)
-        self._tag_stack: List[str] = []
-        self._operation_context: Dict[str, Dict[str, Any]] = {}
-        self._pre_hooks: List = []
-        self._post_hooks: List = []
-        self._onnx_operation_tags: Dict[str, str] = {}
+        self._tag_stack: list[str] = []
+        self._operation_context: dict[str, dict[str, Any]] = {}
+        self._pre_hooks: list = []
+        self._post_hooks: list = []
+        self._onnx_operation_tags: dict[str, str] = {}
         
         if self.verbose:
             logging.basicConfig(level=logging.INFO)
@@ -84,15 +83,15 @@ class UniversalHierarchyExporter:
     def export(
         self,
         model: nn.Module,
-        args: Tuple[torch.Tensor, ...],
+        args: tuple[torch.Tensor, ...],
         output_path: str,
-        input_names: Optional[List[str]] = None,
-        output_names: Optional[List[str]] = None,
-        dynamic_axes: Optional[Dict[str, Dict[int, str]]] = None,
+        input_names: list[str] | None = None,
+        output_names: list[str] | None = None,
+        dynamic_axes: dict[str, dict[int, str]] | None = None,
         opset_version: int = 17,
         do_constant_folding: bool = True,
         **export_kwargs
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Export model to ONNX with hierarchy preservation.
         
@@ -191,7 +190,7 @@ class UniversalHierarchyExporter:
         if self.verbose:
             logger.info(f"Analyzed {len(self._module_hierarchy)} modules in hierarchy")
     
-    def _extract_module_metadata(self, module: nn.Module, name: str, full_path: str) -> Dict[str, Any]:
+    def _extract_module_metadata(self, module: nn.Module, name: str, full_path: str) -> dict[str, Any]:
         """
         Extract metadata for a module using universal PyTorch principles.
         
@@ -302,7 +301,7 @@ class UniversalHierarchyExporter:
         else:
             return text  # Already in proper case
     
-    def _setup_trace_capture(self) -> Dict[nn.Module, str]:
+    def _setup_trace_capture(self) -> dict[nn.Module, str]:
         """
         Set up capture of PyTorch's internal _trace_module_map.
         
@@ -342,7 +341,7 @@ class UniversalHierarchyExporter:
     def _perform_onnx_export(
         self,
         model: nn.Module,
-        args: Tuple[torch.Tensor, ...],
+        args: tuple[torch.Tensor, ...],
         output_path: str,
         **export_kwargs
     ) -> None:
@@ -362,7 +361,7 @@ class UniversalHierarchyExporter:
         if self.verbose:
             logger.info(f"ONNX export completed: {output_path}")
     
-    def _process_trace_module_map(self, trace_map: Dict[nn.Module, str]) -> None:
+    def _process_trace_module_map(self, trace_map: dict[nn.Module, str]) -> None:
         """
         Process captured trace module map to build operation tags.
         
@@ -465,7 +464,7 @@ class UniversalHierarchyExporter:
         if self.verbose:
             logger.info(f"Created sidecar metadata: {Path(sidecar_path).name}")
     
-    def get_hierarchy_metadata(self) -> Dict[str, Any]:
+    def get_hierarchy_metadata(self) -> dict[str, Any]:
         """Get the complete hierarchy metadata."""
         return {
             'module_hierarchy': self._module_hierarchy,
@@ -473,7 +472,7 @@ class UniversalHierarchyExporter:
             'export_stats': self._export_stats
         }
     
-    def validate_against_ground_truth(self, expected_tags: Dict[str, str]) -> Dict[str, Any]:
+    def validate_against_ground_truth(self, expected_tags: dict[str, str]) -> dict[str, Any]:
         """
         Validate export results against ground truth.
         
@@ -812,7 +811,7 @@ def create_bert_tiny_exporter() -> UniversalHierarchyExporter:
     )
 
 
-def export_bert_tiny_with_validation() -> Dict[str, Any]:
+def export_bert_tiny_with_validation() -> dict[str, Any]:
     """
     Export BERT-tiny and validate against ground truth.
     

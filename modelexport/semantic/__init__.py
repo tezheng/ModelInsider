@@ -6,10 +6,10 @@ enabling users to trace any ONNX operation back to its originating HF module.
 """
 
 from .semantic_mapper import (
-    SemanticMapper,
-    SemanticQueryInterface, 
+    HFModuleMapper,
     ScopePathParser,
-    HFModuleMapper
+    SemanticMapper,
+    SemanticQueryInterface,
 )
 
 __all__ = [
