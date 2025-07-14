@@ -22,22 +22,26 @@ Strategies:
 """
 
 # Main export interface
-from .unified_export import export_model, UnifiedExporter
+from .core import tag_utils
+
+# Utilities
+from .core.base import BaseHierarchyExporter, build_hierarchy_path, should_tag_module
+from .core.onnx_utils import ONNXUtils
 
 # Core components for advanced usage
-from .core.strategy_selector import ExportStrategy, StrategySelector, select_best_strategy
+from .core.strategy_selector import (
+    ExportStrategy,
+    StrategySelector,
+    select_best_strategy,
+)
 from .core.unified_optimizer import UnifiedOptimizer, create_optimized_exporter
 
 # Individual strategies for direct access
-from .strategies.htp import HTPHierarchyExporter
-
-# Utilities
-from .core.base import BaseHierarchyExporter, should_tag_module, build_hierarchy_path
-from .core.onnx_utils import ONNXUtils
-from .core import tag_utils
+from .strategies.htp import HTPExporter
+from .unified_export import UnifiedExporter, export_model
 
 # Backward compatibility
-HierarchyExporter = HTPHierarchyExporter
+HierarchyExporter = HTPExporter
 
 __version__ = "0.1.0"
 __all__ = [

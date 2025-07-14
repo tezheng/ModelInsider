@@ -15,7 +15,6 @@ Variations:
 - Built-in HTP: Uses PyTorch's internal module tracking
 """
 
-from .htp_hierarchy_exporter import HierarchyExporter as HTPHierarchyExporter
-from .htp_exporter import HTPExporter, export_with_htp_integrated_reporting
+from .htp_exporter import HTPExporter, export_with_htp_reporting
 
-__all__ = ["HTPHierarchyExporter", "HTPExporter", "export_with_htp_integrated_reporting"]
+__all__ = ["HTPExporter", "export_with_htp_reporting"]

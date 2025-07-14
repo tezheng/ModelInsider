@@ -6,8 +6,8 @@ for hierarchy-preserving ONNX export, optimized for complex models including
 HuggingFace transformers.
 """
 
-from .htp import HTPHierarchyExporter
+from .htp import HTPExporter
 
 __all__ = [
-    "HTPHierarchyExporter",
+    "HTPExporter",
 ]

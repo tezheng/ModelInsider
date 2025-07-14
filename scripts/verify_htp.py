@@ -280,7 +280,7 @@ def main():
             'timestamp': time.time()
         }
         
-        results_file = Path(__file__).parent / "htp_integration_results.json"
+        results_file = Path(__file__).parent / "htp_results.json"
         with open(results_file, 'w') as f:
             json.dump(results, f, indent=2, default=str)
         

@@ -5,11 +5,12 @@ This demonstrates how to group ONNX nodes by their scope names and
 handle nodes with no scope (assign to root module).
 """
 
-import onnx
-from typing import Dict, List, Optional
 from collections import defaultdict
 
-def bucketize_onnx_nodes_by_scope(onnx_model: onnx.ModelProto) -> Dict[str, List[onnx.NodeProto]]:
+import onnx
+
+
+def bucketize_onnx_nodes_by_scope(onnx_model: onnx.ModelProto) -> dict[str, list[onnx.NodeProto]]:
     """
     Bucketize ONNX nodes by their scope names.
     

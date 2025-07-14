@@ -10,10 +10,11 @@ This module provides utilities for working with ONNX models, including:
 
 from __future__ import annotations
 
-import onnx
 import json
-from typing import Dict, List, Any, Optional
 from pathlib import Path
+from typing import Any
+
+import onnx
 
 
 class ONNXUtils:
@@ -44,7 +45,7 @@ class ONNXUtils:
     @staticmethod
     def inject_hierarchy_metadata(
         onnx_model: onnx.ModelProto,
-        node_tags: Dict[str, Dict[str, Any]],
+        node_tags: dict[str, dict[str, Any]],
         method: str = "unknown"
     ) -> int:
         """
@@ -87,7 +88,7 @@ class ONNXUtils:
         return injected_count
     
     @staticmethod
-    def extract_hierarchy_metadata(onnx_model: onnx.ModelProto) -> Dict[str, Dict[str, Any]]:
+    def extract_hierarchy_metadata(onnx_model: onnx.ModelProto) -> dict[str, dict[str, Any]]:
         """
         Extract hierarchy metadata from ONNX node doc_strings.
         
@@ -126,7 +127,7 @@ class ONNXUtils:
         return node_hierarchy
     
     @staticmethod
-    def analyze_model_structure(onnx_model: onnx.ModelProto) -> Dict[str, Any]:
+    def analyze_model_structure(onnx_model: onnx.ModelProto) -> dict[str, Any]:
         """
         Analyze ONNX model structure and provide statistics.
         
@@ -164,7 +165,7 @@ class ONNXUtils:
         }
     
     @staticmethod
-    def _analyze_hierarchy_coverage(onnx_model: onnx.ModelProto) -> Dict[str, Any]:
+    def _analyze_hierarchy_coverage(onnx_model: onnx.ModelProto) -> dict[str, Any]:
         """Analyze hierarchy coverage in the model."""
         total_nodes = len(onnx_model.graph.node)
         tagged_nodes = 0
@@ -195,8 +196,8 @@ class ONNXUtils:
     @staticmethod
     def create_sidecar_file(
         onnx_path: str,
-        node_tags: Dict[str, Dict[str, Any]],
-        metadata: Dict[str, Any]
+        node_tags: dict[str, dict[str, Any]],
+        metadata: dict[str, Any]
     ) -> str:
         """
         Create a sidecar JSON file with complete hierarchy information.
@@ -231,7 +232,7 @@ class ONNXUtils:
         return sidecar_path
     
     @staticmethod
-    def validate_hierarchy_consistency(onnx_path: str) -> Dict[str, Any]:
+    def validate_hierarchy_consistency(onnx_path: str) -> dict[str, Any]:
         """
         Validate consistency between ONNX model hierarchy and sidecar file.
         
@@ -254,7 +255,7 @@ class ONNXUtils:
                     "error": "Sidecar file not found"
                 }
             
-            with open(sidecar_path, 'r') as f:
+            with open(sidecar_path) as f:
                 sidecar_data = json.load(f)
             
             sidecar_hierarchy = sidecar_data.get("node_tags", {})
@@ -295,7 +296,7 @@ class ONNXUtils:
             }
     
     @staticmethod
-    def compare_models(onnx_path1: str, onnx_path2: str) -> Dict[str, Any]:
+    def compare_models(onnx_path1: str, onnx_path2: str) -> dict[str, Any]:
         """
         Compare hierarchy information between two ONNX models.
         

@@ -13,7 +13,7 @@ from transformers import AutoModel, AutoTokenizer
 from pathlib import Path
 import tempfile
 
-from modelexport.strategies.htp.htp_integrated_exporter import export_with_htp_integrated
+from modelexport.strategies.htp.htp_integrated_exporter import export_with_htp
 
 
 def demonstrate_htp_integrated():
@@ -41,7 +41,7 @@ def demonstrate_htp_integrated():
     print(f"\n📦 Exporting with HTP integrated strategy...")
     
     # STEP 4: Export using HTP integrated approach
-    result = export_with_htp_integrated(
+    result = export_with_htp(
         model=model,
         example_inputs=example_inputs,
         output_path=output_path,
@@ -74,7 +74,7 @@ def demonstrate_htp_integrated():
     with tempfile.NamedTemporaryFile(suffix='.onnx', delete=False) as tmp_file:
         fallback_output_path = tmp_file.name
     
-    fallback_result = export_with_htp_integrated(
+    fallback_result = export_with_htp(
         model=model,
         example_inputs=example_inputs,
         output_path=fallback_output_path,

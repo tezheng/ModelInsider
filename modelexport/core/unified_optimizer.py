@@ -5,13 +5,15 @@ This module provides a unified optimization framework that applies optimizations
 across all export strategies based on learnings from iterations 17-18.
 """
 
-import time
 import logging
-import torch
-from typing import Dict, Any, Optional, List, Callable
-from functools import wraps
-from dataclasses import dataclass
+import time
 from collections import defaultdict
+from collections.abc import Callable
+from dataclasses import dataclass
+from functools import wraps
+from typing import Any
+
+import torch
 
 logger = logging.getLogger(__name__)
 
@@ -20,9 +22,9 @@ logger = logging.getLogger(__name__)
 class OptimizationProfile:
     """Profile of optimizations applied to an exporter."""
     strategy_name: str
-    optimizations_applied: List[str]
-    performance_metrics: Dict[str, float]
-    warnings: List[str]
+    optimizations_applied: list[str]
+    performance_metrics: dict[str, float]
+    warnings: list[str]
     
     def get_summary(self) -> str:
         """Get a summary of applied optimizations."""
@@ -58,7 +60,7 @@ class PerformanceMonitor:
         """Increment a performance counter."""
         self.counters[counter_name] += value
     
-    def get_metrics(self) -> Dict[str, Any]:
+    def get_metrics(self) -> dict[str, Any]:
         """Get all collected metrics."""
         metrics = {}
         
@@ -231,7 +233,7 @@ class UnifiedOptimizer:
         
         # 3. Add batch processing utilities
         if not hasattr(exporter, 'batch_process'):
-            def batch_process(items: List[Any], process_func: Callable, batch_size: int = 100):
+            def batch_process(items: list[Any], process_func: Callable, batch_size: int = 100):
                 """Process items in batches for efficiency."""
                 results = []
                 for i in range(0, len(items), batch_size):
@@ -261,7 +263,9 @@ class UnifiedOptimizer:
         elif strategy_name == "usage_based":
             # Apply Usage-Based optimizations from iteration 18
             try:
-                from ..strategies.usage_based.optimizations import apply_usage_based_optimizations
+                from ..strategies.usage_based.optimizations import (
+                    apply_usage_based_optimizations,
+                )
                 apply_usage_based_optimizations(exporter)
                 profile.optimizations_applied.extend([
                     "lightweight_hooks",
@@ -341,15 +345,15 @@ class OptimizationBenchmark:
         example_inputs: Any,
         strategy: str,
         num_runs: int = 3
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Compare optimized vs original exporter performance.
         
         Returns:
             Dictionary with comparison metrics
         """
-        import tempfile
         import os
+        import tempfile
         
         results = {
             "strategy": strategy,

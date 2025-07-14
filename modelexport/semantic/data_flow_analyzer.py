@@ -17,10 +17,11 @@ CARDINAL RULES:
 - MUST-003: CONFIDENCE AWARE - All inherited semantics have confidence scores
 """
 
-import onnx
-from typing import Dict, List, Optional, Set, Tuple, Any
-from collections import defaultdict, deque
 import logging
+from collections import defaultdict, deque
+from typing import Any
+
+import onnx
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +34,7 @@ class DataFlowAnalyzer:
     methods to trace semantic context through data dependencies.
     """
     
-    def __init__(self, onnx_model: onnx.ModelProto, semantic_mappings: Dict[str, Any]):
+    def __init__(self, onnx_model: onnx.ModelProto, semantic_mappings: dict[str, Any]):
         """
         Initialize data flow analyzer.
         
@@ -76,7 +77,7 @@ class DataFlowAnalyzer:
         logger.info(f"Built data flow graph: {len(self.node_graph)} nodes, "
                    f"{len(self.output_graph)} tensors")
     
-    def enhance_semantic_mappings(self) -> Dict[str, Any]:
+    def enhance_semantic_mappings(self) -> dict[str, Any]:
         """
         Enhance existing semantic mappings using data flow analysis.
         
@@ -106,7 +107,7 @@ class DataFlowAnalyzer:
         
         return self.enhanced_mappings
     
-    def _identify_enhancement_candidates(self) -> List[str]:
+    def _identify_enhancement_candidates(self) -> list[str]:
         """Identify nodes that could benefit from data flow enhancement."""
         candidates = []
         
@@ -128,7 +129,7 @@ class DataFlowAnalyzer:
         
         return candidates
     
-    def _enhance_node_semantics(self, node_name: str, original_mapping: Dict[str, Any]) -> Dict[str, Any]:
+    def _enhance_node_semantics(self, node_name: str, original_mapping: dict[str, Any]) -> dict[str, Any]:
         """
         Enhance semantics for a specific node using data flow analysis.
         
@@ -182,7 +183,7 @@ class DataFlowAnalyzer:
         # Return best enhancement or original if no improvement
         return best_enhancement if best_enhancement else original_mapping
     
-    def _calculate_enhancement_score(self, mapping: Dict[str, Any]) -> float:
+    def _calculate_enhancement_score(self, mapping: dict[str, Any]) -> float:
         """Calculate enhancement score for a mapping (higher is better)."""
         semantic_type = mapping.get('semantic_type', 'unknown')
         confidence = mapping.get('confidence', 'unknown')
@@ -196,7 +197,7 @@ class DataFlowAnalyzer:
         
         return semantic_score + confidence_score
     
-    def _try_backward_semantic_inheritance(self, node_name: str) -> Dict[str, Any]:
+    def _try_backward_semantic_inheritance(self, node_name: str) -> dict[str, Any]:
         """
         Try to inherit semantics from input nodes (backward tracing).
         
@@ -241,7 +242,7 @@ class DataFlowAnalyzer:
         
         return {'success': False}
     
-    def _try_forward_semantic_propagation(self, node_name: str) -> Dict[str, Any]:
+    def _try_forward_semantic_propagation(self, node_name: str) -> dict[str, Any]:
         """
         Try to infer semantics from output consumers (forward tracing).
         
@@ -285,7 +286,7 @@ class DataFlowAnalyzer:
         
         return {'success': False}
     
-    def _try_contextual_operation_inference(self, node_name: str) -> Dict[str, Any]:
+    def _try_contextual_operation_inference(self, node_name: str) -> dict[str, Any]:
         """
         Try to infer semantics using broader graph context.
         
@@ -317,7 +318,7 @@ class DataFlowAnalyzer:
         
         return {'success': False}
     
-    def _aggregate_semantic_contexts(self, semantic_contexts: List[Dict[str, Any]]) -> Dict[str, Any]:
+    def _aggregate_semantic_contexts(self, semantic_contexts: list[dict[str, Any]]) -> dict[str, Any]:
         """Aggregate multiple semantic contexts into a unified context."""
         if not semantic_contexts:
             return {}
@@ -359,7 +360,7 @@ class DataFlowAnalyzer:
         
         return aggregated
     
-    def _apply_inheritance_rules(self, inherited_semantics: Dict[str, Any], op_type: str) -> Optional[Dict[str, Any]]:
+    def _apply_inheritance_rules(self, inherited_semantics: dict[str, Any], op_type: str) -> dict[str, Any] | None:
         """Apply semantic inheritance rules based on operation type."""
         inherited_type = inherited_semantics.get('semantic_type')
         
@@ -408,7 +409,7 @@ class DataFlowAnalyzer:
         
         return None
     
-    def _apply_forward_propagation_rules(self, forward_semantics: Dict[str, Any], op_type: str) -> Optional[Dict[str, Any]]:
+    def _apply_forward_propagation_rules(self, forward_semantics: dict[str, Any], op_type: str) -> dict[str, Any] | None:
         """Apply forward semantic propagation rules."""
         forward_type = forward_semantics.get('semantic_type')
         
@@ -432,7 +433,7 @@ class DataFlowAnalyzer:
         
         return None
     
-    def _apply_contextual_patterns(self, op_type: str, neighborhood_ops: List[str]) -> Optional[Dict[str, Any]]:
+    def _apply_contextual_patterns(self, op_type: str, neighborhood_ops: list[str]) -> dict[str, Any] | None:
         """Apply contextual pattern recognition."""
         # Pattern: GELU activation (Div, Erf, Add pattern)
         if (op_type in ['Div', 'Erf', 'Add'] and 
@@ -460,7 +461,7 @@ class DataFlowAnalyzer:
         
         return None
     
-    def _get_node_neighborhood(self, node_name: str, depth: int = 1) -> Set[str]:
+    def _get_node_neighborhood(self, node_name: str, depth: int = 1) -> set[str]:
         """Get neighborhood of nodes within specified depth."""
         if node_name not in self.node_graph:
             return set()
@@ -497,7 +498,7 @@ class DataFlowAnalyzer:
         
         return neighborhood
     
-    def get_enhancement_statistics(self) -> Dict[str, Any]:
+    def get_enhancement_statistics(self) -> dict[str, Any]:
         """Get statistics about semantic enhancements made."""
         original_unknown = sum(1 for mapping in self.semantic_mappings.values() 
                               if mapping.get('semantic_type') == 'unknown')

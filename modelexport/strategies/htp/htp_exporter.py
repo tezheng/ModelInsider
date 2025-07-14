@@ -25,7 +25,7 @@ import io
 import json
 import logging
 import time
-from collections import Counter, defaultdict
+from collections import defaultdict
 from pathlib import Path
 from typing import Any
 
@@ -57,7 +57,7 @@ class HTPExporter:
         """
         self.verbose = verbose
         self.enable_reporting = enable_reporting
-        self.strategy = "htp_integrated"
+        self.strategy = "htp"
 
         # Core components
         self._hierarchy_builder = None
@@ -187,7 +187,9 @@ class HTPExporter:
             )
             logger.info(f"Coverage: {self._export_stats['coverage_percentage']:.1f}%")
 
-        # Add reporting data to export stats if enabled
+        # Add strategy and reporting data to export stats
+        self._export_stats["strategy"] = self.strategy
+        
         if self.enable_reporting:
             self._export_stats["report_data"] = self.report_buffer.getvalue()
 
@@ -521,8 +523,8 @@ class HTPExporter:
             return
 
         try:
-            from rich.tree import Tree
             from rich.text import Text
+            from rich.tree import Tree
 
             tree = Tree("🏗️ Module Hierarchy")
             
@@ -599,7 +601,7 @@ HTPIntegratedExporter = HTPExporter
 HTPIntegratedExporterWithReporting = HTPExporter
 
 
-def export_with_htp_integrated(
+def export_with_htp(
     model: nn.Module,
     output_path: str = "",
     model_name_or_path: str | None = None,
@@ -609,7 +611,7 @@ def export_with_htp_integrated(
     **kwargs,
 ) -> dict[str, Any]:
     """
-    Convenience function for HTP integrated export.
+    Convenience function for HTP export.
 
     Args:
         model: PyTorch model to export
@@ -634,7 +636,7 @@ def export_with_htp_integrated(
     )
 
 
-def export_with_htp_integrated_reporting(
+def export_with_htp_reporting(
     model: nn.Module,
     output_path: str = "",
     model_name_or_path: str | None = None,
@@ -644,7 +646,7 @@ def export_with_htp_integrated_reporting(
     **kwargs,
 ) -> dict[str, Any]:
     """
-    Convenience function for HTP integrated export with detailed reporting.
+    Convenience function for HTP export with detailed reporting.
 
     Args:
         model: PyTorch model to export

@@ -10,10 +10,10 @@ Components:
 - onnx_utils: ONNX model manipulation helpers
 """
 
-from .base import BaseHierarchyExporter
-from .operation_config import OperationConfig
 from . import tag_utils
+from .base import BaseHierarchyExporter
 from .onnx_utils import ONNXUtils
+from .operation_config import OperationConfig
 
 __all__ = [
     "BaseHierarchyExporter",

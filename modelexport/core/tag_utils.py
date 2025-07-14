@@ -9,12 +9,12 @@ This module provides functions to:
 """
 
 import json
-import onnx
-from typing import Dict, List, Optional, Set
 from pathlib import Path
 
+import onnx
 
-def load_tags_from_onnx(onnx_path: str) -> Dict[str, Dict[str, any]]:
+
+def load_tags_from_onnx(onnx_path: str) -> dict[str, dict[str, any]]:
     """
     Load hierarchy tags from ONNX node attributes and doc_string fields.
     
@@ -64,7 +64,7 @@ def load_tags_from_onnx(onnx_path: str) -> Dict[str, Dict[str, any]]:
     return node_tags
 
 
-def load_tags_from_sidecar(onnx_path: str) -> Dict[str, any]:
+def load_tags_from_sidecar(onnx_path: str) -> dict[str, any]:
     """
     Load hierarchy tags from sidecar JSON file.
     
@@ -77,25 +77,25 @@ def load_tags_from_sidecar(onnx_path: str) -> Dict[str, any]:
     # Try HTP metadata format first (new format)
     htp_sidecar_path = onnx_path.replace('.onnx', '_htp_metadata.json')
     if Path(htp_sidecar_path).exists():
-        with open(htp_sidecar_path, 'r') as f:
+        with open(htp_sidecar_path) as f:
             return json.load(f)
     
     # Try legacy integrated format
     htp_integrated_path = onnx_path.replace('.onnx', '_htp_integrated_metadata.json')
     if Path(htp_integrated_path).exists():
-        with open(htp_integrated_path, 'r') as f:
+        with open(htp_integrated_path) as f:
             return json.load(f)
     
     # Try legacy hierarchy format
     legacy_sidecar_path = onnx_path.replace('.onnx', '_hierarchy.json')
     if Path(legacy_sidecar_path).exists():
-        with open(legacy_sidecar_path, 'r') as f:
+        with open(legacy_sidecar_path) as f:
             return json.load(f)
     
     raise FileNotFoundError(f"Sidecar file not found. Tried: {htp_sidecar_path}, {htp_integrated_path}, {legacy_sidecar_path}")
 
 
-def validate_tag_consistency(onnx_path: str) -> Dict[str, any]:
+def validate_tag_consistency(onnx_path: str) -> dict[str, any]:
     """
     Validate that tags in ONNX attributes match those in sidecar file.
     
@@ -152,7 +152,7 @@ def validate_tag_consistency(onnx_path: str) -> Dict[str, any]:
         }
 
 
-def query_operations_by_tag(onnx_path: str, tag_pattern: str, use_sidecar: bool = True) -> List[Dict[str, any]]:
+def query_operations_by_tag(onnx_path: str, tag_pattern: str, use_sidecar: bool = True) -> list[dict[str, any]]:
     """
     Query operations that match a specific tag pattern.
     
@@ -199,7 +199,7 @@ def query_operations_by_tag(onnx_path: str, tag_pattern: str, use_sidecar: bool 
     return matching_operations
 
 
-def get_tag_statistics(onnx_path: str, use_sidecar: bool = True) -> Dict[str, any]:
+def get_tag_statistics(onnx_path: str, use_sidecar: bool = True) -> dict[str, any]:
     """
     Get statistics about tag distribution in the model.
     
@@ -291,7 +291,7 @@ def export_tags_to_csv(onnx_path: str, output_csv: str, use_sidecar: bool = True
             writer.writerow([node_name, op_type, len(tags), primary_tag, all_tags])
 
 
-def compare_tag_distributions(onnx_path1: str, onnx_path2: str) -> Dict[str, any]:
+def compare_tag_distributions(onnx_path1: str, onnx_path2: str) -> dict[str, any]:
     """
     Compare tag distributions between two ONNX models.
     
