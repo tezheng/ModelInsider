@@ -151,8 +151,8 @@ class TestExportCommand:
         # Should contain key help information
         help_output = result.output
         assert "export" in help_output.lower(), "Should mention export command"
-        assert "model_name_or_path" in help_output.lower(), "Should document model path argument"
-        assert "output_path" in help_output.lower(), "Should document output path argument"
+        assert "--model" in help_output.lower(), "Should document --model option"
+        assert "--output" in help_output.lower(), "Should document --output option"
         # Strategy option removed - HTP only now
         assert "--input-specs" in help_output, "Should document input-specs option"
         assert "--verbose" in help_output, "Should document verbose option"
@@ -192,8 +192,8 @@ class TestExportCommand:
             # Run export command
             result = runner.invoke(cli, [
                 'export',
-                'prajjwal1/bert-tiny',
-                str(output_path),
+                '--model', 'prajjwal1/bert-tiny',
+                '--output', str(output_path),
                 '--verbose'
             ])
             

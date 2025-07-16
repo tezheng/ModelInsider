@@ -25,7 +25,9 @@ import io
 import json
 import logging
 import time
+import xml.etree.ElementTree as ET
 from collections import defaultdict
+from datetime import datetime
 from pathlib import Path
 from typing import Any
 
@@ -37,6 +39,15 @@ from ...core.onnx_node_tagger import create_node_tagger_from_hierarchy
 from ...core.tracing_hierarchy_builder import TracingHierarchyBuilder
 
 logger = logging.getLogger(__name__)
+
+# Default ONNX export configuration
+DEFAULT_EXPORT_CONFIG = {
+    "opset_version": 17,
+    "do_constant_folding": True,
+    "export_params": True,
+    "training": False,
+    "verbose": False,  # ONNX export verbose, separate from HTP verbose
+}
 
 
 class HTPExporter:
@@ -80,8 +91,6 @@ class HTPExporter:
             self.report_buffer = io.StringIO()
             try:
                 from rich.console import Console
-                from rich.text import Text
-                from rich.tree import Tree
                 self.console = Console()
                 self._rich_available = True
             except ImportError:
@@ -95,37 +104,80 @@ class HTPExporter:
 
     def export(
         self,
-        model: nn.Module,
+        model: nn.Module | None = None,
         output_path: str = "",
         model_name_or_path: str | None = None,
         input_specs: dict[str, dict[str, Any]] | None = None,
-        input_names: list[str] | None = None,
-        output_names: list[str] | None = None,
-        dynamic_axes: dict[str, dict[int, str]] | None = None,
-        opset_version: int = 17,
+        export_config: dict[str, Any] | None = None,
         enable_operation_fallback: bool = False,
         metadata_filename: str | None = None,
-        **export_kwargs,
+        export_graphml: bool = False,
+        graphml_filename: str | None = None,
+        **kwargs,
     ) -> dict[str, Any]:
         """
         Export model to ONNX with hierarchy-preserving tags.
 
         Args:
-            model: PyTorch model to export
+            model: PyTorch model to export (optional, auto-loads from model_name_or_path if not provided)
             output_path: Path to save ONNX model
-            model_name_or_path: HuggingFace model name/path for auto-input generation
-            input_specs: Manual input specifications (overrides auto-generation)
-            input_names: Names for input tensors
-            output_names: Names for output tensors
-            dynamic_axes: Dynamic axes configuration
-            opset_version: ONNX opset version
+            model_name_or_path: HuggingFace model name/path for auto-input generation and model loading
+            input_specs: Manual input specifications for input generation (overrides auto-generation)
+            export_config: ONNX export configuration (opset_version, do_constant_folding, etc.)
+                         Uses DEFAULT_EXPORT_CONFIG if not provided. Input/output related settings
+                         are ignored - use input_specs for input control.
             enable_operation_fallback: Enable operation-based fallback in tagging
             metadata_filename: Custom metadata filename (default: *_htp_metadata.json)
-            **export_kwargs: Additional arguments for torch.onnx.export
+            export_graphml: Export GraphML canonical format in addition to ONNX (default: False)
+            graphml_filename: Custom GraphML filename (default: *_canonical.graphml)
+            **kwargs: Backward compatibility - will be merged into export_config
 
         Returns:
             Dictionary with export statistics and metadata
         """
+        # Prepare export configuration
+        final_export_config = DEFAULT_EXPORT_CONFIG.copy()
+        if export_config:
+            final_export_config.update(export_config)
+        
+        # Merge kwargs for backward compatibility
+        if kwargs:
+            final_export_config.update(kwargs)
+        
+        # Filter out input/output related settings - these are controlled by input_specs
+        input_output_keys = {
+            "input_names", "output_names", "dynamic_axes", 
+            "input_specs", "args"  # input_specs handled separately, args is inputs
+        }
+        filtered_export_config = {
+            k: v for k, v in final_export_config.items() 
+            if k not in input_output_keys
+        }
+        
+        if self.verbose and export_config:
+            ignored_keys = set(final_export_config.keys()) - set(filtered_export_config.keys())
+            if ignored_keys:
+                logger.info(f"Ignored input/output related config keys: {ignored_keys}")
+        
+        # Auto-load model if not provided
+        if model is None:
+            if model_name_or_path is None:
+                raise ValueError(
+                    "Either 'model' or 'model_name_or_path' must be provided. "
+                    "Provide a loaded PyTorch model or a HuggingFace model name/path for auto-loading."
+                )
+            
+            if self.verbose:
+                logger.info(f"Auto-loading model from: {model_name_or_path}")
+            
+            try:
+                from transformers import AutoModel
+                model = AutoModel.from_pretrained(model_name_or_path)
+                if self.verbose:
+                    logger.info(f"Successfully loaded {type(model).__name__}")
+            except Exception as e:
+                raise ValueError(f"Failed to auto-load model from '{model_name_or_path}': {e}") from e
+        
         start_time = time.time()
 
         if self.enable_reporting:
@@ -138,7 +190,8 @@ class HTPExporter:
             logger.info(f"Starting HTP export for {type(model).__name__}")
 
         # Step 1: Generate inputs using the unified generator
-        self._generate_and_validate_inputs(model_name_or_path, input_specs, export_kwargs)
+        # Note: input_specs is separate from export_config for input generation
+        self._generate_and_validate_inputs(model_name_or_path, input_specs, {})
 
         # Step 2: Set model to eval mode
         model.eval()
@@ -154,11 +207,7 @@ class HTPExporter:
             model,
             self.example_inputs,
             output_path,
-            input_names=input_names,
-            output_names=output_names,
-            dynamic_axes=dynamic_axes,
-            opset_version=opset_version,
-            **export_kwargs,
+            **filtered_export_config,
         )
 
         # Step 5: Load ONNX model and create node tagger
@@ -192,6 +241,13 @@ class HTPExporter:
         
         if self.enable_reporting:
             self._export_stats["report_data"] = self.report_buffer.getvalue()
+
+        # Generate GraphML canonical format if requested
+        if export_graphml:
+            graphml_path = self._generate_graphml_output(output_path, graphml_filename)
+            self._export_stats["graphml_path"] = graphml_path
+            if self.verbose:
+                logger.info(f"GraphML canonical format generated: {graphml_path}")
 
         return self._export_stats.copy()
 
@@ -594,6 +650,277 @@ class HTPExporter:
     def get_tagged_nodes(self) -> dict[str, str]:
         """Get the complete node tagging data."""
         return self._tagged_nodes.copy() if hasattr(self, "_tagged_nodes") else {}
+
+    def _generate_graphml_output(self, onnx_path: str, graphml_filename: str | None = None) -> str:
+        """Generate GraphML canonical format from ONNX and HTP metadata."""
+        from pathlib import Path
+        
+        # Determine GraphML output path
+        onnx_base = Path(onnx_path).stem
+        if graphml_filename:
+            graphml_path = str(Path(onnx_path).parent / graphml_filename)
+        else:
+            graphml_path = str(Path(onnx_path).parent / f"{onnx_base}_canonical.graphml")
+        
+        # Load ONNX model
+        onnx_model = onnx.load(onnx_path)
+        
+        # Create HTP metadata structure
+        htp_metadata = {
+            "hierarchy_data": self._hierarchy_data,
+            "tagged_nodes": self._tagged_nodes,
+            "export_info": {
+                "strategy": "htp",
+                "export_timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            },
+            "statistics": self._export_stats
+        }
+        
+        # Generate GraphML
+        self._create_canonical_graphml_internal(onnx_model, htp_metadata, graphml_path)
+        
+        return graphml_path
+
+    def _create_canonical_graphml_internal(self, onnx_model: onnx.ModelProto, htp_metadata: dict, output_path: str) -> None:
+        """Internal method to create GraphML from ONNX model and HTP metadata."""
+        # Create GraphML structure
+        graphml_root = self._create_graphml_root()
+        self._define_attribute_keys(graphml_root)
+        
+        # Build hierarchical graph
+        root_graph = self._build_hierarchical_graph(onnx_model.graph, htp_metadata)
+        
+        # Add source file metadata to root graph
+        self._add_data_element(root_graph, "m0", Path(output_path).name.replace("_canonical.graphml", ".onnx"))
+        self._add_data_element(root_graph, "m1", "htp_metadata")
+        
+        graphml_root.append(root_graph)
+        
+        # Write output
+        self._write_formatted_xml(graphml_root, output_path)
+
+    def _create_graphml_root(self) -> ET.Element:
+        """Create GraphML root element with namespace declarations."""
+        root = ET.Element("graphml")
+        root.set("xmlns", "http://graphml.graphdrawing.org/xmlns")
+        root.set("xmlns:xsi", "http://www.w3.org/2001/XMLSchema-instance")
+        root.set("xsi:schemaLocation", 
+                 "http://graphml.graphdrawing.org/xmlns "
+                 "http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd")
+        return root
+
+    def _define_attribute_keys(self, root: ET.Element) -> None:
+        """Define GraphML attribute keys for metadata."""
+        key_definitions = [
+            # Graph attributes (for modules/subgraphs)
+            ("d0", "graph", "class_name", "string"),
+            ("d1", "graph", "module_type", "string"), 
+            ("d2", "graph", "execution_order", "int"),
+            ("d3", "graph", "traced_tag", "string"),
+            
+            # Node attributes (for ONNX operations)
+            ("n0", "node", "op_type", "string"),
+            ("n1", "node", "hierarchy_tag", "string"),
+            
+            # Edge attributes (for data flow)
+            ("e0", "edge", "tensor_name", "string"),
+            
+            # Metadata attributes
+            ("m0", "graph", "source_onnx", "string"),
+            ("m1", "graph", "source_htp", "string"),
+            ("m2", "graph", "format_version", "string"),
+            ("m3", "graph", "export_timestamp", "string"),
+        ]
+        
+        for key_id, for_element, attr_name, attr_type in key_definitions:
+            key_elem = ET.SubElement(root, "key")
+            key_elem.set("id", key_id)
+            key_elem.set("for", for_element)
+            key_elem.set("attr.name", attr_name)
+            key_elem.set("attr.type", attr_type)
+
+    def _add_data_element(self, parent: ET.Element, key: str, value: str) -> None:
+        """Add data element with key-value pair."""
+        data = ET.SubElement(parent, "data")
+        data.set("key", key)
+        data.text = str(value)
+
+    def _build_hierarchical_graph(self, onnx_graph, htp_data: dict) -> ET.Element:
+        """Build nested GraphML structure from HTP hierarchy."""
+        # Get root module info
+        root_info = htp_data["hierarchy_data"][""]
+        
+        # Create root graph element
+        root_graph = self._create_subgraph("", root_info, root_info.get("class_name", "Model"))
+        
+        # Add root metadata
+        self._add_data_element(root_graph, "m2", "1.0")  # format_version
+        self._add_data_element(root_graph, "m3", datetime.now().isoformat())  # timestamp
+        
+        # Build nested subgraph structure
+        hierarchy_tree = self._build_hierarchy_tree(htp_data["hierarchy_data"])
+        
+        for module_name, module_info in hierarchy_tree.items():
+            subgraph = self._create_subgraph(module_name, module_info)
+            self._insert_subgraph_in_hierarchy(root_graph, subgraph, module_info["parent"])
+        
+        # Add ONNX operation nodes to appropriate subgraphs
+        self._add_onnx_nodes_to_subgraphs(root_graph, onnx_graph, htp_data["tagged_nodes"], htp_data["hierarchy_data"])
+        
+        # Add data flow edges
+        self._add_data_flow_edges(root_graph, onnx_graph)
+        
+        return root_graph
+
+    def _build_hierarchy_tree(self, hierarchy_data: dict) -> dict:
+        """Convert flat HTP hierarchy to tree structure with parent relationships."""
+        tree = {}
+        
+        for module_name, module_info in hierarchy_data.items():
+            if module_name:  # Skip root (empty string)
+                traced_tag = module_info["traced_tag"]
+                parent_tag = self._extract_parent_tag(traced_tag)
+                
+                # Find parent module by matching traced_tag
+                parent_module = self._find_module_by_traced_tag(hierarchy_data, parent_tag)
+                
+                tree[module_name] = {
+                    **module_info,
+                    "parent": parent_module
+                }
+        
+        return tree
+
+    def _extract_parent_tag(self, traced_tag: str) -> str:
+        """Extract parent traced tag from full traced tag path."""
+        if not traced_tag or "/" not in traced_tag or traced_tag.count("/") <= 1:
+            return ""
+        
+        parts = traced_tag.strip('/').split('/')
+        if len(parts) <= 1:
+            return ""
+        
+        return '/' + '/'.join(parts[:-1])
+
+    def _find_module_by_traced_tag(self, hierarchy_data: dict, target_tag: str) -> str | None:
+        """Find module name that has the specified traced_tag."""
+        for module_name, module_info in hierarchy_data.items():
+            if module_info.get("traced_tag") == target_tag:
+                return module_name if module_name else None
+        return None
+
+    def _create_subgraph(self, module_name: str, module_info: dict, graph_id: str = None) -> ET.Element:
+        """Create GraphML subgraph element for a module."""
+        graph = ET.Element("graph")
+        graph.set("id", graph_id or module_name)
+        graph.set("edgedefault", "directed")
+        
+        # Add module metadata
+        self._add_data_element(graph, "d0", module_info.get("class_name", ""))
+        self._add_data_element(graph, "d1", module_info.get("module_type", ""))
+        self._add_data_element(graph, "d2", module_info.get("execution_order", 0))
+        self._add_data_element(graph, "d3", module_info.get("traced_tag", ""))
+        
+        return graph
+
+    def _insert_subgraph_in_hierarchy(self, root_graph: ET.Element, subgraph: ET.Element, parent_module: str | None) -> None:
+        """Insert subgraph into the correct position in the hierarchy."""
+        if not parent_module:
+            # Insert at root level
+            root_graph.append(subgraph)
+        else:
+            # Find parent subgraph and insert there
+            parent_subgraph = self._find_subgraph_by_id(root_graph, parent_module)
+            parent_subgraph.append(subgraph)
+
+    def _find_subgraph_by_id(self, graph: ET.Element, graph_id: str) -> ET.Element:
+        """Recursively find subgraph by ID."""
+        if graph.get("id") == graph_id:
+            return graph
+        
+        # Search in child graphs
+        for child in graph.findall("graph"):
+            result = self._find_subgraph_by_id(child, graph_id)
+            if result is not None:
+                return result
+        
+        return graph  # Return root if not found
+
+    def _add_onnx_nodes_to_subgraphs(self, root_graph: ET.Element, onnx_graph, tagged_nodes: dict, hierarchy_data: dict) -> None:
+        """Assign ONNX operation nodes to their appropriate subgraphs."""
+        for onnx_node in onnx_graph.node:
+            node_name = onnx_node.name
+            # HTP tagged_nodes already include leading slash, so check both formats
+            hierarchy_tag = tagged_nodes.get(f"/{node_name}", tagged_nodes.get(node_name, ""))
+            
+            # Find target subgraph for this node
+            target_subgraph = self._find_target_subgraph(root_graph, hierarchy_tag, hierarchy_data)
+            
+            # Create GraphML node element
+            graphml_node = ET.Element("node")
+            graphml_node.set("id", node_name)
+            
+            # Add node attributes
+            self._add_data_element(graphml_node, "n0", onnx_node.op_type)
+            self._add_data_element(graphml_node, "n1", hierarchy_tag)
+            
+            # Insert into appropriate subgraph
+            target_subgraph.append(graphml_node)
+
+    def _find_target_subgraph(self, root_graph: ET.Element, hierarchy_tag: str, hierarchy_data: dict) -> ET.Element:
+        """Find the most specific subgraph for a node's hierarchy tag."""
+        if not hierarchy_tag:
+            return root_graph
+        
+        # Find the most specific matching module
+        best_match = None
+        best_match_length = 0
+        
+        for module_name, module_info in hierarchy_data.items():
+            module_tag = module_info.get("traced_tag", "")
+            
+            # Check if hierarchy_tag starts with module_tag (is child of module)
+            if module_tag and hierarchy_tag.startswith(module_tag) and module_tag != hierarchy_tag:
+                if len(module_tag) > best_match_length:
+                    best_match = module_name
+                    best_match_length = len(module_tag)
+        
+        if not best_match:
+            return root_graph
+        
+        # Find the subgraph with matching ID
+        return self._find_subgraph_by_id(root_graph, best_match)
+
+    def _add_data_flow_edges(self, root_graph: ET.Element, onnx_graph) -> None:
+        """Add data flow edges between ONNX operation nodes."""
+        # Build tensor producer mapping
+        tensor_producers = {}
+        for node in onnx_graph.node:
+            for output in node.output:
+                tensor_producers[output] = node.name
+        
+        # Create edges
+        for node in onnx_graph.node:
+            for input_tensor in node.input:
+                source_node = tensor_producers.get(input_tensor)
+                if source_node:
+                    edge = ET.Element("edge")
+                    edge.set("source", source_node)
+                    edge.set("target", node.name)
+                    
+                    # Add tensor name as edge attribute
+                    self._add_data_element(edge, "e0", input_tensor)
+                    
+                    root_graph.append(edge)
+
+    def _write_formatted_xml(self, root: ET.Element, output_path: str) -> None:
+        """Write formatted XML to file."""
+        # Create tree and format
+        tree = ET.ElementTree(root)
+        ET.indent(tree, space="  ", level=0)
+        
+        # Write to file
+        tree.write(output_path, encoding="utf-8", xml_declaration=True)
 
 
 # Backward compatibility aliases

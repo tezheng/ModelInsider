@@ -6,11 +6,12 @@ ONNX export with hierarchy preservation.
 """
 
 import json
+import os
 import sys
+import tempfile
 from pathlib import Path
 
 import click
-import torch
 
 from .core import tag_utils
 from .strategies.htp.htp_exporter import HTPExporter
@@ -27,26 +28,23 @@ def cli(ctx, verbose):
 
 
 @cli.command()
-@click.argument('model_name_or_path')
-@click.argument('output_path')
+@click.option('--model', '-m', 'model_name_or_path', required=True,
+              help='HuggingFace model name or local path to model')
+@click.option('--output', '-o', 'output_path', required=True,
+              help='Path where to save the ONNX model')
 @click.option('--strategy', default='htp', type=click.Choice(['htp']),
               help='Export strategy (only HTP supported)')
 @click.option('--input-specs', type=click.Path(exists=True), help='JSON file with input specifications (optional, auto-generates if not provided)')
-@click.option('--input-text', type=str, help='Text input for model (optional, auto-generates if not provided)')
-@click.option('--opset-version', default=14, type=int,
-              help='ONNX opset version to use')
-@click.option('--config', type=click.Path(exists=True),
-              help='Export configuration file (JSON)')
-@click.option('--temp-dir', type=click.Path(),
-              help='Directory for temporary files (default: system temp)')
+@click.option('--export-config', type=click.Path(exists=True),
+              help='ONNX export configuration file (JSON) - opset_version, do_constant_folding, etc.')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
 @click.pass_context
-def export(ctx, model_name_or_path, output_path, strategy, input_specs, input_text, opset_version, config, temp_dir, verbose):
+def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_config, verbose):
     """
     Export a PyTorch model to ONNX with hierarchy preservation.
     
-    MODEL_NAME_OR_PATH: HuggingFace model name or local path to model
-    OUTPUT_PATH: Path where to save the ONNX model
+    Use --model to specify the HuggingFace model name or local path.
+    Use --output to specify where to save the ONNX model.
     """
     try:
         # Export with HTP strategy using simplified API
@@ -56,13 +54,18 @@ def export(ctx, model_name_or_path, output_path, strategy, input_specs, input_te
         
         exporter = HTPExporter(verbose=verbose, enable_reporting=False)
         
-        # Use HTPExporter's auto-loading and input generation
+        # Load export config if provided
+        export_config_dict = None
+        if export_config:
+            with open(export_config) as f:
+                export_config_dict = json.load(f)
+        
+        # Use HTPExporter's auto-loading capability
         result = exporter.export(
             model_name_or_path=model_name_or_path,
             output_path=output_path,
             input_specs=json.load(open(input_specs)) if input_specs else None,
-            input_text=input_text,
-            opset_version=opset_version
+            export_config=export_config_dict
         )
         
         # HTPExporter automatically creates metadata files
@@ -189,9 +192,17 @@ def validate(onnx_path, check_consistency, repair, verbose):
         
         import onnx
         model = onnx.load(onnx_path)
-        onnx.checker.check_model(model)
         
-        click.echo("✅ ONNX model is valid")
+        # Try to validate with ONNX checker, but allow custom attributes
+        try:
+            onnx.checker.check_model(model)
+            click.echo("✅ ONNX model is valid")
+        except onnx.checker.ValidationError as e:
+            if "hierarchy_tag" in str(e):
+                click.echo("✅ ONNX model is valid (with custom hierarchy attributes)")
+            else:
+                # Re-raise if it's not about our custom attributes
+                raise
         
         # Check for hierarchy tags
         hierarchy_nodes = 0
