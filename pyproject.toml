@@ -133,5 +133,6 @@ line-ending = "auto"
 
 [dependency-groups]
 dev = [
+    "graphviz>=0.21",
     "jupyter>=1.1.1",
 ]
