@@ -28,13 +28,22 @@ class TracingHierarchyBuilder:
     - No complex parent tracking needed
     """
 
-    def __init__(self):
+    def __init__(self, exceptions: list[str] | None = None):
+        """
+        Initialize the tracing hierarchy builder.
+        
+        Args:
+            exceptions: List of torch.nn class names to include in hierarchy despite being
+                       torch.nn modules. Passed to should_include_in_hierarchy.
+                       Example: ["Conv2d", "BatchNorm2d"] to include these in hierarchy.
+        """
         self.tag_stack = []
         self.execution_trace = []
         self.operation_context = {}
         self.hooks = []
         self.module_hierarchy = {}  # Only populated for executed modules
         self.traced_modules = set()  # Track which modules were traced
+        self.exceptions = exceptions  # torch.nn exceptions to include
 
     def is_hf_class(self, module: nn.Module) -> bool:
         """Check if a module is a HuggingFace class - UNIVERSAL."""
@@ -49,8 +58,9 @@ class TracingHierarchyBuilder:
         Only include semantically important modules in hierarchy structure.
         """
         # Use should_include_in_hierarchy to filter torch.nn infrastructure modules
-        # This ensures MUST-002 compliance - no torch.nn classes in hierarchy
-        return should_include_in_hierarchy(module)
+        # This ensures MUST-002 compliance - no torch.nn classes in hierarchy by default
+        # But allows exceptions for specific cases where torch.nn modules are needed
+        return should_include_in_hierarchy(module, exceptions=self.exceptions)
 
     def create_pre_hook(self, module_name: str, module: nn.Module):
         """Create pre-forward hook - ultra simple version."""

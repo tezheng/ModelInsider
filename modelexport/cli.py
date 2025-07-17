@@ -37,9 +37,12 @@ def cli(ctx, verbose):
 @click.option('--input-specs', type=click.Path(exists=True), help='JSON file with input specifications (optional, auto-generates if not provided)')
 @click.option('--export-config', type=click.Path(exists=True),
               help='ONNX export configuration file (JSON) - opset_version, do_constant_folding, etc.')
+@click.option('--enable-reporting', is_flag=True, help='Enable detailed HTP export reporting')
+@click.option('--no-hierarchy-attrs', '--clean-onnx', is_flag=True, help='Disable hierarchy_tag attributes in ONNX nodes (cleaner but loses traceability)')
+@click.option('--include-torch-nn', is_flag=True, help='Include torch.nn children of HF modules in hierarchy (needed for ResNet-like models)')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
 @click.pass_context
-def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_config, verbose):
+def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_config, enable_reporting, no_hierarchy_attrs, include_torch_nn, verbose):
     """
     Export a PyTorch model to ONNX with hierarchy preservation.
     
@@ -52,7 +55,12 @@ def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_c
             click.echo(f"🔄 Loading model and exporting: {model_name_or_path}")
             click.echo(f"🧠 Using {strategy.upper()} (Hierarchical Trace-and-Project) strategy")
         
-        exporter = HTPExporter(verbose=verbose, enable_reporting=False)
+        exporter = HTPExporter(
+            verbose=verbose, 
+            enable_reporting=enable_reporting,
+            embed_hierarchy_attributes=not no_hierarchy_attrs,
+            include_torch_nn_children=include_torch_nn
+        )
         
         # Load export config if provided
         export_config_dict = None
@@ -70,27 +78,25 @@ def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_c
         
         # HTPExporter automatically creates metadata files
         
-        # Output results
-        click.echo("✅ Export completed successfully!")
-        click.echo(f"   ONNX Output: {output_path}")
-        click.echo(f"   Metadata: {result.get('metadata_path', output_path.replace('.onnx', '_htp_metadata.json'))}")
-        if 'onnx_nodes' in result:
-            click.echo(f"   Total operations: {result['onnx_nodes']}")
-        if 'tagged_nodes' in result:
-            click.echo(f"   Tagged operations: {result['tagged_nodes']}")
-        if 'coverage_percentage' in result:
-            click.echo(f"   Coverage: {result['coverage_percentage']}%")
-        click.echo(f"   Strategy: {result['strategy']}")
+        # Output results only when verbose is off
+        # (When verbose is on, HTPExporter already prints detailed summary)
+        if not verbose:
+            click.echo("✅ Export completed successfully!")
+            click.echo(f"   ONNX Output: {output_path}")
+            click.echo(f"   Metadata: {result.get('metadata_path', output_path.replace('.onnx', '_htp_metadata.json'))}")
+            if 'onnx_nodes' in result:
+                click.echo(f"   Total operations: {result['onnx_nodes']}")
+            if 'tagged_nodes' in result:
+                click.echo(f"   Tagged operations: {result['tagged_nodes']}")
+            if 'coverage_percentage' in result:
+                click.echo(f"   Coverage: {result['coverage_percentage']}%")
+            click.echo(f"   Strategy: {result['strategy']}")
+            
+            # Show report file if reporting was enabled
+            if enable_reporting:
+                report_path = output_path.replace('.onnx', '_htp_export_report.txt')
+                click.echo(f"   Report: {report_path}")
         
-        if verbose:
-            # Show tag statistics
-            try:
-                stats = tag_utils.get_tag_statistics(output_path)
-                click.echo("\nTag Distribution:")
-                for tag, count in sorted(stats.items(), key=lambda x: x[1], reverse=True)[:5]:
-                    click.echo(f"   {tag}: {count} operations")
-            except Exception as e:
-                click.echo(f"Warning: Tag statistics unavailable: {e}", err=True)
         
     except Exception as e:
         import sys
