@@ -30,6 +30,7 @@ from rich.text import Text
 from rich.tree import Tree
 
 from ...core.onnx_node_tagger import create_node_tagger_from_hierarchy
+from ...core.onnx_utils import infer_output_names
 from ...core.tracing_hierarchy_builder import TracingHierarchyBuilder
 
 logger = logging.getLogger(__name__)
@@ -68,7 +69,7 @@ class HTPConfig:
         "onnx_nodes": 0,
         "tagged_nodes": 0,
         "empty_tags": sys.maxsize,  # CARDINAL RULE: Must be 0, default to max int to catch violations
-        "coverage_percentage": 100.0,
+        "coverage_percentage": 0.0,  # Will be calculated based on actual tagging
         "strategy": STRATEGY_NAME,
     }
 
@@ -147,6 +148,13 @@ class HTPExporter:
         """Print to console (if verbose) AND write to report (if enabled)."""
         self._print_console(message)
         self._print_report(message)
+
+    def _print_section_header(self, header_text: str) -> None:
+        """Print a formatted section header."""
+        self._output_message("")
+        self._output_message("=" * HTPConfig.SEPARATOR_LENGTH)
+        self._output_message(header_text)
+        self._output_message("=" * HTPConfig.SEPARATOR_LENGTH)
 
     def export(
         self,
@@ -252,10 +260,7 @@ class HTPExporter:
 
     def _print_model_preparation(self, model: nn.Module, output_path: str) -> None:
         """Print Step 1: Model Preparation."""
-        self._output_message("")
-        self._output_message("=" * 80)
-        self._output_message("📋 STEP 1/8: MODEL PREPARATION")
-        self._output_message("=" * 80)
+        self._print_section_header("📋 STEP 1/8: MODEL PREPARATION")
 
         # Count modules and parameters
         module_count = len(list(model.modules()))
@@ -272,10 +277,7 @@ class HTPExporter:
         self, model_name_or_path: str, input_specs: dict | None
     ) -> None:
         """Print Step 2: Input Generation & Validation."""
-        self._output_message("")
-        self._output_message("=" * 80)
-        self._output_message("🔧 STEP 2/8: INPUT GENERATION & VALIDATION")
-        self._output_message("=" * 80)
+        self._print_section_header("🔧 STEP 2/8: INPUT GENERATION & VALIDATION")
 
         if input_specs:
             self._output_message("📝 Using provided input specifications")
@@ -327,10 +329,7 @@ class HTPExporter:
 
     def _print_hierarchy_building(self) -> None:
         """Print Step 3: Hierarchy Building."""
-        self._output_message("")
-        self._output_message("=" * 80)
-        self._output_message("🏗️ STEP 3/8: HIERARCHY BUILDING")
-        self._output_message("=" * 80)
+        self._print_section_header("🏗️ STEP 3/8: HIERARCHY BUILDING")
         self._output_message(
             "✅ Hierarchy building completed with TracingHierarchyBuilder"
         )
@@ -409,7 +408,7 @@ class HTPExporter:
         self, parent_path: str, hierarchy_data: dict
     ) -> list[tuple[str, dict]]:
         """Find immediate children - paths that have exactly one more level than parent.
-        
+
         This universal implementation handles any module hierarchy pattern, including:
         - Simple children: parent.child
         - Numbered patterns: parent.layer.0, parent.blocks.1
@@ -430,7 +429,7 @@ class HTPExporter:
                 if path.startswith(parent_path + "."):
                     # Extract the portion after parent path
                     child_suffix = path[len(parent_path + ".") :]
-                    
+
                     # Check if this is an immediate child
                     # Two cases:
                     # 1. No dots in suffix -> direct child (e.g., "encoder" -> "encoder.layer")
@@ -448,10 +447,6 @@ class HTPExporter:
                             immediate_children.append((path, info))
 
         return immediate_children
-
-    def _get_filename(self, file_path: str) -> str:
-        """Extract filename from file path."""
-        return Path(file_path).name
 
     def _calculate_percentage(self, part: int, total: int) -> float:
         """Calculate percentage with zero-division protection."""
@@ -567,10 +562,7 @@ class HTPExporter:
 
     def _print_onnx_export(self, output_path: str, export_kwargs: dict) -> None:
         """Print Step 4: ONNX Export."""
-        self._output_message("")
-        self._output_message("=" * 80)
-        self._output_message("📦 STEP 4/8: ONNX EXPORT")
-        self._output_message("=" * 80)
+        self._print_section_header("📦 STEP 4/8: ONNX EXPORT")
         self._output_message(f"🎯 Target file: {output_path}")
         self._output_message("⚙️ Export config:")
 
@@ -587,10 +579,7 @@ class HTPExporter:
 
     def _print_node_tagger_creation(self, enable_operation_fallback: bool) -> None:
         """Print Step 5: Node Tagger Creation."""
-        self._output_message("")
-        self._output_message("=" * 80)
-        self._output_message("🏷️ STEP 5/8: NODE TAGGER CREATION")
-        self._output_message("=" * 80)
+        self._print_section_header("🏷️ STEP 5/8: NODE TAGGER CREATION")
         self._output_message("✅ Node tagger created successfully")
         if hasattr(self, "_node_tagger") and self._node_tagger:
             self._output_message(
@@ -602,18 +591,16 @@ class HTPExporter:
 
     def _print_node_tagging(self, onnx_model: onnx.ModelProto) -> None:
         """Print Step 6: ONNX Node Tagging."""
-        self._output_message("")
-        self._output_message("=" * 80)
-        self._output_message("🔗 STEP 6/8: ONNX NODE TAGGING")
-        self._output_message("=" * 80)
+        self._print_section_header("🔗 STEP 6/8: ONNX NODE TAGGING")
         self._output_message("✅ Node tagging completed successfully")
 
         # Show statistics
-        total_nodes = len(self._tagged_nodes) if self._tagged_nodes else 0
-        coverage = (total_nodes / total_nodes * 100) if total_nodes > 0 else 0
+        total_onnx_nodes = len(onnx_model.graph.node)
+        tagged_nodes = len(self._tagged_nodes) if self._tagged_nodes else 0
+        coverage = (tagged_nodes / total_onnx_nodes * 100) if total_onnx_nodes > 0 else 0
 
         self._output_message(f"📈 Coverage: {coverage:.1f}%")
-        self._output_message(f"📊 Tagged nodes: {total_nodes}/{total_nodes}")
+        self._output_message(f"📊 Tagged nodes: {tagged_nodes}/{total_onnx_nodes}")
 
         # Show detailed stats
         if hasattr(self, "_tagging_stats") and self._tagging_stats:
@@ -622,16 +609,21 @@ class HTPExporter:
             root = self._tagging_stats.get("root_fallbacks", 0)
 
             self._output_message(
-                f"   • Direct matches: {direct} ({self._calculate_percentage(direct, total_nodes):.1f}%)"
+                f"   • Direct matches: {direct} ({self._calculate_percentage(direct, total_onnx_nodes):.1f}%)"
             )
             self._output_message(
-                f"   • Parent matches: {parent} ({self._calculate_percentage(parent, total_nodes):.1f}%)"
+                f"   • Parent matches: {parent} ({self._calculate_percentage(parent, total_onnx_nodes):.1f}%)"
             )
             self._output_message(
-                f"   • Root fallbacks: {root} ({self._calculate_percentage(root, total_nodes):.1f}%)"
+                f"   • Root fallbacks: {root} ({self._calculate_percentage(root, total_onnx_nodes):.1f}%)"
             )
 
-        self._output_message("✅ Empty tags: 0 (CARDINAL RULE: MUST BE 0)")
+        # Show empty tags count
+        empty_tags = self._export_stats.get("empty_tags", 0)
+        if empty_tags == 0:
+            self._output_message("✅ Empty tags: 0")
+        else:
+            self._output_message(f"❌ Empty tags: {empty_tags}")
 
         # Print Top 20 Nodes by Hierarchy
         self._print_top_nodes_by_hierarchy()
@@ -682,17 +674,12 @@ class HTPExporter:
 
     def _print_tag_injection(self, output_path: str) -> None:
         """Print Step 7: Tag Injection."""
-        self._output_message("")
-        self._output_message("=" * 80)
-        self._output_message("🏷️ STEP 7/8: TAG INJECTION")
-        self._output_message("=" * 80)
+        self._print_section_header("🏷️ STEP 7/8: TAG INJECTION")
 
         if self.embed_hierarchy_attributes:
             self._output_message("🏷️ Hierarchy tag attributes: enabled")
             self._output_message("✅ Tags injected into ONNX model successfully")
-            self._output_message(
-                f"📄 Updated ONNX file: {output_path}"
-            )
+            self._output_message(f"📄 Updated ONNX file: {output_path}")
         else:
             self._output_message(
                 "🏷️ Hierarchy tag attributes: disabled by --no-hierarchy-attrs/--clean-onnx"
@@ -700,19 +687,13 @@ class HTPExporter:
 
     def _print_metadata_generation(self, metadata_path: str) -> None:
         """Print Step 8: Metadata Generation."""
-        self._output_message("")
-        self._output_message("=" * 80)
-        self._output_message("📄 STEP 8/8: METADATA GENERATION")
-        self._output_message("=" * 80)
+        self._print_section_header("📄 STEP 8/8: METADATA GENERATION")
         self._output_message("✅ Metadata file created successfully")
         self._output_message(f"📄 Metadata file: {metadata_path}")
 
     def _print_final_summary(self, output_path: str, metadata_path: str) -> None:
         """Print final export summary."""
-        self._output_message("")
-        self._output_message("=" * 80)
-        self._output_message("📋 FINAL EXPORT SUMMARY")
-        self._output_message("=" * 80)
+        self._print_section_header("📋 FINAL EXPORT SUMMARY")
         self._output_message(
             f"🎉 HTP Export completed successfully in {self._export_stats['export_time']:.2f}s!"
         )
@@ -769,15 +750,28 @@ class HTPExporter:
         if self.include_torch_nn_children:
             # Common torch.nn modules that might be children of HF modules
             exceptions = [
-                "Conv1d", "Conv2d", "Conv3d",
-                "BatchNorm1d", "BatchNorm2d", "BatchNorm3d",
-                "Linear", "Embedding",
-                "ReLU", "GELU", "Tanh", "Sigmoid",
-                "Dropout", "LayerNorm",
-                "MaxPool1d", "MaxPool2d", "MaxPool3d",
-                "AvgPool1d", "AvgPool2d", "AvgPool3d",
+                "Conv1d",
+                "Conv2d",
+                "Conv3d",
+                "BatchNorm1d",
+                "BatchNorm2d",
+                "BatchNorm3d",
+                "Linear",
+                "Embedding",
+                "ReLU",
+                "GELU",
+                "Tanh",
+                "Sigmoid",
+                "Dropout",
+                "LayerNorm",
+                "MaxPool1d",
+                "MaxPool2d",
+                "MaxPool3d",
+                "AvgPool1d",
+                "AvgPool2d",
+                "AvgPool3d",
             ]
-        
+
         self._hierarchy_builder = TracingHierarchyBuilder(exceptions=exceptions)
 
         # Convert inputs
@@ -797,7 +791,7 @@ class HTPExporter:
     ) -> None:
         """Export to ONNX internally."""
         import warnings
-        
+
         # Filter out non-ONNX export keys
         filtered_kwargs = {
             k: v
@@ -810,48 +804,36 @@ class HTPExporter:
                 "input_generation_kwargs",
             }
         }
-        
+
         # Handle input/output names for Optimum compatibility
-        if "input_names" not in filtered_kwargs and isinstance(self.example_inputs, dict):
+        if "input_names" not in filtered_kwargs and isinstance(
+            self.example_inputs, dict
+        ):
             filtered_kwargs["input_names"] = list(self.example_inputs.keys())
-        
+
         # Universal output naming: Only try to infer names if not already provided
         # This approach is model-agnostic and doesn't hardcode any specific names
         if "output_names" not in filtered_kwargs:
-            try:
-                # Try to get output structure for naming
-                with torch.no_grad():
-                    outputs = model(**self.example_inputs if isinstance(self.example_inputs, dict) else self.example_inputs)
-                
-                # Universal extraction from ModelOutput dataclasses
-                if hasattr(outputs, "__dataclass_fields__"):
-                    # Extract field names for simple tensor outputs only
-                    # Complex outputs (tuples, lists) will use ONNX default names
-                    output_names = []
-                    for field_name in outputs.__dataclass_fields__:
-                        field_value = getattr(outputs, field_name, None)
-                        if field_value is not None and isinstance(field_value, torch.Tensor):
-                            output_names.append(field_name)
-                    
-                    # Only set if we found simple tensor outputs
-                    # This avoids issues with complex outputs like GPT2's past_key_values
-                    if output_names:
-                        filtered_kwargs["output_names"] = output_names
-            except Exception:
-                # If inference fails for any reason, just skip output naming
-                # ONNX export will use default names
-                pass
+            # Get outputs from the tracing hierarchy builder to avoid duplicate execution
+            outputs = self._hierarchy_builder.get_outputs() if self._hierarchy_builder else None
+            
+            # Use the universal utility function to infer output names
+            output_names = infer_output_names(outputs)
+            if output_names:
+                filtered_kwargs["output_names"] = output_names
 
         # Convert inputs to tuple for ONNX export if needed
         if isinstance(self.example_inputs, dict):
             example_inputs_tuple = tuple(self.example_inputs.values())
         else:
             example_inputs_tuple = self.example_inputs
-        
+
         # Suppress TracerWarnings during export
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=torch.jit.TracerWarning)
-            torch.onnx.export(model, example_inputs_tuple, output_path, **filtered_kwargs)
+            torch.onnx.export(
+                model, example_inputs_tuple, output_path, **filtered_kwargs
+            )
 
     def _initialize_node_tagger(self, enable_operation_fallback: bool) -> None:
         """Create node tagger internally."""
@@ -872,8 +854,16 @@ class HTPExporter:
         # Update export stats
         self._export_stats["onnx_nodes"] = len(onnx_model.graph.node)
         self._export_stats["tagged_nodes"] = len(self._tagged_nodes)
-        self._export_stats["empty_tags"] = 0  # We guarantee no empty tags
-        self._export_stats["coverage_percentage"] = 100.0
+        
+        # Calculate empty tags (should be 0 with our implementation)
+        empty_tag_count = sum(1 for tag in self._tagged_nodes.values() if not tag or not tag.strip())
+        self._export_stats["empty_tags"] = empty_tag_count
+        
+        # Calculate coverage percentage
+        total_nodes = len(onnx_model.graph.node)
+        tagged_nodes = len(self._tagged_nodes)
+        coverage = (tagged_nodes / total_nodes * 100.0) if total_nodes > 0 else 0.0
+        self._export_stats["coverage_percentage"] = coverage
 
     def _embed_tags_in_onnx(
         self, output_path: str, onnx_model: onnx.ModelProto
@@ -887,11 +877,8 @@ class HTPExporter:
                     tag = self._tagged_nodes[node_name]
                     metadata_attr = onnx.helper.make_attribute("hierarchy_tag", tag)
                     node.attribute.append(metadata_attr)
-        else:
-            pass  # Skipping hierarchy_tag attributes
-
-        # Save model
-        onnx.save(onnx_model, output_path)
+            # Save model
+            onnx.save(onnx_model, output_path)
 
     def _generate_metadata_file(
         self, output_path: str, metadata_filename: str | None
@@ -906,8 +893,8 @@ class HTPExporter:
 
         metadata = {
             "export_info": {
-                "onnx_file": self._get_filename(output_path),
-                "exporter": "HTP_Exporter",
+                "onnx_file": Path(output_path).name,
+                "exporter": self.__class__.__name__,
                 "strategy": self.strategy,
                 "export_timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
                 "embed_hierarchy_attributes": self.embed_hierarchy_attributes,
@@ -927,8 +914,8 @@ class HTPExporter:
             else {},
             "quality_guarantees": {
                 "no_hardcoded_logic": "Universal module tracking via TracingHierarchyBuilder",
-                "no_empty_tags_guarantee": "All nodes have non-empty hierarchy tags",
-                "coverage_guarantee": "100% node coverage with proper fallbacks",
+                "no_empty_tags_guarantee": f"Empty tags: {self._export_stats.get('empty_tags', 'unknown')}",
+                "coverage_guarantee": f"Node coverage: {self._export_stats.get('coverage_percentage', 0):.1f}% with proper fallbacks",
             },
         }
 
