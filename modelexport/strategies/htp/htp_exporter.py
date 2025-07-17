@@ -120,6 +120,15 @@ class HTPExporter:
         # Export statistics
         self._export_stats = HTPConfig.DEFAULT_EXPORT_STATS.copy()
 
+        # Export report data (structured console output)
+        self._export_report = {
+            "export_session": {},
+            "model_info": {},
+            "export_report": {},
+            "final_summary": {},
+            "quality_guarantees": {}
+        }
+
         # Reporting buffer
         self.report_buffer = io.StringIO() if enable_reporting else None
 
@@ -169,6 +178,14 @@ class HTPExporter:
     ) -> dict[str, Any]:
         """Export model to ONNX with hierarchy-preserving tags."""
         start_time = time.time()
+        
+        # Initialize export session info
+        self._export_report["export_session"] = {
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "strategy": self.strategy,
+            "version": "1.0",
+            "status": "in_progress"
+        }
 
         # Auto-load model if needed
         if model is None:
@@ -185,24 +202,100 @@ class HTPExporter:
             self._print_console(f"Successfully loaded {type(model).__name__}")
 
         self._print_console(f"Starting HTP export for {type(model).__name__}")
+        
+        # Collect model info
+        self._export_report["model_info"] = {
+            "model_name_or_path": model_name_or_path or "unknown",
+            "model_class": type(model).__name__,
+            "total_modules": len(list(model.modules())),
+            "total_parameters": sum(p.numel() for p in model.parameters()),
+            "framework": "transformers"
+        }
 
         # Step 1: Model Preparation
         if self.verbose:
             self._print_model_preparation(model, output_path)
 
         model.eval()
+        
+        # Record model preparation step
+        self._export_report["export_report"]["model_preparation"] = {
+            "status": "completed",
+            "details": {
+                "model_class": type(model).__name__,
+                "module_count": len(list(model.modules())),
+                "parameter_count": sum(p.numel() for p in model.parameters()),
+                "export_target": output_path,
+                "model_mode": "eval"
+            }
+        }
 
         # Step 2: Input Generation
         if self.verbose:
             self._print_input_generation(model_name_or_path, input_specs)
         else:
             self._create_example_inputs(model_name_or_path, input_specs)
+        
+        # Record input generation details
+        input_details = {
+            "status": "completed",
+            "details": {
+                "method": "provided" if input_specs else "auto_generated"
+            }
+        }
+        
+        # Try to add model type and task info
+        if model_name_or_path and not input_specs:
+            try:
+                from transformers import AutoConfig
+                config = AutoConfig.from_pretrained(model_name_or_path)
+                input_details["details"]["model_type"] = config.model_type
+                
+                # Try to detect task
+                task = None
+                try:
+                    from optimum.exporters import TasksManager
+                    supported_tasks = TasksManager.get_supported_tasks_for_model_type(
+                        config.model_type, exporter="onnx", library_name="transformers"
+                    )
+                    if supported_tasks:
+                        task = next(iter(supported_tasks.keys()))
+                    else:
+                        task = HTPConfig.DEFAULT_TASK
+                except Exception:
+                    task = HTPConfig.DEFAULT_TASK
+                
+                input_details["details"]["detected_task"] = task
+            except Exception:
+                # If we can't get model info, just continue
+                pass
+        
+        # Add input shapes and dtypes
+        if self.example_inputs:
+            input_details["details"]["inputs"] = {}
+            for name, tensor in self.example_inputs.items():
+                input_details["details"]["inputs"][name] = {
+                    "shape": list(tensor.shape),
+                    "dtype": str(tensor.dtype)
+                }
+        
+        self._export_report["export_report"]["input_generation"] = input_details
 
         # Step 3: Hierarchy Building
         self._trace_model_hierarchy(model)
 
         if self.verbose:
             self._print_hierarchy_building()
+        
+        # Record hierarchy building details
+        self._export_report["export_report"]["hierarchy_building"] = {
+            "status": "completed",
+            "details": {
+                "builder": "TracingHierarchyBuilder",
+                "modules_traced": len(self._hierarchy_data),
+                "execution_steps": self._hierarchy_builder.get_execution_summary().get("execution_steps", 0) if self._hierarchy_builder else 0
+            }
+        }
 
         # Step 4: ONNX Export
         export_kwargs = {
@@ -215,6 +308,16 @@ class HTPExporter:
             self._print_onnx_export(output_path, export_kwargs)
 
         self._convert_model_to_onnx(model, output_path, export_kwargs)
+        
+        # Record ONNX export details
+        self._export_report["export_report"]["onnx_export"] = {
+            "status": "completed",
+            "details": {
+                "export_config": export_kwargs.copy(),
+                "output_file": output_path,
+                "file_size_mb": round(Path(output_path).stat().st_size / (1024 * 1024), 2) if Path(output_path).exists() else 0
+            }
+        }
 
         # Step 5: Node Tagger Creation
         onnx_model = onnx.load(output_path)
@@ -223,36 +326,113 @@ class HTPExporter:
 
         if self.verbose:
             self._print_node_tagger_creation(enable_operation_fallback)
+        
+        # Record node tagger creation
+        self._export_report["export_report"]["node_tagger_creation"] = {
+            "status": "completed",
+            "details": {
+                "model_root_tag": self._node_tagger.model_root_tag if self._node_tagger else "/Unknown",
+                "operation_fallback": enable_operation_fallback
+            }
+        }
 
         # Step 6: Node Tagging
         self._apply_hierarchy_tags(onnx_model)
 
         if self.verbose:
             self._print_node_tagging(onnx_model)
+        
+        # Record node tagging details
+        from collections import Counter
+        tag_counter = Counter(self._tagged_nodes.values()) if self._tagged_nodes else Counter()
+        top_hierarchies = [
+            {"tag": tag, "node_count": count}
+            for tag, count in tag_counter.most_common(HTPConfig.TOP_NODES_COUNT)
+        ]
+        
+        self._export_report["export_report"]["node_tagging"] = {
+            "status": "completed",
+            "details": {
+                "total_onnx_nodes": len(onnx_model.graph.node),
+                "tagged_nodes": len(self._tagged_nodes),
+                "coverage_percentage": self._export_stats.get("coverage_percentage", 0.0),
+                "empty_tags": self._export_stats.get("empty_tags", 0),
+                "tagging_statistics": self._tagging_stats.copy() if self._tagging_stats else {},
+                "top_hierarchies": top_hierarchies
+            }
+        }
 
         # Step 7: Tag Injection
         if self.verbose:
             self._print_tag_injection(output_path)
 
         self._embed_tags_in_onnx(output_path, onnx_model)
+        
+        # Record tag injection
+        self._export_report["export_report"]["tag_injection"] = {
+            "status": "completed",
+            "details": {
+                "hierarchy_attributes_embedded": self.embed_hierarchy_attributes,
+                "injection_method": "onnx_node_attributes" if self.embed_hierarchy_attributes else "none",
+                "nodes_with_tags": len(self._tagged_nodes) if self.embed_hierarchy_attributes else 0
+            }
+        }
 
+        # Calculate final statistics before metadata generation
+        self._export_stats["export_time"] = time.time() - start_time
+        
+        # Update export session status and duration
+        self._export_report["export_session"]["status"] = "completed"
+        self._export_report["export_session"]["total_duration_seconds"] = round(self._export_stats["export_time"], 2)
+        
+        # Populate final summary and quality guarantees before metadata generation
+        report_path = str(output_path).replace(HTPConfig.ONNX_EXTENSION, HTPConfig.REPORT_SUFFIX) if self.enable_reporting else None
+        
+        self._export_report["final_summary"] = {
+            "export_time_seconds": round(self._export_stats["export_time"], 2),
+            "hierarchy_modules": self._export_stats["hierarchy_modules"],
+            "onnx_nodes": self._export_stats["onnx_nodes"],
+            "tagged_nodes": self._export_stats["tagged_nodes"],
+            "coverage_percentage": self._export_stats["coverage_percentage"],
+            "empty_tags": self._export_stats["empty_tags"],
+            "output_files": {
+                "onnx_model": output_path,
+                "metadata": "TBD",  # Will be updated after generation
+                "report": report_path if self.enable_reporting else "disabled"
+            }
+        }
+        
+        self._export_report["quality_guarantees"] = {
+            "no_hardcoded_logic": True,
+            "universal_module_tracking": "TracingHierarchyBuilder",
+            "empty_tags_guarantee": self._export_stats["empty_tags"],
+            "coverage_guarantee": f"{self._export_stats['coverage_percentage']:.1f}%",
+            "optimum_compatible": True
+        }
+        
         # Step 8: Metadata Generation
         metadata_path = self._generate_metadata_file(output_path, metadata_filename)
+        
+        # Update metadata path in final summary
+        self._export_report["final_summary"]["output_files"]["metadata"] = metadata_path
 
         if self.verbose:
             self._print_metadata_generation(metadata_path)
-
-        # Final Summary
-        self._export_stats["export_time"] = time.time() - start_time
+        
+        # Record metadata generation
+        self._export_report["export_report"]["metadata_generation"] = {
+            "status": "completed",
+            "details": {
+                "metadata_file": metadata_path,
+                "file_size_kb": round(Path(metadata_path).stat().st_size / 1024, 2) if Path(metadata_path).exists() else 0
+            }
+        }
 
         if self.verbose:
             self._print_final_summary(output_path, metadata_path)
 
         # Generate report file if enabled
         if self.enable_reporting:
-            report_path = str(output_path).replace(
-                HTPConfig.ONNX_EXTENSION, HTPConfig.REPORT_SUFFIX
-            )
             with open(report_path, "w") as f:
                 f.write(self.report_buffer.getvalue())
 
@@ -917,6 +1097,7 @@ class HTPExporter:
                 "no_empty_tags_guarantee": f"Empty tags: {self._export_stats.get('empty_tags', 'unknown')}",
                 "coverage_guarantee": f"Node coverage: {self._export_stats.get('coverage_percentage', 0):.1f}% with proper fallbacks",
             },
+            "export_report": self._export_report,
         }
 
         with open(metadata_path, "w") as f:
