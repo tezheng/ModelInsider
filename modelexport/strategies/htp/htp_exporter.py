@@ -810,11 +810,48 @@ class HTPExporter:
                 "input_generation_kwargs",
             }
         }
+        
+        # Handle input/output names for Optimum compatibility
+        if "input_names" not in filtered_kwargs and isinstance(self.example_inputs, dict):
+            filtered_kwargs["input_names"] = list(self.example_inputs.keys())
+        
+        # Universal output naming: Only try to infer names if not already provided
+        # This approach is model-agnostic and doesn't hardcode any specific names
+        if "output_names" not in filtered_kwargs:
+            try:
+                # Try to get output structure for naming
+                with torch.no_grad():
+                    outputs = model(**self.example_inputs if isinstance(self.example_inputs, dict) else self.example_inputs)
+                
+                # Universal extraction from ModelOutput dataclasses
+                if hasattr(outputs, "__dataclass_fields__"):
+                    # Extract field names for simple tensor outputs only
+                    # Complex outputs (tuples, lists) will use ONNX default names
+                    output_names = []
+                    for field_name in outputs.__dataclass_fields__:
+                        field_value = getattr(outputs, field_name, None)
+                        if field_value is not None and isinstance(field_value, torch.Tensor):
+                            output_names.append(field_name)
+                    
+                    # Only set if we found simple tensor outputs
+                    # This avoids issues with complex outputs like GPT2's past_key_values
+                    if output_names:
+                        filtered_kwargs["output_names"] = output_names
+            except Exception:
+                # If inference fails for any reason, just skip output naming
+                # ONNX export will use default names
+                pass
 
+        # Convert inputs to tuple for ONNX export if needed
+        if isinstance(self.example_inputs, dict):
+            example_inputs_tuple = tuple(self.example_inputs.values())
+        else:
+            example_inputs_tuple = self.example_inputs
+        
         # Suppress TracerWarnings during export
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=torch.jit.TracerWarning)
-            torch.onnx.export(model, self.example_inputs, output_path, **filtered_kwargs)
+            torch.onnx.export(model, example_inputs_tuple, output_path, **filtered_kwargs)
 
     def _initialize_node_tagger(self, enable_operation_fallback: bool) -> None:
         """Create node tagger internally."""
