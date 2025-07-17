@@ -77,9 +77,9 @@ class BaseHierarchyExporter(ABC):
         return self._export_stats.copy()
 
 
-def should_tag_module(module: torch.nn.Module, exceptions: list[str] | None = None) -> bool:
+def should_include_in_hierarchy(module: torch.nn.Module, exceptions: list[str] | None = None) -> bool:
     """
-    Determine if a module should be tagged in the hierarchy based on semantic importance.
+    Determine if a module should be included in the hierarchy structure.
     
     Filters out torch.nn infrastructure modules while preserving semantically important ones.
     
@@ -89,25 +89,29 @@ def should_tag_module(module: torch.nn.Module, exceptions: list[str] | None = No
                    If None, uses default exceptions: [] (MUST-002 compliance)
         
     Returns:
-        True if module should be tagged in hierarchy, False otherwise
+        True if module should be included in hierarchy, False otherwise
         
     Examples:
         >>> # HuggingFace modules - always included
-        >>> should_tag_module(bert_embeddings)  # BertEmbeddings -> True
-        >>> should_tag_module(bert_attention)   # BertAttention -> True
+        >>> should_include_in_hierarchy(bert_embeddings)  # BertEmbeddings -> True
+        >>> should_include_in_hierarchy(bert_attention)   # BertAttention -> True
         
         >>> # torch.nn modules - excluded by default (MUST-002)
-        >>> should_tag_module(layer_norm)       # LayerNorm -> False
+        >>> should_include_in_hierarchy(layer_norm)       # LayerNorm -> False
         
         >>> # torch.nn infrastructure - excluded
-        >>> should_tag_module(embedding)        # Embedding -> False
-        >>> should_tag_module(dropout)          # Dropout -> False  
-        >>> should_tag_module(relu)            # ReLU -> False
-        >>> should_tag_module(linear)          # Linear -> False
+        >>> should_include_in_hierarchy(embedding)        # Embedding -> False
+        >>> should_include_in_hierarchy(dropout)          # Dropout -> False  
+        >>> should_include_in_hierarchy(relu)            # ReLU -> False
+        >>> should_include_in_hierarchy(linear)          # Linear -> False
         
         >>> # Custom exceptions
-        >>> should_tag_module(embedding, exceptions=["LayerNorm", "Embedding"])  # Embedding -> True
+        >>> should_include_in_hierarchy(embedding, exceptions=["LayerNorm", "Embedding"])  # Embedding -> True
     """
+    # Input validation
+    if not isinstance(module, torch.nn.Module):
+        raise TypeError(f"Expected torch.nn.Module, got {type(module)}")
+    
     # Default exception for semantically important torch.nn modules
     if exceptions is None:
         exceptions = []  # MUST-002: No torch.nn classes should appear in hierarchy tags
@@ -173,7 +177,7 @@ def build_hierarchy_path(model_root: torch.nn.Module, module_path: str, all_modu
             class_name = module.__class__.__name__
             
             # MUST-002: Filter out torch.nn modules from hierarchy paths
-            if should_tag_module(module):
+            if should_include_in_hierarchy(module):
                 # Handle numeric indices in the path (e.g., "layer.0" -> "BertLayer.0")
                 if i > 0 and path_parts[i-1] in ['layer'] and part.isdigit():
                     # Previous part was "layer" and current part is a number

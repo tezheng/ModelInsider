@@ -87,6 +87,7 @@ class HTPExporter:
         verbose: bool = False,
         enable_reporting: bool = False,
         embed_hierarchy_attributes: bool = True,
+        include_torch_nn_children: bool = False,
     ):
         """
         Initialize HTP exporter.
@@ -96,10 +97,13 @@ class HTPExporter:
             enable_reporting: Enable report file generation
             embed_hierarchy_attributes: Whether to embed hierarchy_tag attributes in ONNX
                                        (disabled by --clean-onnx or --no-hierarchy-attrs)
+            include_torch_nn_children: Include torch.nn children of HF modules in hierarchy
+                                      for proper operation attribution (e.g., ResNet)
         """
         self.verbose = verbose
         self.enable_reporting = enable_reporting
         self.embed_hierarchy_attributes = embed_hierarchy_attributes
+        self.include_torch_nn_children = include_torch_nn_children
         self.strategy = HTPConfig.STRATEGY_NAME
 
         # Core components
@@ -499,12 +503,15 @@ class HTPExporter:
         for child_path, child_info in immediate_children:
             class_name = child_info.get("class_name", "Unknown")
 
-            # Count nodes for this module
+            # Count nodes for this module (including descendants)
             module_info = hierarchy_data.get(child_path, {})
             expected_tag = module_info.get("traced_tag", "")
             node_count = 0
             if expected_tag and self._tagged_nodes:
-                node_count = list(self._tagged_nodes.values()).count(expected_tag)
+                # Count nodes that have this exact tag OR are descendants
+                for tag in self._tagged_nodes.values():
+                    if tag == expected_tag or tag.startswith(expected_tag + "/"):
+                        node_count += 1
 
             styled_text = self._create_styled_text(
                 class_name,
@@ -757,7 +764,21 @@ class HTPExporter:
 
     def _trace_model_hierarchy(self, model: nn.Module) -> None:
         """Build hierarchy internally."""
-        self._hierarchy_builder = TracingHierarchyBuilder()
+        # Determine if we need torch.nn exceptions for this model
+        exceptions = None
+        if self.include_torch_nn_children:
+            # Common torch.nn modules that might be children of HF modules
+            exceptions = [
+                "Conv1d", "Conv2d", "Conv3d",
+                "BatchNorm1d", "BatchNorm2d", "BatchNorm3d",
+                "Linear", "Embedding",
+                "ReLU", "GELU", "Tanh", "Sigmoid",
+                "Dropout", "LayerNorm",
+                "MaxPool1d", "MaxPool2d", "MaxPool3d",
+                "AvgPool1d", "AvgPool2d", "AvgPool3d",
+            ]
+        
+        self._hierarchy_builder = TracingHierarchyBuilder(exceptions=exceptions)
 
         # Convert inputs
         if isinstance(self.example_inputs, dict):
