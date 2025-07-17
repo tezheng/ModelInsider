@@ -14,6 +14,8 @@ from typing import Any
 import torch
 import torch.nn as nn
 
+from .base import should_include_in_hierarchy
+
 
 class TracingHierarchyBuilder:
     """
@@ -43,11 +45,12 @@ class TracingHierarchyBuilder:
         """
         Determine if module should create a new hierarchy level - UNIVERSAL.
 
-        CARDINAL RULE: NO HARDCODED LOGIC - use ALL PyTorch modules
+        CARDINAL RULE #5 (MUST-002): Filter torch.nn modules from hierarchy
+        Only include semantically important modules in hierarchy structure.
         """
-        # Universal approach: Include ALL nn.Module subclasses
-        # This ensures we capture hierarchy for any PyTorch model
-        return isinstance(module, nn.Module)
+        # Use should_include_in_hierarchy to filter torch.nn infrastructure modules
+        # This ensures MUST-002 compliance - no torch.nn classes in hierarchy
+        return should_include_in_hierarchy(module)
 
     def create_pre_hook(self, module_name: str, module: nn.Module):
         """Create pre-forward hook - ultra simple version."""
