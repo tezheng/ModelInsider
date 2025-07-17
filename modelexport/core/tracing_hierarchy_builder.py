@@ -44,6 +44,7 @@ class TracingHierarchyBuilder:
         self.module_hierarchy = {}  # Only populated for executed modules
         self.traced_modules = set()  # Track which modules were traced
         self.exceptions = exceptions  # torch.nn exceptions to include
+        self.model_outputs = None  # Store model outputs from execution
 
     def is_hf_class(self, module: nn.Module) -> bool:
         """Check if a module is a HuggingFace class - UNIVERSAL."""
@@ -175,9 +176,9 @@ class TracingHierarchyBuilder:
             with torch.no_grad():
                 # Handle both dict inputs (keyword args) and list/tuple inputs (positional args)
                 if isinstance(example_inputs, dict):
-                    _ = model(**example_inputs)
+                    self.model_outputs = model(**example_inputs)
                 else:
-                    _ = model(*example_inputs)
+                    self.model_outputs = model(*example_inputs)
         finally:
             self.remove_hooks()
 
@@ -215,6 +216,15 @@ class TracingHierarchyBuilder:
             "module_hierarchy": self.get_complete_hierarchy(),
         }
 
+    def get_outputs(self) -> Any:
+        """
+        Get the model outputs captured during trace_model_execution.
+        
+        Returns:
+            The model outputs from the last execution, or None if not executed yet.
+        """
+        return self.model_outputs
+
     def clear(self) -> None:
         """Clear all internal state."""
         self.tag_stack.clear()
@@ -223,3 +233,4 @@ class TracingHierarchyBuilder:
         self.module_hierarchy.clear()
         self.traced_modules.clear()
         self.remove_hooks()
+        self.model_outputs = None
