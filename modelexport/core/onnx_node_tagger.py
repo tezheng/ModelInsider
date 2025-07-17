@@ -100,6 +100,7 @@ class ONNXNodeTagger:
         Examples:
             "/embeddings/word_embeddings/Gather" → "embeddings.word_embeddings"  
             "/encoder/layer.0/attention/self/query/MatMul" → "encoder.layer.0.attention.self.query"
+            "/encoder/stages.0/layers.0/layer/layer.0/convolution/Conv" → "encoder.stages.0.layers.0.layer.0.convolution"
             "/Softmax_123" → "__root__"
             "MatMul" → "__root__"
         """
@@ -118,7 +119,23 @@ class ONNXNodeTagger:
         
         # Extract scope (everything except operation)
         scope_parts = parts[:-1]
-        return '.'.join(scope_parts) if scope_parts else "__root__"
+        
+        # Handle ResNet-style double layer pattern: "layer/layer.0" -> "layer.0"
+        # This happens when ONNX export creates redundant path components
+        cleaned_parts = []
+        i = 0
+        while i < len(scope_parts):
+            if (i < len(scope_parts) - 1 and 
+                scope_parts[i] == "layer" and 
+                scope_parts[i + 1].startswith("layer.")):
+                # Skip the redundant "layer" and use "layer.N" directly
+                cleaned_parts.append(scope_parts[i + 1])
+                i += 2
+            else:
+                cleaned_parts.append(scope_parts[i])
+                i += 1
+        
+        return '.'.join(cleaned_parts) if cleaned_parts else "__root__"
     
     def tag_all_nodes(self, onnx_model: onnx.ModelProto) -> dict[str, str]:
         """
@@ -208,7 +225,7 @@ class ONNXNodeTagger:
         
         scope_parts = scope_name.split('.')
         
-        for hierarchy_scope in self.scope_to_tag.keys():
+        for hierarchy_scope in self.scope_to_tag:
             hierarchy_parts = hierarchy_scope.split('.')
             
             # Calculate common prefix length
@@ -240,7 +257,7 @@ class ONNXNodeTagger:
             'total_nodes': len(onnx_model.graph.node),
             'root_nodes': len(scope_buckets.get('__root__', [])),
             'scoped_nodes': sum(len(nodes) for scope, nodes in scope_buckets.items() if scope != '__root__'),
-            'unique_scopes': len([s for s in scope_buckets.keys() if s != '__root__']),
+            'unique_scopes': len([s for s in scope_buckets if s != '__root__']),
             'direct_matches': 0,
             'parent_matches': 0, 
             'operation_matches': 0,

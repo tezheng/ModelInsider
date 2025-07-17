@@ -1,5 +1,4 @@
 {
-  "mcpConfigPath": "./.claude/mcp_config.json",
   "permissions": {
     "allow": [
       "WebFetch(domain:github.com)",
@@ -61,7 +60,10 @@
       "Bash(dot:*)",
       "Bash(command -v:*)",
       "WebFetch(domain:pypi.org)",
-      "WebFetch(domain:networkx.org)"
+      "WebFetch(domain:networkx.org)",
+      "Bash(git log:*)",
+      "Bash(diff:*)",
+      "Bash(/dev/null)"
     ],
     "deny": []
   }
