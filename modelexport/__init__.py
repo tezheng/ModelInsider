@@ -25,7 +25,7 @@ Strategies:
 from .core import tag_utils
 
 # Utilities
-from .core.base import BaseHierarchyExporter, build_hierarchy_path, should_tag_module
+from .core.base import BaseHierarchyExporter, should_include_in_hierarchy
 from .core.onnx_utils import ONNXUtils
 
 # Core components for advanced usage
@@ -63,8 +63,7 @@ __all__ = [
     
     # Utilities
     "BaseHierarchyExporter",
-    "should_tag_module",
-    "build_hierarchy_path",
+    "should_include_in_hierarchy",
     "ONNXUtils",
     "tag_utils",
     

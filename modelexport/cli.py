@@ -6,9 +6,7 @@ ONNX export with hierarchy preservation.
 """
 
 import json
-import os
 import sys
-import tempfile
 from pathlib import Path
 
 import click

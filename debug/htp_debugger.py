@@ -31,7 +31,6 @@ from rich.text import Text
 import sys
 sys.path.append(str(Path(__file__).parent.parent))
 
-from modelexport.strategies.htp.htp_integrated_exporter import HTPIntegratedExporter
 from modelexport.core.tracing_hierarchy_builder import TracingHierarchyBuilder
 from modelexport.core.onnx_node_tagger import create_node_tagger_from_hierarchy
 
