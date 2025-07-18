@@ -1089,6 +1089,8 @@ class HTPExporter:
                     }
                 ),
             },
+            "hierarchy_data": self._hierarchy_data,
+            "tagged_nodes": self._tagged_nodes,
             "tagging_summary": self._tagging_stats
             if hasattr(self, "_tagging_stats")
             else {},
