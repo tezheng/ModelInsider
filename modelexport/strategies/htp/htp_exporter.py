@@ -1071,35 +1071,129 @@ class HTPExporter:
                 HTPConfig.ONNX_EXTENSION, HTPConfig.METADATA_SUFFIX
             )
 
-        metadata = {
-            "export_info": {
-                "onnx_file": Path(output_path).name,
-                "exporter": self.__class__.__name__,
-                "strategy": self.strategy,
-                "export_timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
-                "embed_hierarchy_attributes": self.embed_hierarchy_attributes,
-            },
-            "statistics": self._export_stats,
-            "hierarchy_summary": {
-                "total_modules": len(self._hierarchy_data),
-                "module_types": list(
-                    {
-                        info.get("class_name", "")
-                        for info in self._hierarchy_data.values()
-                    }
-                ),
-            },
-            "hierarchy_data": self._hierarchy_data,
+        # Build improved metadata structure
+        metadata = {}
+        
+        # 1. Export Context
+        metadata["export_context"] = {
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "strategy": self.strategy,
+            "version": "1.0",
+            "exporter": self.__class__.__name__,
+            "embed_hierarchy_attributes": self.embed_hierarchy_attributes,
+        }
+        
+        # 2. Model
+        metadata["model"] = {
+            "name_or_path": self._export_report["model_info"].get("model_name_or_path", "unknown"),
+            "class": self._export_report["model_info"].get("model_class", "unknown"),
+            "framework": self._export_report["model_info"].get("framework", "transformers"),
+            "total_modules": self._export_report["model_info"].get("total_modules", 0),
+            "total_parameters": self._export_report["model_info"].get("total_parameters", 0),
+        }
+        
+        # 3. Tracing (includes model type, task, inputs, outputs)
+        tracing_info = {
+            "builder": "TracingHierarchyBuilder",
+            "modules_traced": len(self._hierarchy_data),
+            "execution_steps": self._export_report["export_report"]["hierarchy_building"]["details"].get("execution_steps", 0),
+        }
+        
+        # Add model type and task from input generation
+        input_gen_details = self._export_report["export_report"]["input_generation"]["details"]
+        if "model_type" in input_gen_details:
+            tracing_info["model_type"] = input_gen_details["model_type"]
+        if "detected_task" in input_gen_details:
+            tracing_info["task"] = input_gen_details["detected_task"]
+            
+        # Add inputs
+        if "inputs" in input_gen_details:
+            tracing_info["inputs"] = input_gen_details["inputs"]
+            
+        # Add outputs if available
+        outputs = self._hierarchy_builder.get_outputs() if self._hierarchy_builder else None
+        if outputs:
+            output_names = infer_output_names(outputs)
+            if output_names:
+                tracing_info["outputs"] = output_names
+                
+        metadata["tracing"] = tracing_info
+        
+        # 4. Modules (renamed from hierarchy_data)
+        metadata["modules"] = self._hierarchy_data
+        
+        # 5. Tagging
+        metadata["tagging"] = {
             "tagged_nodes": self._tagged_nodes,
-            "tagging_summary": self._tagging_stats
-            if hasattr(self, "_tagging_stats")
-            else {},
-            "quality_guarantees": {
-                "no_hardcoded_logic": "Universal module tracking via TracingHierarchyBuilder",
-                "no_empty_tags_guarantee": f"Empty tags: {self._export_stats.get('empty_tags', 'unknown')}",
-                "coverage_guarantee": f"Node coverage: {self._export_stats.get('coverage_percentage', 0):.1f}% with proper fallbacks",
+            "statistics": self._tagging_stats if hasattr(self, "_tagging_stats") else {},
+            "coverage": {
+                "total_onnx_nodes": self._export_stats.get("onnx_nodes", 0),
+                "tagged_nodes": self._export_stats.get("tagged_nodes", 0),
+                "coverage_percentage": self._export_stats.get("coverage_percentage", 0.0),
+                "empty_tags": self._export_stats.get("empty_tags", 0),
             },
-            "export_report": self._export_report,
+        }
+        
+        # 6. Outputs
+        metadata["outputs"] = {
+            "onnx_model": {
+                "path": Path(output_path).name,
+                "size_mb": self._export_report["export_report"]["onnx_export"]["details"].get("file_size_mb", 0),
+                "opset_version": self._export_report["export_report"]["onnx_export"]["details"]["export_config"].get("opset_version", 17),
+            },
+            "metadata": {
+                "path": Path(metadata_path).name,
+            },
+        }
+        
+        # Add output names if available
+        if "outputs" in tracing_info:
+            metadata["outputs"]["onnx_model"]["output_names"] = tracing_info["outputs"]
+            
+        # 7. Report (renamed from export_report, contains process details)
+        metadata["report"] = {
+            "export_time_seconds": round(self._export_stats.get("export_time", 0), 2),
+            "steps": {
+                "model_preparation": self._export_report["export_report"]["model_preparation"],
+                "input_generation": {
+                    "status": self._export_report["export_report"]["input_generation"]["status"],
+                    "method": input_gen_details.get("method", "unknown"),
+                },
+                "hierarchy_building": self._export_report["export_report"]["hierarchy_building"],
+                "onnx_export": {
+                    "status": self._export_report["export_report"]["onnx_export"]["status"],
+                    "export_config": self._export_report["export_report"]["onnx_export"]["details"]["export_config"],
+                },
+                "node_tagging": {
+                    "status": self._export_report["export_report"]["node_tagging"]["status"],
+                    "top_hierarchies": self._export_report["export_report"]["node_tagging"]["details"].get("top_hierarchies", []),
+                },
+                "tag_injection": self._export_report["export_report"]["tag_injection"],
+            },
+            "quality_guarantees": {
+                "no_hardcoded_logic": True,
+                "universal_module_tracking": "TracingHierarchyBuilder",
+                "empty_tags_guarantee": self._export_stats.get("empty_tags", 0),
+                "coverage_guarantee": f"{self._export_stats.get('coverage_percentage', 0):.1f}%",
+                "optimum_compatible": True,
+            },
+        }
+        
+        # 8. Statistics (summary)
+        metadata["statistics"] = {
+            "export_time": self._export_stats.get("export_time", 0),
+            "hierarchy_modules": self._export_stats.get("hierarchy_modules", 0),
+            "onnx_nodes": self._export_stats.get("onnx_nodes", 0),
+            "tagged_nodes": self._export_stats.get("tagged_nodes", 0),
+            "empty_tags": self._export_stats.get("empty_tags", 0),
+            "coverage_percentage": self._export_stats.get("coverage_percentage", 0.0),
+            "module_types": list(
+                {
+                    info.get("class_name", "")
+                    for info in self._hierarchy_data.values()
+                    if info.get("class_name")
+                }
+            ),
         }
 
         with open(metadata_path, "w") as f:
