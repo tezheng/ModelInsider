@@ -1,0 +1,61 @@
+{
+  "export_context": {
+    "timestamp": "{{ export_context.timestamp }}",
+    "strategy": "{{ export_context.strategy }}",
+    "version": "{{ export_context.version }}",
+    "exporter": "{{ export_context.exporter }}",
+    "embed_hierarchy_attributes": {{ export_context.embed_hierarchy_attributes | lower }}
+  },
+  "model": {
+    "name_or_path": "{{ model.name_or_path }}",
+    "class": "{{ model.class_name }}",
+    "framework": "{{ model.framework }}",
+    "total_modules": {{ model.total_modules }},
+    "total_parameters": {{ model.total_parameters }}
+  },
+  "tracing": {
+    "builder": "{{ tracing.builder }}",
+    "modules_traced": {{ tracing.modules_traced }},
+    "execution_steps": {{ tracing.execution_steps }}{% if tracing.model_type %},
+    "model_type": "{{ tracing.model_type }}"{% endif %}{% if tracing.task %},
+    "task": "{{ tracing.task }}"{% endif %}{% if tracing.inputs %},
+    "inputs": {{ tracing.inputs | tojson(indent=4) }}{% endif %}{% if tracing.outputs %},
+    "outputs": {{ tracing.outputs | tojson }}{% endif %}
+  },
+  "modules": {{ modules | tojson(indent=2) }},
+  "tagging": {
+    "tagged_nodes": {{ tagging.tagged_nodes | tojson(indent=4) }},
+    "statistics": {{ tagging.statistics | tojson(indent=4) }},
+    "coverage": {
+      "total_onnx_nodes": {{ tagging.coverage.total_onnx_nodes }},
+      "tagged_nodes": {{ tagging.coverage.tagged_nodes }},
+      "coverage_percentage": {{ tagging.coverage.coverage_percentage }},
+      "empty_tags": {{ tagging.coverage.empty_tags }}
+    }
+  },
+  "outputs": {
+    "onnx_model": {
+      "path": "{{ outputs.onnx_model.path }}",
+      "size_mb": {{ outputs.onnx_model.size_mb }},
+      "opset_version": {{ outputs.onnx_model.opset_version }}{% if outputs.onnx_model.output_names %},
+      "output_names": {{ outputs.onnx_model.output_names | tojson }}{% endif %}
+    },
+    "metadata": {
+      "path": "{{ outputs.metadata.path }}"
+    }
+  },
+  "report": {
+    "export_time_seconds": {{ report.export_time_seconds }},
+    "steps": {{ report.steps | tojson(indent=4) }},
+    "quality_guarantees": {{ report.quality_guarantees | tojson(indent=4) }}
+  },
+  "statistics": {
+    "export_time": {{ statistics.export_time }},
+    "hierarchy_modules": {{ statistics.hierarchy_modules }},
+    "onnx_nodes": {{ statistics.onnx_nodes }},
+    "tagged_nodes": {{ statistics.tagged_nodes }},
+    "empty_tags": {{ statistics.empty_tags }},
+    "coverage_percentage": {{ statistics.coverage_percentage }},
+    "module_types": {{ statistics.module_types | tojson }}
+  }
+}
