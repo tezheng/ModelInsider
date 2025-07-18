@@ -1091,7 +1091,23 @@ class HTPExporter:
             }
         )
         
-        # Build metadata using the builder pattern
+        # Build metadata - TODO: Switch to Pydantic when added as dependency
+        # from .pydantic_builder import HTPMetadataBuilderPydantic
+        # metadata_model = HTPMetadataBuilderPydantic.from_exporter_state(
+        #     export_report=self._export_report,
+        #     export_stats=self._export_stats,
+        #     hierarchy_data=self._hierarchy_data,
+        #     tagged_nodes=self._tagged_nodes,
+        #     tagging_stats=self._tagging_stats,
+        #     hierarchy_builder=self._hierarchy_builder,
+        #     output_path=output_path,
+        #     metadata_path=metadata_path,
+        #     embed_hierarchy_attributes=self.embed_hierarchy_attributes,
+        #     strategy=self.strategy,
+        # )
+        # metadata = metadata_model.model_dump(exclude_none=True)
+        
+        # For now, use dataclass builder until Pydantic is added
         builder = HTPMetadataBuilder()
         
         metadata = (
