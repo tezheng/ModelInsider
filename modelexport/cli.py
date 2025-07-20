@@ -49,9 +49,7 @@ def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_c
     """
     try:
         # Export with HTP strategy using simplified API
-        if verbose:
-            click.echo(f"🔄 Loading model and exporting: {model_name_or_path}")
-            click.echo(f"🧠 Using {strategy.upper()} (Hierarchical Trace-and-Project) strategy")
+        # Don't print messages here - the monitor will handle it
         
         exporter = HTPExporter(
             verbose=verbose, 
