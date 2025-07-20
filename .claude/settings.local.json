@@ -63,7 +63,8 @@
       "WebFetch(domain:networkx.org)",
       "Bash(git log:*)",
       "Bash(diff:*)",
-      "Bash(/dev/null)"
+      "Bash(/dev/null)",
+      "Bash(ruff check:*)"
     ],
     "deny": []
   }

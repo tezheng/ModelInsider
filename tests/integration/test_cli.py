@@ -82,18 +82,25 @@ class TestCLIExport:
         with open(metadata_path) as f:
             metadata = json.load(f)
         
-        # Check for required fields in metadata
-        assert 'export_info' in metadata, "Missing export_info in metadata"
-        assert 'statistics' in metadata, "Missing statistics in metadata"
-        assert 'hierarchy_data' in metadata, "Missing hierarchy_data in metadata"
-        assert 'tagged_nodes' in metadata, "Missing tagged_nodes in metadata"
+        # Check for required fields in metadata (new structure)
+        assert 'export_context' in metadata, "Missing export_context in metadata"
+        assert 'model' in metadata, "Missing model in metadata"
+        assert 'modules' in metadata, "Missing modules in metadata"
+        assert 'nodes' in metadata, "Missing nodes in metadata"
+        assert 'report' in metadata, "Missing report in metadata"
         
-        # Validate tag statistics make sense
-        stats = metadata['statistics']
-        assert stats['onnx_nodes'] > 0
-        assert stats['tagged_nodes'] > 0
-        assert stats['empty_tags'] == 0
-        assert stats['coverage_percentage'] == 100.0
+        # Validate tag statistics make sense (new structure)
+        assert 'node_tagging' in metadata['report'], "Missing node_tagging in report"
+        stats = metadata['report']['node_tagging']['statistics']
+        assert stats['total_nodes'] > 0
+        assert stats['direct_matches'] >= 0
+        assert stats['parent_matches'] >= 0
+        assert stats['root_fallbacks'] >= 0
+        
+        # Check coverage
+        coverage = metadata['report']['node_tagging']['coverage']
+        assert coverage['coverage_percentage'] == 100.0
+        assert coverage['empty_tags'] == 0
     
     def test_export_with_custom_options(self, cli_runner, temp_workspace):
         """Test export with custom options."""

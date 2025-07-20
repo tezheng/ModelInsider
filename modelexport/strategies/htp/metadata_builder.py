@@ -86,6 +86,7 @@ class OutputFiles:
     """Output file information."""
     onnx_model: OnnxModelOutput
     metadata: dict[str, str] = field(default_factory=dict)
+    report: dict[str, str] = field(default_factory=dict)
 
 
 @dataclass
@@ -231,7 +232,8 @@ class HTPMetadataBuilder:
         onnx_size_mb: float,
         metadata_path: str,
         opset_version: int = 17,
-        output_names: list[str] | None = None
+        output_names: list[str] | None = None,
+        report_path: str | None = None
     ) -> HTPMetadataBuilder:
         """Set output file information."""
         self._output_files = OutputFiles(
@@ -243,6 +245,11 @@ class HTPMetadataBuilder:
             ),
             metadata={"path": Path(metadata_path).name}
         )
+        
+        # Add report file if provided
+        if report_path:
+            self._output_files.report = {"path": Path(report_path).name}
+            
         return self
     
     def with_export_report(
