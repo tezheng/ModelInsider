@@ -1,9 +1,9 @@
 """
-HTP (Hierarchy-preserving Tags Protocol) Exporter.
+HTP (Hierarchical Tracing and Projection) Exporter.
 
 This exporter preserves the hierarchical structure of HuggingFace models
-when converting to ONNX format by tracing module execution and tagging
-ONNX nodes with their source module information.
+when converting to ONNX format by tracing module execution and projecting
+hierarchy tags onto ONNX nodes with their source module information.
 
 Key Features:
 - Direct module context capture during execution
@@ -38,7 +38,6 @@ class HTPConfig:
     REPORT_SUFFIX = "_htp_export_report.txt"
     METADATA_SUFFIX = "_htp_metadata.json"
 
-
     # Export defaults
     DEFAULT_TASK = "feature-extraction"
 
@@ -60,6 +59,13 @@ class HTPConfig:
         "strategy": STRATEGY_NAME,
     }
 
+    # Common torch.nn modules that might be children of HF modules
+    # Used when include_torch_nn_children is True
+    TORCH_NN_EXCEPTIONS: ClassVar[list[str]] = [
+        "Embedding",
+        "LayerNorm",
+    ]
+
 
 class HTPExporter:
     """
@@ -76,6 +82,7 @@ class HTPExporter:
         enable_reporting: bool = False,
         embed_hierarchy_attributes: bool = True,
         include_torch_nn_children: bool = False,
+        torch_nn_exceptions: list[str] | None = None,
     ):
         """
         Initialize HTP exporter.
@@ -87,11 +94,14 @@ class HTPExporter:
                                        (disabled by --clean-onnx or --no-hierarchy-attrs)
             include_torch_nn_children: Include torch.nn children of HF modules in hierarchy
                                       for proper operation attribution (e.g., ResNet)
+            torch_nn_exceptions: Custom list of torch.nn module names to include.
+                                If None, uses HTPConfig.TORCH_NN_EXCEPTIONS.
         """
         self.verbose = verbose
         self.enable_reporting = enable_reporting
         self.embed_hierarchy_attributes = embed_hierarchy_attributes
         self.include_torch_nn_children = include_torch_nn_children
+        self.torch_nn_exceptions = torch_nn_exceptions or HTPConfig.TORCH_NN_EXCEPTIONS
         self.strategy = HTPConfig.STRATEGY_NAME
 
         # Core components
@@ -109,8 +119,6 @@ class HTPExporter:
 
         # Export monitor will be initialized in export()
         self._monitor = None
-        
-
 
     def export(
         self,
@@ -124,14 +132,14 @@ class HTPExporter:
     ) -> dict[str, Any]:
         """Export model to ONNX with hierarchy-preserving tags."""
         start_time = time.time()
-        
+
         # Initialize export monitor
         self._monitor = HTPExportMonitor(
             output_path=output_path,
             model_name=model_name_or_path or "",
             verbose=self.verbose,
             enable_report=self.enable_reporting,
-            embed_hierarchy=self.embed_hierarchy_attributes
+            embed_hierarchy=self.embed_hierarchy_attributes,
         )
 
         # Use monitor as context manager
@@ -144,42 +152,49 @@ class HTPExporter:
                     )
 
                 from transformers import AutoModel
+
                 model = AutoModel.from_pretrained(model_name_or_path)
 
             # Step 1: Model Preparation
             model.eval()
-            
+
             # Update monitor with model info
             monitor.update(
                 HTPExportStep.MODEL_PREP,
                 model_name=model_name_or_path or "unknown",
                 model_class=type(model).__name__,
                 total_modules=len(list(model.modules())),
-                total_parameters=sum(p.numel() for p in model.parameters())
+                total_parameters=sum(p.numel() for p in model.parameters()),
             )
 
             # Step 2: Input Generation
             self._create_example_inputs(model_name_or_path, input_specs)
-            
+
             # Prepare input generation data
             input_gen_data = {
                 "method": "provided" if input_specs else "auto_generated",
-                "inputs": {}
+                "inputs": {},
             }
-            
+
             # Try to add model type and task info
             if model_name_or_path and not input_specs:
                 try:
                     from transformers import AutoConfig
+
                     config = AutoConfig.from_pretrained(model_name_or_path)
                     input_gen_data["model_type"] = config.model_type
-                    
+
                     # Try to detect task
                     task = None
                     try:
                         from optimum.exporters import TasksManager
-                        supported_tasks = TasksManager.get_supported_tasks_for_model_type(
-                            config.model_type, exporter="onnx", library_name="transformers"
+
+                        supported_tasks = (
+                            TasksManager.get_supported_tasks_for_model_type(
+                                config.model_type,
+                                exporter="onnx",
+                                library_name="transformers",
+                            )
                         )
                         if supported_tasks:
                             task = next(iter(supported_tasks.keys()))
@@ -187,32 +202,38 @@ class HTPExporter:
                             task = HTPConfig.DEFAULT_TASK
                     except Exception:
                         task = HTPConfig.DEFAULT_TASK
-                    
+
                     input_gen_data["task"] = task
                 except Exception:
                     # If we can't get model info, just continue
                     pass
-            
+
             # Add input shapes and dtypes
             if self.example_inputs:
                 for name, tensor in self.example_inputs.items():
                     input_gen_data["inputs"][name] = {
                         "shape": list(tensor.shape),
-                        "dtype": str(tensor.dtype)
+                        "dtype": str(tensor.dtype),
                     }
-            
+
             # Update monitor
             monitor.update(HTPExportStep.INPUT_GEN, **input_gen_data)
 
             # Step 3: Hierarchy Building
             self._trace_model_hierarchy(model)
-            
+
             # Update monitor with hierarchy data
-            execution_steps = self._hierarchy_builder.get_execution_summary().get("execution_steps", 0) if self._hierarchy_builder else 0
+            execution_steps = (
+                self._hierarchy_builder.get_execution_summary().get(
+                    "execution_steps", 0
+                )
+                if self._hierarchy_builder
+                else 0
+            )
             monitor.update(
                 HTPExportStep.HIERARCHY,
                 hierarchy=self._hierarchy_data,
-                execution_steps=execution_steps
+                execution_steps=execution_steps,
             )
 
             # Step 4: ONNX Export
@@ -222,22 +243,41 @@ class HTPExporter:
                 **kwargs,
             }
 
-            self._convert_model_to_onnx(model, output_path, export_kwargs)
-            
+            # Keep a reference to export_kwargs to capture output_names after conversion
+            actual_export_kwargs = export_kwargs.copy()
+
+            self._convert_model_to_onnx(model, output_path, actual_export_kwargs)
+
             # Update monitor with ONNX export info
-            onnx_size_mb = round(Path(output_path).stat().st_size / (1024 * 1024), 2) if Path(output_path).exists() else 0
+            onnx_size_mb = (
+                round(Path(output_path).stat().st_size / (1024 * 1024), 2)
+                if Path(output_path).exists()
+                else 0
+            )
             # Get input names if available
             input_names = []
             if isinstance(self.example_inputs, dict):
                 input_names = list(self.example_inputs.keys())
-            
+
+            # Get output names (they might have been inferred in _convert_model_to_onnx)
+            output_names = []
+            # First check if we have output names from the tracing
+            outputs = (
+                self._hierarchy_builder.get_outputs()
+                if self._hierarchy_builder
+                else None
+            )
+            if outputs is not None:
+                output_names = infer_output_names(outputs) or []
+
             monitor.update(
                 HTPExportStep.ONNX_EXPORT,
                 opset_version=export_kwargs.get("opset_version", 17),
                 do_constant_folding=export_kwargs.get("do_constant_folding", True),
                 verbose=export_kwargs.get("verbose", False),
                 input_names=input_names,
-                onnx_size_mb=onnx_size_mb
+                output_names=output_names,
+                onnx_size_mb=onnx_size_mb,
             )
 
             # Step 5: Node Tagger Creation
@@ -246,16 +286,7 @@ class HTPExporter:
             self._initialize_node_tagger(enable_operation_fallback)
 
             # Update monitor
-            # Get root tag from hierarchy
-            root_info = self._hierarchy_data.get("", {})
-            root_tag = root_info.get("traced_tag", "/Model")
-            
-            monitor.update(
-                HTPExportStep.TAGGER_CREATION,
-                tagger_type="HierarchyNodeTagger",
-                enable_operation_fallback=enable_operation_fallback,
-                root_tag=root_tag
-            )
+            # (TAGGER_CREATION step removed - integrated into NODE_TAGGING)
 
             # Step 6: Node Tagging
             self._apply_hierarchy_tags(onnx_model)
@@ -264,18 +295,27 @@ class HTPExporter:
             total_nodes = len(onnx_model.graph.node)
             tagged_nodes = len(self._tagged_nodes)
             coverage = (tagged_nodes / total_nodes * 100.0) if total_nodes > 0 else 0.0
-            
+
+            # Calculate ONNX operation counts
+            from collections import Counter
+
+            op_counts = Counter()
+            for node in onnx_model.graph.node:
+                op_counts[node.op_type] += 1
+
             monitor.update(
                 HTPExportStep.NODE_TAGGING,
                 total_nodes=total_nodes,
                 tagged_nodes=self._tagged_nodes,
                 tagging_stats=self._tagging_stats,
-                coverage=coverage
+                coverage=coverage,
+                op_counts=dict(op_counts),
+                hierarchy=self._hierarchy_data,  # Pass hierarchy for tree display
             )
 
             # Step 7: Tag Injection
             self._embed_tags_in_onnx(output_path, onnx_model)
-            
+
             # Skip tag injection step - it's part of model save
 
             # Calculate final statistics before metadata generation
@@ -283,49 +323,41 @@ class HTPExporter:
             self._export_stats["hierarchy_modules"] = len(self._hierarchy_data)
             self._export_stats["onnx_nodes"] = len(onnx_model.graph.node)
             self._export_stats["tagged_nodes"] = len(self._tagged_nodes)
-            
+
             # Calculate empty tags (should be 0 with our implementation)
-            empty_tag_count = sum(1 for tag in self._tagged_nodes.values() if not tag or not tag.strip())
+            empty_tag_count = sum(
+                1 for tag in self._tagged_nodes.values() if not tag or not tag.strip()
+            )
             self._export_stats["empty_tags"] = empty_tag_count
-            
+
             # Calculate coverage percentage
             total_nodes = len(onnx_model.graph.node)
             tagged_nodes = len(self._tagged_nodes)
             coverage = (tagged_nodes / total_nodes * 100.0) if total_nodes > 0 else 0.0
             self._export_stats["coverage_percentage"] = coverage
-            
-            # Step 7: Save - just notify monitor
-            monitor.update(HTPExportStep.SAVE)
-            
+
+            # Step 7: Tag injection - notify monitor
+            monitor.update(HTPExportStep.TAG_INJECTION)
+
             # Store output names if available
-            outputs = self._hierarchy_builder.get_outputs() if self._hierarchy_builder else None
-            output_names = infer_output_names(outputs) if outputs else []
+            outputs = (
+                self._hierarchy_builder.get_outputs()
+                if self._hierarchy_builder
+                else None
+            )
+            output_names = infer_output_names(outputs) if outputs is not None else []
             monitor.data.output_names = output_names or []
-            
-            # Step 8: Complete - trigger final metadata generation in monitor
-            monitor.update(
-                HTPExportStep.COMPLETE,
+
+            # Finalize export with metadata generation and summary (not numbered steps)
+            monitor.finalize_export(
                 export_time=time.time() - start_time,
-                output_path=output_path,  # Add output_path so metadata file path can be displayed
+                output_path=output_path,
                 report_path=f"{Path(output_path).with_suffix('').as_posix()}_htp_export_report.txt",
-                console_log_path=f"{Path(output_path).with_suffix('').as_posix()}_console.log"
+                console_log_path=f"{Path(output_path).with_suffix('').as_posix()}_console.log",
             )
 
         # The monitor's context manager will handle finalization
         return self._export_stats.copy()
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     # Internal implementation methods
     def _create_example_inputs(
@@ -348,29 +380,8 @@ class HTPExporter:
         # Determine if we need torch.nn exceptions for this model
         exceptions = None
         if self.include_torch_nn_children:
-            # Common torch.nn modules that might be children of HF modules
-            exceptions = [
-                "Conv1d",
-                "Conv2d",
-                "Conv3d",
-                "BatchNorm1d",
-                "BatchNorm2d",
-                "BatchNorm3d",
-                "Linear",
-                "Embedding",
-                "ReLU",
-                "GELU",
-                "Tanh",
-                "Sigmoid",
-                "Dropout",
-                "LayerNorm",
-                "MaxPool1d",
-                "MaxPool2d",
-                "MaxPool3d",
-                "AvgPool1d",
-                "AvgPool2d",
-                "AvgPool3d",
-            ]
+            # Use torch.nn exceptions from instance (allows override)
+            exceptions = self.torch_nn_exceptions
 
         self._hierarchy_builder = TracingHierarchyBuilder(exceptions=exceptions)
 
@@ -415,8 +426,12 @@ class HTPExporter:
         # This approach is model-agnostic and doesn't hardcode any specific names
         if "output_names" not in filtered_kwargs:
             # Get outputs from the tracing hierarchy builder to avoid duplicate execution
-            outputs = self._hierarchy_builder.get_outputs() if self._hierarchy_builder else None
-            
+            outputs = (
+                self._hierarchy_builder.get_outputs()
+                if self._hierarchy_builder
+                else None
+            )
+
             # Use the universal utility function to infer output names
             output_names = infer_output_names(outputs)
             if output_names:
@@ -452,11 +467,13 @@ class HTPExporter:
         # Update export stats
         self._export_stats["onnx_nodes"] = len(onnx_model.graph.node)
         self._export_stats["tagged_nodes"] = len(self._tagged_nodes)
-        
+
         # Calculate empty tags (should be 0 with our implementation)
-        empty_tag_count = sum(1 for tag in self._tagged_nodes.values() if not tag or not tag.strip())
+        empty_tag_count = sum(
+            1 for tag in self._tagged_nodes.values() if not tag or not tag.strip()
+        )
         self._export_stats["empty_tags"] = empty_tag_count
-        
+
         # Calculate coverage percentage
         total_nodes = len(onnx_model.graph.node)
         tagged_nodes = len(self._tagged_nodes)
@@ -477,7 +494,6 @@ class HTPExporter:
                     node.attribute.append(metadata_attr)
             # Save model
             onnx.save(onnx_model, output_path)
-
 
 
 # Export functions for backward compatibility
