@@ -16,7 +16,10 @@ from typing import Any
 @dataclass
 class ExportContext:
     """Export session context information."""
-    timestamp: str = field(default_factory=lambda: time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()))
+
+    timestamp: str = field(
+        default_factory=lambda: time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+    )
     strategy: str = "htp"
     version: str = "1.0"
     exporter: str = "HTPExporter"
@@ -26,12 +29,13 @@ class ExportContext:
 @dataclass
 class ModelInfo:
     """Model information."""
+
     name_or_path: str
     class_name: str
     framework: str = "transformers"
     total_modules: int = 0
     total_parameters: int = 0
-    
+
     def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary with renamed fields."""
         return {
@@ -46,6 +50,7 @@ class ModelInfo:
 @dataclass
 class TracingInfo:
     """Tracing execution information."""
+
     builder: str = "TracingHierarchyBuilder"
     modules_traced: int = 0
     execution_steps: int = 0
@@ -58,6 +63,7 @@ class TracingInfo:
 @dataclass
 class TaggingCoverage:
     """Tagging coverage statistics."""
+
     total_onnx_nodes: int = 0
     tagged_nodes: int = 0
     coverage_percentage: float = 0.0
@@ -67,6 +73,7 @@ class TaggingCoverage:
 @dataclass
 class TaggingInfo:
     """Node tagging information."""
+
     tagged_nodes: dict[str, str] = field(default_factory=dict)
     statistics: dict[str, Any] = field(default_factory=dict)
     coverage: TaggingCoverage = field(default_factory=TaggingCoverage)
@@ -75,6 +82,7 @@ class TaggingInfo:
 @dataclass
 class OnnxModelOutput:
     """ONNX model output information."""
+
     path: str
     size_mb: float = 0.0
     opset_version: int = 17
@@ -84,6 +92,7 @@ class OnnxModelOutput:
 @dataclass
 class OutputFiles:
     """Output file information."""
+
     onnx_model: OnnxModelOutput
     metadata: dict[str, str] = field(default_factory=dict)
     report: dict[str, str] = field(default_factory=dict)
@@ -92,6 +101,7 @@ class OutputFiles:
 @dataclass
 class ExportStep:
     """Export process step information."""
+
     status: str = "pending"
     details: dict[str, Any] | None = None
 
@@ -99,6 +109,7 @@ class ExportStep:
 @dataclass
 class QualityGuarantees:
     """Export quality guarantees."""
+
     no_hardcoded_logic: bool = True
     universal_module_tracking: str = "TracingHierarchyBuilder"
     empty_tags_guarantee: int = 0
@@ -109,6 +120,7 @@ class QualityGuarantees:
 @dataclass
 class ExportReport:
     """Export process report."""
+
     export_time_seconds: float = 0.0
     steps: dict[str, Any] = field(default_factory=dict)
     quality_guarantees: QualityGuarantees = field(default_factory=QualityGuarantees)
@@ -117,6 +129,7 @@ class ExportReport:
 @dataclass
 class Statistics:
     """Export statistics summary."""
+
     export_time: float = 0.0
     hierarchy_modules: int = 0
     onnx_nodes: int = 0
@@ -129,11 +142,11 @@ class Statistics:
 class HTPMetadataBuilder:
     """
     Builder for HTP metadata using clean architecture patterns.
-    
+
     This builder provides a fluent interface for constructing metadata
     step by step, ensuring all required fields are properly set.
     """
-    
+
     def __init__(self):
         """Initialize the builder with default values."""
         self._export_context = ExportContext()
@@ -144,30 +157,30 @@ class HTPMetadataBuilder:
         self._output_files: OutputFiles | None = None
         self._export_report = ExportReport()
         self._statistics = Statistics()
-    
+
     def with_export_context(
         self,
         strategy: str = "htp",
         version: str = "1.0",
         exporter: str = "HTPExporter",
-        embed_hierarchy_attributes: bool = True
+        embed_hierarchy_attributes: bool = True,
     ) -> HTPMetadataBuilder:
         """Set export context information."""
         self._export_context = ExportContext(
             strategy=strategy,
             version=version,
             exporter=exporter,
-            embed_hierarchy_attributes=embed_hierarchy_attributes
+            embed_hierarchy_attributes=embed_hierarchy_attributes,
         )
         return self
-    
+
     def with_model_info(
         self,
         name_or_path: str,
         class_name: str,
         total_modules: int,
         total_parameters: int,
-        framework: str = "transformers"
+        framework: str = "transformers",
     ) -> HTPMetadataBuilder:
         """Set model information."""
         self._model_info = ModelInfo(
@@ -175,10 +188,10 @@ class HTPMetadataBuilder:
             class_name=class_name,
             framework=framework,
             total_modules=total_modules,
-            total_parameters=total_parameters
+            total_parameters=total_parameters,
         )
         return self
-    
+
     def with_tracing_info(
         self,
         modules_traced: int,
@@ -186,7 +199,7 @@ class HTPMetadataBuilder:
         model_type: str | None = None,
         task: str | None = None,
         inputs: dict[str, dict[str, Any]] | None = None,
-        outputs: list[str] | None = None
+        outputs: list[str] | None = None,
     ) -> HTPMetadataBuilder:
         """Set tracing information."""
         self._tracing_info = TracingInfo(
@@ -195,15 +208,15 @@ class HTPMetadataBuilder:
             model_type=model_type,
             task=task,
             inputs=inputs,
-            outputs=outputs
+            outputs=outputs,
         )
         return self
-    
+
     def with_modules(self, modules: dict[str, dict[str, Any]]) -> HTPMetadataBuilder:
         """Set module hierarchy data."""
         self._modules = modules
         return self
-    
+
     def with_tagging_info(
         self,
         tagged_nodes: dict[str, str],
@@ -211,7 +224,7 @@ class HTPMetadataBuilder:
         total_onnx_nodes: int,
         tagged_nodes_count: int,
         coverage_percentage: float,
-        empty_tags: int
+        empty_tags: int,
     ) -> HTPMetadataBuilder:
         """Set tagging information."""
         self._tagging_info = TaggingInfo(
@@ -221,11 +234,11 @@ class HTPMetadataBuilder:
                 total_onnx_nodes=total_onnx_nodes,
                 tagged_nodes=tagged_nodes_count,
                 coverage_percentage=coverage_percentage,
-                empty_tags=empty_tags
-            )
+                empty_tags=empty_tags,
+            ),
         )
         return self
-    
+
     def with_output_files(
         self,
         onnx_path: str,
@@ -233,7 +246,7 @@ class HTPMetadataBuilder:
         metadata_path: str,
         opset_version: int = 17,
         output_names: list[str] | None = None,
-        report_path: str | None = None
+        report_path: str | None = None,
     ) -> HTPMetadataBuilder:
         """Set output file information."""
         self._output_files = OutputFiles(
@@ -241,23 +254,23 @@ class HTPMetadataBuilder:
                 path=Path(onnx_path).name,
                 size_mb=onnx_size_mb,
                 opset_version=opset_version,
-                output_names=output_names
+                output_names=output_names,
             ),
-            metadata={"path": Path(metadata_path).name}
+            metadata={"path": Path(metadata_path).name},
         )
-        
+
         # Add report file if provided
         if report_path:
             self._output_files.report = {"path": Path(report_path).name}
-            
+
         return self
-    
+
     def with_export_report(
         self,
         export_time_seconds: float,
         steps: dict[str, Any],
         empty_tags_guarantee: int,
-        coverage_percentage: float
+        coverage_percentage: float,
     ) -> HTPMetadataBuilder:
         """Set export report information."""
         self._export_report = ExportReport(
@@ -265,11 +278,11 @@ class HTPMetadataBuilder:
             steps=steps,
             quality_guarantees=QualityGuarantees(
                 empty_tags_guarantee=empty_tags_guarantee,
-                coverage_guarantee=f"{coverage_percentage:.1f}%"
-            )
+                coverage_guarantee=f"{coverage_percentage:.1f}%",
+            ),
         )
         return self
-    
+
     def with_statistics(
         self,
         export_time: float,
@@ -278,7 +291,7 @@ class HTPMetadataBuilder:
         tagged_nodes: int,
         empty_tags: int,
         coverage_percentage: float,
-        module_types: list[str]
+        module_types: list[str],
     ) -> HTPMetadataBuilder:
         """Set statistics summary."""
         self._statistics = Statistics(
@@ -288,26 +301,28 @@ class HTPMetadataBuilder:
             tagged_nodes=tagged_nodes,
             empty_tags=empty_tags,
             coverage_percentage=coverage_percentage,
-            module_types=module_types
+            module_types=module_types,
         )
         return self
-    
+
     def build(self) -> dict[str, Any]:
         """
         Build the final metadata dictionary.
-        
+
         Returns:
             Complete metadata dictionary ready for JSON serialization.
-            
+
         Raises:
             ValueError: If required fields are missing.
         """
         if self._model_info is None:
-            raise ValueError("Model info is required")
-        
+            msg = "Model info is required"
+            raise ValueError(msg)
+
         if self._output_files is None:
-            raise ValueError("Output files info is required")
-        
+            msg = "Output files info is required"
+            raise ValueError(msg)
+
         # Build the metadata dictionary in the correct order
         metadata = {
             "export_context": asdict(self._export_context),
@@ -317,19 +332,19 @@ class HTPMetadataBuilder:
             "tagging": {
                 "tagged_nodes": self._tagging_info.tagged_nodes,
                 "statistics": self._tagging_info.statistics,
-                "coverage": asdict(self._tagging_info.coverage)
+                "coverage": asdict(self._tagging_info.coverage),
             },
             "outputs": {
                 "onnx_model": asdict(self._output_files.onnx_model),
-                "metadata": self._output_files.metadata
+                "metadata": self._output_files.metadata,
             },
             "report": asdict(self._export_report),
-            "statistics": asdict(self._statistics)
+            "statistics": asdict(self._statistics),
         }
-        
+
         # Clean up None values
         return self._clean_dict(metadata)
-    
+
     def _clean_dict(self, d: dict[str, Any]) -> dict[str, Any]:
         """Remove None values from dictionary recursively."""
         cleaned = {}

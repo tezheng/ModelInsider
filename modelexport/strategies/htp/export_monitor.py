@@ -1,1395 +1,1212 @@
 """
-HTP Export Monitoring System - Comprehensive Fix
+HTP Export Monitor - Simplified with Rich Library
 
-This module provides a unified monitoring system for the HTP export process with:
-- Proper ANSI text styling matching baseline
-- Complete console output capture (no truncation)
-- Full text reports (plain text, no ANSI)
-- Complete metadata with all console data in JSON format
-- Clean design following best practices
+This module provides monitoring for the HTP (Hierarchical Tracing and Projection)
+export process using Rich library for all console output.
 """
+
+from __future__ import annotations
 
 import io
 import json
-import re
 import time
-from collections import Counter, defaultdict
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from enum import Enum
+from io import StringIO
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any, ClassVar
 
 from rich.console import Console
 from rich.text import Text
 from rich.tree import Tree
 
-
 # ============================================================================
 # CONFIGURATION
 # ============================================================================
 
-class Config:
-    """Centralized configuration for export monitor."""
-    
-    # Display limits
-    MAX_TREE_DEPTH = 100  # No truncation
-    MAX_DISPLAY_NODES = 1000  # No truncation
-    TOP_NODES_COUNT = 20  # Changed from 13 to match baseline
-    
-    # Formatting
+
+class HTPExportMonitorConfig:
+    """Configuration constants for HTP Export Monitor.
+
+    TODO: Current config implementation is too aggressive. Many strings that are
+    used only once might not need to be configured. Consider refactoring to only
+    extract frequently used strings, strings that might change, or strings that
+    would benefit from centralization (e.g., for internationalization).
+    """
+
+    # Display settings
+    TOP_NODES_COUNT = 20
     SEPARATOR_LENGTH = 80
-    SEPARATOR_CHAR = "="
-    SUBSEPARATOR_CHAR = "-"
-    
+    MAX_HIERARCHY_LINES = 30  # Maximum lines to display in hierarchy trees
+    TOP_NODES_SEPARATOR_LENGTH = 30
+    SECTION_SEPARATOR_LENGTH = 60
+
     # Console settings
-    CONSOLE_WIDTH = 80
-    FORCE_TERMINAL = True
-    COLOR_SYSTEM = "standard"
-    
-    # File names
+    CONSOLE_WIDTH = 120
+    HEADER_SEPARATOR = "="
+    SECTION_SEPARATOR = "-"
+    TOTAL_STEPS = 6
+
+    # File suffixes
     METADATA_SUFFIX = "_htp_metadata.json"
     REPORT_SUFFIX = "_htp_export_report.txt"
-    CONSOLE_LOG_SUFFIX = "_console.log"
+
+    # Numeric constants
+    MILLION = 1e6
+    PERCENT = 100.0
+    DEFAULT_OPSET_VERSION = 17
+
+    # Report settings
+    TOP_OPERATIONS_COUNT = 10
+
+    # Formatting settings
+    INDENT_SPACES = 3
+
+    # Emojis for steps
+    EMOJI_MODEL_PREP = "📋"
+    EMOJI_INPUT_GEN = "🔧"
+    EMOJI_HIERARCHY = "🏗️"
+    EMOJI_ONNX_EXPORT = "📦"
+    EMOJI_NODE_TAGGING = "🔗"
+    EMOJI_TAG_INJECTION = "🏷️"
+
+    # Other emojis
+    EMOJI_LAUNCH = "🚀"
+    EMOJI_CALENDAR = "📅"
+    EMOJI_RELOAD = "🔄"
+    EMOJI_TARGET = "🎯"
+    EMOJI_SUCCESS = "✅"
+    EMOJI_WARNING = "⚠️"
+    EMOJI_INFO = "📝"
+    EMOJI_ROBOT = "🤖"
+    EMOJI_SEARCH = "🔍"
+    EMOJI_TREE = "🌳"
+    EMOJI_CHART = "📊"
+    EMOJI_CHART_UP = "📈"
+    EMOJI_CONFIG = "🔧"
+    EMOJI_INBOX = "📥"
+    EMOJI_OUTBOX = "📤"
+    EMOJI_SAVE = "💾"
+    EMOJI_FILE = "📁"
+
+    # Step titles
+    TITLE_MODEL_PREP = "MODEL PREPARATION"
+    TITLE_INPUT_GEN = "INPUT GENERATION"
+    TITLE_HIERARCHY = "HIERARCHY BUILDING"
+    TITLE_ONNX_EXPORT = "ONNX EXPORT"
+    TITLE_NODE_TAGGING = "ONNX NODE TAGGING"
+    TITLE_TAG_INJECTION = "TAG INJECTION"
+
+    # Text messages
+    MSG_HTP_EXPORT_PROCESS = "HTP ONNX EXPORT PROCESS"
+    MSG_EXPORT_TIME = "Export Time"
+    MSG_LOADING_MODEL = "Loading model and exporting"
+    MSG_STRATEGY_HTP = "HTP"
+    MSG_STRATEGY_DESC = "(Hierarchical Tracing and Projection)"
+    MSG_STRATEGY_DISABLED = "DISABLED"
+    MSG_CLEAN_ONNX = "(--clean-onnx)"
+    MSG_MODEL_LOADED = "Model loaded"
+    MSG_MODULES = "modules"
+    MSG_PARAMETERS = "parameters"
+    MSG_EXPORT_TARGET = "Export target"
+    MSG_EVAL_MODE = "Model set to evaluation mode"
+    MSG_PROVIDED_INPUTS = "Using provided input specifications"
+    MSG_AUTO_GEN_INPUTS = "Auto-generating inputs for"
+    MSG_MODEL_TYPE = "Model type"
+    MSG_DETECTED_TASK = "Detected task"
+    MSG_GENERATED_INPUTS = "Generated inputs"
+    MSG_SHAPE = "shape"
+    MSG_DTYPE = "dtype"
+    MSG_TRACING_EXECUTION = "Tracing module execution with dummy inputs..."
+    MSG_CAPTURED_MODULES = "Captured"
+    MSG_MODULES_IN_HIERARCHY = "modules in hierarchy"
+    MSG_TOTAL_EXEC_STEPS = "Total execution steps"
+    MSG_MODULE_HIERARCHY = "Module Hierarchy"
+    MSG_EXPORT_CONFIG = "Export configuration"
+    MSG_OPSET_VERSION = "Opset version"
+    MSG_CONSTANT_FOLDING = "Constant folding"
+    MSG_INPUT_NAMES = "Input names"
+    MSG_OUTPUT_NAMES = "Output names"
+    MSG_OUTPUT_NAMES_WARNING = "Not detected"
+    MSG_OUTPUT_NAMES_NOTE = "(model may not have named outputs)"
+    MSG_ONNX_EXPORTED = "ONNX model exported successfully"
+    MSG_MODEL_SIZE = "Model size"
+    MSG_NODE_TAGGING_COMPLETE = "Node tagging completed successfully"
+    MSG_COVERAGE = "Coverage"
+    MSG_TAGGED_NODES = "Tagged nodes"
+    MSG_EMPTY_TAGS = "Empty tags"
+    MSG_TOP_NODES = "Top"
+    MSG_NODES_BY_HIERARCHY = "Nodes by Hierarchy"
+    MSG_NODES = "nodes"
+    MSG_DIRECT_MATCHES = "Direct matches"
+    MSG_PARENT_MATCHES = "Parent matches"
+    MSG_ROOT_FALLBACKS = "Root fallbacks"
+    MSG_COMPLETE_HIERARCHY = "Complete HF Hierarchy with ONNX Nodes"
+    MSG_ONNX_NODES = "ONNX nodes"
+    MSG_OPS = "ops"
+    MSG_INJECTING_TAGS = "Injecting hierarchy tags into ONNX model..."
+    MSG_TAGS_EMBEDDED = "Tags successfully embedded as node attributes"
+    MSG_TAG_INJECTION_SKIPPED = "Hierarchy tag injection skipped (--clean-onnx mode)"
+    MSG_MODEL_SAVED = "Model saved to"
+    MSG_EXPORT_COMPLETE = "EXPORT COMPLETE"
+    MSG_EXPORT_SUMMARY = "Export Summary"
+    MSG_TOTAL_TIME = "Total time"
+    MSG_HIERARCHY_MODULES = "Hierarchy modules"
+    MSG_OUTPUT_FILES = "Output files"
+    MSG_ONNX_MODEL = "ONNX model"
+    MSG_METADATA = "Metadata"
+    MSG_REPORT = "Report"
+    MSG_LINES_TRUNCATED = "... showing first"
+    MSG_LINES = "lines"
+    MSG_TRUNCATED_NOTE = "truncated for console"
+    MSG_TRUE = "True"
+    MSG_FALSE = "False"
+
+    # Report messages
+    MSG_REPORT_HEADER = "HTP ONNX EXPORT REPORT"
+    MSG_TIMESTAMP = "Timestamp"
+    MSG_MODEL = "Model"
+    MSG_OUTPUT = "Output"
+    MSG_STEP = "STEP"
+    MSG_MODEL_CLASS = "Model Class"
+    MSG_TOTAL_MODULES = "Total Modules"
+    MSG_TOTAL_PARAMETERS = "Total Parameters"
+    MSG_CAPTURED_MODULES_REPORT = "Captured Modules"
+    MSG_EXECUTION_STEPS = "Execution Steps"
+    MSG_TOTAL_ONNX_NODES = "Total ONNX Nodes"
+    MSG_TOP_OPERATIONS = "Top Operations"
+    MSG_EXPORT_TIME_REPORT = "Export Time"
+    MSG_EMBED_HIERARCHY = "Embed Hierarchy"
+    MSG_FAILED_WRITE_REPORT = "Failed to write report"
+    MSG_FAILED_WRITE_METADATA = "Failed to write metadata"
 
 
 # ============================================================================
 # DATA MODELS
 # ============================================================================
 
+
 class HTPExportStep(Enum):
-    """Export process steps."""
-    MODEL_PREP = "model_preparation"
-    INPUT_GEN = "input_generation"
-    HIERARCHY = "hierarchy_building"
-    TRACE = "model_tracing"
-    ONNX_EXPORT = "onnx_export"
-    TAGGER_CREATION = "tagger_creation"
-    NODE_TAGGING = "node_tagging"
-    SAVE = "model_save"
-    COMPLETE = "export_complete"
+    """6-step export process (removed TAGGER_CREATION)."""
+
+    MODEL_PREP = "model_preparation"  # Step 1
+    INPUT_GEN = "input_generation"  # Step 2
+    HIERARCHY = "hierarchy_building"  # Step 3
+    ONNX_EXPORT = "onnx_export"  # Step 4
+    NODE_TAGGING = "node_tagging"  # Step 5
+    TAG_INJECTION = "tag_injection"  # Step 6
 
 
 @dataclass
 class HTPExportData:
-    """Container for all export-related data."""
+    """Container for export data."""
+
     # Model info
     model_name: str = ""
     model_class: str = ""
     total_modules: int = 0
     total_parameters: int = 0
-    
+
     # Export config
     output_path: str = ""
-    strategy: str = "htp"
-    embed_hierarchy_attributes: bool = True
-    
-    # Hierarchy data
-    hierarchy: Dict[str, Dict[str, Any]] = None
-    execution_steps: int = 0
-    
-    # ONNX data
-    output_names: List[str] = None
-    onnx_size_mb: float = 0.0
-    
-    # Tagging results
-    total_nodes: int = 0
-    tagged_nodes: Dict[str, str] = None
-    tagging_stats: Dict[str, int] = None
-    coverage: float = 0.0
-    
+    embed_hierarchy: bool = True
+
+    # Step data
+    step_data: dict[str, Any] = field(default_factory=dict)
+
     # Timing
-    timestamp: str = ""
-    elapsed_time: float = 0.0
+    start_time: float = field(default_factory=time.time)
     export_time: float = 0.0
-    
-    # Step-specific data
-    steps: Dict[str, Any] = None
-    
-    # Output paths
-    report_path: Optional[str] = None
-    console_log_path: Optional[str] = None
-    
-    def __post_init__(self):
-        """Initialize mutable defaults."""
-        if self.hierarchy is None:
-            self.hierarchy = {}
-        if self.tagged_nodes is None:
-            self.tagged_nodes = {}
-        if self.tagging_stats is None:
-            self.tagging_stats = {}
-        if self.steps is None:
-            self.steps = {}
-        if self.output_names is None:
-            self.output_names = []
-        if not self.timestamp:
-            self.timestamp = time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
 
 
 # ============================================================================
-# TEXT STYLING UTILITIES
+# EXPORT MONITOR
 # ============================================================================
 
-class TextStyler:
-    """Utilities for ANSI text styling matching baseline."""
-    
-    @staticmethod
-    def bold(text: str) -> str:
-        """Format text as bold."""
-        return f"\033[1m{text}\033[0m"
-    
-    @staticmethod
-    def bold_cyan(text: Union[str, int, float]) -> str:
-        """Format number as bold cyan."""
-        return f"\033[1;36m{text}\033[0m"
-    
-    @staticmethod
-    def bold_parens(content: str) -> str:
-        """Format with bold parentheses."""
-        return f"\033[1m(\033[0m{content}\033[1m)\033[0m"
-    
-    @staticmethod
-    def green_true() -> str:
-        """Format True as italic green."""
-        return "\033[3;92mTrue\033[0m"
-    
-    @staticmethod
-    def red_false() -> str:
-        """Format False as italic red."""
-        return "\033[3;91mFalse\033[0m"
-    
-    @staticmethod
-    def green_string(text: str) -> str:
-        """Format string as green."""
-        return f"\033[32m'{text}'\033[0m"
-    
-    @staticmethod
-    def green(text: str) -> str:
-        """Format text as green (alias for compatibility)."""
-        return f"\033[32m{text}\033[0m"
-    
-    @staticmethod
-    def magenta_path(path: str) -> str:
-        """Format path as magenta."""
-        return f"\033[35m{path}\033[0m"
-    
-    @staticmethod
-    def magenta(text: str) -> str:
-        """Format text as magenta (alias for compatibility)."""
-        return f"\033[35m{text}\033[0m"
-    
-    @staticmethod
-    def bright_magenta(text: str) -> str:
-        """Format text as bright magenta."""
-        return f"\033[95m{text}\033[0m"
-    
-    @staticmethod
-    def red(text: str) -> str:
-        """Format text as red."""
-        return f"\033[91m{text}\033[0m"
-    
-    @staticmethod
-    def yellow(text: str) -> str:
-        """Format text as yellow."""
-        return f"\033[33m{text}\033[0m"
-    
-    @staticmethod
-    def format_bool(value: bool) -> str:
-        """Format boolean with color."""
-        return TextStyler.green_true() if value else TextStyler.red_false()
-    
-    @staticmethod
-    def format_boolean(value: bool) -> str:
-        """Format boolean with color (alias for compatibility)."""
-        return TextStyler.format_bool(value)
-    
-    @staticmethod
-    def format_step_header(step_num: int, total: int, title: str, icon: str = "📋") -> str:
-        """Format step header with styled numbers and custom icon."""
-        return (f"{icon} STEP {TextStyler.bold_cyan(step_num)}/"
-                f"{TextStyler.bold_cyan(total)}: {title}")
-    
-    @staticmethod
-    def strip_ansi(text: str) -> str:
-        """Remove all ANSI escape codes from text."""
-        ansi_escape = re.compile(r'\x1B(?:[@-Z\\-_]|\[[0-?]*[ -/]*[@-~])')
-        return ansi_escape.sub('', text)
-
-
-# ============================================================================
-# BASE WRITER CLASS
-# ============================================================================
-
-class StepAwareWriter:
-    """Base class for step-aware writers."""
-    
-    def __init__(self):
-        self._step_handlers = {}
-        self._register_handlers()
-    
-    def _register_handlers(self):
-        """Register step handlers from decorated methods."""
-        for attr_name in dir(self):
-            attr = getattr(self, attr_name)
-            if hasattr(attr, '_export_step'):
-                self._step_handlers[attr._export_step] = attr
-    
-    def write(self, export_step: HTPExportStep, data: HTPExportData) -> int:
-        """Write data for the given export step."""
-        handler = self._step_handlers.get(export_step, self._write_default)
-        return handler(export_step, data)
-    
-    def _write_default(self, export_step: HTPExportStep, data: HTPExportData) -> int:
-        """Default handler for unregistered steps."""
-        return 0
-    
-    def flush(self) -> None:
-        """Flush any buffered data. Override in subclasses."""
-        pass
-
-
-def step(export_step: HTPExportStep):
-    """Decorator to register a method as handler for an export step."""
-    def decorator(func):
-        func._export_step = export_step
-        return func
-    return decorator
-
-
-# ============================================================================
-# CONSOLE WRITER WITH PROPER STYLING
-# ============================================================================
-
-class HTPConsoleWriter(StepAwareWriter):
-    """Console output writer with proper ANSI styling."""
-    
-    def __init__(self, console: Console = None, verbose: bool = True, 
-                 capture_buffer: io.StringIO = None):
-        super().__init__()
-        self.console = console or Console(
-            width=Config.CONSOLE_WIDTH,
-            force_terminal=Config.FORCE_TERMINAL,
-            legacy_windows=False,
-            color_system=Config.COLOR_SYSTEM
-        )
-        self.verbose = verbose
-        self.capture_buffer = capture_buffer  # For capturing output
-        self._total_steps = 8
-    
-    def _print(self, text: str, **kwargs):
-        """Print to console and capture buffer."""
-        if self.verbose:
-            # Write directly to console file to preserve ANSI codes
-            self.console.file.write(text + "\n")
-            
-            # Also capture to buffer if provided
-            if self.capture_buffer:
-                self.capture_buffer.write(text + "\n")
-    
-    def _get_step_icon(self, step: HTPExportStep) -> str:
-        """Get icon for export step matching baseline."""
-        icon_map = {
-            HTPExportStep.MODEL_PREP: "📋",
-            HTPExportStep.INPUT_GEN: "🔧",
-            HTPExportStep.HIERARCHY: "🏗️",
-            HTPExportStep.ONNX_EXPORT: "📦",
-            HTPExportStep.TAGGER_CREATION: "🏷️",
-            HTPExportStep.NODE_TAGGING: "🔗",
-            HTPExportStep.SAVE: "🏷️",
-            HTPExportStep.COMPLETE: "📄"
-        }
-        return icon_map.get(step, "📋")
-    
-    def _print_separator(self):
-        """Print section separator."""
-        self._print(Config.SEPARATOR_CHAR * Config.SEPARATOR_LENGTH)
-    
-    def _print_header(self, text: str):
-        """Print section header."""
-        self._print("")
-        self._print_separator()
-        self._print(text)
-        self._print_separator()
-    
-    @step(HTPExportStep.MODEL_PREP)
-    def write_model_prep(self, export_step: HTPExportStep, data: HTPExportData) -> int:
-        """Step 1: Model preparation with proper styling."""
-        if not self.verbose:
-            return 0
-        
-        # Initial messages (only print once)
-        if not hasattr(self, '_initial_printed'):
-            if data.model_name:
-                self._print(f"🔄 Loading model and exporting: {data.model_name}")
-            
-            # Strategy line with special formatting
-            strategy_line = f"🧠 Using HTP {TextStyler.bold_parens('Hierarchical Trace-and-Project')} strategy"
-            self._print(strategy_line)
-            self._initial_printed = True
-            
-            # Extra newline after initial messages
-            self._print("")
-        
-        if data.model_name:
-            self._print(f"Auto-loading model from: {data.model_name}")
-            self._print(f"Successfully loaded {data.model_class}")
-            self._print(f"Starting HTP export for {data.model_class}")
-        
-        # Step header with correct icon
-        icon = self._get_step_icon(HTPExportStep.MODEL_PREP)
-        self._print_header(TextStyler.format_step_header(1, self._total_steps, "MODEL PREPARATION", icon))
-        
-        # Model info with styled numbers - format like baseline (4.4M not 4.38592M)
-        params_str = f"{data.total_parameters/1e6:.1f}"
-        model_line = (f"✅ Model loaded: {data.model_class} "
-                     f"{TextStyler.bold_parens(f'{TextStyler.bold_cyan(data.total_modules)} modules, '
-                     f'{TextStyler.bold_cyan(params_str)}M parameters')}")
-        self._print(model_line)
-        
-        # Use output path from console writer if available
-        export_target = getattr(self, '_output_path', data.output_path)
-        self._print(f"🎯 Export target: {export_target}")
-        self._print(f"⚙️ Strategy: HTP {TextStyler.bold_parens('Hierarchy-Preserving')}")
-        self._print("✅ Model set to evaluation mode")
-        return 1
-    
-    @step(HTPExportStep.INPUT_GEN)
-    def write_input_gen(self, export_step: HTPExportStep, data: HTPExportData) -> int:
-        """Step 2: Input generation with styled output."""
-        if not self.verbose:
-            return 0
-        
-        icon = self._get_step_icon(HTPExportStep.INPUT_GEN)
-        self._print_header(TextStyler.format_step_header(2, self._total_steps, 
-                                                         "INPUT GENERATION & VALIDATION", icon))
-        
-        if "input_generation" in data.steps:
-            step_data = data.steps["input_generation"]
-            self._print(f"🤖 Auto-generating inputs for: {data.model_name}")
-            self._print(f"   • Model type: {step_data.get('model_type', 'unknown')}")
-            self._print(f"   • Auto-detected task: {step_data.get('task', 'unknown')}")
-            
-            if "model_type" in step_data and "task" in step_data:
-                self._print(f"✅ Created onnx export config for {step_data['model_type']} "
-                          f"with task {step_data['task']}")
-            
-            # Input tensors with styled count
-            inputs = step_data.get("inputs", {})
-            if inputs:
-                self._print(f"🔧 Generated {TextStyler.bold_cyan(len(inputs))} input tensors:")
-                
-                for name, spec in inputs.items():
-                    # Format shape with bold brackets and cyan numbers
-                    shape = spec.get("shape", [])
-                    shape_str = TextStyler.bold("[")
-                    shape_str += ", ".join(TextStyler.bold_cyan(dim) for dim in shape)
-                    shape_str += TextStyler.bold("]")
-                    
-                    # Format dtype with bold parentheses
-                    dtype_str = TextStyler.bold_parens(spec.get("dtype", "unknown"))
-                    
-                    self._print(f"   • {name}: {shape_str} {dtype_str}")
-        
-        return 1
-    
-    @step(HTPExportStep.HIERARCHY)
-    def write_hierarchy(self, export_step: HTPExportStep, data: HTPExportData) -> int:
-        """Step 3: Hierarchy building with full tree."""
-        if not self.verbose:
-            return 0
-        
-        icon = self._get_step_icon(HTPExportStep.HIERARCHY)
-        self._print_header(TextStyler.format_step_header(3, self._total_steps, "HIERARCHY BUILDING", icon))
-        
-        self._print("✅ Hierarchy building completed with TracingHierarchyBuilder")
-        
-        # Get hierarchy from step data if not in main data
-        hierarchy = data.hierarchy
-        if not hierarchy and hasattr(data, 'steps') and 'hierarchy_building' in data.steps:
-            hierarchy = data.steps['hierarchy_building'].get('hierarchy', {})
-        
-        self._print(f"📈 Traced {TextStyler.bold_cyan(len(hierarchy))} modules")
-        self._print(f"🔄 Execution steps: {TextStyler.bold_cyan(data.execution_steps)}")
-        
-        # Print full hierarchy tree
-        self._print("\n🌳 Module Hierarchy:")
-        self._print("-" * 60)
-        self._print_hierarchy_tree(hierarchy)
-        
-        return 1
-    
-    def _print_hierarchy_tree(self, hierarchy: Dict[str, Dict[str, Any]]) -> None:
-        """Print the complete module hierarchy tree matching baseline format."""
-        # Find root
-        root_info = hierarchy.get("", {})
-        root_name = root_info.get("class_name", "Model")
-        self._print(root_name)
-        
-        # Create a sorted list of all paths for consistent ordering
-        all_paths = sorted(hierarchy.keys())
-        
-        def get_indent_level(path: str) -> int:
-            """Get the indentation level based on path depth."""
-            if not path:
-                return 0
-            return path.count('.')
-        
-        def find_direct_children(parent_path: str) -> List[str]:
-            """Find all direct children of a path, handling intermediate missing paths."""
-            children = []
-            
-            for path in all_paths:
-                if path == parent_path or not path:
-                    continue
-                    
-                # Check if this path is under the parent
-                if parent_path == "":
-                    # For root, check top-level paths
-                    if '.' not in path:
-                        children.append(path)
-                elif path.startswith(parent_path + '.'):
-                    # Get the remaining path after parent
-                    remaining = path[len(parent_path) + 1:]
-                    
-                    # Find the next component
-                    next_dot = remaining.find('.')
-                    if next_dot == -1:
-                        # Direct child (e.g., encoder -> encoder.layer)
-                        children.append(path)
-                    else:
-                        # Check if there's an intermediate missing path
-                        # e.g., encoder -> encoder.layer.0 (encoder.layer doesn't exist)
-                        intermediate = parent_path + '.' + remaining[:next_dot]
-                        if intermediate not in hierarchy:
-                            # The intermediate doesn't exist
-                            # Only include if this is the next level (one missing intermediate)
-                            # Count dots to ensure we're only one level deeper
-                            parent_dots = parent_path.count('.') if parent_path else 0
-                            path_dots = path.count('.')
-                            if path_dots == parent_dots + 2:  # One missing level
-                                children.append(path)
-            
-            return sorted(set(children))  # Remove duplicates
-        
-        def print_module_subtree(path: str, prefix: str = "", is_last: bool = True):
-            """Print a module and its subtree."""
-            if path:  # Don't print root again
-                info = hierarchy.get(path, {})
-                class_name = info.get("class_name", "Unknown")
-                
-                # Tree connector
-                connector = "└── " if is_last else "├── "
-                
-                # Style numbers in path for display
-                display_path = path
-                display_path = re.sub(r'\.(\d+)', lambda m: f'.{TextStyler.bold_cyan(m.group(1))}', display_path)
-                
-                # Print the line
-                self._print(f"{prefix}{connector}{class_name}: {display_path}")
-            
-            # Find and print children
-            children = find_direct_children(path)
-            for i, child in enumerate(children):
-                is_last_child = (i == len(children) - 1)
-                
-                # Determine new prefix
-                if path:  # Not root
-                    new_prefix = prefix + ("    " if is_last else "│   ")
-                else:
-                    new_prefix = ""
-                    
-                print_module_subtree(child, new_prefix, is_last_child)
-        
-        # Start printing from root
-        print_module_subtree("", "", True)
-    
-    @step(HTPExportStep.ONNX_EXPORT)
-    def write_onnx_export(self, export_step: HTPExportStep, data: HTPExportData) -> int:
-        """Step 4: ONNX export with styled config."""
-        if not self.verbose:
-            return 0
-        
-        icon = self._get_step_icon(HTPExportStep.ONNX_EXPORT)
-        self._print_header(TextStyler.format_step_header(4, self._total_steps, "ONNX EXPORT", icon))
-        
-        # Use output path from console writer if available
-        target_file = getattr(self, '_output_path', data.output_path)
-        self._print(f"🎯 Target file: {target_file}")
-        
-        # Export config with styled values
-        self._print("⚙️ Export config:")
-        
-        # Get config from step data
-        if "onnx_export" in data.steps:
-            step_data = data.steps["onnx_export"]
-            opset = step_data.get("opset_version", 17)
-            folding = step_data.get("do_constant_folding", True)
-            verbose = step_data.get("verbose", False)
-            input_names = step_data.get("input_names", [])
-        else:
-            opset = 17
-            folding = True
-            verbose = False
-            input_names = []
-            
-        self._print(f"   • opset_version: {TextStyler.bold_cyan(opset)}")
-        self._print(f"   • do_constant_folding: {TextStyler.format_bool(folding)}")
-        self._print(f"   • verbose: {TextStyler.format_bool(verbose)}")
-        
-        # Input names with green strings
-        if input_names:
-            names_str = TextStyler.bold("[")
-            names_str += ", ".join(TextStyler.green_string(name) for name in input_names)
-            names_str += TextStyler.bold("]")
-            self._print(f"   • input_names: {names_str}")
-        
-        self._print("✅ ONNX export completed successfully")
-        return 1
-    
-    @step(HTPExportStep.TAGGER_CREATION)
-    def write_tagger_creation(self, export_step: HTPExportStep, data: HTPExportData) -> int:
-        """Step 5: Node tagger creation."""
-        if not self.verbose:
-            return 0
-        
-        icon = self._get_step_icon(HTPExportStep.TAGGER_CREATION)
-        self._print_header(TextStyler.format_step_header(5, self._total_steps, "NODE TAGGER CREATION", icon))
-        
-        self._print("✅ Node tagger created successfully")
-        
-        # Model root tag with styled path and class
-        root_tag = data.steps.get("tagger_creation", {}).get("root_tag", "/Model")
-        if "/" in root_tag:
-            path, class_name = root_tag.rsplit("/", 1)
-            styled_tag = f"{TextStyler.magenta_path(path + '/')}{TextStyler.bright_magenta(class_name)}"
-        else:
-            styled_tag = TextStyler.bright_magenta(root_tag)
-        
-        self._print(f"🏷️ Model root tag: {styled_tag}")
-        self._print("🔧 Operation fallback: disabled")
-        return 1
-    
-    @step(HTPExportStep.NODE_TAGGING)
-    def write_node_tagging(self, export_step: HTPExportStep, data: HTPExportData) -> int:
-        """Step 6: Node tagging with full statistics."""
-        if not self.verbose:
-            return 0
-        
-        icon = self._get_step_icon(HTPExportStep.NODE_TAGGING)
-        self._print_header(TextStyler.format_step_header(6, self._total_steps, "ONNX NODE TAGGING", icon))
-        
-        self._print("✅ Node tagging completed successfully")
-        # Calculate coverage here if not provided
-        coverage = data.coverage if data.coverage > 0 else 100.0  # Default to 100% for HTP
-        self._print(f"📈 Coverage: {TextStyler.bold_cyan(f'{coverage:.1f}')}%")
-        self._print(f"📊 Tagged nodes: {TextStyler.bold_cyan(len(data.tagged_nodes))}"
-                   f"/{TextStyler.bold_cyan(data.total_nodes)}")
-        
-        # Tagging statistics with styled numbers and percentages
-        stats = data.tagging_stats
-        if stats and data.total_nodes > 0:
-            direct = stats.get("direct_matches", 0)
-            parent = stats.get("parent_matches", 0)
-            root = stats.get("root_fallbacks", 0)
-            
-            direct_pct = f"{direct/data.total_nodes*100:.1f}"
-            parent_pct = f"{parent/data.total_nodes*100:.1f}"
-            root_pct = f"{root/data.total_nodes*100:.1f}"
-            
-            self._print(f"   • Direct matches: {TextStyler.bold_cyan(direct)} "
-                       f"{TextStyler.bold_parens(f'{TextStyler.bold_cyan(direct_pct)}%')}")
-            self._print(f"   • Parent matches: {TextStyler.bold_cyan(parent)} "
-                       f"{TextStyler.bold_parens(f'{TextStyler.bold_cyan(parent_pct)}%')}")
-            self._print(f"   • Root fallbacks: {TextStyler.bold_cyan(root)} "
-                       f"{TextStyler.bold_parens(f'{TextStyler.bold_cyan(root_pct)}%')}")
-        
-        empty_tags = stats.get("empty_tags", 0)
-        self._print(f"✅ Empty tags: {TextStyler.bold_cyan(empty_tags)}")
-        
-        # Top nodes by hierarchy
-        self._print_top_nodes(data.tagged_nodes)
-        
-        # Full hierarchy with ONNX nodes
-        self._print_hierarchy_with_nodes(data.hierarchy, data.tagged_nodes)
-        
-        return 1
-    
-    def _print_top_nodes(self, tagged_nodes: Dict[str, str]) -> None:
-        """Print top nodes by hierarchy."""
-        tag_counts = Counter(tagged_nodes.values())
-        top_tags = tag_counts.most_common(Config.TOP_NODES_COUNT)
-        
-        if top_tags:
-            display_count = min(len(top_tags), Config.TOP_NODES_COUNT)
-            # Always show 20 even if we have fewer
-            self._print(f"\n📊 Top {TextStyler.bold_cyan(Config.TOP_NODES_COUNT)} "
-                       f"Nodes by Hierarchy:")
-            self._print("-" * 30)
-            
-            for i, (tag, count) in enumerate(top_tags[:Config.TOP_NODES_COUNT], 1):
-                # Style the tag path and class
-                if "/" in tag:
-                    parts = tag.split("/")
-                    path = "/".join(parts[:-1])
-                    class_name = parts[-1]
-                    styled_tag = f"{TextStyler.magenta_path(path + '/')}{TextStyler.bright_magenta(class_name)}"
-                else:
-                    styled_tag = TextStyler.bright_magenta(tag)
-                
-                rank_str = f"{i:>2}"
-                self._print(f"{TextStyler.bold_cyan(rank_str)}. {styled_tag}: {TextStyler.bold_cyan(count)} nodes")
-    
-    def _print_hierarchy_with_nodes(self, hierarchy: Dict[str, Dict[str, Any]], 
-                                   tagged_nodes: Dict[str, str]) -> None:
-        """Print complete hierarchy with ONNX node details."""
-        self._print("\n🌳 Complete HF Hierarchy with ONNX Nodes:")
-        self._print("-" * 60)
-        
-        # Group nodes by tag and operation
-        nodes_by_tag = defaultdict(lambda: defaultdict(list))
-        for node_name, tag in tagged_nodes.items():
-            op_type = node_name.split('_')[0] if '_' in node_name else node_name
-            nodes_by_tag[tag][op_type].append(node_name)
-        
-        # Track lines for truncation
-        lines_to_print = []
-        
-        def add_line(line: str):
-            lines_to_print.append(line)
-        
-        def print_module_and_ops(path: str, prefix: str = "", is_last: bool = True):
-            info = hierarchy.get(path, {})
-            class_name = info.get("class_name", "Unknown")
-            tag = info.get("traced_tag", "")
-            
-            # Count nodes for this module
-            # For display purposes, show the total count of all nodes under this module
-            if path:
-                # Count all nodes with tags that start with this module's tag
-                module_tag_prefix = tag
-                node_count = len([n for n, t in tagged_nodes.items() if t.startswith(module_tag_prefix)])
-            else:
-                # For root, count all nodes
-                node_count = len(tagged_nodes)
-            
-            # Print module line
-            if path:  # Not root
-                connector = "└── " if is_last else "├── "
-                styled_path = re.sub(r'\.(\d+)', lambda m: f'.{TextStyler.bold_cyan(m.group(1))}', path)
-                add_line(f"{prefix}{connector}{class_name}: {styled_path} {TextStyler.bold_parens(f'{TextStyler.bold_cyan(node_count)} nodes')}")
-                new_prefix = prefix + ("    " if is_last else "│   ")
-            else:
-                # Root - count all nodes
-                total_nodes = len(tagged_nodes)
-                add_line(f"{class_name} {TextStyler.bold_parens(f'{TextStyler.bold_cyan(total_nodes)} ONNX nodes')}")
-                new_prefix = ""
-            
-            # Find children - handle compound components like layer.0
-            children = []
-            if path == "":
-                # Root level - find all paths with no dots
-                children = [p for p in hierarchy if p and "." not in p]
-            else:
-                # Find immediate children of this path
-                prefix = path + "."
-                potential_children = set()
-                
-                for p in hierarchy:
-                    if p.startswith(prefix) and p != path:
-                        remainder = p[len(prefix):]
-                        
-                        if remainder:
-                            # For compound components like layer.0, find the immediate child
-                            if "." in remainder:
-                                # Try to find the immediate child by checking what paths exist
-                                parts = remainder.split(".")
-                                for i in range(1, len(parts) + 1):
-                                    potential_child = prefix + ".".join(parts[:i])
-                                    if potential_child in hierarchy and potential_child not in potential_children:
-                                        # Check if this is immediate (no intermediate paths)
-                                        is_immediate = True
-                                        for other in hierarchy:
-                                            if (other.startswith(prefix) and 
-                                                other != path and 
-                                                other != potential_child and
-                                                potential_child.startswith(other + ".")):
-                                                is_immediate = False
-                                                break
-                                        if is_immediate:
-                                            potential_children.add(potential_child)
-                                            break
-                            else:
-                                # Simple child
-                                child_path = prefix + remainder
-                                if child_path in hierarchy:
-                                    potential_children.add(child_path)
-                
-                children = sorted(list(potential_children))
-            
-            # Special sort to handle numeric indices and maintain order like baseline
-            def sort_key(p):
-                parts = p.split(".")
-                result = []
-                for part in parts:
-                    # Try to convert numeric parts to int for proper sorting
-                    try:
-                        result.append((0, int(part)))
-                    except ValueError:
-                        # For string parts, use special ordering for attention components
-                        # to match baseline where "self" comes before "output"
-                        if part == "self":
-                            result.append((1, "a_self"))  # Sort self first
-                        elif part == "output":
-                            result.append((1, "z_output"))  # Sort output last
-                        else:
-                            result.append((1, part))
-                return result
-            
-            children.sort(key=sort_key)
-            
-            # For modules with operations, print operations first (if any)
-            # Skip operations for root module as per baseline
-            if tag in nodes_by_tag and node_count > 0 and path != "":
-                # Check if this module has direct operations (not just from children)
-                has_direct_ops = True
-                if children:
-                    # Calculate operations that belong to children
-                    child_tags = [hierarchy.get(c, {}).get("traced_tag", "") for c in children]
-                    child_node_count = sum(len([n for n, t in tagged_nodes.items() if t == ct]) for ct in child_tags)
-                    if child_node_count >= node_count:
-                        # All operations belong to children
-                        has_direct_ops = False
-                
-                if has_direct_ops:
-                    # Group operations by type
-                    ops_by_type = defaultdict(list)
-                    for node_name in [n for n, t in tagged_nodes.items() if t == tag]:
-                        # Extract operation type from node name
-                        if "/" in node_name:
-                            parts = node_name.split("/")
-                            op_type = parts[-1].split("_")[0] if "_" in parts[-1] else parts[-1]
-                        else:
-                            op_type = node_name.split("_")[0] if "_" in node_name else node_name
-                        ops_by_type[op_type].append(node_name)
-                    
-                    # Print each operation type
-                    op_items = sorted(ops_by_type.items())
-                    for i, (op_type, op_nodes) in enumerate(op_items):
-                        is_last_op = (i == len(op_items) - 1) and len(children) == 0
-                        op_connector = "└── " if is_last_op else "├── "
-                        
-                        if len(op_nodes) > 1:
-                            add_line(f"{new_prefix}{op_connector}{op_type} {TextStyler.bold_parens(f'{TextStyler.bold_cyan(len(op_nodes))} ops')}")
-                        else:
-                            # Single op - check if it needs full path
-                            node_name = op_nodes[0]
-                            if any(x in node_name for x in ["LayerNorm", "Gather", "Gemm", "Tanh", "Div", "Shape", "Slice", "Softmax", "MatMul", "Add"]):
-                                if "/" in node_name:
-                                    path_parts = node_name.split("/")
-                                    styled = TextStyler.magenta_path("/".join(path_parts[:-1]) + "/") + TextStyler.bright_magenta(path_parts[-1])
-                                    add_line(f"{new_prefix}{op_connector}{op_type}: {styled}")
-                                else:
-                                    add_line(f"{new_prefix}{op_connector}{op_type}")
-                            else:
-                                add_line(f"{new_prefix}{op_connector}{op_type}")
-            
-            # Then print children
-            for i, child in enumerate(children):
-                is_last_child = (i == len(children) - 1)
-                print_module_and_ops(child, new_prefix, is_last_child)
-        
-        # Start from root
-        print_module_and_ops("")
-        
-        # Now print the collected lines with truncation
-        MAX_HIERARCHY_LINES = 30  # Match baseline
-        total_lines = len(lines_to_print)
-        
-        if total_lines <= MAX_HIERARCHY_LINES:
-            # Print all lines if under limit
-            for line in lines_to_print:
-                self._print(line)
-        else:
-            # Print first MAX_HIERARCHY_LINES lines, then truncation message
-            for i in range(MAX_HIERARCHY_LINES):
-                self._print(lines_to_print[i])
-            
-            remaining = total_lines - MAX_HIERARCHY_LINES
-            self._print(f"{TextStyler.yellow('...')} and {TextStyler.bold_cyan(remaining)} more lines "
-                       f"{TextStyler.bold_parens('truncated for console')}")
-            self._print(f"{TextStyler.bold_parens(f'showing {TextStyler.bold_cyan(MAX_HIERARCHY_LINES)}/'
-                                                f'{TextStyler.bold_cyan(total_lines)} lines')}")
-    
-    @step(HTPExportStep.SAVE)
-    def write_save(self, export_step: HTPExportStep, data: HTPExportData) -> int:
-        """Step 7: Save ONNX model."""
-        if not self.verbose:
-            return 0
-        
-        icon = self._get_step_icon(HTPExportStep.SAVE)
-        self._print_header(TextStyler.format_step_header(7, self._total_steps, "TAG INJECTION", icon))
-        
-        self._print(f"🏷️ Hierarchy tag attributes: {'enabled' if data.embed_hierarchy_attributes else 'disabled'}")
-        self._print("✅ Tags injected into ONNX model successfully")
-        # Use output path from console writer if available
-        onnx_file = getattr(self, '_output_path', data.output_path)
-        self._print(f"📄 Updated ONNX file: {onnx_file}")
-        
-        return 1
-    
-    @step(HTPExportStep.COMPLETE)
-    def write_complete(self, export_step: HTPExportStep, data: HTPExportData) -> int:
-        """Step 8: Export complete with summary."""
-        if not self.verbose:
-            return 0
-        
-        icon = self._get_step_icon(HTPExportStep.COMPLETE)
-        self._print_header(TextStyler.format_step_header(8, self._total_steps, "METADATA GENERATION", icon))
-        
-        self._print("✅ Metadata file created successfully")
-        if data.output_path:
-            metadata_path = str(Path(data.output_path).with_suffix('')) + "_htp_metadata.json"
-            self._print(f"📄 Metadata file: {metadata_path}")
-        
-        # Add the final export summary as a separate section
-        self._print("")
-        self._print_header("📋 FINAL EXPORT SUMMARY")
-        
-        # Format time properly (e.g., 4.83s not 61.09s)
-        time_str = f"{data.export_time:.2f}" if data.export_time < 10 else f"{data.export_time:.0f}"
-        self._print(f"🎉 HTP Export completed successfully in {TextStyler.bold_cyan(time_str)}s!")
-        
-        self._print("📊 Export Statistics:")
-        # Format time properly
-        time_str = f"{data.export_time:.2f}" if data.export_time < 10 else f"{data.export_time:.0f}"
-        self._print(f"   • Export time: {TextStyler.bold_cyan(time_str)}s")
-        self._print(f"   • Hierarchy modules: {TextStyler.bold_cyan(len(data.hierarchy))}")
-        self._print(f"   • ONNX nodes: {TextStyler.bold_cyan(data.total_nodes)}")
-        self._print(f"   • Tagged nodes: {TextStyler.bold_cyan(len(data.tagged_nodes))}")
-        self._print(f"   • Coverage: {TextStyler.bold_cyan(f'{data.coverage:.1f}')}%")
-        self._print(f"   • Empty tags: {TextStyler.bold_cyan(0)} ✅")
-        
-        # Output files
-        self._print("")
-        self._print("📁 Output Files:")
-        output_path = getattr(self, '_output_path', data.output_path)
-        if output_path:
-            self._print(f"   • ONNX model: {output_path}")
-            metadata_path = str(Path(output_path).with_suffix('')) + "_htp_metadata.json"
-            report_path = str(Path(output_path).with_suffix('')) + "_htp_export_report.txt"
-            self._print(f"   • Metadata: {metadata_path}")
-            self._print(f"   • Report: {report_path}")
-        
-        return 1
-
-
-# ============================================================================
-# METADATA WRITER WITH COMPLETE REPORT SECTION
-# ============================================================================
-
-class HTPMetadataWriter(StepAwareWriter):
-    """JSON metadata writer with complete report section."""
-    
-    def __init__(self, output_path: str):
-        super().__init__()
-        self.output_path = Path(output_path).with_suffix("").as_posix()
-        self.metadata_path = f"{self.output_path}{Config.METADATA_SUFFIX}"
-        self.metadata = {
-            "export_context": {},
-            "model": {},
-            "modules": {},
-            "nodes": {},
-            "outputs": {},
-            "report": {"steps": {}}
-        }
-    
-    @step(HTPExportStep.MODEL_PREP)
-    def write_model_prep(self, export_step: HTPExportStep, data: HTPExportData) -> int:
-        """Record detailed model preparation info."""
-        self.metadata["export_context"] = {
-            "timestamp": data.timestamp,
-            "strategy": data.strategy,
-            "version": "1.0",
-            "exporter": "HTPExporter",
-            "embed_hierarchy_attributes": data.embed_hierarchy_attributes
-        }
-        
-        self.metadata["model"] = {
-            "name_or_path": data.model_name,
-            "class": data.model_class,
-            "framework": "transformers",
-            "total_modules": data.total_modules,
-            "total_parameters": data.total_parameters
-        }
-        
-        # Complete report section
-        self.metadata["report"]["steps"]["model_preparation"] = {
-            "model_class": data.model_class,
-            "total_modules": data.total_modules,
-            "total_parameters": data.total_parameters,
-            "parameters_formatted": f"{data.total_parameters/1e6:.1f}M",
-            "export_target": data.output_path,
-            "strategy": f"{data.strategy.upper()} (Hierarchy-Preserving)",
-            "embed_hierarchy_attributes": data.embed_hierarchy_attributes,
-            "evaluation_mode": True,
-            "timestamp": data.timestamp
-        }
-        
-        return 1
-    
-    @step(HTPExportStep.INPUT_GEN)
-    def write_input_gen(self, export_step: HTPExportStep, data: HTPExportData) -> int:
-        """Record detailed input generation info."""
-        if "input_generation" in data.steps:
-            step_data = data.steps["input_generation"]
-            
-            if "tracing" not in self.metadata:
-                self.metadata["tracing"] = {}
-            
-            self.metadata["tracing"].update({
-                "model_type": step_data.get("model_type", "unknown"),
-                "task": step_data.get("task", "unknown"),
-                "inputs": step_data.get("inputs", {}),
-                "outputs": data.output_names
-            })
-            
-            # Complete report section
-            self.metadata["report"]["steps"]["input_generation"] = {
-                "model_name": data.model_name,
-                "model_type": step_data.get("model_type", "unknown"),
-                "task": step_data.get("task", "unknown"),
-                "auto_detected_task": step_data.get("task", "unknown"),
-                "config_created": True,
-                "inputs_generated": {
-                    "count": len(step_data.get("inputs", {})),
-                    "tensors": step_data.get("inputs", {})
-                },
-                "output_names": data.output_names,
-                "timestamp": data.timestamp
-            }
-        
-        return 1
-    
-    @step(HTPExportStep.HIERARCHY)
-    def write_hierarchy(self, export_step: HTPExportStep, data: HTPExportData) -> int:
-        """Record complete hierarchy data."""
-        self.metadata["modules"] = data.hierarchy.copy()
-        
-        if "tracing" not in self.metadata:
-            self.metadata["tracing"] = {}
-        
-        self.metadata["tracing"].update({
-            "builder": "TracingHierarchyBuilder",
-            "modules_traced": len(data.hierarchy),
-            "execution_steps": data.execution_steps
-        })
-        
-        # Build hierarchy tree structure for report
-        tree_structure = self._build_tree_structure(data.hierarchy)
-        
-        # Calculate hierarchy depth safely
-        hierarchy_depth = 0
-        if data.hierarchy:
-            non_empty_paths = [p for p in data.hierarchy if p]
-            if non_empty_paths:
-                hierarchy_depth = max(len(p.split('.')) for p in non_empty_paths)
-        
-        self.metadata["report"]["steps"]["hierarchy_building"] = {
-            "builder": "TracingHierarchyBuilder",
-            "modules_traced": len(data.hierarchy),
-            "execution_steps": data.execution_steps,
-            "hierarchy_depth": hierarchy_depth,
-            "module_tree": tree_structure,
-            "timestamp": data.timestamp
-        }
-        
-        return 1
-    
-    def _build_tree_structure(self, hierarchy: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
-        """Build tree structure for metadata."""
-        root_info = hierarchy.get("", {})
-        root_name = root_info.get("class_name", "Model")
-        
-        tree = {
-            "root": root_name,
-            "total_modules": len(hierarchy),
-            "modules": {}
-        }
-        
-        # Build nested structure
-        for path, info in hierarchy.items():
-            if not path:
-                continue
-            
-            parts = path.split(".")
-            current = tree["modules"]
-            
-            for i, part in enumerate(parts):
-                current_path = ".".join(parts[:i+1])
-                if part not in current:
-                    current[part] = {
-                        "class": hierarchy.get(current_path, {}).get("class_name", "Unknown"),
-                        "path": current_path,
-                        "children": {}
-                    }
-                current = current[part]["children"]
-        
-        return tree
-    
-    @step(HTPExportStep.ONNX_EXPORT)
-    def write_onnx_export(self, export_step: HTPExportStep, data: HTPExportData) -> int:
-        """Record detailed ONNX export info."""
-        export_config = data.steps.get("onnx_export", {}).get("config", {})
-        
-        self.metadata["report"]["steps"]["onnx_export"] = {
-            "target_file": data.output_path,
-            "opset_version": export_config.get("opset_version", 17),
-            "do_constant_folding": export_config.get("do_constant_folding", True),
-            "verbose": export_config.get("verbose", False),
-            "input_names": export_config.get("input_names", []),
-            "output_names": data.output_names,
-            "dynamic_axes": export_config.get("dynamic_axes"),
-            "export_successful": True,
-            "file_size_mb": data.onnx_size_mb,
-            "timestamp": data.timestamp
-        }
-        
-        return 1
-    
-    @step(HTPExportStep.TAGGER_CREATION)
-    def write_tagger_creation(self, export_step: HTPExportStep, data: HTPExportData) -> int:
-        """Record tagger creation details."""
-        tagger_info = data.steps.get("tagger_creation", {})
-        
-        self.metadata["report"]["steps"]["node_tagger_creation"] = {
-            "tagger_created": True,
-            "model_root_tag": tagger_info.get("root_tag", "/Model"),
-            "operation_fallback": "disabled",
-            "timestamp": data.timestamp
-        }
-        
-        return 1
-    
-    @step(HTPExportStep.NODE_TAGGING)
-    def write_node_tagging(self, export_step: HTPExportStep, data: HTPExportData) -> int:
-        """Record complete tagging results."""
-        self.metadata["nodes"] = data.tagged_nodes.copy()
-        
-        stats = data.tagging_stats
-        
-        # Build top nodes list
-        tag_counts = Counter(data.tagged_nodes.values())
-        top_nodes = [
-            {
-                "rank": i + 1,
-                "tag": tag,
-                "count": count
-            }
-            for i, (tag, count) in enumerate(tag_counts.most_common(Config.TOP_NODES_COUNT))
-        ]
-        
-        self.metadata["report"]["steps"]["node_tagging"] = {
-            "total_nodes": data.total_nodes,
-            "tagged_nodes": len(data.tagged_nodes),
-            "coverage_percentage": data.coverage,
-            "tagging_statistics": {
-                "direct_matches": stats.get("direct_matches", 0),
-                "direct_percentage": round(stats.get("direct_matches", 0) / data.total_nodes * 100, 1) if data.total_nodes > 0 else 0,
-                "parent_matches": stats.get("parent_matches", 0),
-                "parent_percentage": round(stats.get("parent_matches", 0) / data.total_nodes * 100, 1) if data.total_nodes > 0 else 0,
-                "root_fallbacks": stats.get("root_fallbacks", 0),
-                "root_percentage": round(stats.get("root_fallbacks", 0) / data.total_nodes * 100, 1) if data.total_nodes > 0 else 0,
-                "empty_tags": stats.get("empty_tags", 0)
-            },
-            "top_nodes_by_hierarchy": top_nodes,
-            "timestamp": data.timestamp
-        }
-        
-        return 1
-    
-    @step(HTPExportStep.SAVE)
-    def write_save(self, export_step: HTPExportStep, data: HTPExportData) -> int:
-        """Record model save details."""
-        self.metadata["report"]["steps"]["model_save"] = {
-            "output_path": data.output_path,
-            "hierarchy_attributes_embedded": data.embed_hierarchy_attributes,
-            "file_saved": True,
-            "timestamp": data.timestamp
-        }
-        
-        return 1
-    
-    @step(HTPExportStep.COMPLETE)
-    def write_complete(self, export_step: HTPExportStep, data: HTPExportData) -> int:
-        """Record export completion with full statistics."""
-        self.metadata["export_context"]["export_time_seconds"] = round(data.export_time, 2)
-        
-        # Build outputs section
-        self.metadata["outputs"] = {}
-        
-        if data.output_path:
-            self.metadata["outputs"]["onnx_model"] = {
-                "path": Path(data.output_path).name,
-                "size_mb": data.onnx_size_mb
-            }
-        
-        if self.metadata_path:
-            self.metadata["outputs"]["metadata"] = {
-                "path": Path(self.metadata_path).name
-            }
-        
-        if data.report_path:
-            self.metadata["outputs"]["report"] = {
-                "path": Path(data.report_path).name
-            }
-        
-        if data.console_log_path:
-            self.metadata["outputs"]["console_log"] = {
-                "path": Path(data.console_log_path).name
-            }
-        
-        # Complete report section
-        self.metadata["report"]["steps"]["export_complete"] = {
-            "export_time_seconds": data.export_time,
-            "export_statistics": {
-                "hierarchy_modules": len(data.hierarchy),
-                "onnx_nodes": data.total_nodes,
-                "tagged_nodes": len(data.tagged_nodes),
-                "coverage": data.coverage
-            },
-            "output_files": {
-                "onnx_model": Path(data.output_path).name if data.output_path else None,
-                "metadata": Path(self.metadata_path).name,
-                "report": Path(data.report_path).name if data.report_path else None,
-                "console_log": Path(data.console_log_path).name if data.console_log_path else None
-            },
-            "timestamp": data.timestamp
-        }
-        
-        return 1
-    
-    def flush(self) -> None:
-        """Write metadata to file."""
-        with open(self.metadata_path, 'w') as f:
-            json.dump(self.metadata, f, indent=2)
-
-
-# ============================================================================
-# TEXT REPORT WRITER WITH COMPLETE CONSOLE OUTPUT
-# ============================================================================
-
-class HTPReportWriter(StepAwareWriter):
-    """Full text report writer that captures ALL console output."""
-    
-    def __init__(self, output_path: str, console_buffer: io.StringIO = None):
-        super().__init__()
-        self.output_path = Path(output_path).with_suffix("").as_posix()
-        self.report_path = f"{self.output_path}{Config.REPORT_SUFFIX}"
-        self.buffer = io.StringIO()
-        self.console_buffer = console_buffer
-        self._write_header()
-    
-    def _write_header(self):
-        """Write report header."""
-        self.buffer.write("=" * Config.SEPARATOR_LENGTH + "\n")
-        self.buffer.write("HTP EXPORT FULL REPORT\n")
-        self.buffer.write("=" * Config.SEPARATOR_LENGTH + "\n")
-        self.buffer.write(f"Generated: {time.strftime('%Y-%m-%dT%H:%M:%SZ', time.gmtime())}\n\n")
-    
-    def flush(self):
-        """Write the complete console output to report file."""
-        # If we have console buffer, append its content (stripped of ANSI)
-        if self.console_buffer:
-            console_output = self.console_buffer.getvalue()
-            plain_output = TextStyler.strip_ansi(console_output)
-            self.buffer.write(plain_output)
-        
-        # Write to file
-        with open(self.report_path, 'w', encoding='utf-8') as f:
-            f.write(self.buffer.getvalue())
-
-
-# ============================================================================
-# MAIN EXPORT MONITOR
-# ============================================================================
 
 class HTPExportMonitor:
-    """Main orchestrator for HTP export monitoring."""
-    
-    def __init__(self, output_path: str, model_name: str = "", verbose: bool = True, 
-                 enable_report: bool = True, console: Console = None, embed_hierarchy: bool = True):
+    """Simplified HTP export monitor using Rich library."""
+
+    # Step metadata
+    STEP_INFO: ClassVar[dict[HTPExportStep, tuple[str, str]]] = {
+        HTPExportStep.MODEL_PREP: (
+            HTPExportMonitorConfig.EMOJI_MODEL_PREP,
+            HTPExportMonitorConfig.TITLE_MODEL_PREP,
+        ),
+        HTPExportStep.INPUT_GEN: (
+            HTPExportMonitorConfig.EMOJI_INPUT_GEN,
+            HTPExportMonitorConfig.TITLE_INPUT_GEN,
+        ),
+        HTPExportStep.HIERARCHY: (
+            HTPExportMonitorConfig.EMOJI_HIERARCHY,
+            HTPExportMonitorConfig.TITLE_HIERARCHY,
+        ),
+        HTPExportStep.ONNX_EXPORT: (
+            HTPExportMonitorConfig.EMOJI_ONNX_EXPORT,
+            HTPExportMonitorConfig.TITLE_ONNX_EXPORT,
+        ),
+        HTPExportStep.NODE_TAGGING: (
+            HTPExportMonitorConfig.EMOJI_NODE_TAGGING,
+            HTPExportMonitorConfig.TITLE_NODE_TAGGING,
+        ),
+        HTPExportStep.TAG_INJECTION: (
+            HTPExportMonitorConfig.EMOJI_TAG_INJECTION,
+            HTPExportMonitorConfig.TITLE_TAG_INJECTION,
+        ),
+    }
+
+    # ========================================================================
+    # STYLING UTILITIES
+    # ========================================================================
+
+    @staticmethod
+    def _bright_cyan(text: str) -> str:
+        """Format text in bright cyan."""
+        return f"[bold cyan]{text}[/bold cyan]"
+
+    @staticmethod
+    def _bright_green(text: str) -> str:
+        """Format text in bright green."""
+        return f"[bold green]{text}[/bold green]"
+
+    @staticmethod
+    def _bright_red(text: str) -> str:
+        """Format text in bright red."""
+        return f"[bold red]{text}[/bold red]"
+
+    @staticmethod
+    def _bright_magenta(text: str) -> str:
+        """Format text in bright magenta."""
+        return f"[bold magenta]{text}[/bold magenta]"
+
+    @staticmethod
+    def _bright_yellow(text: str) -> str:
+        """Format text in bright yellow."""
+        return f"[bold yellow]{text}[/bold yellow]"
+
+    @staticmethod
+    def _dim(text: str) -> str:
+        """Format text in dim style."""
+        return f"[dim]{text}[/dim]"
+
+    @staticmethod
+    def _bold(text: str) -> str:
+        """Format text in bold."""
+        return f"[bold]{text}[/bold]"
+
+    def __init__(
+        self,
+        output_path: str,
+        model_name: str = "",
+        verbose: bool = True,
+        enable_report: bool = True,
+        embed_hierarchy: bool = True,
+    ):
+        """Initialize monitor."""
         self.output_path = output_path
         self.model_name = model_name
         self.verbose = verbose
-        self.enable_report = enable_report  # For backward compatibility
-        self.embed_hierarchy = embed_hierarchy  # For backward compatibility
-        
-        # Console output buffer for capturing
-        self.console_buffer = io.StringIO()
-        
-        # Initialize writers
-        self.console_writer = HTPConsoleWriter(
-            console=console,
-            verbose=verbose,
-            capture_buffer=self.console_buffer
+        self.enable_report = enable_report
+        self.embed_hierarchy = embed_hierarchy
+
+        # Console setup - use wider width to avoid line wrapping in tree
+        # Disable highlight to prevent automatic path coloring
+        self.console = Console(
+            width=HTPExportMonitorConfig.CONSOLE_WIDTH,
+            force_terminal=True,
+            legacy_windows=False,
+            highlight=False,
         )
-        # Pass output path to console writer
-        self.console_writer._output_path = output_path
-        
-        self.metadata_writer = HTPMetadataWriter(output_path)
-        self.report_writer = HTPReportWriter(
-            output_path,
-            console_buffer=self.console_buffer
+
+        # Data storage
+        self.data = HTPExportData(
+            model_name=model_name,
+            output_path=output_path,
+            embed_hierarchy=embed_hierarchy,
         )
-        
-        # Don't print initial messages here - they'll be printed in log_step
-        
-        # Track timing
-        self.start_time = time.time()
-    
-    def log_step(self, step: HTPExportStep, data: HTPExportData) -> None:
-        """Log data for an export step to all writers."""
-        # Update timing
-        data.elapsed_time = time.time() - self.start_time
-        
-        # Write to all outputs
-        self.console_writer.write(step, data)
-        self.metadata_writer.write(step, data)
-        self.report_writer.write(step, data)
-    
-    def get_console_output(self) -> str:
-        """Get captured console output."""
-        return self.console_buffer.getvalue()
-    
-    def get_metadata(self) -> Dict[str, Any]:
-        """Get current metadata."""
-        return self.metadata_writer.metadata.copy()
-    
-    def finalize(self) -> Dict[str, str]:
-        """Finalize all outputs and return paths."""
-        # Flush all writers
-        self.console_writer.flush()
-        self.metadata_writer.flush()
-        self.report_writer.flush()
-        
-        # Save console log with ANSI codes
-        console_log_path = f"{Path(self.output_path).with_suffix('').as_posix()}{Config.CONSOLE_LOG_SUFFIX}"
-        with open(console_log_path, 'w', encoding='utf-8') as f:
-            f.write(self.console_buffer.getvalue())
-        
-        return {
-            "metadata_path": self.metadata_writer.metadata_path,
-            "report_path": self.report_writer.report_path,
-            "console_log_path": console_log_path
+
+        # Metadata for JSON output
+        self.metadata = {
+            "export_context": {},
+            "steps": {},
+            "hierarchy": {},
+            "tagging": {},
         }
-    
+
     def __enter__(self):
-        """Enter context manager."""
+        """Context manager entry."""
+        if self.verbose:
+            self._print_header()
         return self
-    
+
     def __exit__(self, exc_type, exc_val, exc_tb):
-        """Exit context manager and finalize."""
+        """Context manager exit."""
         if exc_type is None:
-            self.finalize()
-        return False
-    
+            # Success - always write metadata
+            self._write_metadata()
+
+            # Write report only if enabled
+            if self.enable_report:
+                self._write_report()
+
+        # Always add empty line at the end for visual separation
+        self.console.print()
+
     def update(self, step: HTPExportStep, **kwargs):
-        """Update monitoring with step data.
-        
-        This method provides backward compatibility with the old monitor interface.
-        It converts update calls to log_step calls with HTPExportData.
-        
-        Args:
-            step: The export step
-            **kwargs: Step-specific data
-        """
-        # For backward compatibility, we'll store step data and log when possible
-        if not hasattr(self, '_step_data'):
-            self._step_data = {}
-        
+        """Update monitoring with step data."""
         # Store step data
-        self._step_data[step.value] = kwargs
-        
-        # For backward compatibility, create HTPExportData and log the step
-        # Build data from accumulated step data
-        data = HTPExportData()
-        
-        # Copy all accumulated data
-        for step_name, step_kwargs in self._step_data.items():
-            for key, value in step_kwargs.items():
-                if hasattr(data, key):
-                    setattr(data, key, value)
-        
-        # Copy current step data
-        for key, value in kwargs.items():
-            if hasattr(data, key):
-                setattr(data, key, value)
-        
-        # Add steps attribute for compatibility
-        data.steps = self._step_data.copy()
-        
-        # Log the step
-        self.log_step(step, data)
-    
-    @property
-    def data(self):
-        """Get collected export data (backward compatibility).
-        
-        Returns an object compatible with the old monitor interface.
-        """
-        if not hasattr(self, '_step_data'):
-            self._step_data = {}
-        
-        # Create a namespace object that has both dict-like access and attribute access
-        class MonitorData:
-            def __init__(self, step_data):
-                self.steps = step_data
-                # Add common attributes from step data
-                for step_values in step_data.values():
-                    for key, value in step_values.items():
-                        if not hasattr(self, key):
-                            setattr(self, key, value)
-            
-            def get(self, key, default=None):
-                return getattr(self, key, default)
-        
-        return MonitorData(self._step_data)
+        self.data.step_data[step.value] = kwargs
 
+        # Update model data for specific steps
+        if step == HTPExportStep.MODEL_PREP:
+            self.data.model_class = kwargs.get("model_class", "")
+            self.data.total_modules = kwargs.get("total_modules", 0)
+            self.data.total_parameters = kwargs.get("total_parameters", 0)
 
-# ============================================================================
-# EXAMPLE USAGE
-# ============================================================================
+        # Display step output
+        if self.verbose:
+            self._display_step(step, kwargs)
 
-if __name__ == "__main__":
-    # Example usage
-    monitor = HTPExportMonitor("model.onnx", "bert-base", verbose=True)
-    
-    # Create sample data
-    data = HTPExportData(
-        model_name="bert-base",
-        model_class="BertModel",
-        total_modules=48,
-        total_parameters=4385536,
-        output_path="model.onnx",
-        hierarchy={"": {"class_name": "BertModel"}},
-        execution_steps=36,
-        total_nodes=136,
-        tagged_nodes={f"node_{i}": "/BertModel" for i in range(136)},
-        tagging_stats={
-            "direct_matches": 83,
-            "parent_matches": 34,
-            "root_fallbacks": 19
-        },
-        coverage=100.0,
-        export_time=2.35,
-        onnx_size_mb=17.5
-    )
-    
-    # Log all steps
-    for step in HTPExportStep:
-        monitor.log_step(step, data)
-    
-    # Finalize
-    paths = monitor.finalize()
-    print(f"\nOutputs saved:")
-    for name, path in paths.items():
-        print(f"  {name}: {path}")
+        # Update metadata
+        self._update_metadata(step, kwargs)
+
+    def finalize_export(self, export_time: float, output_path: str, **kwargs):
+        """Finalize export with summary."""
+        self.data.export_time = export_time
+
+        if self.verbose:
+            self._print_summary()
+
+    # ========================================================================
+    # DISPLAY METHODS
+    # ========================================================================
+
+    def _print_header(self):
+        """Print export header."""
+        self.console.print(
+            "\n"
+            + HTPExportMonitorConfig.HEADER_SEPARATOR
+            * HTPExportMonitorConfig.SEPARATOR_LENGTH
+        )
+        self.console.print(
+            f"{HTPExportMonitorConfig.EMOJI_LAUNCH} {self._bright_cyan(HTPExportMonitorConfig.MSG_HTP_EXPORT_PROCESS)}"
+        )
+        self.console.print(
+            HTPExportMonitorConfig.HEADER_SEPARATOR
+            * HTPExportMonitorConfig.SEPARATOR_LENGTH
+        )
+
+        # Timestamp
+        timestamp = time.strftime("%Y-%m-%d %H:%M:%S")
+        self.console.print(
+            f"{HTPExportMonitorConfig.EMOJI_CALENDAR} {HTPExportMonitorConfig.MSG_EXPORT_TIME}: {self._bright_green(timestamp)}"
+        )
+        self.console.print(
+            f"{HTPExportMonitorConfig.EMOJI_RELOAD} {HTPExportMonitorConfig.MSG_LOADING_MODEL}: {self._bright_magenta(self.model_name)}"
+        )
+
+        # Strategy info
+        if self.embed_hierarchy:
+            self.console.print(
+                f"{HTPExportMonitorConfig.EMOJI_TARGET} Strategy: {self._bright_cyan(HTPExportMonitorConfig.MSG_STRATEGY_HTP)} "
+                f"{HTPExportMonitorConfig.MSG_STRATEGY_DESC}"
+            )
+        else:
+            self.console.print(
+                f"{HTPExportMonitorConfig.EMOJI_TARGET} Strategy: {self._bright_cyan(HTPExportMonitorConfig.MSG_STRATEGY_HTP)} "
+                f"{HTPExportMonitorConfig.MSG_STRATEGY_DESC} - "
+                f"{self._bright_red(HTPExportMonitorConfig.MSG_STRATEGY_DISABLED)} {HTPExportMonitorConfig.MSG_CLEAN_ONNX}"
+            )
+        self.console.print(
+            HTPExportMonitorConfig.HEADER_SEPARATOR
+            * HTPExportMonitorConfig.SEPARATOR_LENGTH
+        )
+
+    def _display_step(self, step: HTPExportStep, data: dict):
+        """Display step output."""
+        icon, title = self.STEP_INFO[step]
+        step_num = list(self.STEP_INFO.keys()).index(step) + 1
+
+        # Step header
+        self.console.print(
+            f"\n{icon} {self._bold(f'{HTPExportMonitorConfig.MSG_STEP} {step_num}/{HTPExportMonitorConfig.TOTAL_STEPS}: {title}')}"
+        )
+        self.console.print(
+            HTPExportMonitorConfig.SECTION_SEPARATOR
+            * HTPExportMonitorConfig.SEPARATOR_LENGTH
+        )
+
+        # Step-specific display
+        if step == HTPExportStep.MODEL_PREP:
+            self._display_model_prep(data)
+        elif step == HTPExportStep.INPUT_GEN:
+            self._display_input_gen(data)
+        elif step == HTPExportStep.HIERARCHY:
+            self._display_hierarchy(data)
+        elif step == HTPExportStep.ONNX_EXPORT:
+            self._display_onnx_export(data)
+        elif step == HTPExportStep.NODE_TAGGING:
+            self._display_node_tagging(data)
+        elif step == HTPExportStep.TAG_INJECTION:
+            self._display_tag_injection(data)
+
+    def _display_model_prep(self, data: dict):
+        """Display model preparation step."""
+        # Display
+        # Format parameters to match baseline exactly (4.4M not 4.4M)
+        params_m = self.data.total_parameters / HTPExportMonitorConfig.MILLION
+        if params_m == int(params_m):
+            params_str = f"{int(params_m)}"
+        else:
+            params_str = f"{params_m:.1f}"
+
+        self.console.print(
+            f"{HTPExportMonitorConfig.EMOJI_SUCCESS} {HTPExportMonitorConfig.MSG_MODEL_LOADED}: {self.data.model_class} "
+            f"({self._bright_cyan(str(self.data.total_modules))} {HTPExportMonitorConfig.MSG_MODULES}, "
+            f"{self._bright_cyan(params_str + 'M')} {HTPExportMonitorConfig.MSG_PARAMETERS})"
+        )
+        self.console.print(
+            f"{HTPExportMonitorConfig.EMOJI_TARGET} {HTPExportMonitorConfig.MSG_EXPORT_TARGET}: {self._bright_magenta(self.output_path)}"
+        )
+        self.console.print(
+            f"{HTPExportMonitorConfig.EMOJI_SUCCESS} {HTPExportMonitorConfig.MSG_EVAL_MODE}"
+        )
+
+    def _display_input_gen(self, data: dict):
+        """Display input generation step."""
+        method = data.get("method", "auto_generated")
+
+        if method == "provided":
+            self.console.print(
+                f"{HTPExportMonitorConfig.EMOJI_INFO} {HTPExportMonitorConfig.MSG_PROVIDED_INPUTS}"
+            )
+        else:
+            self.console.print(
+                f"{HTPExportMonitorConfig.EMOJI_ROBOT} {HTPExportMonitorConfig.MSG_AUTO_GEN_INPUTS}: {self.model_name}"
+            )
+            if "model_type" in data:
+                self.console.print(
+                    f"   • {HTPExportMonitorConfig.MSG_MODEL_TYPE}: {self._bright_green(data['model_type'])}"
+                )  # Green for config
+            if "task" in data:
+                self.console.print(
+                    f"   • {HTPExportMonitorConfig.MSG_DETECTED_TASK}: {self._bright_green(data['task'])}"
+                )  # Green for config
+
+        # Display input details
+        if "inputs" in data:
+            self.console.print(
+                f"{HTPExportMonitorConfig.EMOJI_SUCCESS} {HTPExportMonitorConfig.MSG_GENERATED_INPUTS}:"
+            )
+            for name, info in data["inputs"].items():
+                shape_str = str(info["shape"])
+                dtype_str = info["dtype"]
+                self.console.print(
+                    f"   • {name}: {HTPExportMonitorConfig.MSG_SHAPE}={self._bright_green(shape_str)}, {HTPExportMonitorConfig.MSG_DTYPE}={self._bright_green(dtype_str)}"
+                )  # Green for values
+
+    def _display_hierarchy(self, data: dict):
+        """Display hierarchy building step using Rich Tree."""
+        hierarchy = data.get("hierarchy", {})
+        execution_steps = data.get("execution_steps", 0)
+
+        self.console.print(
+            f"{HTPExportMonitorConfig.EMOJI_SEARCH} {HTPExportMonitorConfig.MSG_TRACING_EXECUTION}"
+        )
+        self.console.print(
+            f"{HTPExportMonitorConfig.EMOJI_SUCCESS} {HTPExportMonitorConfig.MSG_CAPTURED_MODULES} {self._bright_cyan(str(len(hierarchy)))} {HTPExportMonitorConfig.MSG_MODULES_IN_HIERARCHY}"
+        )
+        self.console.print(
+            f"{HTPExportMonitorConfig.EMOJI_CHART} {HTPExportMonitorConfig.MSG_TOTAL_EXEC_STEPS}: {self._bright_cyan(str(execution_steps))}"
+        )
+
+        # Build and display hierarchy tree
+        if hierarchy:
+            self.console.print(
+                f"\n{HTPExportMonitorConfig.EMOJI_TREE} {HTPExportMonitorConfig.MSG_MODULE_HIERARCHY}:"
+            )
+            tree = self._build_hierarchy_tree(hierarchy)
+            self._display_truncated_tree(tree)
+
+    def _build_hierarchy_tree(self, hierarchy: dict) -> Tree:
+        """Build Rich Tree from hierarchy data."""
+        # Find root
+        root_info = hierarchy.get("", {})
+        root_name = root_info.get("class_name", "Model")
+
+        # Create tree
+        tree = Tree(self._bold(root_name))
+
+        # Build tree recursively
+        def add_children(parent_node, parent_path: str):
+            children = self._find_immediate_children(parent_path, hierarchy)
+
+            for child_path in children:
+                child_info = hierarchy.get(child_path, {})
+                class_name = child_info.get("class_name", "Unknown")
+
+                # Create node text with simplified styling
+                # Instead of inline markup, use Text object styling
+                node_text = Text()
+
+                # Display format: ClassName: path
+                node_text.append(class_name, style="bold")
+                node_text.append(": ", style="white")
+                node_text.append(child_path, style="dim")
+
+                # Add node to tree
+                child_node = parent_node.add(node_text)
+
+                # Recursively add children
+                add_children(child_node, child_path)
+
+        # Start building from root
+        add_children(tree, "")
+
+        return tree
+
+    def _find_immediate_children(self, parent_path: str, hierarchy: dict) -> list:
+        """Find immediate children of a path."""
+        if parent_path == "":
+            # Root case
+            return sorted([p for p in hierarchy if p and "." not in p])
+
+        # Non-root case
+        prefix = parent_path + "."
+        immediate = []
+
+        for path in hierarchy:
+            if not path.startswith(prefix) or path == parent_path:
+                continue
+
+            suffix = path[len(prefix) :]
+
+            # Check if immediate child
+            if "." not in suffix:
+                immediate.append(path)
+            elif suffix.count(".") == 1 and suffix.split(".")[1].isdigit():
+                # Compound pattern like layer.0
+                immediate.append(path)
+
+        # Custom sort
+        def sort_key(path):
+            parts = path.split(".")
+            result = []
+            for part in parts:
+                if part.isdigit():
+                    result.append((0, int(part)))
+                else:
+                    result.append((1, part))
+            return result
+
+        return sorted(immediate, key=sort_key)
+
+    def _build_truncated_tree(
+        self, source_tree: Tree, target_tree: Tree, max_lines: int
+    ) -> int:
+        """Build a truncated version of the tree that fits within max_lines."""
+        line_count = 1  # Start with root
+
+        # Helper to add nodes up to limit
+        def add_nodes_to_limit(source_children, target_parent, current_count):
+            count = current_count
+            for child in source_children:
+                if count >= max_lines:
+                    break
+                # Add this child
+                target_child = target_parent.add(child.label)
+                count += 1
+
+                # Try to add its children
+                if hasattr(child, "children") and child.children and count < max_lines:
+                    count = add_nodes_to_limit(child.children, target_child, count)
+            return count
+
+        # Add nodes from source to target
+        if hasattr(source_tree, "children") and source_tree.children:
+            line_count = add_nodes_to_limit(
+                source_tree.children, target_tree, line_count
+            )
+
+        return line_count
+
+    def _display_onnx_export(self, data: dict):
+        """Display ONNX export step."""
+        opset = data.get("opset_version", HTPExportMonitorConfig.DEFAULT_OPSET_VERSION)
+        folding = data.get("do_constant_folding", True)
+        size_mb = data.get("onnx_size_mb", 0)
+
+        self.console.print(
+            f"{HTPExportMonitorConfig.EMOJI_CONFIG} {HTPExportMonitorConfig.MSG_EXPORT_CONFIG}:"
+        )
+        self.console.print(
+            f"   • {HTPExportMonitorConfig.MSG_OPSET_VERSION}: {self._bright_green(str(opset))}"
+        )  # Green for config value
+        self.console.print(
+            f"   • {HTPExportMonitorConfig.MSG_CONSTANT_FOLDING}: {self._format_bool(folding)}"
+        )
+
+        if "input_names" in data:
+            # Format array items with green color
+            input_names = data["input_names"]
+            formatted_inputs = (
+                "["
+                + ", ".join(
+                    f"{self._bright_green(f"'{name}'")}" for name in input_names
+                )
+                + "]"
+            )
+            self.console.print(
+                f"{HTPExportMonitorConfig.EMOJI_INBOX} {HTPExportMonitorConfig.MSG_INPUT_NAMES}: {formatted_inputs}"
+            )
+
+        if "output_names" in data:
+            output_names = data["output_names"]
+            if output_names:
+                # Format array items with green color
+                formatted_outputs = (
+                    "["
+                    + ", ".join(
+                        f"{self._bright_green(f"'{name}'")}" for name in output_names
+                    )
+                    + "]"
+                )
+                self.console.print(
+                    f"{HTPExportMonitorConfig.EMOJI_OUTBOX} {HTPExportMonitorConfig.MSG_OUTPUT_NAMES}: {formatted_outputs}"
+                )
+            else:
+                # Log warning when output names are not available
+                self.console.print(
+                    f"{HTPExportMonitorConfig.EMOJI_WARNING}  {HTPExportMonitorConfig.MSG_OUTPUT_NAMES}: {self._bright_yellow(HTPExportMonitorConfig.MSG_OUTPUT_NAMES_WARNING)} {HTPExportMonitorConfig.MSG_OUTPUT_NAMES_NOTE}"
+                )
+
+        self.console.print(
+            f"{HTPExportMonitorConfig.EMOJI_SUCCESS} {HTPExportMonitorConfig.MSG_ONNX_EXPORTED}"
+        )
+        self.console.print(
+            f"{HTPExportMonitorConfig.EMOJI_ONNX_EXPORT} {HTPExportMonitorConfig.MSG_MODEL_SIZE}: {self._bright_cyan(f'{size_mb:.2f}MB')}"
+        )
+
+    def _display_node_tagging(self, data: dict):
+        """Display node tagging step."""
+        total_nodes = data.get("total_nodes", 0)
+        tagged_nodes = data.get("tagged_nodes", {})
+        coverage = data.get("coverage", 0.0)
+        tagging_stats = data.get("tagging_stats", {})
+
+        self.console.print(
+            f"{HTPExportMonitorConfig.EMOJI_SUCCESS} {HTPExportMonitorConfig.MSG_NODE_TAGGING_COMPLETE}"
+        )
+        self.console.print(
+            f"{HTPExportMonitorConfig.EMOJI_CHART_UP} {HTPExportMonitorConfig.MSG_COVERAGE}: {self._bright_cyan(f'{coverage:.1f}%')}"
+        )
+        self.console.print(
+            f"{HTPExportMonitorConfig.EMOJI_CHART} {HTPExportMonitorConfig.MSG_TAGGED_NODES}: {self._bright_cyan(str(len(tagged_nodes)))}/{self._bright_cyan(str(total_nodes))}"
+        )
+
+        # Display tagging statistics
+        self._display_tagging_statistics(tagging_stats, total_nodes)
+
+        self.console.print(
+            f"{HTPExportMonitorConfig.EMOJI_SUCCESS} {HTPExportMonitorConfig.MSG_EMPTY_TAGS}: {self._bright_cyan('0')}"
+        )
+
+        # Display nodes by hierarchy
+        self._display_nodes_by_hierarchy(tagged_nodes)
+
+        # Display hierarchy tree with node counts
+        hierarchy = data.get("hierarchy")
+        if hierarchy and tagged_nodes:
+            self.console.print(
+                f"\n{HTPExportMonitorConfig.EMOJI_TREE} {HTPExportMonitorConfig.MSG_COMPLETE_HIERARCHY}:"
+            )
+            self.console.print(
+                HTPExportMonitorConfig.SECTION_SEPARATOR
+                * HTPExportMonitorConfig.SECTION_SEPARATOR_LENGTH
+            )
+
+            # Build a tree that includes node counts
+            tree = self._build_hierarchy_tree_with_counts(hierarchy, tagged_nodes)
+            self._display_truncated_tree(tree)
+
+    def _display_tagging_statistics(self, tagging_stats: dict, total_nodes: int):
+        """Display tagging statistics with percentages."""
+        if not tagging_stats:
+            return
+
+        direct = tagging_stats.get("direct_matches", 0)
+        parent = tagging_stats.get("parent_matches", 0)
+        root = tagging_stats.get("root_fallbacks", 0)
+
+        if total_nodes > 0:
+            direct_pct = self._calculate_percentage(direct, total_nodes)
+            parent_pct = self._calculate_percentage(parent, total_nodes)
+            root_pct = self._calculate_percentage(root, total_nodes)
+            self.console.print(
+                f"   • {HTPExportMonitorConfig.MSG_DIRECT_MATCHES}: {self._bright_cyan(str(direct))} ({self._bright_cyan(f'{direct_pct:.1f}%')})"
+            )
+            self.console.print(
+                f"   • {HTPExportMonitorConfig.MSG_PARENT_MATCHES}: {self._bright_cyan(str(parent))} ({self._bright_cyan(f'{parent_pct:.1f}%')})"
+            )
+            self.console.print(
+                f"   • {HTPExportMonitorConfig.MSG_ROOT_FALLBACKS}: {self._bright_cyan(str(root))} ({self._bright_cyan(f'{root_pct:.1f}%')})"
+            )
+
+    def _display_nodes_by_hierarchy(self, tagged_nodes: dict):
+        """Display top nodes grouped by hierarchy."""
+        if not tagged_nodes:
+            return
+
+        from collections import Counter
+
+        # Count nodes by hierarchy tag
+        tag_counts = Counter(tagged_nodes.values())
+
+        self.console.print(
+            f"\n{HTPExportMonitorConfig.EMOJI_CHART} {HTPExportMonitorConfig.MSG_TOP_NODES} {self._bright_cyan(str(min(len(tag_counts), HTPExportMonitorConfig.TOP_NODES_COUNT)))} {HTPExportMonitorConfig.MSG_NODES_BY_HIERARCHY}:"
+        )
+        self.console.print(
+            HTPExportMonitorConfig.SECTION_SEPARATOR
+            * HTPExportMonitorConfig.TOP_NODES_SEPARATOR_LENGTH
+        )
+
+        sorted_tags = tag_counts.most_common(HTPExportMonitorConfig.TOP_NODES_COUNT)
+        for i, (tag, count) in enumerate(sorted_tags):
+            # Simple display without path/class splitting
+            self.console.print(
+                f" {i + 1:2d}. {tag}: {self._bright_cyan(str(count))} {HTPExportMonitorConfig.MSG_NODES}"
+            )
+
+    def _build_hierarchy_tree_with_counts(
+        self, hierarchy: dict, tagged_nodes: dict
+    ) -> Tree:
+        """Build Rich Tree with node counts from tagged nodes."""
+
+        # Count nodes per hierarchy path
+        node_counts, nodes_by_module = self._count_nodes_by_hierarchy(tagged_nodes)
+
+        # Find root
+        root_info = hierarchy.get("", {})
+        root_name = root_info.get("class_name", "Model")
+        root_tag = root_info.get("traced_tag", "/Model")
+        root_count = node_counts.get(root_tag, 0)
+
+        # Create tree with count
+        tree = Tree(
+            f"{self._bold(root_name)} ({self._bright_cyan(str(root_count))} {HTPExportMonitorConfig.MSG_ONNX_NODES})"
+        )
+
+        # Build tree recursively with counts
+        self._add_hierarchy_children_with_counts(
+            tree, "", root_tag, hierarchy, node_counts, nodes_by_module
+        )
+
+        return tree
+
+    def _count_nodes_by_hierarchy(self, tagged_nodes: dict) -> tuple[dict, dict]:
+        """Count nodes per hierarchy path and group by module."""
+        from collections import defaultdict
+
+        node_counts = defaultdict(int)
+        nodes_by_module = defaultdict(list)  # module_tag -> [(node_name, simple_name)]
+
+        for node_name, tag in tagged_nodes.items():
+            # Count nodes for each level of the hierarchy
+            parts = tag.split("/")
+            for i in range(1, len(parts) + 1):
+                prefix = "/".join(parts[:i])
+                if prefix:
+                    node_counts[prefix] += 1
+
+            # Store node with its module
+            nodes_by_module[tag].append(node_name)
+
+        return node_counts, nodes_by_module
+
+    def _add_hierarchy_children_with_counts(
+        self,
+        parent_node,
+        parent_path: str,
+        parent_tag: str,
+        hierarchy: dict,
+        node_counts: dict,
+        nodes_by_module: dict,
+    ):
+        """Add children to hierarchy tree with node counts."""
+        children = self._find_immediate_children(parent_path, hierarchy)
+
+        for child_path in children:
+            child_info = hierarchy.get(child_path, {})
+            class_name = child_info.get("class_name", "Unknown")
+            child_tag = child_info.get("traced_tag", "")
+            child_count = node_counts.get(child_tag, 0)
+
+            # Create node text with count and proper styling
+            node_text = self._create_hierarchy_node_text(
+                class_name, child_path, child_count
+            )
+
+            # Add node to tree
+            child_node = parent_node.add(node_text)
+
+            # Add ONNX operation nodes under this module
+            if child_tag in nodes_by_module:
+                self._add_onnx_operations_to_node(
+                    child_node, nodes_by_module[child_tag]
+                )
+
+            # Recursively add children
+            self._add_hierarchy_children_with_counts(
+                child_node,
+                child_path,
+                child_tag,
+                hierarchy,
+                node_counts,
+                nodes_by_module,
+            )
+
+    def _create_hierarchy_node_text(
+        self, class_name: str, path: str, count: int
+    ) -> Text:
+        """Create styled text for hierarchy node."""
+        node_text = Text()
+        node_text.append(f"{class_name}", style="bold")
+        node_text.append(": ", style="")
+        node_text.append(path, style="dim")  # Gray/dim style for path
+        node_text.append(" (", style="")
+        node_text.append(str(count), style="bold cyan")  # Cyan for count
+        node_text.append(f" {HTPExportMonitorConfig.MSG_NODES})", style="")
+        return node_text
+
+    def _add_onnx_operations_to_node(self, parent_node, node_names: list):
+        """Add ONNX operations under a module node."""
+        from collections import defaultdict
+
+        # Group nodes by their base operation type
+        ops_grouped = defaultdict(list)
+        for node_name in sorted(node_names):
+            op_type = self._extract_operation_type(node_name)
+            ops_grouped[op_type].append(node_name)
+
+        # Display grouped operations
+        for op_type in sorted(ops_grouped.keys()):
+            op_nodes = ops_grouped[op_type]
+            if len(op_nodes) > 1:
+                # Multiple operations of same type - show count
+                op_text = Text()
+                op_text.append(op_type, style="bold")
+                op_text.append(" (", style="")
+                op_text.append(str(len(op_nodes)), style="bold cyan")
+                op_text.append(f" {HTPExportMonitorConfig.MSG_OPS})", style="")
+                parent_node.add(op_text)
+            else:
+                # Single operation - show the simple name
+                node_name = op_nodes[0]
+                simple_name = node_name.split("/")[-1]  # Just the last part
+                op_text = Text()
+                op_text.append(simple_name, style="bold")
+                op_text.append(": ", style="")
+                op_text.append(node_name, style="dim")  # Full path in dim
+                parent_node.add(op_text)
+
+    def _extract_operation_type(self, node_name: str) -> str:
+        """Extract operation type from node name."""
+        # Extract base operation name (e.g., "/embeddings/Add_0" -> "Add")
+        # Handle both simple names like "Add_0" and paths like "/embeddings/Add_0"
+        base_name = node_name.split("/")[-1]  # Get last part of path
+        if "_" in base_name:
+            return base_name.split("_")[0]
+        else:
+            # For names without underscore, try to extract operation type
+            # e.g., "LayerNormalization" -> "LayerNormalization"
+            return base_name
+
+    def _display_tag_injection(self, data: dict):
+        """Display tag injection step."""
+        if self.embed_hierarchy:
+            self.console.print(
+                f"{HTPExportMonitorConfig.EMOJI_TAG_INJECTION} {HTPExportMonitorConfig.MSG_INJECTING_TAGS}"
+            )
+            self.console.print(
+                f"{HTPExportMonitorConfig.EMOJI_SUCCESS} {HTPExportMonitorConfig.MSG_TAGS_EMBEDDED}"
+            )
+        else:
+            self.console.print(
+                f"{HTPExportMonitorConfig.EMOJI_WARNING} {HTPExportMonitorConfig.MSG_TAG_INJECTION_SKIPPED}"
+            )
+
+        self.console.print(
+            f"{HTPExportMonitorConfig.EMOJI_SAVE} {HTPExportMonitorConfig.MSG_MODEL_SAVED}: {self._bright_magenta(self.output_path)}"
+        )
+
+    def _print_summary(self):
+        """Print export summary."""
+        self.console.print(
+            "\n"
+            + HTPExportMonitorConfig.HEADER_SEPARATOR
+            * HTPExportMonitorConfig.SEPARATOR_LENGTH
+        )
+        self.console.print(
+            f"{HTPExportMonitorConfig.EMOJI_SUCCESS} {self._bright_green(HTPExportMonitorConfig.MSG_EXPORT_COMPLETE)}"
+        )
+        self.console.print(
+            HTPExportMonitorConfig.HEADER_SEPARATOR
+            * HTPExportMonitorConfig.SEPARATOR_LENGTH
+        )
+
+        # Summary stats
+        total_time = self.data.export_time
+        hierarchy_data = self.data.step_data.get(HTPExportStep.HIERARCHY.value, {})
+        tagging_data = self.data.step_data.get(HTPExportStep.NODE_TAGGING.value, {})
+
+        modules = len(hierarchy_data.get("hierarchy", {}))
+        nodes = tagging_data.get("total_nodes", 0)
+        tagged = len(tagging_data.get("tagged_nodes", {}))
+        coverage = tagging_data.get("coverage", 0.0)
+
+        self.console.print(
+            f"{HTPExportMonitorConfig.EMOJI_CHART} {HTPExportMonitorConfig.MSG_EXPORT_SUMMARY}:"
+        )
+        self.console.print(
+            f"   • {HTPExportMonitorConfig.MSG_TOTAL_TIME}: {self._bright_cyan(f'{total_time:.2f}s')}"
+        )
+        self.console.print(
+            f"   • {HTPExportMonitorConfig.MSG_HIERARCHY_MODULES}: {self._bright_cyan(str(modules))}"
+        )
+        self.console.print(
+            f"   • {HTPExportMonitorConfig.MSG_ONNX_NODES}: {self._bright_cyan(str(nodes))}"
+        )
+        self.console.print(
+            f"   • {HTPExportMonitorConfig.MSG_TAGGED_NODES}: {self._bright_cyan(str(tagged))} "
+            f"({self._bright_cyan(f'{coverage:.1f}%')} {HTPExportMonitorConfig.MSG_COVERAGE.lower()})"
+        )
+
+        self.console.print(
+            f"\n{HTPExportMonitorConfig.EMOJI_FILE} {HTPExportMonitorConfig.MSG_OUTPUT_FILES}:"
+        )
+        self.console.print(
+            f"   • {HTPExportMonitorConfig.MSG_ONNX_MODEL}: {self._bright_magenta(self.output_path)}"
+        )
+
+        # Metadata is always written
+        base_path = Path(self.output_path).with_suffix("")
+        metadata_path = f"{base_path}{HTPExportMonitorConfig.METADATA_SUFFIX}"
+        self.console.print(
+            f"   • {HTPExportMonitorConfig.MSG_METADATA}: {self._bright_magenta(metadata_path)}"
+        )
+
+        if self.enable_report:
+            report_path = f"{base_path}{HTPExportMonitorConfig.REPORT_SUFFIX}"
+            self.console.print(
+                f"   • {HTPExportMonitorConfig.MSG_REPORT}: {self._bright_magenta(report_path)}"
+            )
+
+    # ========================================================================
+    # UTILITY METHODS
+    # ========================================================================
+
+    def _format_bool(self, value: bool) -> str:
+        """Format boolean with color."""
+        if value:
+            return self._bright_green(HTPExportMonitorConfig.MSG_TRUE)
+        else:
+            return self._bright_red(HTPExportMonitorConfig.MSG_FALSE)
+
+    def _create_report_console(self, file=None) -> Console:
+        """Create a console for report generation."""
+        return Console(
+            file=file,
+            width=HTPExportMonitorConfig.CONSOLE_WIDTH,
+            force_terminal=False,  # No ANSI codes in reports
+            legacy_windows=False,
+            highlight=False,
+        )
+
+    def _calculate_percentage(self, part: float, total: float) -> float:
+        """Calculate percentage safely."""
+        return (part / total * HTPExportMonitorConfig.PERCENT) if total > 0 else 0.0
+
+    def _build_output_path(self, suffix: str) -> str:
+        """Build output path with given suffix."""
+        base_path = Path(self.output_path).with_suffix("")
+        return f"{base_path}{suffix}"
+
+    def _display_truncated_tree(self, tree: Tree, max_lines: int | None = None) -> None:
+        """Display a tree with optional truncation."""
+        if max_lines is None:
+            max_lines = HTPExportMonitorConfig.MAX_HIERARCHY_LINES
+
+        # Create a temporary console to capture the tree output
+        string_buffer = StringIO()
+        temp_console = self._create_report_console(file=string_buffer)
+        temp_console.print(tree)
+
+        # Get lines and apply truncation
+        lines = string_buffer.getvalue().strip().split("\n")
+        if len(lines) <= max_lines:
+            self.console.print(tree)
+        else:
+            # Create truncated tree
+            truncated_tree = Tree(tree.label)
+            self._build_truncated_tree(tree, truncated_tree, max_lines - 1)
+            self.console.print(truncated_tree)
+            self.console.print(
+                f"{HTPExportMonitorConfig.MSG_LINES_TRUNCATED} {max_lines} {HTPExportMonitorConfig.MSG_LINES} ({self._bold(HTPExportMonitorConfig.MSG_TRUNCATED_NOTE)})"
+            )
+
+    def _update_metadata(self, step: HTPExportStep, data: dict):
+        """Update metadata for JSON output."""
+        self.metadata["steps"][step.value] = data
+
+    def _write_report(self):
+        """Write text report by capturing console output."""
+        try:
+            # Create a string buffer to capture output
+            string_buffer = io.StringIO()
+            report_console = self._create_report_console(file=string_buffer)
+
+            # Write header
+            report_console.print(
+                HTPExportMonitorConfig.HEADER_SEPARATOR
+                * HTPExportMonitorConfig.SEPARATOR_LENGTH
+            )
+            report_console.print(HTPExportMonitorConfig.MSG_REPORT_HEADER)
+            report_console.print(
+                HTPExportMonitorConfig.HEADER_SEPARATOR
+                * HTPExportMonitorConfig.SEPARATOR_LENGTH
+            )
+            report_console.print(
+                f"{HTPExportMonitorConfig.MSG_TIMESTAMP}: {time.strftime('%Y-%m-%d %H:%M:%S')}"
+            )
+            report_console.print(
+                f"{HTPExportMonitorConfig.MSG_MODEL}: {self.data.model_name}"
+            )
+            report_console.print(
+                f"{HTPExportMonitorConfig.MSG_OUTPUT}: {self.output_path}"
+            )
+            report_console.print(
+                HTPExportMonitorConfig.HEADER_SEPARATOR
+                * HTPExportMonitorConfig.SEPARATOR_LENGTH
+            )
+
+            # Write each step's data
+            for step in HTPExportStep:
+                if step.value in self.data.step_data:
+                    step_data = self.data.step_data[step.value]
+                    icon, title = self.STEP_INFO[step]
+                    step_num = list(self.STEP_INFO.keys()).index(step) + 1
+
+                    report_console.print(
+                        f"\n{HTPExportMonitorConfig.MSG_STEP} {step_num}/{HTPExportMonitorConfig.TOTAL_STEPS}: {title}"
+                    )
+                    report_console.print(
+                        HTPExportMonitorConfig.SECTION_SEPARATOR
+                        * HTPExportMonitorConfig.SEPARATOR_LENGTH
+                    )
+
+                    # Step-specific content
+                    if step == HTPExportStep.MODEL_PREP:
+                        report_console.print(
+                            f"{HTPExportMonitorConfig.MSG_MODEL_CLASS}: {self.data.model_class}"
+                        )
+                        report_console.print(
+                            f"{HTPExportMonitorConfig.MSG_TOTAL_MODULES}: {self.data.total_modules}"
+                        )
+                        report_console.print(
+                            f"{HTPExportMonitorConfig.MSG_TOTAL_PARAMETERS}: {self.data.total_parameters:,}"
+                        )
+
+                    elif step == HTPExportStep.HIERARCHY:
+                        hierarchy = step_data.get("hierarchy", {})
+                        report_console.print(
+                            f"{HTPExportMonitorConfig.MSG_CAPTURED_MODULES_REPORT}: {len(hierarchy)}"
+                        )
+                        report_console.print(
+                            f"{HTPExportMonitorConfig.MSG_EXECUTION_STEPS}: {step_data.get('execution_steps', 0)}"
+                        )
+
+                        # Include hierarchy tree
+                        if hierarchy:
+                            report_console.print(
+                                f"\n{HTPExportMonitorConfig.MSG_MODULE_HIERARCHY}:"
+                            )
+                            tree = self._build_hierarchy_tree(hierarchy)
+                            report_console.print(tree)
+
+                    elif step == HTPExportStep.NODE_TAGGING:
+                        report_console.print(
+                            f"{HTPExportMonitorConfig.MSG_TOTAL_ONNX_NODES}: {step_data.get('total_nodes', 0)}"
+                        )
+                        report_console.print(
+                            f"{HTPExportMonitorConfig.MSG_TAGGED_NODES}: {len(step_data.get('tagged_nodes', {}))}"
+                        )
+                        report_console.print(
+                            f"{HTPExportMonitorConfig.MSG_COVERAGE}: {step_data.get('coverage', 0):.1f}%"
+                        )
+
+                        # Include operation counts
+                        op_counts = step_data.get("op_counts", {})
+                        if op_counts:
+                            report_console.print(
+                                f"\n{HTPExportMonitorConfig.MSG_TOP_OPERATIONS}:"
+                            )
+                            sorted_ops = sorted(
+                                op_counts.items(), key=lambda x: x[1], reverse=True
+                            )
+                            for op, count in sorted_ops[
+                                : HTPExportMonitorConfig.TOP_OPERATIONS_COUNT
+                            ]:
+                                report_console.print(
+                                    f"  {op}: {count} {HTPExportMonitorConfig.MSG_NODES}"
+                                )
+
+            # Write summary
+            report_console.print(
+                "\n"
+                + HTPExportMonitorConfig.HEADER_SEPARATOR
+                * HTPExportMonitorConfig.SEPARATOR_LENGTH
+            )
+            report_console.print(HTPExportMonitorConfig.MSG_EXPORT_SUMMARY.upper())
+            report_console.print(
+                HTPExportMonitorConfig.HEADER_SEPARATOR
+                * HTPExportMonitorConfig.SEPARATOR_LENGTH
+            )
+            report_console.print(
+                f"{HTPExportMonitorConfig.MSG_EXPORT_TIME_REPORT}: {self.data.export_time:.2f}s"
+            )
+            report_console.print(
+                f"{HTPExportMonitorConfig.MSG_EMBED_HIERARCHY}: {self.embed_hierarchy}"
+            )
+
+            # Write to file
+            report_path = self._build_output_path(HTPExportMonitorConfig.REPORT_SUFFIX)
+
+            with open(report_path, "w") as f:
+                f.write(string_buffer.getvalue())
+        except Exception as e:
+            self.console.print(
+                f"{HTPExportMonitorConfig.EMOJI_WARNING} {HTPExportMonitorConfig.MSG_FAILED_WRITE_REPORT}: {e}"
+            )
+
+    def _write_metadata(self):
+        """Write JSON metadata."""
+        try:
+            metadata_path = self._build_output_path(
+                HTPExportMonitorConfig.METADATA_SUFFIX
+            )
+
+            # Add export context
+            self.metadata["export_context"] = {
+                "model_name": self.data.model_name,
+                "output_path": self.output_path,
+                "export_time": self.data.export_time,
+                "embed_hierarchy": self.embed_hierarchy,
+            }
+
+            # Write JSON
+            with open(metadata_path, "w") as f:
+                json.dump(self.metadata, f, indent=2)
+        except Exception as e:
+            self.console.print(
+                f"{HTPExportMonitorConfig.EMOJI_WARNING} {HTPExportMonitorConfig.MSG_FAILED_WRITE_METADATA}: {e}"
+            )
