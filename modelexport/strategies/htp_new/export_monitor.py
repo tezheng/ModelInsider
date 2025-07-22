@@ -199,14 +199,16 @@ class HTPExportMonitor:
         
         # Summary stats
         total_time = self.data.export_time
-        modules = len(self.data.hierarchy.hierarchy) if self.data.hierarchy else 0
+        traced_modules = len(self.data.hierarchy.hierarchy) if self.data.hierarchy else 0
+        total_modules = self.data.model_prep.total_modules if self.data.model_prep else 0
         nodes = self.data.node_tagging.total_nodes if self.data.node_tagging else 0
         tagged = len(self.data.node_tagging.tagged_nodes) if self.data.node_tagging else 0
         coverage = self.data.node_tagging.coverage if self.data.node_tagging else 0.0
         
         console.print("📊 Export Summary:")
         console.print(f"   • Total time: [bold cyan]{total_time:.2f}s[/bold cyan]")
-        console.print(f"   • Hierarchy modules: [bold cyan]{modules}[/bold cyan]")
+        console.print(f"   • Hierarchy modules: [bold cyan]{total_modules}[/bold cyan]")
+        console.print(f"   • Traced modules: [bold cyan]{traced_modules}/{total_modules}[/bold cyan]")
         console.print(f"   • ONNX nodes: [bold cyan]{nodes}[/bold cyan]")
         console.print(
             f"   • Tagged nodes: [bold cyan]{tagged}[/bold cyan] "

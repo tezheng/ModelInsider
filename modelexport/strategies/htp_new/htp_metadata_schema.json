@@ -465,7 +465,12 @@
           "minimum": 0
         },
         "hierarchy_modules": {
-          "description": "Number of modules in hierarchy",
+          "description": "Total number of modules in model",
+          "type": "integer",
+          "minimum": 0
+        },
+        "traced_modules": {
+          "description": "Number of modules traced during execution",
           "type": "integer",
           "minimum": 0
         },
@@ -502,6 +507,7 @@
       "required": [
         "export_time",
         "hierarchy_modules",
+        "traced_modules",
         "onnx_nodes",
         "tagged_nodes",
         "empty_tags",

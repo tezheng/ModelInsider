@@ -152,7 +152,7 @@ class ConsoleWriter(StepAwareWriter):
         
         self.console.print("🔍 Tracing module execution with dummy inputs...")
         self.console.print(
-            f"✅ Captured {self._bright_cyan(len(data.hierarchy.hierarchy))} modules in hierarchy"
+            f"✅ Traced {self._bright_cyan(len(data.hierarchy.hierarchy))} modules in hierarchy"
         )
         self.console.print(
             f"📊 Total execution steps: {self._bright_cyan(data.hierarchy.execution_steps)}"
