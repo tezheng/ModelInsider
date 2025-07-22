@@ -161,7 +161,7 @@ class ConsoleWriter(StepAwareWriter):
         # Build and display hierarchy tree
         if data.hierarchy.hierarchy:
             self.console.print("\n🌳 Module Hierarchy:")
-            tree = self._build_hierarchy_tree(data.hierarchy.hierarchy)
+            tree = build_rich_tree(data.hierarchy.hierarchy, show_counts=False)
             self._display_truncated_tree(tree)
         
         return 1
@@ -229,9 +229,10 @@ class ConsoleWriter(StepAwareWriter):
         if data.hierarchy and data.hierarchy.hierarchy and data.node_tagging.tagged_nodes:
             self.console.print("\n🌳 Complete HF Hierarchy with ONNX Nodes:")
             self.console.print("-" * 60)
-            tree = self._build_hierarchy_tree_with_counts(
-                data.hierarchy.hierarchy,
-                data.node_tagging.tagged_nodes
+            tree = build_rich_tree(
+                data.hierarchy.hierarchy, 
+                show_counts=True, 
+                tagged_nodes=data.node_tagging.tagged_nodes
             )
             self._display_truncated_tree(tree)
         
@@ -257,13 +258,6 @@ class ConsoleWriter(StepAwareWriter):
         
         return 1
     
-    def _build_hierarchy_tree(self, hierarchy: dict[str, ModuleInfo]) -> Tree:
-        """Build Rich Tree from hierarchy data using shared utility."""
-        return build_rich_tree(hierarchy, show_counts=False)
-    
-    def _find_immediate_children(self, parent_path: str, hierarchy: dict[str, ModuleInfo]) -> list[str]:
-        """Find immediate children of a path using shared hierarchy logic."""
-        return find_immediate_children(parent_path, hierarchy)
     
     def _display_truncated_tree(self, tree: Tree, max_lines: int | None = None) -> None:
         """Display a tree with optional truncation."""
@@ -367,13 +361,6 @@ class ConsoleWriter(StepAwareWriter):
         for i, (tag, count) in enumerate(sorted_tags):
             self.console.print(f" {i + 1:2d}. {tag}: {self._bright_cyan(count)} nodes")
     
-    def _build_hierarchy_tree_with_counts(
-        self,
-        hierarchy: dict[str, ModuleInfo],
-        tagged_nodes: dict[str, str]
-    ) -> Tree:
-        """Build Rich Tree with node counts from tagged nodes using shared utility."""
-        return build_rich_tree(hierarchy, show_counts=True, tagged_nodes=tagged_nodes)
     
     
     def _extract_operation_type(self, node_name: str) -> str:
