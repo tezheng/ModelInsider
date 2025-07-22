@@ -146,18 +146,18 @@ class TestHTPExportMonitor:
             # Step 5: Node Tagging
             monitor.update(
                 ExportStep.NODE_TAGGING,
-                total_nodes=591,
+                total_nodes=2,
                 tagged_nodes={
                     "node1": "/BertModel/embeddings",
                     "node2": "/BertModel/encoder",
                 },
                 tagging_stats={
-                    "direct_matches": 524,
-                    "parent_matches": 67,
+                    "direct_matches": 2,
+                    "parent_matches": 0,
                     "root_fallbacks": 0,
                 },
                 coverage=100.0,
-                op_counts={"Add": 74, "MatMul": 73},
+                op_counts={"Add": 1, "MatMul": 1},
             )
             
             # Step 6: Tag Injection
@@ -180,7 +180,8 @@ class TestHTPExportMonitor:
         # Verify new metadata structure
         assert "nodes" in metadata  # Tagged nodes at root level
         assert "report" in metadata
-        assert "node_tagging" in metadata["report"]
+        assert "steps" in metadata["report"]
+        assert "node_tagging" in metadata["report"]["steps"]
         assert "modules" in metadata  # Hierarchy is now at root level as modules
         
         # Check report
@@ -286,6 +287,100 @@ class TestHTPExportMonitor:
         
         # The monitor now uses context manager pattern for finalization
         # No need to call finalize_export manually
+    
+    def test_traced_modules_in_export_summary(self):
+        """Test that 'Traced modules: X/Y' appears in Export Summary output."""
+        # Capture console output
+        import sys
+        from io import StringIO
+        captured_output = StringIO()
+        
+        with patch('rich.console.Console.print') as mock_print:
+            # Store all print calls
+            printed_lines = []
+            mock_print.side_effect = lambda *args, **kwargs: printed_lines.append(str(args[0]) if args else "")
+            
+            with HTPExportMonitor(
+                output_path=self.output_path,
+                model_name="bert-tiny",
+                verbose=True,
+                enable_report=False,
+            ) as monitor:
+                # Step 1: Model Prep
+                monitor.update(
+                    ExportStep.MODEL_PREP,
+                    model_class="BertModel",
+                    total_modules=73,
+                    total_parameters=4385916,
+                )
+                
+                # Step 2: Input Gen
+                monitor.update(
+                    ExportStep.INPUT_GEN,
+                    method="auto_generated",
+                    inputs={
+                        "input_ids": {"shape": [1, 7], "dtype": "int64"},
+                    }
+                )
+                
+                # Step 3: Hierarchy
+                monitor.update(
+                    ExportStep.HIERARCHY,
+                    hierarchy={
+                        "": {"class_name": "BertModel", "traced_tag": "/BertModel"},
+                        "embeddings": {"class_name": "BertEmbeddings", "traced_tag": "/BertModel/embeddings"},
+                        "encoder": {"class_name": "BertEncoder", "traced_tag": "/BertModel/encoder"},
+                    },
+                    execution_steps=245,
+                )
+                
+                # Step 4: ONNX Export
+                monitor.update(
+                    ExportStep.ONNX_EXPORT,
+                    opset_version=17,
+                    onnx_size_mb=17.6,
+                )
+                
+                # Step 5: Node Tagging
+                monitor.update(
+                    ExportStep.NODE_TAGGING,
+                    total_nodes=591,
+                    tagged_nodes={
+                        "node1": "/BertModel/embeddings",
+                        "node2": "/BertModel/encoder",
+                    },
+                    tagging_stats={
+                        "direct_matches": 524,
+                    },
+                    coverage=100.0,
+                )
+                
+                # Step 6: Tag Injection
+                monitor.update(
+                    ExportStep.TAG_INJECTION,
+                )
+                
+                # Monitor finalizes automatically via context manager
+            
+            # Check that Export Summary was printed
+            full_output = "\n".join(printed_lines)
+            
+            # Should contain Export Summary section
+            assert "📊 Export Summary:" in full_output or "Export Summary:" in full_output
+            
+            # Should contain the new format "Traced modules: X/Y"
+            import re
+            traced_pattern = re.compile(r'Traced modules:\s*\[?.*?\]?(\d+)/(\d+)')
+            match = traced_pattern.search(full_output)
+            
+            assert match is not None, f"'Traced modules: X/Y' format not found in output:\n{full_output}"
+            
+            # Verify the numbers make sense
+            traced = int(match.group(1))
+            total = int(match.group(2))
+            assert traced == 3, f"Expected 3 traced modules, got {traced}"
+            assert total == 73, f"Expected 73 total modules, got {total}"
+            assert traced <= total, f"Traced modules ({traced}) should be <= total modules ({total})"
 
 
 if __name__ == "__main__":

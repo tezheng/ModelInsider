@@ -119,18 +119,57 @@ class TestHTPMetadataValidation:
             with open(metadata_path, 'r') as f:
                 metadata = json.load(f)
             
-            # Module count should match
-            modules_in_hierarchy = len(metadata["modules"])
+            # Modules is now hierarchical structure, get all tags recursively
+            def extract_tags_from_hierarchy(module_dict):
+                """Extract all tags from hierarchical module structure."""
+                tags = set()
+                if isinstance(module_dict, dict):
+                    if "traced_tag" in module_dict:
+                        tags.add(module_dict["traced_tag"])
+                    if "children" in module_dict:
+                        for child in module_dict["children"].values():
+                            tags.update(extract_tags_from_hierarchy(child))
+                return tags
             
-            # All modules should have required fields
-            for module_path, module_info in metadata["modules"].items():
-                assert "class_name" in module_info
-                assert "traced_tag" in module_info
+            # Root module should have required fields
+            assert "class_name" in metadata["modules"]
+            assert "traced_tag" in metadata["modules"]
+            
+            # Extract all valid tags from hierarchical structure
+            valid_tags = extract_tags_from_hierarchy(metadata["modules"])
             
             # Node mappings should reference valid tags
-            valid_tags = {info["traced_tag"] for info in metadata["modules"].values()}
             for node_name, tag in metadata["nodes"].items():
-                assert tag in valid_tags, f"Node {node_name} has invalid tag {tag}"
+                assert tag in valid_tags, f"Node {node_name} has invalid tag {tag} (valid: {sorted(valid_tags)[:10]}...)"
+    
+    def test_traced_modules_in_statistics(self):
+        """Test that traced_modules field is present in statistics."""
+        with tempfile.TemporaryDirectory() as temp_dir:
+            output_path = Path(temp_dir) / "test.onnx"
+            
+            exporter = HTPExporter(verbose=False, enable_reporting=False)
+            exporter.export(
+                model_name_or_path="prajjwal1/bert-tiny",
+                output_path=str(output_path),
+            )
+            
+            metadata_path = str(output_path).replace(".onnx", "_htp_metadata.json")
+            with open(metadata_path, 'r') as f:
+                metadata = json.load(f)
+            
+            # Check statistics section exists
+            assert "statistics" in metadata
+            
+            # Check traced_modules field exists
+            assert "traced_modules" in metadata["statistics"]
+            assert "hierarchy_modules" in metadata["statistics"]
+            
+            # traced_modules should be less than or equal to hierarchy_modules
+            traced = metadata["statistics"]["traced_modules"]
+            total = metadata["statistics"]["hierarchy_modules"]
+            assert traced <= total
+            assert traced > 0  # Should have traced at least some modules
+            assert total > 0   # Should have total modules count
     
     def test_nodes_at_root_level(self):
         """Test that nodes mapping is at root level, not nested."""
@@ -205,10 +244,21 @@ class TestHTPReportValidation:
             # Check that module hierarchy section exists
             assert "## Module Hierarchy" in report
             
+            # Extract all class names from hierarchical structure
+            def extract_class_names(module_dict):
+                """Extract all class names from hierarchical module structure."""
+                class_names = []
+                if isinstance(module_dict, dict):
+                    if "class_name" in module_dict:
+                        class_names.append(module_dict["class_name"])
+                    if "children" in module_dict:
+                        for child in module_dict["children"].values():
+                            class_names.extend(extract_class_names(child))
+                return class_names
+            
             # All modules should be in the report (within the collapsible section)
-            for module_path in metadata["modules"]:
-                module_info = metadata["modules"][module_path]
-                class_name = module_info.get("class_name", "Unknown")
+            class_names = extract_class_names(metadata["modules"])
+            for class_name in class_names:
                 # Check either in mermaid diagram or in table
                 assert class_name in report
             
@@ -294,6 +344,18 @@ class TestHTPReportValidation:
             
             # Check for successful completion (in markdown format)
             assert "successfully" in report.lower()
+            
+            # Check for new Traced Modules field
+            assert "**Traced Modules**:" in report
+            # Should show format like "18/48" or similar
+            import re
+            traced_pattern = re.compile(r'\*\*Traced Modules\*\*:\s*(\d+)/(\d+)')
+            match = traced_pattern.search(report)
+            assert match is not None, "Traced modules format not found in report"
+            traced = int(match.group(1))
+            total = int(match.group(2))
+            assert traced <= total
+            assert traced > 0
 
 
 class TestHTPCleanOnnxMode:

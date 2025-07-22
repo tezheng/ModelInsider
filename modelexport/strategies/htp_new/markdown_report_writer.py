@@ -30,7 +30,7 @@ class MarkdownReportWriter(StepAwareWriter):
     # Report string constants for potential i18n
     TITLE = "HTP ONNX Export Report"
     TITLE_ERROR = "HTP ONNX Export Report - Error"
-    SECTION_EXPORT_STEPS = "Export Process"
+    SECTION_EXPORT_STEPS = "Export Process Steps"
     SECTION_MODULE_HIERARCHY = "Module Hierarchy"
     SECTION_NODE_MAPPINGS = "Complete Node Mappings"
     SECTION_SUMMARY = "Export Summary"
@@ -226,7 +226,7 @@ class MarkdownReportWriter(StepAwareWriter):
         
         if data.hierarchy:
             items = [
-                f"**Modules Captured**: {len(data.hierarchy.hierarchy)}",
+                f"**Modules Traced**: {len(data.hierarchy.hierarchy)}",
                 f"**Execution Steps**: {data.hierarchy.execution_steps}",
                 "**Status**: Module hierarchy successfully traced",
             ]
@@ -484,14 +484,16 @@ class MarkdownReportWriter(StepAwareWriter):
         # Coverage Statistics
         self.doc.add_heading("Coverage Statistics", level=3)
         
-        hierarchy_modules = len(data.hierarchy.hierarchy) if data.hierarchy else 0
+        traced_modules = len(data.hierarchy.hierarchy) if data.hierarchy else 0
+        total_modules = data.model_prep.total_modules if data.model_prep else 0
         onnx_nodes = data.node_tagging.total_nodes if data.node_tagging else 0
         tagged_nodes = len(data.node_tagging.tagged_nodes) if data.node_tagging else 0
         coverage = data.node_tagging.coverage if data.node_tagging else 0.0
         empty_tags = data.node_tagging.tagging_stats.get("empty_tags", 0) if data.node_tagging else 0
         
         stats = [
-            f"**Hierarchy Modules**: {hierarchy_modules}",
+            f"**Hierarchy Modules**: {total_modules}",
+            f"**Traced Modules**: {traced_modules}/{total_modules}",
             f"**ONNX Nodes**: {onnx_nodes}",
             f"**Tagged Nodes**: {tagged_nodes} ({coverage:.1f}%)",
             f"**Empty Tags**: {empty_tags}",

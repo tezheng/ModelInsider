@@ -128,16 +128,24 @@ def _validate_cross_fields(metadata: dict[str, Any]) -> None:
                             f"doesn't match calculation {expected:.2f}%"
                         )
     
-    # Validate module hierarchy count
+    # Validate traced modules count
     if "modules" in metadata and "statistics" in metadata:
-        # Count modules in hierarchical structure
+        # Count modules in hierarchical structure (these are traced modules)
         module_count = _count_modules(metadata["modules"])
-        reported_count = metadata["statistics"].get("hierarchy_modules", 0)
+        traced_count = metadata["statistics"].get("traced_modules", 0)
         
-        if module_count != reported_count:
+        if module_count != traced_count:
             raise MetadataValidationError(
-                f"Invalid statistics: hierarchy_modules ({reported_count}) "
+                f"Invalid statistics: traced_modules ({traced_count}) "
                 f"doesn't match actual module count ({module_count})"
+            )
+        
+        # Validate that traced_modules <= hierarchy_modules
+        hierarchy_count = metadata["statistics"].get("hierarchy_modules", 0)
+        if traced_count > hierarchy_count:
+            raise MetadataValidationError(
+                f"Invalid statistics: traced_modules ({traced_count}) "
+                f"cannot exceed hierarchy_modules ({hierarchy_count})"
             )
 
 

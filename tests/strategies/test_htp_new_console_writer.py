@@ -106,7 +106,7 @@ class TestConsoleWriter:
         output = self.get_plain_output()
         
         assert "STEP 3/6: HIERARCHY BUILDING" in output
-        assert "Captured 4 modules in hierarchy" in output
+        assert "Traced 4 modules in hierarchy" in output
         assert "Total execution steps: 42" in output
         assert "Module Hierarchy:" in output
         assert "BertModel" in output

@@ -57,7 +57,7 @@ Tracing execution information (from console output Step 3):
 ```json
 {
   "builder": "TracingHierarchyBuilder",
-  "modules_traced": 18,                    // Console: Captured 18 modules
+  "modules_traced": 18,                    // Console: Traced 18 modules
   "execution_steps": 36,                   // Console: Total execution steps: 36
   "model_type": "bert",                    // From Step 2 auto-detection
   "task": "feature-extraction",            // From Step 2 auto-detection
@@ -242,7 +242,8 @@ Export summary statistics (from console output final summary):
 ```json
 {
   "export_time": 4.79,                     // Console: Total time: 4.79s
-  "hierarchy_modules": 18,                 // Console: Hierarchy modules: 18
+  "hierarchy_modules": 48,                 // Console: Hierarchy modules: 48
+  "traced_modules": 18,                    // Console: Traced modules: 18/48
   "onnx_nodes": 136,                       // Console: ONNX nodes: 136
   "tagged_nodes": 136,                     // Console: Tagged nodes: 136
   "empty_tags": 0,                         // Always 0 with HTP
@@ -304,7 +305,7 @@ The report is generated as a **Markdown file (.md)** with structured sections us
 ...
 
 ### ✅ Step 3/6: Hierarchy Building
-- **Modules Captured**: {MODULE_COUNT}
+- **Modules Traced**: {MODULE_COUNT}
 - **Execution Steps**: {EXECUTION_STEPS}
 - **Status**: Module hierarchy successfully traced
 
@@ -391,6 +392,7 @@ flowchart LR
 
 ### Coverage Statistics
 - **Hierarchy Modules**: {HIERARCHY_MODULES}
+- **Traced Modules**: {TRACED_MODULES}/{HIERARCHY_MODULES}
 - **ONNX Nodes**: {ONNX_NODES}  
 - **Tagged Nodes**: {TAGGED_NODES} ({COVERAGE}%)
 - **Empty Tags**: {EMPTY_TAGS}

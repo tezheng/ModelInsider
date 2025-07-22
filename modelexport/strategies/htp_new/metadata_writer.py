@@ -240,7 +240,12 @@ class MetadataWriter(StepAwareWriter):
         )
         
         # Set statistics
-        hierarchy_modules = self._count_modules(self.builder._modules) if self.builder._modules else 0
+        traced_modules = self._count_modules(self.builder._modules) if self.builder._modules else 0
+        # Get total modules from model info
+        total_modules = 0
+        if hasattr(self.builder, "_model_info") and self.builder._model_info:
+            total_modules = self.builder._model_info.total_modules
+        
         onnx_nodes = 0
         tagged_nodes = 0
         module_types = []
@@ -255,7 +260,8 @@ class MetadataWriter(StepAwareWriter):
         
         self.builder.with_statistics(
             export_time=self._export_time,
-            hierarchy_modules=hierarchy_modules,
+            hierarchy_modules=total_modules,
+            traced_modules=traced_modules,
             onnx_nodes=onnx_nodes,
             tagged_nodes=tagged_nodes,
             empty_tags=empty_tags,

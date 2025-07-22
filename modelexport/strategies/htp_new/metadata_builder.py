@@ -120,6 +120,7 @@ class Statistics:
     """Export statistics summary."""
     export_time: float = 0.0
     hierarchy_modules: int = 0
+    traced_modules: int = 0
     onnx_nodes: int = 0
     tagged_nodes: int = 0
     empty_tags: int = 0
@@ -277,6 +278,7 @@ class HTPMetadataBuilder:
         self,
         export_time: float,
         hierarchy_modules: int,
+        traced_modules: int,
         onnx_nodes: int,
         tagged_nodes: int,
         empty_tags: int,
@@ -287,6 +289,7 @@ class HTPMetadataBuilder:
         self._statistics = Statistics(
             export_time=export_time,
             hierarchy_modules=hierarchy_modules,
+            traced_modules=traced_modules,
             onnx_nodes=onnx_nodes,
             tagged_nodes=tagged_nodes,
             empty_tags=empty_tags,
