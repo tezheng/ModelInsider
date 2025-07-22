@@ -1,0 +1,155 @@
+{
+  "export_context": {
+    "timestamp": "2025-07-21T12:28:17Z",
+    "strategy": "htp",
+    "version": "1.0",
+    "exporter": "HTPExporter",
+    "embed_hierarchy_attributes": true,
+    "export_time_seconds": 4.59
+  },
+  "model": {
+    "name_or_path": "prajjwal1/bert-tiny",
+    "class": "BertModel",
+    "framework": "transformers",
+    "total_modules": 48,
+    "total_parameters": 4385920
+  },
+  "modules": {
+    "": {
+      "class_name": "BertModel",
+      "traced_tag": "/BertModel",
+      "execution_order": 0
+    },
+    "embeddings": {
+      "class_name": "BertEmbeddings",
+      "traced_tag": "/BertModel/BertEmbeddings",
+      "execution_order": 1
+    },
+    "encoder": {
+      "class_name": "BertEncoder",
+      "traced_tag": "/BertModel/BertEncoder",
+      "execution_order": 2
+    },
+    "encoder.layer.0": {
+      "class_name": "BertLayer",
+      "traced_tag": "/BertModel/BertEncoder/BertLayer.0",
+      "execution_order": 3
+    },
+    "encoder.layer.0.attention": {
+      "class_name": "BertAttention",
+      "traced_tag": "/BertModel/BertEncoder/BertLayer.0/BertAttention",
+      "execution_order": 4
+    }
+  },
+  "nodes": {
+    "/Constant": "/BertModel",
+    "/Cast": "/BertModel",
+    "/embeddings/Gather": "/BertModel/BertEmbeddings",
+    "/embeddings/LayerNorm/LayerNormalization": "/BertModel/BertEmbeddings",
+    "/encoder/layer.0/attention/self/MatMul": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/output/dense/MatMul": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSelfOutput"
+  },
+  "outputs": {
+    "onnx_model": {
+      "path": "bert-tiny.onnx",
+      "size_mb": 16.76,
+      "opset_version": 17,
+      "output_names": ["last_hidden_state", "pooler_output"]
+    },
+    "metadata": {
+      "path": "bert-tiny_htp_metadata.json"
+    },
+    "report": {
+      "path": "bert-tiny_htp_export_report.txt"
+    }
+  },
+  "report": {
+    "steps": {
+      "input_generation": {
+        "method": "auto_generated",
+        "model_type": "bert",
+        "task": "feature-extraction",
+        "inputs": {
+          "input_ids": {
+            "shape": [2, 16],
+            "dtype": "torch.int64"
+          },
+          "attention_mask": {
+            "shape": [2, 16],
+            "dtype": "torch.int64"
+          },
+          "token_type_ids": {
+            "shape": [2, 16],
+            "dtype": "torch.int64"
+          }
+        }
+      },
+      "onnx_export": {
+        "opset_version": 17,
+        "do_constant_folding": true,
+        "onnx_size_mb": 16.76,
+        "output_names": ["last_hidden_state", "pooler_output"]
+      },
+      "tag_injection": {
+        "tags_injected": true,
+        "tags_stripped": false
+      }
+    },
+    "node_tagging": {
+      "statistics": {
+        "direct_matches": 83,
+        "parent_matches": 34,
+        "root_fallbacks": 19,
+        "tagged_nodes": 136
+      },
+      "coverage": {
+        "percentage": 100.0,
+        "total_onnx_nodes": 136,
+        "tagged_nodes": 136
+      }
+    }
+  },
+  "tracing": {
+    "builder": "TracingHierarchyBuilder",
+    "modules_traced": 18,
+    "execution_steps": 36,
+    "model_type": "bert",
+    "task": "feature-extraction",
+    "inputs": {
+      "input_ids": {
+        "shape": [2, 16],
+        "dtype": "torch.int64"
+      },
+      "attention_mask": {
+        "shape": [2, 16],
+        "dtype": "torch.int64"
+      },
+      "token_type_ids": {
+        "shape": [2, 16],
+        "dtype": "torch.int64"
+      }
+    },
+    "outputs": ["last_hidden_state", "pooler_output"]
+  },
+  "statistics": {
+    "export_time": 4.59,
+    "hierarchy_modules": 18,
+    "onnx_nodes": 136,
+    "tagged_nodes": 136,
+    "empty_tags": 0,
+    "coverage_percentage": 100.0,
+    "module_types": [
+      "BertModel",
+      "BertEmbeddings",
+      "BertEncoder",
+      "BertLayer",
+      "BertAttention",
+      "BertSdpaSelfAttention",
+      "BertSelfOutput",
+      "BertIntermediate",
+      "GELUActivation",
+      "BertOutput",
+      "BertPooler"
+    ]
+  }
+}

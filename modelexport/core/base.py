@@ -82,6 +82,8 @@ def should_include_in_hierarchy(module: torch.nn.Module, exceptions: list[str] |
     Determine if a module should be included in the hierarchy structure.
     
     Filters out torch.nn infrastructure modules while preserving semantically important ones.
+    NOTE: This function is primarily used for ONNX tag filtering. For complete hierarchy 
+    reports, consider bypassing this filter entirely.
     
     Args:
         module: PyTorch module to evaluate

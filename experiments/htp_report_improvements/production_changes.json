@@ -1,0 +1,34 @@
+{
+  "file": "modelexport/strategies/htp/htp_exporter.py",
+  "changes": [
+    {
+      "description": "Add text report buffer to __init__",
+      "location": "__init__ method",
+      "add": "self.text_report_buffer = StringIO()"
+    },
+    {
+      "description": "Capture output in _output_message",
+      "location": "_output_message method",
+      "add": "self.text_report_buffer.write(message + '\\n')"
+    },
+    {
+      "description": "Override _render_tree_output for full capture",
+      "location": "_render_tree_output method",
+      "add": "\n# Also write full tree to text buffer\ntext_console = Console(file=self.text_report_buffer, force_terminal=False, width=120)\ntext_console.print(tree)\n"
+    },
+    {
+      "description": "Restructure metadata in _generate_metadata_file",
+      "location": "_generate_metadata_file method, after building metadata",
+      "changes": [
+        "Replace: metadata['tagging']['tagged_nodes']",
+        "With: metadata['nodes'] = self._tagged_nodes.copy()",
+        "Move: statistics and coverage to metadata['report']['node_tagging']"
+      ]
+    },
+    {
+      "description": "Write full report at end of export",
+      "location": "export method, at the end",
+      "add": "\n# Write full text report\nreport_path = str(output_path).replace('.onnx', '_full_report.txt')\nwith open(report_path, 'w', encoding='utf-8') as f:\n    # Add complete modules section\n    f.write(\"\\n\" + \"=\"*80 + \"\\n\")\n    f.write(\"COMPLETE MODULE HIERARCHY\\n\")\n    f.write(\"=\"*80 + \"\\n\\n\")\n    for module_path, module_data in sorted(self._hierarchy_data.items()):\n        f.write(f\"Module: {module_path or '[ROOT]'}\\n\")\n        f.write(f\"  Class: {module_data.get('class_name', 'Unknown')}\\n\")\n        f.write(f\"  Tag: {module_data.get('traced_tag', '')}\\n\")\n        f.write(\"\\n\")\n    \n    # Add complete nodes section  \n    f.write(\"\\n\" + \"=\"*80 + \"\\n\")\n    f.write(\"COMPLETE NODE MAPPINGS\\n\")\n    f.write(\"=\"*80 + \"\\n\\n\")\n    for node_name, tag in sorted(self._tagged_nodes.items()):\n        f.write(f\"{node_name} -> {tag}\\n\")\n    \n    # Write captured console output\n    f.write(\"\\n\" + \"=\"*80 + \"\\n\")\n    f.write(\"CONSOLE OUTPUT\\n\")\n    f.write(\"=\"*80 + \"\\n\\n\")\n    f.write(self.text_report_buffer.getvalue())\n"
+    }
+  ]
+}

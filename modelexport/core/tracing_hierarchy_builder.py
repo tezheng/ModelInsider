@@ -55,12 +55,11 @@ class TracingHierarchyBuilder:
         """
         Determine if module should create a new hierarchy level - UNIVERSAL.
 
-        CARDINAL RULE #5 (MUST-002): Filter torch.nn modules from hierarchy
-        Only include semantically important modules in hierarchy structure.
+        Respects the exceptions parameter to control which torch.nn modules are included.
+        When exceptions=None (default), torch.nn modules are excluded per MUST-002.
         """
-        # Use should_include_in_hierarchy to filter torch.nn infrastructure modules
-        # This ensures MUST-002 compliance - no torch.nn classes in hierarchy by default
-        # But allows exceptions for specific cases where torch.nn modules are needed
+        # Use the universal should_include_in_hierarchy function
+        # This properly filters torch.nn modules based on the exceptions list
         return should_include_in_hierarchy(module, exceptions=self.exceptions)
 
     def create_pre_hook(self, module_name: str, module: nn.Module):
