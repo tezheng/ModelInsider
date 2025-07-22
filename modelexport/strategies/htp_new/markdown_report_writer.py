@@ -349,56 +349,11 @@ class MarkdownReportWriter(StepAwareWriter):
             self.doc.add_paragraph("No hierarchy data available.")
             return
         
-        # Mermaid flowchart
-        self.doc.add_raw("```mermaid")
-        self.doc.add_raw("flowchart LR")
-        
-        # Generate simplified hierarchy for Mermaid (top-level modules)
+        # Get hierarchy data for module table
         hierarchy = data.hierarchy.hierarchy
         
-        # Build parent-child relationships
-        relationships = []
-        module_ids = {}
-        id_counter = 0
-        seen_relationships = set()  # Prevent duplicate relationships
-        
-        # First pass: assign IDs to modules
-        for path, _module_info in hierarchy.items():
-            if path not in module_ids:
-                module_ids[path] = f"M{id_counter}"
-                id_counter += 1
-        
-        # Second pass: build relationships
-        for path, module_info in hierarchy.items():
-            if "." in path:
-                parent_path = ".".join(path.split(".")[:-1])
-                if parent_path in module_ids:
-                    parent_id = module_ids[parent_path]
-                    child_id = module_ids[path]
-                    rel_key = f"{parent_id}->{child_id}"
-                    if rel_key not in seen_relationships:
-                        seen_relationships.add(rel_key)
-                        parent_info = hierarchy.get(parent_path)
-                        parent_class = parent_info.class_name if parent_info else "Unknown"
-                        relationships.append(f"    {parent_id}[{parent_class}] --> {child_id}[{module_info.class_name}]")
-            elif path and "/" not in path:  # Top-level module
-                root_id = module_ids.get("", "M0")
-                child_id = module_ids[path]
-                rel_key = f"{root_id}->{child_id}"
-                if rel_key not in seen_relationships:
-                    seen_relationships.add(rel_key)
-                    root_info = hierarchy.get("")
-                    root_class = root_info.class_name if root_info else "Model"
-                    relationships.append(f"    {root_id}[{root_class}] --> {child_id}[{module_info.class_name}]")
-        
-        # Add first 10 relationships to avoid clutter
-        for rel in relationships[:10]:
-            self.doc.add_raw(rel)
-        
-        if len(relationships) > 10:
-            self.doc.add_raw(f"    %% ... and {len(relationships) - 10} more relationships")
-        
-        self.doc.add_raw("```")
+        # Note about disabled Mermaid diagram
+        self.doc.add_paragraph("📊 **Hierarchy Visualization**: *Mermaid diagram temporarily disabled for stability.*")
         
         # Module table with reordered columns
         self.doc.add_heading("Module List (Sorted by Execution Order)", level=3)
