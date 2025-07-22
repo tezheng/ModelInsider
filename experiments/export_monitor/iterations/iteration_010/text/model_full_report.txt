@@ -1,0 +1,138 @@
+
+================================================================================
+COMPLETE MODULE HIERARCHY
+================================================================================
+
+Model Name: sshleifer/tiny-gpt2
+Model Class: GPT2Model
+Total Modules: 32
+Total Parameters: 102,714
+
+INPUT GENERATION
+----------------------------------------
+Model Type: text
+Task: test
+Method: auto_generated
+
+Generated Inputs:
+  input_ids: shape=torch.Size([1, 128]), dtype=torch.int64
+  attention_mask: shape=torch.Size([1, 128]), dtype=torch.int64
+
+Module: [ROOT]
+  Class: GPT2Model
+  Tag: /GPT2Model
+
+Module: wte
+  Class: Embedding
+  Tag: /GPT2Model/wte
+
+Module: wpe
+  Class: Embedding
+  Tag: /GPT2Model/wpe
+
+Module: drop
+  Class: Dropout
+  Tag: /GPT2Model/drop
+
+Module: h
+  Class: ModuleList
+  Tag: /GPT2Model/h
+
+Module: h.0
+  Class: GPT2Block
+  Tag: /GPT2Model/h/0
+
+Module: h.0.ln_1
+  Class: LayerNorm
+  Tag: /GPT2Model/h/0/ln_1
+
+Module: h.0.attn
+  Class: GPT2Attention
+  Tag: /GPT2Model/h/0/attn
+
+Module: h.0.attn.c_attn
+  Class: Conv1D
+  Tag: /GPT2Model/h/0/attn/c_attn
+
+Module: h.0.attn.c_proj
+  Class: Conv1D
+  Tag: /GPT2Model/h/0/attn/c_proj
+
+Total Modules: 10
+
+NODE TAGGING STATISTICS
+----------------------------------------
+Total ONNX Nodes: 50
+Tagged Nodes: 50
+Coverage: 100.0%
+  Root Nodes: 50
+  Scoped Nodes: 0
+  Unique Scopes: 1
+  Direct Matches: 30
+  Parent Matches: 15
+  Operation Matches: 0
+  Root Fallbacks: 5
+  Empty Tags: 0
+
+COMPLETE NODE MAPPINGS
+----------------------------------------
+node_0 -> /GPT2Model
+node_1 -> /GPT2Model
+node_10 -> /GPT2Model
+node_11 -> /GPT2Model
+node_12 -> /GPT2Model
+node_13 -> /GPT2Model
+node_14 -> /GPT2Model
+node_15 -> /GPT2Model
+node_16 -> /GPT2Model
+node_17 -> /GPT2Model
+node_18 -> /GPT2Model
+node_19 -> /GPT2Model
+node_2 -> /GPT2Model
+node_20 -> /GPT2Model
+node_21 -> /GPT2Model
+node_22 -> /GPT2Model
+node_23 -> /GPT2Model
+node_24 -> /GPT2Model
+node_25 -> /GPT2Model
+node_26 -> /GPT2Model
+node_27 -> /GPT2Model
+node_28 -> /GPT2Model
+node_29 -> /GPT2Model
+node_3 -> /GPT2Model
+node_30 -> /GPT2Model
+node_31 -> /GPT2Model
+node_32 -> /GPT2Model
+node_33 -> /GPT2Model
+node_34 -> /GPT2Model
+node_35 -> /GPT2Model
+node_36 -> /GPT2Model
+node_37 -> /GPT2Model
+node_38 -> /GPT2Model
+node_39 -> /GPT2Model
+node_4 -> /GPT2Model
+node_40 -> /GPT2Model
+node_41 -> /GPT2Model
+node_42 -> /GPT2Model
+node_43 -> /GPT2Model
+node_44 -> /GPT2Model
+node_45 -> /GPT2Model
+node_46 -> /GPT2Model
+node_47 -> /GPT2Model
+node_48 -> /GPT2Model
+node_49 -> /GPT2Model
+node_5 -> /GPT2Model
+node_6 -> /GPT2Model
+node_7 -> /GPT2Model
+node_8 -> /GPT2Model
+node_9 -> /GPT2Model
+
+EXPORT SUMMARY
+----------------------------------------
+Total Export Time: 0.01s
+ONNX File Size: 0.00MB
+Final Coverage: 100.0%
+Empty Tags: 0 ✅
+
+================================================================================
+Export completed successfully!

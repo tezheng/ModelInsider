@@ -1,0 +1,25 @@
+================================================================================
+HTP EXPORT FULL REPORT
+================================================================================
+Generated: 2025-07-18T19:04:11Z
+
+
+MODEL INFORMATION
+----------------------------------------
+Model Name: 
+Model Class: 
+Total Modules: 0
+Total Parameters: 0
+Export Strategy: HTP
+Output Path: demo.onnx
+
+[2025-07-18T11:04:09Z] input_generation: Completed
+
+EXPORT SUMMARY
+----------------------------------------
+Total Export Time: -1.46s
+ONNX File Size: 0.00MB
+Final Coverage: 0.0%
+
+================================================================================
+Export completed successfully!

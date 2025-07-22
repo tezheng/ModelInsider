@@ -1,0 +1,256 @@
+
+================================================================================
+COMPLETE MODULE HIERARCHY
+================================================================================
+
+Model Name: prajjwal1/bert-tiny
+Model Class: BertModel
+Total Modules: 48
+Total Parameters: 4,385,920
+
+INPUT GENERATION
+----------------------------------------
+Model Type: bert
+Task: feature-extraction
+Method: auto_generated
+
+Generated Inputs:
+  input_ids: shape=torch.Size([1, 128]), dtype=torch.int64
+  attention_mask: shape=torch.Size([1, 128]), dtype=torch.int64
+
+Module: [ROOT]
+  Class: BertModel
+  Tag: /BertModel
+
+Module: embeddings
+  Class: BertEmbeddings
+  Tag: /BertModel/BertEmbeddings
+
+Module: encoder
+  Class: BertEncoder
+  Tag: /BertModel/BertEncoder
+
+Module: encoder.layer.0
+  Class: BertLayer
+  Tag: /BertModel/BertEncoder/BertLayer.0
+
+Module: encoder.layer.0.attention
+  Class: BertAttention
+  Tag: /BertModel/BertEncoder/BertLayer.0/BertAttention
+
+Module: encoder.layer.0.attention.self
+  Class: BertSdpaSelfAttention
+  Tag: /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+
+Module: encoder.layer.0.attention.output
+  Class: BertSelfOutput
+  Tag: /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSelfOutput
+
+Module: encoder.layer.0.intermediate
+  Class: BertIntermediate
+  Tag: /BertModel/BertEncoder/BertLayer.0/BertIntermediate
+
+Module: encoder.layer.0.intermediate.intermediate_act_fn
+  Class: GELUActivation
+  Tag: /BertModel/BertEncoder/BertLayer.0/BertIntermediate/GELUActivation
+
+Module: encoder.layer.0.output
+  Class: BertOutput
+  Tag: /BertModel/BertEncoder/BertLayer.0/BertOutput
+
+Module: encoder.layer.1
+  Class: BertLayer
+  Tag: /BertModel/BertEncoder/BertLayer.1
+
+Module: encoder.layer.1.attention
+  Class: BertAttention
+  Tag: /BertModel/BertEncoder/BertLayer.1/BertAttention
+
+Module: encoder.layer.1.attention.self
+  Class: BertSdpaSelfAttention
+  Tag: /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+
+Module: encoder.layer.1.attention.output
+  Class: BertSelfOutput
+  Tag: /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSelfOutput
+
+Module: encoder.layer.1.intermediate
+  Class: BertIntermediate
+  Tag: /BertModel/BertEncoder/BertLayer.1/BertIntermediate
+
+Module: encoder.layer.1.intermediate.intermediate_act_fn
+  Class: GELUActivation
+  Tag: /BertModel/BertEncoder/BertLayer.1/BertIntermediate/GELUActivation
+
+Module: encoder.layer.1.output
+  Class: BertOutput
+  Tag: /BertModel/BertEncoder/BertLayer.1/BertOutput
+
+Module: pooler
+  Class: BertPooler
+  Tag: /BertModel/BertPooler
+
+Total Modules: 18
+
+NODE TAGGING STATISTICS
+----------------------------------------
+Total ONNX Nodes: 136
+Tagged Nodes: 136
+Coverage: 100.0%
+  Root Nodes: 19
+  Scoped Nodes: 117
+  Unique Scopes: 11
+  Direct Matches: 83
+  Parent Matches: 34
+  Operation Matches: 0
+  Root Fallbacks: 19
+  Empty Tags: 0
+
+COMPLETE NODE MAPPINGS
+----------------------------------------
+/embeddings/node_0 -> /BertModel/BertEmbeddings
+/embeddings/node_1 -> /BertModel/BertEmbeddings
+/embeddings/node_2 -> /BertModel/BertEmbeddings
+/embeddings/node_3 -> /BertModel/BertEmbeddings
+/embeddings/node_4 -> /BertModel/BertEmbeddings
+/embeddings/node_5 -> /BertModel/BertEmbeddings
+/embeddings/node_6 -> /BertModel/BertEmbeddings
+/embeddings/node_7 -> /BertModel/BertEmbeddings
+/encoder/layer.0/attention/output/node_0 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSelfOutput
+/encoder/layer.0/attention/output/node_1 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSelfOutput
+/encoder/layer.0/attention/output/node_2 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSelfOutput
+/encoder/layer.0/attention/output/node_3 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSelfOutput
+/encoder/layer.0/attention/self/node_0 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_1 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_10 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_11 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_12 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_13 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_14 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_15 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_16 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_17 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_18 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_19 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_2 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_20 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_21 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_22 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_23 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_24 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_25 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_26 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_27 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_28 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_29 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_3 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_30 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_31 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_32 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_33 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_34 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_4 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_5 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_6 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_7 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_8 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/attention/self/node_9 -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/encoder/layer.0/intermediate/node_0 -> /BertModel/BertEncoder/BertLayer.0/BertIntermediate
+/encoder/layer.0/intermediate/node_1 -> /BertModel/BertEncoder/BertLayer.0/BertIntermediate
+/encoder/layer.0/intermediate/node_2 -> /BertModel/BertEncoder/BertLayer.0/BertIntermediate
+/encoder/layer.0/intermediate/node_3 -> /BertModel/BertEncoder/BertLayer.0/BertIntermediate
+/encoder/layer.0/intermediate/node_4 -> /BertModel/BertEncoder/BertLayer.0/BertIntermediate
+/encoder/layer.0/intermediate/node_5 -> /BertModel/BertEncoder/BertLayer.0/BertIntermediate
+/encoder/layer.0/intermediate/node_6 -> /BertModel/BertEncoder/BertLayer.0/BertIntermediate
+/encoder/layer.0/intermediate/node_7 -> /BertModel/BertEncoder/BertLayer.0/BertIntermediate
+/encoder/layer.0/intermediate/node_8 -> /BertModel/BertEncoder/BertLayer.0/BertIntermediate
+/encoder/layer.0/intermediate/node_9 -> /BertModel/BertEncoder/BertLayer.0/BertIntermediate
+/encoder/layer.0/output/node_0 -> /BertModel/BertEncoder/BertLayer.0/BertOutput
+/encoder/layer.0/output/node_1 -> /BertModel/BertEncoder/BertLayer.0/BertOutput
+/encoder/layer.0/output/node_2 -> /BertModel/BertEncoder/BertLayer.0/BertOutput
+/encoder/layer.0/output/node_3 -> /BertModel/BertEncoder/BertLayer.0/BertOutput
+/encoder/layer.1/attention/output/node_0 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSelfOutput
+/encoder/layer.1/attention/output/node_1 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSelfOutput
+/encoder/layer.1/attention/output/node_2 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSelfOutput
+/encoder/layer.1/attention/output/node_3 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSelfOutput
+/encoder/layer.1/attention/self/node_0 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_1 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_10 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_11 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_12 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_13 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_14 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_15 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_16 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_17 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_18 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_19 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_2 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_20 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_21 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_22 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_23 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_24 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_25 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_26 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_27 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_28 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_29 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_3 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_30 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_31 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_32 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_33 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_34 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_4 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_5 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_6 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_7 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_8 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/attention/self/node_9 -> /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention
+/encoder/layer.1/intermediate/node_0 -> /BertModel/BertEncoder/BertLayer.1/BertIntermediate
+/encoder/layer.1/intermediate/node_1 -> /BertModel/BertEncoder/BertLayer.1/BertIntermediate
+/encoder/layer.1/intermediate/node_2 -> /BertModel/BertEncoder/BertLayer.1/BertIntermediate
+/encoder/layer.1/intermediate/node_3 -> /BertModel/BertEncoder/BertLayer.1/BertIntermediate
+/encoder/layer.1/intermediate/node_4 -> /BertModel/BertEncoder/BertLayer.1/BertIntermediate
+/encoder/layer.1/intermediate/node_5 -> /BertModel/BertEncoder/BertLayer.1/BertIntermediate
+/encoder/layer.1/intermediate/node_6 -> /BertModel/BertEncoder/BertLayer.1/BertIntermediate
+/encoder/layer.1/intermediate/node_7 -> /BertModel/BertEncoder/BertLayer.1/BertIntermediate
+/encoder/layer.1/intermediate/node_8 -> /BertModel/BertEncoder/BertLayer.1/BertIntermediate
+/encoder/layer.1/intermediate/node_9 -> /BertModel/BertEncoder/BertLayer.1/BertIntermediate
+/encoder/layer.1/output/node_0 -> /BertModel/BertEncoder/BertLayer.1/BertOutput
+/encoder/layer.1/output/node_1 -> /BertModel/BertEncoder/BertLayer.1/BertOutput
+/encoder/layer.1/output/node_2 -> /BertModel/BertEncoder/BertLayer.1/BertOutput
+/encoder/layer.1/output/node_3 -> /BertModel/BertEncoder/BertLayer.1/BertOutput
+/pooler/node_0 -> /BertModel/BertPooler
+/pooler/node_1 -> /BertModel/BertPooler
+/pooler/node_2 -> /BertModel/BertPooler
+/root_node_0 -> /BertModel
+/root_node_1 -> /BertModel
+/root_node_10 -> /BertModel
+/root_node_11 -> /BertModel
+/root_node_12 -> /BertModel
+/root_node_13 -> /BertModel
+/root_node_14 -> /BertModel
+/root_node_15 -> /BertModel
+/root_node_16 -> /BertModel
+/root_node_17 -> /BertModel
+/root_node_18 -> /BertModel
+/root_node_2 -> /BertModel
+/root_node_3 -> /BertModel
+/root_node_4 -> /BertModel
+/root_node_5 -> /BertModel
+/root_node_6 -> /BertModel
+/root_node_7 -> /BertModel
+/root_node_8 -> /BertModel
+/root_node_9 -> /BertModel
+
+EXPORT SUMMARY
+----------------------------------------
+Total Export Time: 0.02s
+ONNX File Size: 0.00MB
+Final Coverage: 100.0%
+Empty Tags: 0 ✅
+
+================================================================================
+Export completed successfully!

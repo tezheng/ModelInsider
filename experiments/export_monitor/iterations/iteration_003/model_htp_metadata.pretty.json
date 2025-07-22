@@ -1,0 +1,294 @@
+{
+  "export_info": {
+    "timestamp": "2025-07-18T22:41:47Z",
+    "model_name": "prajjwal1/bert-tiny",
+    "model_class": "BertModel",
+    "export_time": 0.01590418815612793,
+    "strategy": "htp",
+    "embed_hierarchy_attributes": true
+  },
+  "model_info": {
+    "total_modules": 48,
+    "total_parameters": 4385920,
+    "execution_steps": 36
+  },
+  "input_info": {
+    "input_names": [
+      "input_ids",
+      "attention_mask",
+      "token_type_ids"
+    ],
+    "output_names": []
+  },
+  "hierarchy": {
+    "": {
+      "class_name": "BertModel",
+      "traced_tag": "/BertModel",
+      "module_type": "huggingface",
+      "execution_order": 0
+    },
+    "embeddings": {
+      "class_name": "BertEmbeddings",
+      "traced_tag": "/BertModel/BertEmbeddings",
+      "module_type": "huggingface",
+      "execution_order": 1
+    },
+    "encoder": {
+      "class_name": "BertEncoder",
+      "traced_tag": "/BertModel/BertEncoder",
+      "module_type": "huggingface",
+      "execution_order": 2
+    },
+    "pooler": {
+      "class_name": "BertPooler",
+      "traced_tag": "/BertModel/BertPooler",
+      "module_type": "huggingface",
+      "execution_order": 17
+    },
+    "encoder.layer.0": {
+      "class_name": "BertLayer",
+      "traced_tag": "/BertModel/BertEncoder/BertLayer.0",
+      "module_type": "huggingface",
+      "execution_order": 3
+    },
+    "encoder.layer.0.attention": {
+      "class_name": "BertAttention",
+      "traced_tag": "/BertModel/BertEncoder/BertLayer.0/BertAttention",
+      "module_type": "huggingface",
+      "execution_order": 4
+    },
+    "encoder.layer.0.attention.self": {
+      "class_name": "BertSdpaSelfAttention",
+      "traced_tag": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+      "module_type": "huggingface",
+      "execution_order": 5
+    },
+    "encoder.layer.0.attention.output": {
+      "class_name": "BertSelfOutput",
+      "traced_tag": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSelfOutput",
+      "module_type": "huggingface",
+      "execution_order": 6
+    },
+    "encoder.layer.0.intermediate": {
+      "class_name": "BertIntermediate",
+      "traced_tag": "/BertModel/BertEncoder/BertLayer.0/BertIntermediate",
+      "module_type": "huggingface",
+      "execution_order": 7
+    },
+    "encoder.layer.0.intermediate.intermediate_act_fn": {
+      "class_name": "GELUActivation",
+      "traced_tag": "/BertModel/BertEncoder/BertLayer.0/BertIntermediate/GELUActivation",
+      "module_type": "huggingface",
+      "execution_order": 8
+    },
+    "encoder.layer.0.output": {
+      "class_name": "BertOutput",
+      "traced_tag": "/BertModel/BertEncoder/BertLayer.0/BertOutput",
+      "module_type": "huggingface",
+      "execution_order": 9
+    },
+    "encoder.layer.1": {
+      "class_name": "BertLayer",
+      "traced_tag": "/BertModel/BertEncoder/BertLayer.1",
+      "module_type": "huggingface",
+      "execution_order": 10
+    },
+    "encoder.layer.1.attention": {
+      "class_name": "BertAttention",
+      "traced_tag": "/BertModel/BertEncoder/BertLayer.1/BertAttention",
+      "module_type": "huggingface",
+      "execution_order": 11
+    },
+    "encoder.layer.1.attention.self": {
+      "class_name": "BertSdpaSelfAttention",
+      "traced_tag": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+      "module_type": "huggingface",
+      "execution_order": 12
+    },
+    "encoder.layer.1.attention.output": {
+      "class_name": "BertSelfOutput",
+      "traced_tag": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSelfOutput",
+      "module_type": "huggingface",
+      "execution_order": 13
+    },
+    "encoder.layer.1.intermediate": {
+      "class_name": "BertIntermediate",
+      "traced_tag": "/BertModel/BertEncoder/BertLayer.1/BertIntermediate",
+      "module_type": "huggingface",
+      "execution_order": 14
+    },
+    "encoder.layer.1.intermediate.intermediate_act_fn": {
+      "class_name": "GELUActivation",
+      "traced_tag": "/BertModel/BertEncoder/BertLayer.1/BertIntermediate/GELUActivation",
+      "module_type": "huggingface",
+      "execution_order": 15
+    },
+    "encoder.layer.1.output": {
+      "class_name": "BertOutput",
+      "traced_tag": "/BertModel/BertEncoder/BertLayer.1/BertOutput",
+      "module_type": "huggingface",
+      "execution_order": 16
+    }
+  },
+  "nodes": {
+    "/Cast": "/BertModel",
+    "/Cast_1": "/BertModel",
+    "/Cast_2": "/BertModel",
+    "/Constant": "/BertModel",
+    "/ConstantOfShape": "/BertModel",
+    "/Constant_1": "/BertModel",
+    "/Constant_2": "/BertModel",
+    "/Constant_3": "/BertModel",
+    "/Constant_4": "/BertModel",
+    "/Constant_5": "/BertModel",
+    "/Constant_6": "/BertModel",
+    "/Equal": "/BertModel",
+    "/Expand": "/BertModel",
+    "/Mul": "/BertModel",
+    "/Sub": "/BertModel",
+    "/Unsqueeze": "/BertModel",
+    "/Unsqueeze_1": "/BertModel",
+    "/Where": "/BertModel",
+    "/Where_1": "/BertModel",
+    "/embeddings/Add": "/BertModel/BertEmbeddings",
+    "/embeddings/Add_1": "/BertModel/BertEmbeddings",
+    "/embeddings/Constant": "/BertModel/BertEmbeddings",
+    "/embeddings/Constant_1": "/BertModel/BertEmbeddings",
+    "/embeddings/LayerNorm/LayerNormalization": "/BertModel/BertEmbeddings",
+    "/embeddings/position_embeddings/Gather": "/BertModel/BertEmbeddings",
+    "/embeddings/token_type_embeddings/Gather": "/BertModel/BertEmbeddings",
+    "/embeddings/word_embeddings/Gather": "/BertModel/BertEmbeddings",
+    "/encoder/layer.0/attention/self/Add": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Cast": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Cast_1": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Div": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/MatMul": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/MatMul_1": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Mul": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Mul_1": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Reshape": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Reshape_1": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Reshape_2": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Reshape_3": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Shape": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Slice": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Softmax": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Sqrt": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Sqrt_1": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Sqrt_2": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Transpose": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Transpose_1": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Transpose_2": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Transpose_3": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/key/Add": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/key/MatMul": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/query/Add": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/query/MatMul": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/value/Add": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/value/MatMul": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Constant_0": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Constant_1": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Constant_2": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Constant_3": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Constant_4": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Constant_5": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/self/Constant_6": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.0/attention/output/Add": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSelfOutput",
+    "/encoder/layer.0/attention/output/LayerNorm/LayerNormalization": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSelfOutput",
+    "/encoder/layer.0/attention/output/dense/Add": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSelfOutput",
+    "/encoder/layer.0/attention/output/dense/MatMul": "/BertModel/BertEncoder/BertLayer.0/BertAttention/BertSelfOutput",
+    "/encoder/layer.0/intermediate/dense/Add": "/BertModel/BertEncoder/BertLayer.0/BertIntermediate",
+    "/encoder/layer.0/intermediate/dense/MatMul": "/BertModel/BertEncoder/BertLayer.0/BertIntermediate",
+    "/encoder/layer.0/intermediate/intermediate_act_fn/Add": "/BertModel/BertEncoder/BertLayer.0/BertIntermediate/GELUActivation",
+    "/encoder/layer.0/intermediate/intermediate_act_fn/Constant": "/BertModel/BertEncoder/BertLayer.0/BertIntermediate/GELUActivation",
+    "/encoder/layer.0/intermediate/intermediate_act_fn/Constant_1": "/BertModel/BertEncoder/BertLayer.0/BertIntermediate/GELUActivation",
+    "/encoder/layer.0/intermediate/intermediate_act_fn/Constant_2": "/BertModel/BertEncoder/BertLayer.0/BertIntermediate/GELUActivation",
+    "/encoder/layer.0/intermediate/intermediate_act_fn/Div": "/BertModel/BertEncoder/BertLayer.0/BertIntermediate/GELUActivation",
+    "/encoder/layer.0/intermediate/intermediate_act_fn/Erf": "/BertModel/BertEncoder/BertLayer.0/BertIntermediate/GELUActivation",
+    "/encoder/layer.0/intermediate/intermediate_act_fn/Mul": "/BertModel/BertEncoder/BertLayer.0/BertIntermediate/GELUActivation",
+    "/encoder/layer.0/intermediate/intermediate_act_fn/Mul_1": "/BertModel/BertEncoder/BertLayer.0/BertIntermediate/GELUActivation",
+    "/encoder/layer.0/output/Add": "/BertModel/BertEncoder/BertLayer.0/BertOutput",
+    "/encoder/layer.0/output/LayerNorm/LayerNormalization": "/BertModel/BertEncoder/BertLayer.0/BertOutput",
+    "/encoder/layer.0/output/dense/Add": "/BertModel/BertEncoder/BertLayer.0/BertOutput",
+    "/encoder/layer.0/output/dense/MatMul": "/BertModel/BertEncoder/BertLayer.0/BertOutput",
+    "/encoder/layer.1/attention/self/Add": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Cast": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Cast_1": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Div": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/MatMul": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/MatMul_1": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Mul": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Mul_1": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Reshape": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Reshape_1": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Reshape_2": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Reshape_3": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Shape": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Slice": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Softmax": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Sqrt": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Sqrt_1": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Sqrt_2": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Transpose": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Transpose_1": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Transpose_2": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Transpose_3": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/key/Add": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/key/MatMul": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/query/Add": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/query/MatMul": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/value/Add": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/value/MatMul": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Constant_0": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Constant_1": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Constant_2": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Constant_3": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Constant_4": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Constant_5": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/self/Constant_6": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention",
+    "/encoder/layer.1/attention/output/Add": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSelfOutput",
+    "/encoder/layer.1/attention/output/LayerNorm/LayerNormalization": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSelfOutput",
+    "/encoder/layer.1/attention/output/dense/Add": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSelfOutput",
+    "/encoder/layer.1/attention/output/dense/MatMul": "/BertModel/BertEncoder/BertLayer.1/BertAttention/BertSelfOutput",
+    "/encoder/layer.1/intermediate/dense/Add": "/BertModel/BertEncoder/BertLayer.1/BertIntermediate",
+    "/encoder/layer.1/intermediate/dense/MatMul": "/BertModel/BertEncoder/BertLayer.1/BertIntermediate",
+    "/encoder/layer.1/intermediate/intermediate_act_fn/Add": "/BertModel/BertEncoder/BertLayer.1/BertIntermediate/GELUActivation",
+    "/encoder/layer.1/intermediate/intermediate_act_fn/Constant": "/BertModel/BertEncoder/BertLayer.1/BertIntermediate/GELUActivation",
+    "/encoder/layer.1/intermediate/intermediate_act_fn/Constant_1": "/BertModel/BertEncoder/BertLayer.1/BertIntermediate/GELUActivation",
+    "/encoder/layer.1/intermediate/intermediate_act_fn/Constant_2": "/BertModel/BertEncoder/BertLayer.1/BertIntermediate/GELUActivation",
+    "/encoder/layer.1/intermediate/intermediate_act_fn/Div": "/BertModel/BertEncoder/BertLayer.1/BertIntermediate/GELUActivation",
+    "/encoder/layer.1/intermediate/intermediate_act_fn/Erf": "/BertModel/BertEncoder/BertLayer.1/BertIntermediate/GELUActivation",
+    "/encoder/layer.1/intermediate/intermediate_act_fn/Mul": "/BertModel/BertEncoder/BertLayer.1/BertIntermediate/GELUActivation",
+    "/encoder/layer.1/intermediate/intermediate_act_fn/Mul_1": "/BertModel/BertEncoder/BertLayer.1/BertIntermediate/GELUActivation",
+    "/encoder/layer.1/output/Add": "/BertModel/BertEncoder/BertLayer.1/BertOutput",
+    "/encoder/layer.1/output/LayerNorm/LayerNormalization": "/BertModel/BertEncoder/BertLayer.1/BertOutput",
+    "/encoder/layer.1/output/dense/Add": "/BertModel/BertEncoder/BertLayer.1/BertOutput",
+    "/encoder/layer.1/output/dense/MatMul": "/BertModel/BertEncoder/BertLayer.1/BertOutput",
+    "/pooler/Gather": "/BertModel/BertPooler",
+    "/pooler/activation/Tanh": "/BertModel/BertPooler",
+    "/pooler/dense/Gemm": "/BertModel/BertPooler"
+  },
+  "report": {
+    "node_tagging": {
+      "statistics": {
+        "total_nodes": 136,
+        "tagged_nodes": 136,
+        "coverage": "100.0%",
+        "direct_matches": 83,
+        "parent_matches": 34,
+        "operation_matches": 0,
+        "root_fallbacks": 19,
+        "empty_tags": 0
+      },
+      "coverage": {
+        "percentage": 100.0,
+        "empty_tags": 0
+      }
+    }
+  },
+  "file_info": {
+    "onnx_path": "/home/zhengte/modelexport_allmodels/experiments/export_monitor/iterations/iteration_003/model.onnx",
+    "onnx_size_mb": 16.765246391296387,
+    "metadata_path": "/home/zhengte/modelexport_allmodels/experiments/export_monitor/iterations/iteration_003/model_htp_metadata.json"
+  }
+}

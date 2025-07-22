@@ -1,0 +1,156 @@
+
+================================================================================
+📋 STEP [1;36m1[0m/[1;36m8[0m: MODEL PREPARATION
+================================================================================
+✅ Model loaded: BertModel [1m([0m[1;36m48[0m modules, [1;36m4.[0m4M parameters[1m)[0m
+🎯 Export target: 
+[35m/home/zhengte/modelexport_allmodels/experiments/export_monitor/iterations/iterat[0m
+[35mion_002/[0m[95mmodel.onnx[0m
+⚙️ Strategy: HTP [1m([0mHierarchy-Preserving[1m)[0m
+✅ Hierarchy attributes will be embedded in ONNX
+✅ Model set to evaluation mode
+
+================================================================================
+📋 STEP [1;36m2[0m/[1;36m8[0m: INPUT GENERATION & VALIDATION
+================================================================================
+🤖 Auto-generating inputs for: prajjwal1/bert-tiny
+   • Model type: bert
+   • Task: feature-extraction
+✅ Created onnx export config for bert with task feature-extraction
+🔧 Generated [1;36m3[0m input tensors:
+   • input_ids: [1m[[0m[1;36m2[0m, [1;36m16[0m[1m][0m [1m([0mtorch.int64[1m)[0m
+   • attention_mask: [1m[[0m[1;36m2[0m, [1;36m16[0m[1m][0m [1m([0mtorch.int64[1m)[0m
+   • token_type_ids: [1m[[0m[1;36m2[0m, [1;36m16[0m[1m][0m [1m([0mtorch.int64[1m)[0m
+
+================================================================================
+📋 STEP [1;36m3[0m/[1;36m8[0m: HIERARCHY BUILDING
+================================================================================
+✅ Hierarchy building completed with TracingHierarchyBuilder
+📈 Traced [1;36m18[0m modules
+🔄 Execution steps: [1;36m18[0m
+
+🌳 Module Hierarchy:
+------------------------------------------------------------
+BertModel
+├── BertEmbeddings: embeddings
+├── BertEncoder: encoder
+│   ├── BertLayer: layer.[1;36m0[0m
+│   │   ├── BertAttention: attention
+│   │   │   ├── BertSelfOutput: output
+│   │   │   └── BertSdpaSelfAttention: self
+│   │   ├── BertIntermediate: intermediate
+│   │   │   └── GELUActivation: intermediate_act_fn
+│   │   └── BertOutput: output
+│   └── BertLayer: layer.[1;36m1[0m
+│       ├── BertAttention: attention
+│       │   ├── BertSelfOutput: output
+│       │   └── BertSdpaSelfAttention: self
+│       ├── BertIntermediate: intermediate
+│       │   └── GELUActivation: intermediate_act_fn
+│       └── BertOutput: output
+└── BertPooler: pooler
+[1m([0mshowing [1;36m18[0m/[1;36m18[0m lines[1m)[0m
+
+================================================================================
+📋 STEP [1;36m4[0m/[1;36m8[0m: ONNX EXPORT
+================================================================================
+🎯 Export target: 
+[35m/home/zhengte/modelexport_allmodels/experiments/export_monitor/iterations/iterat[0m
+[35mion_002/[0m[95mmodel.onnx[0m
+⚙️ Export config:
+   • opset_version: [1;36m17[0m
+   • do_constant_folding: [3;92mTrue[0m
+   • verbose: [3;91mFalse[0m
+   • input_names: [1m[[0m[32m'input_ids'[0m, [32m'attention_mask'[0m, [32m'token_type_ids'[0m[1m][0m
+✅ ONNX export completed successfully
+
+================================================================================
+📋 STEP [1;36m5[0m/[1;36m8[0m: NODE TAGGER CREATION
+================================================================================
+✅ Node tagger created successfully
+🏷️ Model root tag: [35m/[0m[95mBertModel[0m
+🔧 Operation fallback: disabled
+
+================================================================================
+📋 STEP [1;36m6[0m/[1;36m8[0m: ONNX NODE TAGGING
+================================================================================
+✅ Node tagging completed successfully
+📈 Coverage: [1;36m71.3[0m%
+📊 Tagged nodes: [1;36m97[0m/[1;36m136[0m
+   • Direct matches: [1;36m83[0m [1m([0m[1;36m61.0[0m%[1m)[0m
+   • Parent matches: [1;36m34[0m [1m([0m[1;36m25.0[0m%[1m)[0m
+   • Root fallbacks: [1;36m19[0m [1m([0m[1;36m14.0[0m%[1m)[0m
+✅ Empty tags: [1;36m0[0m
+
+📊 Top [1;36m4[0m Nodes by Hierarchy:
+------------------------------
+ [1;36m1[0m. [35m/BertModel/BertEncoder/BertLayer.0/BertAttention/[0m[95mBertSdpaSelfAttention[0m: [1;36m35[0m 
+nodes
+ [1;36m2[0m. [35m/BertModel/BertEncoder/BertLayer.1/BertAttention/[0m[95mBertSdpaSelfAttention[0m: [1;36m35[0m 
+nodes
+ [1;36m3[0m. [35m/[0m[95mBertModel[0m: [1;36m19[0m nodes
+ [1;36m4[0m. [35m/BertModel/[0m[95mBertEmbeddings[0m: [1;36m8[0m nodes
+
+🌳 Complete HF Hierarchy with ONNX Nodes:
+------------------------------------------------------------
+BertModel [1m([0m[1;36m136[0m ONNX nodes[1m)[0m
+├── BertEmbeddings: embeddings [1m([0m[1;36m8[0m nodes[1m)[0m
+│   ├── [35m/embeddings/[0m[95mnode[0m [1m([0m[1;36m8[0m ops[1m)[0m
+├── BertEncoder: encoder [1m([0m[1;36m0[0m nodes[1m)[0m
+│   ├── BertLayer: layer.[1;36m0[0m [1m([0m[1;36m0[0m nodes[1m)[0m
+│   │   ├── BertAttention: attention [1m([0m[1;36m0[0m nodes[1m)[0m
+│   │   │   ├── BertSelfOutput: output [1m([0m[1;36m0[0m nodes[1m)[0m
+│   │   │   ├── BertSdpaSelfAttention: self [1m([0m[1;36m35[0m nodes[1m)[0m
+│   │   ├── BertIntermediate: intermediate [1m([0m[1;36m0[0m nodes[1m)[0m
+│   │   │   ├── GELUActivation: intermediate_act_fn [1m([0m[1;36m0[0m nodes[1m)[0m
+│   │   ├── BertOutput: output [1m([0m[1;36m0[0m nodes[1m)[0m
+│   ├── BertLayer: layer.[1;36m1[0m [1m([0m[1;36m0[0m nodes[1m)[0m
+│   │   ├── BertAttention: attention [1m([0m[1;36m0[0m nodes[1m)[0m
+│   │   │   ├── BertSelfOutput: output [1m([0m[1;36m0[0m nodes[1m)[0m
+│   │   │   ├── BertSdpaSelfAttention: self [1m([0m[1;36m35[0m nodes[1m)[0m
+│   │   ├── BertIntermediate: intermediate [1m([0m[1;36m0[0m nodes[1m)[0m
+│   │   │   ├── GELUActivation: intermediate_act_fn [1m([0m[1;36m0[0m nodes[1m)[0m
+│   │   ├── BertOutput: output [1m([0m[1;36m0[0m nodes[1m)[0m
+├── BertPooler: pooler [1m([0m[1;36m0[0m nodes[1m)[0m
+[33m...[0m and [1;36m117[0m more lines [1m([0mtruncated for console[1m)[0m
+[1m([0mshowing [1;36m19[0m/[1;36m136[0m lines[1m)[0m
+
+================================================================================
+📋 STEP [1;36m7[0m/[1;36m8[0m: TAG INJECTION
+================================================================================
+🏷️ Hierarchy tag attributes: enabled
+✅ Tags injected into ONNX model successfully
+📄 Updated ONNX file: 
+[35m/home/zhengte/modelexport_allmodels/experiments/export_monitor/iterations/iterat[0m
+[35mion_002/[0m[95mmodel.onnx[0m
+
+================================================================================
+📋 STEP [1;36m8[0m/[1;36m8[0m: METADATA GENERATION
+================================================================================
+✅ Metadata file created successfully
+📄 Metadata file: 
+[35m/home/zhengte/modelexport_allmodels/experiments/export_monitor/iterations/iterat[0m
+[35mion_002/[0m[95mmodel_htp_metadata.json[0m
+
+================================================================================
+FINAL EXPORT SUMMARY
+================================================================================
+🎉 HTP Export completed successfully in [1;36m0.[0m02s!
+📊 Export Statistics:
+   • Export time: [1;36m0.[0m02s
+   • Hierarchy modules: [1;36m18[0m
+   • ONNX nodes: [1;36m136[0m
+   • Tagged nodes: [1;36m97[0m
+   • Coverage: [1;36m71.3[0m%
+   • Empty tags: [1;36m0[0m ✅
+
+📁 Output Files:
+   • ONNX model: 
+[35m/home/zhengte/modelexport_allmodels/experiments/export_monitor/iterations/iterat[0m
+[35mion_002/[0m[95mmodel.onnx[0m
+   • Metadata: 
+[35m/home/zhengte/modelexport_allmodels/experiments/export_monitor/iterations/iterat[0m
+[35mion_002/[0m[95mmodel_htp_metadata.json[0m
+   • Report: 
+[35m/home/zhengte/modelexport_allmodels/experiments/export_monitor/iterations/iterat[0m
+[35mion_002/[0m[95mmodel_full_report.txt[0m

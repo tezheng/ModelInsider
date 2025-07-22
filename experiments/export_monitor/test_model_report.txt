@@ -1,0 +1,75 @@
+================================================================================
+HTP EXPORT FULL REPORT
+================================================================================
+Generated: 2025-07-18T19:04:10Z
+
+
+MODEL INFORMATION
+----------------------------------------
+Model Name: prajjwal1/bert-tiny
+Model Class: BertModel
+Total Modules: 48
+Total Parameters: 4,400,000
+Export Strategy: HTP
+Output Path: test_model.onnx
+
+[2025-07-18T11:04:10Z] input_generation: Completed
+
+COMPLETE MODULE HIERARCHY
+----------------------------------------
+
+Module: [ROOT]
+  Class: BertModel
+  Tag: /BertModel
+
+Module: embeddings
+  Class: BertEmbeddings
+  Tag: /BertModel/BertEmbeddings
+
+Module: encoder
+  Class: BertEncoder
+  Tag: /BertModel/BertEncoder
+
+Module: encoder.layer.0
+  Class: BertLayer
+  Tag: /BertModel/BertEncoder/BertLayer.0
+
+Module: encoder.layer.0.attention
+  Class: BertAttention
+  Tag: /BertModel/BertEncoder/BertLayer.0/BertAttention
+
+Module: encoder.layer.0.attention.self
+  Class: BertSdpaSelfAttention
+  Tag: /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+
+Module: pooler
+  Class: BertPooler
+  Tag: /BertModel/BertPooler
+
+Total Modules: 7
+
+NODE TAGGING STATISTICS
+----------------------------------------
+Total ONNX Nodes: 136
+Tagged Nodes: 4
+Coverage: 2.9%
+  Direct Matches: 83
+  Parent Matches: 34
+  Root Fallbacks: 19
+  Empty Tags: 0
+
+COMPLETE NODE MAPPINGS
+----------------------------------------
+/Cast -> /BertModel
+/embeddings/Add -> /BertModel/BertEmbeddings
+/encoder/layer.0/attention/self/MatMul -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/pooler/Gather -> /BertModel/BertPooler
+
+EXPORT SUMMARY
+----------------------------------------
+Total Export Time: 0.32s
+ONNX File Size: 16.76MB
+Final Coverage: 2.9%
+
+================================================================================
+Export completed successfully!

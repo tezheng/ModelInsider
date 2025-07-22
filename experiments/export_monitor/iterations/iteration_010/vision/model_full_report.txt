@@ -1,0 +1,137 @@
+
+================================================================================
+COMPLETE MODULE HIERARCHY
+================================================================================
+
+Model Name: google/mobilenet_v2_0.35_96
+Model Class: MobileNetV2ForImageClassification
+Total Modules: 214
+Total Parameters: 1,678,409
+
+INPUT GENERATION
+----------------------------------------
+Model Type: vision
+Task: test
+Method: auto_generated
+
+Generated Inputs:
+  pixel_values: shape=torch.Size([1, 3, 224, 224]), dtype=torch.float32
+
+Module: [ROOT]
+  Class: MobileNetV2ForImageClassification
+  Tag: /MobileNetV2ForImageClassification
+
+Module: mobilenet_v2
+  Class: MobileNetV2Model
+  Tag: /MobileNetV2ForImageClassification/mobilenet_v2
+
+Module: mobilenet_v2.conv_stem
+  Class: MobileNetV2Stem
+  Tag: /MobileNetV2ForImageClassification/mobilenet_v2/conv_stem
+
+Module: mobilenet_v2.conv_stem.first_conv
+  Class: MobileNetV2ConvLayer
+  Tag: /MobileNetV2ForImageClassification/mobilenet_v2/conv_stem/first_conv
+
+Module: mobilenet_v2.conv_stem.first_conv.convolution
+  Class: Conv2d
+  Tag: /MobileNetV2ForImageClassification/mobilenet_v2/conv_stem/first_conv/convolution
+
+Module: mobilenet_v2.conv_stem.first_conv.normalization
+  Class: BatchNorm2d
+  Tag: /MobileNetV2ForImageClassification/mobilenet_v2/conv_stem/first_conv/normalization
+
+Module: mobilenet_v2.conv_stem.first_conv.activation
+  Class: ReLU6
+  Tag: /MobileNetV2ForImageClassification/mobilenet_v2/conv_stem/first_conv/activation
+
+Module: mobilenet_v2.conv_stem.conv_3x3
+  Class: MobileNetV2ConvLayer
+  Tag: /MobileNetV2ForImageClassification/mobilenet_v2/conv_stem/conv_3x3
+
+Module: mobilenet_v2.conv_stem.conv_3x3.convolution
+  Class: Conv2d
+  Tag: /MobileNetV2ForImageClassification/mobilenet_v2/conv_stem/conv_3x3/convolution
+
+Module: mobilenet_v2.conv_stem.conv_3x3.normalization
+  Class: BatchNorm2d
+  Tag: /MobileNetV2ForImageClassification/mobilenet_v2/conv_stem/conv_3x3/normalization
+
+Total Modules: 10
+
+NODE TAGGING STATISTICS
+----------------------------------------
+Total ONNX Nodes: 50
+Tagged Nodes: 50
+Coverage: 100.0%
+  Root Nodes: 50
+  Scoped Nodes: 0
+  Unique Scopes: 1
+  Direct Matches: 30
+  Parent Matches: 15
+  Operation Matches: 0
+  Root Fallbacks: 5
+  Empty Tags: 0
+
+COMPLETE NODE MAPPINGS
+----------------------------------------
+node_0 -> /MobileNetV2ForImageClassification
+node_1 -> /MobileNetV2ForImageClassification
+node_10 -> /MobileNetV2ForImageClassification
+node_11 -> /MobileNetV2ForImageClassification
+node_12 -> /MobileNetV2ForImageClassification
+node_13 -> /MobileNetV2ForImageClassification
+node_14 -> /MobileNetV2ForImageClassification
+node_15 -> /MobileNetV2ForImageClassification
+node_16 -> /MobileNetV2ForImageClassification
+node_17 -> /MobileNetV2ForImageClassification
+node_18 -> /MobileNetV2ForImageClassification
+node_19 -> /MobileNetV2ForImageClassification
+node_2 -> /MobileNetV2ForImageClassification
+node_20 -> /MobileNetV2ForImageClassification
+node_21 -> /MobileNetV2ForImageClassification
+node_22 -> /MobileNetV2ForImageClassification
+node_23 -> /MobileNetV2ForImageClassification
+node_24 -> /MobileNetV2ForImageClassification
+node_25 -> /MobileNetV2ForImageClassification
+node_26 -> /MobileNetV2ForImageClassification
+node_27 -> /MobileNetV2ForImageClassification
+node_28 -> /MobileNetV2ForImageClassification
+node_29 -> /MobileNetV2ForImageClassification
+node_3 -> /MobileNetV2ForImageClassification
+node_30 -> /MobileNetV2ForImageClassification
+node_31 -> /MobileNetV2ForImageClassification
+node_32 -> /MobileNetV2ForImageClassification
+node_33 -> /MobileNetV2ForImageClassification
+node_34 -> /MobileNetV2ForImageClassification
+node_35 -> /MobileNetV2ForImageClassification
+node_36 -> /MobileNetV2ForImageClassification
+node_37 -> /MobileNetV2ForImageClassification
+node_38 -> /MobileNetV2ForImageClassification
+node_39 -> /MobileNetV2ForImageClassification
+node_4 -> /MobileNetV2ForImageClassification
+node_40 -> /MobileNetV2ForImageClassification
+node_41 -> /MobileNetV2ForImageClassification
+node_42 -> /MobileNetV2ForImageClassification
+node_43 -> /MobileNetV2ForImageClassification
+node_44 -> /MobileNetV2ForImageClassification
+node_45 -> /MobileNetV2ForImageClassification
+node_46 -> /MobileNetV2ForImageClassification
+node_47 -> /MobileNetV2ForImageClassification
+node_48 -> /MobileNetV2ForImageClassification
+node_49 -> /MobileNetV2ForImageClassification
+node_5 -> /MobileNetV2ForImageClassification
+node_6 -> /MobileNetV2ForImageClassification
+node_7 -> /MobileNetV2ForImageClassification
+node_8 -> /MobileNetV2ForImageClassification
+node_9 -> /MobileNetV2ForImageClassification
+
+EXPORT SUMMARY
+----------------------------------------
+Total Export Time: 0.01s
+ONNX File Size: 0.00MB
+Final Coverage: 100.0%
+Empty Tags: 0 ✅
+
+================================================================================
+Export completed successfully!
