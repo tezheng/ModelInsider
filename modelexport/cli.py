@@ -12,7 +12,7 @@ from pathlib import Path
 import click
 
 from .core import tag_utils
-from .strategies.htp.htp_exporter import HTPExporter
+from .strategies import HTPExporter
 
 
 @click.group()

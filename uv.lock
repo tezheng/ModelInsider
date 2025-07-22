@@ -1330,6 +1330,7 @@ dependencies = [
     { name = "pytest-cov" },
     { name = "rich" },
     { name = "seaborn" },
+    { name = "snakemd" },
     { name = "torch" },
     { name = "torchvision" },
     { name = "transformers" },
@@ -1370,6 +1371,7 @@ requires-dist = [
     { name = "rich", specifier = ">=14.0.0" },
     { name = "ruff", marker = "extra == 'dev'" },
     { name = "seaborn", specifier = ">=0.13.2" },
+    { name = "snakemd", specifier = ">=2.3.0" },
     { name = "torch" },
     { name = "torchvision" },
     { name = "transformers" },
@@ -2627,6 +2629,15 @@ source = { registry = "https://pypi.org/simple" }
 sdist = { url = "https://files.pythonhosted.org/packages/94/e7/b2c673351809dca68a0e064b6af791aa332cf192da575fd474ed7d6f16a2/six-1.17.0.tar.gz", hash = "sha256:ff70335d468e7eb6ec65b95b99d3a2836546063f63acc5171de367e834932a81", size = 34031, upload-time = "2024-12-04T17:35:28.174Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/b7/ce/149a00dd41f10bc29e5921b496af8b574d8413afcd5e30dfa0ed46c2cc5e/six-1.17.0-py2.py3-none-any.whl", hash = "sha256:4721f391ed90541fddacab5acf947aa0d3dc7d27b2e1e8eda2be8970586c3274", size = 11050, upload-time = "2024-12-04T17:35:26.475Z" },
+]
+
+[[package]]
+name = "snakemd"
+version = "2.3.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/2d/87/973cea63dd380a194f3091bf201ad9a26ccf1ee02c4c1b58899918fb641b/snakemd-2.3.0.tar.gz", hash = "sha256:6a74b20ad5c8b6357fba5af4a5daea01251e6a793ee69f57a9aaceb17349d124", size = 22611, upload-time = "2025-01-07T02:01:16.515Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a7/00/c3bcf763adeda7fd5676f958cea92244b6215f3947c78baa7093f7f411c7/snakemd-2.3.0-py3-none-any.whl", hash = "sha256:20e42054db491eefd8ceca3e85f66086df262b75000aa37400da8591f6400995", size = 22179, upload-time = "2025-01-07T02:01:13.928Z" },
 ]
 
 [[package]]

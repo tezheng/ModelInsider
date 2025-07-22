@@ -21,6 +21,7 @@ dependencies = [
     "pytest>=8.4.1",
     "pytest-cov>=6.2.1",
     "pydantic>=2.11.7",
+    "snakemd>=2.3.0",
 ]
 
 [project.scripts]
