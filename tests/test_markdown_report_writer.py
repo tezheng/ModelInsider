@@ -174,8 +174,8 @@ class TestMarkdownReportWriter:
             assert "## Complete Node Mappings" in content
             assert "## Export Summary" in content
     
-    def test_mermaid_flowchart(self, sample_export_data):
-        """Test that Mermaid flowchart is included."""
+    def test_mermaid_flowchart_disabled(self, sample_export_data):
+        """Test that Mermaid flowchart is disabled (TEZ-28)."""
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = str(Path(tmpdir) / "test_model.onnx")
             writer = MarkdownReportWriter(output_path)
@@ -190,11 +190,17 @@ class TestMarkdownReportWriter:
             report_path = Path(tmpdir) / "test_model_htp_export_report.md"
             content = report_path.read_text()
             
-            # Check Mermaid syntax
-            assert "```mermaid" in content
-            assert "flowchart LR" in content
+            # Verify Mermaid is disabled
+            assert "```mermaid" not in content
+            assert "flowchart LR" not in content
+            assert "-->" not in content
+            
+            # Verify informational note is present
+            assert "Hierarchy Visualization" in content
+            assert "Mermaid diagram temporarily disabled" in content
+            
+            # Verify module data is still present in the module table
             assert "BertModel" in content
-            assert "-->" in content
     
     def test_collapsible_sections(self, sample_export_data):
         """Test that collapsible sections are included."""
