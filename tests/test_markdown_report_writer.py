@@ -442,26 +442,23 @@ class TestMarkdownReportWriter:
             assert module_list_idx != -1
             
             # Look for the table content after the headers
-            # We expect to see entries like "2 (66.7%)" for modules with nodes
-            # The BertEmbeddings module should have 2 nodes out of 3 total (66.7%)
-            # (based on the test data: 2 nodes tagged to BertEmbeddings out of 3 total)
+            # We expect to see entries like "2/2" for modules with nodes
+            # Format: {direct}/{total} where direct = nodes in this module only, total = including children
             
-            # Check for percentage format
-            assert " (" in content[module_list_idx:]  # Space before parenthesis
-            assert "%)" in content[module_list_idx:]  # Percentage sign before closing parenthesis
-            
-            # For BertEmbeddings with 2 nodes out of 3 total
-            # Note: The actual percentage depends on test data setup
-            # We just check the format is correct
+            # Check for slash format
             import re
-            node_pattern = re.compile(r'\d+ \(\d+\.\d%\)')
+            node_pattern = re.compile(r'\d+/\d+')
             matches = node_pattern.findall(content[module_list_idx:])
             assert len(matches) > 0, "No node count entries found in Module List table"
             
-            # Verify the format is correct by checking we have percentages like "66.7%" and "33.3%"
+            # For test data:
+            # - Root has 0 direct nodes but 3 total (0/3)
+            # - BertEmbeddings has 2 direct and 2 total (2/2) 
+            # - BertSdpaSelfAttention has 1 direct and 1 total (1/1)
             table_section = content[module_list_idx:module_list_idx + 2000]
-            assert "66.7%" in table_section or "66.67%" in table_section  # BertEmbeddings: 2/3
-            assert "33.3%" in table_section or "33.33%" in table_section  # BertSdpaSelfAttention: 1/3
+            assert "0/3" in table_section  # Root module
+            assert "2/2" in table_section  # BertEmbeddings (leaf module)
+            assert "1/1" in table_section  # BertSdpaSelfAttention (leaf module)
 
 
 class TestMarkdownReportIntegration:

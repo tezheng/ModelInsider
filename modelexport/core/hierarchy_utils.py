@@ -198,6 +198,38 @@ def count_nodes_per_tag(tagged_nodes: dict[str, str]) -> dict[str, int]:
     return dict(node_counts)
 
 
+def count_direct_and_total_nodes(tagged_nodes: dict[str, str]) -> tuple[dict[str, int], dict[str, int]]:
+    """
+    Count direct nodes (not in children) and total nodes (including children) per hierarchy tag.
+    
+    Args:
+        tagged_nodes: Dictionary mapping node names to hierarchy tags
+        
+    Returns:
+        Tuple of (direct_counts, total_counts) dictionaries
+    """
+    from collections import defaultdict
+    
+    direct_counts = defaultdict(int)
+    total_counts = defaultdict(int)
+    
+    # First pass: count direct nodes
+    for _node_name, tag in tagged_nodes.items():
+        if tag:
+            direct_counts[tag] += 1
+    
+    # Second pass: accumulate total counts (direct + children)
+    for _node_name, tag in tagged_nodes.items():
+        # Count for all parent paths
+        parts = tag.split("/")
+        for i in range(1, len(parts) + 1):
+            prefix = "/".join(parts[:i])
+            if prefix:
+                total_counts[prefix] += 1
+    
+    return dict(direct_counts), dict(total_counts)
+
+
 def build_rich_tree(hierarchy: dict[str, Any], show_counts: bool = False, tagged_nodes: dict[str, str] | None = None):
     """
     Build Rich Tree object for console display.

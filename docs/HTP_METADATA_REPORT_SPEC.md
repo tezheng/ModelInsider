@@ -366,7 +366,7 @@ flowchart LR
 
 | Execution Order | Class Name | Nodes | Tag | Scope |
 | :-------------- | :--------- | :---- | :-- | :---- |
-| {ORDER} | {CLASS} | {COUNT} ({PCT}%) | {TAG} | {SCOPE} |
+| {ORDER} | {CLASS} | {DIRECT}/{TOTAL} | {TAG} | {SCOPE} |
 ...
 
 ## Complete Node Mappings
@@ -418,8 +418,10 @@ flowchart LR
 
 3. **Table Formatting**:
    - Left-aligned columns using `:---` syntax
-   - Module List includes node counts with percentages
-   - Percentage formatting with one decimal place
+   - Module List includes node counts in format: `{direct}/{total}`
+     - `direct` = nodes directly in this module (not in children)
+     - `total` = all nodes in this module and its children
+   - Example: `8/8` for leaf modules, `19/136` for BertModel root
 
 4. **Removed Sections**:
    - "Top 20 Nodes by Hierarchy" (duplicated Module Node Distribution)

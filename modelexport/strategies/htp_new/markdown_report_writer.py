@@ -12,7 +12,11 @@ from pathlib import Path
 
 import snakemd
 
-from ...core.hierarchy_utils import build_ascii_tree, count_nodes_per_tag
+from ...core.hierarchy_utils import (
+    build_ascii_tree,
+    count_direct_and_total_nodes,
+    count_nodes_per_tag,
+)
 from .base_writer import ExportData, ExportStep, StepAwareWriter, step
 
 
@@ -399,12 +403,11 @@ class MarkdownReportWriter(StepAwareWriter):
         # Module table with reordered columns
         self.doc.add_heading("Module List (Sorted by Execution Order)", level=3)
         
-        # Count nodes for each module if available
-        node_counts = {}
-        total_nodes = 0
+        # Count direct and total nodes for each module if available
+        direct_counts = {}
+        total_counts = {}
         if data.node_tagging and data.node_tagging.tagged_nodes:
-            node_counts = count_nodes_per_tag(data.node_tagging.tagged_nodes)
-            total_nodes = len(data.node_tagging.tagged_nodes)
+            direct_counts, total_counts = count_direct_and_total_nodes(data.node_tagging.tagged_nodes)
         
         headers = ["Execution Order", "Class Name", "Nodes", "Tag", "Scope"]
         rows = []
@@ -419,11 +422,11 @@ class MarkdownReportWriter(StepAwareWriter):
             display_path = "[ROOT]" if path == "" else path
             exec_order = str(module_info.execution_order) if module_info.execution_order is not None else "-"
             
-            # Get node count for this module
+            # Get node counts for this module
             tag = module_info.traced_tag if hasattr(module_info, "traced_tag") else ""
-            node_count = node_counts.get(tag, 0) if tag else 0
-            percentage = (node_count / total_nodes * 100) if total_nodes > 0 else 0
-            nodes_str = f"{node_count} ({percentage:.1f}%)" if node_count > 0 else "0 (0.0%)"
+            direct_count = direct_counts.get(tag, 0) if tag else 0
+            total_count = total_counts.get(tag, 0) if tag else 0
+            nodes_str = f"{direct_count}/{total_count}"
             
             rows.append([
                 exec_order,
