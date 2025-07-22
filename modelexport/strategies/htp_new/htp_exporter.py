@@ -433,18 +433,12 @@ class HTPExporter:
             output_names = infer_output_names(outputs)
             if output_names:
                 filtered_kwargs["output_names"] = output_names
-
-        # Convert inputs to tuple for ONNX export if needed
-        if isinstance(self.example_inputs, dict):
-            example_inputs_tuple = tuple(self.example_inputs.values())
-        else:
-            example_inputs_tuple = self.example_inputs
-
+        
         # Suppress TracerWarnings during export
         with warnings.catch_warnings():
             warnings.filterwarnings("ignore", category=torch.jit.TracerWarning)
             torch.onnx.export(
-                model, example_inputs_tuple, output_path, **filtered_kwargs
+                model, self.example_inputs, output_path, **filtered_kwargs
             )
 
     def _initialize_node_tagger(self, enable_operation_fallback: bool) -> None:
