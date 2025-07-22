@@ -82,25 +82,36 @@ class TestCLIExport:
         with open(metadata_path) as f:
             metadata = json.load(f)
         
-        # Check for required fields in metadata (new structure)
+        # Check for required fields in metadata (new HTP structure)
         assert 'export_context' in metadata, "Missing export_context in metadata"
         assert 'model' in metadata, "Missing model in metadata"
         assert 'modules' in metadata, "Missing modules in metadata"
         assert 'nodes' in metadata, "Missing nodes in metadata"
+        assert 'outputs' in metadata, "Missing outputs in metadata"
         assert 'report' in metadata, "Missing report in metadata"
+        assert 'tracing' in metadata, "Missing tracing in metadata"
+        assert 'statistics' in metadata, "Missing statistics in metadata"
         
-        # Validate tag statistics make sense (new structure)
+        # Validate model info
+        assert metadata['model']['name_or_path'] == 'prajjwal1/bert-tiny'
+        assert metadata['model']['total_modules'] == 48
+        
+        # Validate report structure
+        assert 'steps' in metadata['report'], "Missing steps in report"
         assert 'node_tagging' in metadata['report'], "Missing node_tagging in report"
-        stats = metadata['report']['node_tagging']['statistics']
-        assert stats['total_nodes'] > 0
+        
+        # Validate statistics
+        assert metadata['statistics']['onnx_nodes'] > 0
+        assert metadata['statistics']['tagged_nodes'] > 0
+        assert metadata['statistics']['coverage_percentage'] == 100.0
+        
+        # Validate node tagging report
+        node_tagging = metadata['report']['node_tagging']
+        assert 'statistics' in node_tagging
+        stats = node_tagging['statistics']
         assert stats['direct_matches'] >= 0
         assert stats['parent_matches'] >= 0
         assert stats['root_fallbacks'] >= 0
-        
-        # Check coverage
-        coverage = metadata['report']['node_tagging']['coverage']
-        assert coverage['coverage_percentage'] == 100.0
-        assert coverage['empty_tags'] == 0
     
     def test_export_with_custom_options(self, cli_runner, temp_workspace):
         """Test export with custom options."""
