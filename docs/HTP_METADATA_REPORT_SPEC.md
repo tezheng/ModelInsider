@@ -339,7 +339,7 @@ The report is generated as a **Markdown file (.md)** with structured sections us
 | Root Fallbacks | {ROOT} | {ROOT_PCT}% |
 | Empty Tags | {EMPTY} | {EMPTY_PCT}% |
 
-### Complete HF Hierarchy with ONNX Nodes
+#### Complete HF Hierarchy with ONNX Nodes
 
 <details>
 <summary>Click to expand complete hierarchy with node counts</summary>

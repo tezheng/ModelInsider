@@ -304,7 +304,7 @@ class MarkdownReportWriter(StepAwareWriter):
             
             # Add complete hierarchy with node counts
             if data.hierarchy:
-                self.doc.add_heading("Complete HF Hierarchy with ONNX Nodes", level=3)
+                self.doc.add_heading("Complete HF Hierarchy with ONNX Nodes", level=4)
                 
                 # Count nodes per hierarchy path
                 node_counts = count_nodes_per_tag(data.node_tagging.tagged_nodes)
