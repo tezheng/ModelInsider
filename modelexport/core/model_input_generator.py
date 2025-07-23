@@ -232,38 +232,47 @@ def patch_export_config(export_config) -> None:
         export_config: Optimum export config instance to patch
         
     This function checks the config type and applies appropriate patches:
-    - SamOnnxConfig: Replaces DummyPointsGenerator with semantic version
+    - SamOnnxConfig: Forces pixel_values generation for full model export
     - Future models: Add additional patches as needed
     """
     config_type = type(export_config).__name__
     
     if config_type == "SamOnnxConfig":
-        from optimum.utils.input_generators import DummyPointsGenerator
+        # TEZ-48 Fix: Override generate_dummy_inputs to force pixel_values generation
+        original_generate = export_config.generate_dummy_inputs
         
-        class SemanticDummyPointsGenerator(DummyPointsGenerator):
-            """Enhanced dummy points generator with semantic coordinates for SAM models"""
+        def generate_full_model_inputs(framework="pt", **kwargs):
+            """Generate inputs for full SAM model export with pixel_values"""
+            import torch
+            from optimum.utils import DEFAULT_DUMMY_SHAPES
             
-            def generate(self, input_name: str, framework: str = "pt", int_dtype: str = "int64", float_dtype: str = "fp32"):
-                if input_name == "input_points":
-                    # Generate semantic pixel coordinates [0, 1024] instead of random [0, 1]
-                    shape = [self.batch_size, self.point_batch_size, self.nb_points_per_image, 2]
-                    return self.random_float_tensor(
-                        shape, 
-                        min_value=0, 
-                        max_value=1024, 
-                        framework=framework, 
-                        dtype=float_dtype
-                    )
-                return super().generate(input_name, framework, int_dtype, float_dtype)
+            # Merge default shapes with user overrides
+            shapes = DEFAULT_DUMMY_SHAPES.copy()
+            shapes.update(kwargs)
+            
+            # Generate inputs for full model export
+            batch_size = shapes.get("batch_size", 1)
+            
+            inputs = {
+                # Generate pixel_values for full model (includes vision encoder)
+                "pixel_values": torch.randn(batch_size, 3, 1024, 1024, dtype=torch.float32),
+                
+                # Generate semantic input points (center region)
+                "input_points": torch.tensor([[[[512.0, 512.0]]]] * batch_size, dtype=torch.float32),
+                
+                # Generate input labels (foreground point)
+                "input_labels": torch.tensor([[[1]]] * batch_size, dtype=torch.long),
+            }
+            
+            logger.info(f"Generated full model SAM inputs: {list(inputs.keys())}")
+            for name, tensor in inputs.items():
+                logger.debug(f"  {name}: {list(tensor.shape)} ({tensor.dtype})")
+            
+            return inputs
         
-        # Inject semantic generator into this config instance
-        original_classes = export_config.DUMMY_INPUT_GENERATOR_CLASSES
-        export_config.DUMMY_INPUT_GENERATOR_CLASSES = (
-            original_classes[0],  # DummyVisionInputGenerator (unchanged)
-            SemanticDummyPointsGenerator,  # Our semantic version
-            original_classes[2],  # DummyVisionEmbeddingsGenerator (unchanged)
-        )
-        logger.info(f"🎯 Applied semantic coordinate fix for {config_type}")
+        # Replace the generate_dummy_inputs method
+        export_config.generate_dummy_inputs = generate_full_model_inputs
+        logger.info(f"🎯 Applied full model export fix for {config_type} (pixel_values instead of embeddings)")
     
     # Future model patches can be added here
     # elif config_type == "SomeOtherConfig":
