@@ -14,6 +14,8 @@ from typing import Any
 import torch
 import torch.nn as nn
 
+from .base import should_include_in_hierarchy
+
 
 class TracingHierarchyBuilder:
     """
@@ -26,13 +28,23 @@ class TracingHierarchyBuilder:
     - No complex parent tracking needed
     """
 
-    def __init__(self):
+    def __init__(self, exceptions: list[str] | None = None):
+        """
+        Initialize the tracing hierarchy builder.
+        
+        Args:
+            exceptions: List of torch.nn class names to include in hierarchy despite being
+                       torch.nn modules. Passed to should_include_in_hierarchy.
+                       Example: ["Conv2d", "BatchNorm2d"] to include these in hierarchy.
+        """
         self.tag_stack = []
         self.execution_trace = []
         self.operation_context = {}
         self.hooks = []
         self.module_hierarchy = {}  # Only populated for executed modules
         self.traced_modules = set()  # Track which modules were traced
+        self.exceptions = exceptions  # torch.nn exceptions to include
+        self.model_outputs = None  # Store model outputs from execution
 
     def is_hf_class(self, module: nn.Module) -> bool:
         """Check if a module is a HuggingFace class - UNIVERSAL."""
@@ -43,11 +55,12 @@ class TracingHierarchyBuilder:
         """
         Determine if module should create a new hierarchy level - UNIVERSAL.
 
-        CARDINAL RULE: NO HARDCODED LOGIC - use ALL PyTorch modules
+        Respects the exceptions parameter to control which torch.nn modules are included.
+        When exceptions=None (default), torch.nn modules are excluded per MUST-002.
         """
-        # Universal approach: Include ALL nn.Module subclasses
-        # This ensures we capture hierarchy for any PyTorch model
-        return isinstance(module, nn.Module)
+        # Use the universal should_include_in_hierarchy function
+        # This properly filters torch.nn modules based on the exceptions list
+        return should_include_in_hierarchy(module, exceptions=self.exceptions)
 
     def create_pre_hook(self, module_name: str, module: nn.Module):
         """Create pre-forward hook - ultra simple version."""
@@ -162,9 +175,9 @@ class TracingHierarchyBuilder:
             with torch.no_grad():
                 # Handle both dict inputs (keyword args) and list/tuple inputs (positional args)
                 if isinstance(example_inputs, dict):
-                    _ = model(**example_inputs)
+                    self.model_outputs = model(**example_inputs)
                 else:
-                    _ = model(*example_inputs)
+                    self.model_outputs = model(*example_inputs)
         finally:
             self.remove_hooks()
 
@@ -202,6 +215,15 @@ class TracingHierarchyBuilder:
             "module_hierarchy": self.get_complete_hierarchy(),
         }
 
+    def get_outputs(self) -> Any:
+        """
+        Get the model outputs captured during trace_model_execution.
+        
+        Returns:
+            The model outputs from the last execution, or None if not executed yet.
+        """
+        return self.model_outputs
+
     def clear(self) -> None:
         """Clear all internal state."""
         self.tag_stack.clear()
@@ -210,3 +232,4 @@ class TracingHierarchyBuilder:
         self.module_hierarchy.clear()
         self.traced_modules.clear()
         self.remove_hooks()
+        self.model_outputs = None

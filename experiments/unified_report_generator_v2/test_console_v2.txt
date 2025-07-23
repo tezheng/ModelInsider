@@ -1,0 +1,90 @@
+
+================================================================================
+📋 STEP [1;36m1[0m/[1;36m8[0m: MODEL PREPARATION
+================================================================================
+✅ Model loaded: BertModel [1m([0m[1;36m48[0m modules, [1;36m4.[0m4M parameters[1m)[0m
+🎯 Export target: bert-tiny.onnx
+⚙️ Strategy: HTP [1m([0mHierarchy-Preserving[1m)[0m
+✅ Model set to evaluation mode
+
+================================================================================
+🔧 STEP [1;36m2[0m/[1;36m8[0m: INPUT GENERATION & VALIDATION
+================================================================================
+🤖 Auto-generating inputs for: prajjwal1/bert-tiny
+   • Model type: bert
+   • Auto-detected task: feature-extraction
+✅ Created onnx export config for bert with task feature-extraction
+🔧 Generated 3 input tensors:
+   • input_ids: [1m[[0m[1;36m2[0m, [1;36m16[0m[1m][0m [1m([0mtorch.int64[1m)[0m
+   • attention_mask: [1m[[0m[1;36m2[0m, [1;36m16[0m[1m][0m [1m([0mtorch.int64[1m)[0m
+   • token_type_ids: [1m[[0m[1;36m2[0m, [1;36m16[0m[1m][0m [1m([0mtorch.int64[1m)[0m
+
+================================================================================
+🏗️ STEP [1;36m3[0m/[1;36m8[0m: HIERARCHY BUILDING
+================================================================================
+✅ Hierarchy building completed with TracingHierarchyBuilder
+📈 Traced 7 modules
+🔄 Execution steps: 36
+
+================================================================================
+🔗 STEP [1;36m6[0m/[1;36m8[0m: ONNX NODE TAGGING
+================================================================================
+
+🌳 Module Hierarchy:
+------------------------------------------------------------
+[1;35mBertModel[0m
+├── [32membeddings[0m
+│   └── [32m_info[0m
+│       ├── class: BertEmbeddings
+│       └── tag: /BertModel/BertEmbeddings
+├── [32mencoder[0m
+│   ├── [32m_info[0m
+│   │   ├── class: BertEncoder
+│   │   └── tag: /BertModel/BertEncoder
+│   └── [32mlayer[0m
+│       └── [32m0[0m
+│           ├── [32m_info[0m
+│           │   ├── class: BertLayer
+│           │   └── tag: /BertModel/BertEncoder/BertLayer.0
+│           └── [32mattention[0m
+│               ├── [32m_info[0m
+│               │   ├── class: BertAttention
+│               │   └── tag: /BertModel/BertEncoder/BertLayer.0/BertAttention
+│               └── [32mself[0m
+│                   └── [32m_info[0m
+│                       ├── class: BertSdpaSelfAttention
+│                       └── tag: 
+│                           /BertModel/BertEncoder/BertLayer.0/BertAttention/Ber
+│                           tSdpaSelfAttention
+└── [32mpooler[0m
+    └── [32m_info[0m
+        ├── class: BertPooler
+... and 1 more lines (truncated for console)
+(showing 30/31 lines)
+📈 Coverage: [1;36m100.0[0m%
+📊 Tagged nodes: [1;36m136[0m/[1;36m136[0m
+   • Direct matches: [1;36m83[0m [1m([0m[1;36m61.0[0m%[1m)[0m
+   • Parent matches: [1;36m34[0m [1m([0m[1;36m25.0[0m%[1m)[0m
+   • Root fallbacks: [1;36m19[0m [1m([0m[1;36m14.0[0m%[1m)[0m
+✅ Empty tags: [1;36m0[0m
+
+================================================================================
+📋 FINAL EXPORT SUMMARY
+================================================================================
+🎉 HTP Export completed successfully in 7.72s!
+📊 Export Statistics:
+   • Export time: [1;36m7.[0m72s
+   • Hierarchy modules: [1;36m7[0m
+   • ONNX nodes: [1;36m136[0m
+   • Tagged nodes: [1;36m136[0m
+   • Coverage: [1;36m100.0[0m%
+   • Empty tags: [1;36m0[0m ✅
+
+📁 Output Files:
+   • onnx_path: bert-tiny.onnx
+   • onnx_size_mb: [1;36m16.76[0m
+   • metadata_path: bert-tiny_htp_metadata.json
+   • report_path: bert-tiny_full_report.txt
+   • ONNX model: bert-tiny.onnx
+   • Metadata: bert-tiny_htp_metadata.json
+   • Report: bert-tiny_full_report.txt

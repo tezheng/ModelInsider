@@ -1,0 +1,102 @@
+
+================================================================================
+📋 STEP [1;36m1[0m/[1;36m8[0m: MODEL PREPARATION
+================================================================================
+✅ Model loaded: BertModel [1m([0m[1;36m48[0m modules, [1;36m4.[0m4M parameters[1m)[0m
+🎯 Export target: bert-tiny.onnx
+⚙️ Strategy: HTP [1m([0mHierarchy-Preserving[1m)[0m
+✅ Model set to evaluation mode
+
+================================================================================
+🔧 STEP [1;36m2[0m/[1;36m8[0m: INPUT GENERATION & VALIDATION
+================================================================================
+🤖 Auto-generating inputs for: prajjwal1/bert-tiny
+   • Model type: bert
+   • Auto-detected task: feature-extraction
+✅ Created onnx export config for bert with task feature-extraction
+🔧 Generated [1;36m3[0m input tensors:
+   • input_ids: [1m[[0m[1;36m2[0m, [1;36m16[0m[1m][0m [1m([0mtorch.int64[1m)[0m
+   • attention_mask: [1m[[0m[1;36m2[0m, [1;36m16[0m[1m][0m [1m([0mtorch.int64[1m)[0m
+   • token_type_ids: [1m[[0m[1;36m2[0m, [1;36m16[0m[1m][0m [1m([0mtorch.int64[1m)[0m
+
+================================================================================
+🏗️ STEP [1;36m3[0m/[1;36m8[0m: HIERARCHY BUILDING
+================================================================================
+✅ Hierarchy building completed with TracingHierarchyBuilder
+📈 Traced [1;36m7[0m modules
+🔄 Execution steps: [1;36m36[0m
+
+🌳 Module Hierarchy:
+------------------------------------------------------------
+[1m[[0m[1;36m1[0m;35mBertModel[1m[[0m0m
+├── [1m[[0m32mBertEmbeddings: embeddings[1m[[0m0m
+├── [1m[[0m32mBertEncoder: encoder[1m[[0m0m
+└── [1m[[0m32mBertPooler: pooler[1m[[0m0m
+
+================================================================================
+📦 STEP [1;36m4[0m/[1;36m8[0m: ONNX EXPORT
+================================================================================
+🎯 Target file: bert-tiny.onnx
+⚙️ Export config:
+   • opset_version: [1;36m17[0m
+   • do_constant_folding: [3;92mTrue[0m
+   • verbose: [3;91mFalse[0m
+✅ ONNX export completed successfully
+
+================================================================================
+🏷️ STEP [1;36m5[0m/[1;36m8[0m: NODE TAGGER CREATION
+================================================================================
+✅ Node tagger created successfully
+🏷️ Model root tag: [35m/[0m[95mBertModel[0m
+🔧 Operation fallback: disabled
+
+================================================================================
+🔗 STEP [1;36m6[0m/[1;36m8[0m: ONNX NODE TAGGING
+================================================================================
+✅ Node tagging completed successfully
+📈 Coverage: [1;36m100.0[0m%
+📊 Tagged nodes: [1;36m136[0m/[1;36m136[0m
+   • Direct matches: [1;36m83[0m [1m([0m[1;36m61.0[0m%[1m)[0m
+   • Parent matches: [1;36m34[0m [1m([0m[1;36m25.0[0m%[1m)[0m
+   • Root fallbacks: [1;36m19[0m [1m([0m[1;36m14.0[0m%[1m)[0m
+✅ Empty tags: [1;36m0[0m
+
+📊 Top [1;36m20[0m Nodes by Hierarchy:
+------------------------------
+ [1;36m1[0m. [35m/[0m[95mBertModel[0m: [1;36m1[0m nodes
+ [1;36m2[0m. [35m/BertModel/[0m[95mBertEmbeddings[0m: [1;36m1[0m nodes
+ [1;36m3[0m. [35m/BertModel/.../[0m[95mBertSdpaSelfAttention[0m: [1;36m1[0m nodes
+
+🌳 Complete HF Hierarchy with ONNX Nodes:
+------------------------------------------------------------
+[1m[[0m[1;36m1[0m;35mBertModel [1m([0m[1;36m136[0m ONNX nodes[1m)[0m[1m[[0m0m
+
+================================================================================
+🏷️ STEP [1;36m7[0m/[1;36m8[0m: TAG INJECTION
+================================================================================
+🏷️ Hierarchy tag attributes: enabled
+✅ Tags injected into ONNX model successfully
+📄 Updated ONNX file: bert-tiny.onnx
+
+================================================================================
+📄 STEP [1;36m8[0m/[1;36m8[0m: METADATA GENERATION
+================================================================================
+✅ Metadata file created successfully
+📄 Metadata file: bert-tiny_htp_metadata.json
+
+================================================================================
+📋 FINAL EXPORT SUMMARY
+================================================================================
+🎉 HTP Export completed successfully in [1;36m7.[0m72s!
+📊 Export Statistics:
+   • Export time: [1;36m7.[0m72s
+   • Hierarchy modules: [1;36m7[0m
+   • ONNX nodes: [1;36m136[0m
+   • Tagged nodes: [1;36m136[0m
+   • Coverage: [1;36m100.0[0m%
+   • Empty tags: [1;36m0[0m ✅
+
+📁 Output Files:
+   • ONNX model: bert-tiny.onnx
+   • Metadata: bert-tiny_htp_metadata.json
+   • Report: bert-tiny_full_report.txt

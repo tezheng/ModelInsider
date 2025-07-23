@@ -51,15 +51,20 @@
       "Bash(tests/integration/test_cli.py::TestCLICompare::test_compare_help )",
       "Bash(tests/unit/test_core/test_operation_config.py::TestOperationConfig::test_operation_registry_structure )",
       "Bash(-v)",
-      "Bash(tests/integration/test_cli.py::TestCLIAnalyze::test_analyze_help )",
       "Bash(tests/integration/test_cli.py::TestCLIAnalyze::test_analyze_nonexistent_file )",
-      "Bash(tests/integration/test_cli.py::TestCLIValidate::test_validate_help )",
       "Bash(tests/integration/test_cli.py::TestCLIValidate::test_validate_nonexistent_file )",
-      "Bash(tests/integration/test_cli.py::TestCLICompare::test_compare_help )",
       "Bash(tests/integration/test_cli.py::TestCLICompare::test_compare_nonexistent_files )",
-      "Bash(tests/integration/test_cli.py::TestCLIAnalyze::test_analyze_nonexistent_file )",
-      "Bash(tests/integration/test_cli.py::TestCLIValidate::test_validate_nonexistent_file )",
-      "Bash(tests/integration/test_cli.py::TestCLICompare::test_compare_nonexistent_files )"
+      "mcp__puppeteer__puppeteer_navigate",
+      "mcp__puppeteer__puppeteer_screenshot",
+      "WebFetch(domain:gojs.net)",
+      "Bash(dot:*)",
+      "Bash(command -v:*)",
+      "WebFetch(domain:pypi.org)",
+      "WebFetch(domain:networkx.org)",
+      "Bash(git log:*)",
+      "Bash(diff:*)",
+      "Bash(/dev/null)",
+      "Bash(ruff check:*)"
     ],
     "deny": []
   }

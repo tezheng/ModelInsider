@@ -12,7 +12,7 @@ from typing import Any
 
 import pytest
 
-from modelexport.core.base import BaseHierarchyExporter
+from modelexport.strategies.htp_new import HTPExporter
 
 from .test_models import TestModelFixtures
 
@@ -26,7 +26,7 @@ class BaseStrategyTest(ABC):
     """
     
     @abstractmethod
-    def get_exporter(self) -> BaseHierarchyExporter:
+    def get_exporter(self) -> HTPExporter:
         """Get the exporter instance for this strategy."""
         pass
     

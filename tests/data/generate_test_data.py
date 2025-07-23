@@ -22,7 +22,7 @@ import os
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from modelexport.core.base import should_tag_module, build_hierarchy_path
+from modelexport.core.base import should_include_in_hierarchy, build_hierarchy_path
 
 try:
     from transformers import AutoModel, AutoTokenizer
@@ -86,8 +86,8 @@ def generate_expected_tags_from_model(model: torch.nn.Module) -> Dict[str, Any]:
             # Create universal tag based on module class
             module_class = f"{module.__class__.__module__}.{module.__class__.__name__}"
             
-            # Use the new should_tag_module function for filtering
-            should_include = should_tag_module(module)
+            # Use the new should_include_in_hierarchy function for filtering
+            should_include = should_include_in_hierarchy(module)
             
             # Extract all metadata (JSON serializable)
             forward_sig = extract_forward_signature(module)
@@ -156,6 +156,42 @@ def export_baseline_onnx(model: torch.nn.Module, inputs: Dict, output_path: Path
     )
     
     print(f"✅ Baseline ONNX exported successfully")
+
+
+def export_static_baseline_onnx(model: torch.nn.Module, inputs: Dict, output_path: Path, export_config: Dict):
+    """Export model without dynamic axes for static optimized baseline."""
+    print(f"Exporting static baseline ONNX to {output_path}")
+    
+    # Convert inputs to tuple for torch.onnx.export
+    if hasattr(inputs, 'data'):
+        # Handle BatchEncoding from transformers
+        tensor_inputs = {k: v for k, v in inputs.data.items() if isinstance(v, torch.Tensor)}
+    elif isinstance(inputs, dict):
+        tensor_inputs = inputs
+    else:
+        tensor_inputs = {"input": inputs}
+    
+    # Use config input_names order to ensure consistent tensor ordering
+    if 'input_names' in export_config:
+        input_names = export_config['input_names']
+        # Reorder tensors to match config input_names order
+        input_args = tuple(tensor_inputs[name] for name in input_names if name in tensor_inputs)
+    else:
+        # Fallback to original order
+        input_args = tuple(tensor_inputs.values())
+    
+    # Create static config (remove dynamic_axes)
+    static_export_config = {k: v for k, v in export_config.items() 
+                           if k not in ['input_specs', 'dynamic_axes']}
+    
+    torch.onnx.export(
+        model,
+        input_args,
+        str(output_path),
+        **static_export_config
+    )
+    
+    print(f"✅ Static baseline ONNX exported successfully")
 
 
 def export_individual_modules(model: torch.nn.Module, model_inputs: Dict, output_dir: Path, export_config: Dict):
@@ -268,16 +304,28 @@ def generate_topology_signatures(model: torch.nn.Module, model_inputs: Dict, exp
     with tempfile.NamedTemporaryFile(suffix='.onnx', delete=False) as tmp:
         try:
             # Convert inputs properly - handle dict inputs universally
-            if isinstance(model_inputs, dict):
-                # Dictionary inputs - convert to tuple for ONNX export
-                input_args = tuple(model_inputs.values())
+            if hasattr(model_inputs, 'data'):
+                # Handle BatchEncoding from transformers
+                tensor_inputs = {k: v for k, v in model_inputs.data.items() if isinstance(v, torch.Tensor)}
+            elif isinstance(model_inputs, dict):
+                tensor_inputs = model_inputs
             else:
-                # Single input or other format
-                input_args = (model_inputs,)
+                tensor_inputs = {"input": model_inputs}
             
-            # Use same opset version as config to ensure compatibility
-            opset_version = export_config.get('opset_version', 14)
-            torch.onnx.export(model, input_args, tmp.name, opset_version=opset_version)
+            # Use config input_names order to ensure consistent tensor ordering
+            if 'input_names' in export_config:
+                input_names = export_config['input_names']
+                # Reorder tensors to match config input_names order
+                input_args = tuple(tensor_inputs[name] for name in input_names if name in tensor_inputs)
+            else:
+                # Fallback to original order
+                input_args = tuple(tensor_inputs.values())
+            
+            # Filter out non-ONNX export parameters
+            onnx_export_config = {k: v for k, v in export_config.items() if k != 'input_specs'}
+            
+            # Do the export with full config
+            torch.onnx.export(model, input_args, tmp.name, **onnx_export_config)
             
             # Analyze ONNX structure
             import onnx
@@ -387,9 +435,26 @@ def generate_universal_test_data(output_dir: Path, export_config: Dict, model_na
     model_dir = output_dir / model_dir_name
     model_dir.mkdir(parents=True, exist_ok=True)
     
-    # 1. Generate baseline ONNX
+    # 1. Generate baseline ONNX (with dynamic axes)
     baseline_path = model_dir / "baseline.onnx"
     export_baseline_onnx(model, inputs, baseline_path, export_config)
+    
+    # 1b. Generate static baseline ONNX (without dynamic axes, like HTP)
+    static_baseline_path = model_dir / "baseline_static.onnx"
+    export_static_baseline_onnx(model, inputs, static_baseline_path, export_config)
+    
+    # Compare the two baselines
+    print("\n📊 Baseline Comparison:")
+    try:
+        import onnx
+        dynamic_model = onnx.load(baseline_path)
+        static_model = onnx.load(static_baseline_path)
+        print(f"  Dynamic baseline: {len(dynamic_model.graph.node)} nodes")
+        print(f"  Static baseline:  {len(static_model.graph.node)} nodes")
+        print(f"  Reduction: {len(dynamic_model.graph.node) - len(static_model.graph.node)} nodes "
+              f"({(1 - len(static_model.graph.node)/len(dynamic_model.graph.node))*100:.1f}%)")
+    except Exception as e:
+        print(f"  Could not compare: {e}")
     
     # 2. Generate expected tags from model structure
     expected_tags = generate_expected_tags_from_model(model)
@@ -403,13 +468,34 @@ def generate_universal_test_data(output_dir: Path, export_config: Dict, model_na
     with open(model_dir / "exported_modules.json", 'w') as f:
         json.dump(exported_modules, f, indent=2)
     
-    # 4. Generate topology signatures
-    topology = generate_topology_signatures(model, inputs, export_config)
-    with open(model_dir / "topology_signatures.json", 'w') as f:
-        json.dump(topology, f, indent=2)
-    print("✅ Topology signatures saved")
+    # 4. Generate topology signatures for both versions
+    print("\n📐 Generating topology signatures...")
+    topology_dynamic = generate_topology_signatures(model, inputs, export_config)
     
-    print(f"🎉 Universal test data generated in {model_dir}")
+    # Generate static topology signatures
+    static_config = {k: v for k, v in export_config.items() if k != 'dynamic_axes'}
+    topology_static = generate_topology_signatures(model, inputs, static_config)
+    
+    # Save combined topology data
+    topology_data = {
+        "dynamic": topology_dynamic,
+        "static": topology_static,
+        "comparison": {
+            "node_reduction": topology_dynamic.get("total_nodes", 0) - topology_static.get("total_nodes", 0),
+            "node_reduction_percent": (
+                (1 - topology_static.get("total_nodes", 1) / topology_dynamic.get("total_nodes", 1)) * 100
+                if topology_dynamic.get("total_nodes", 0) > 0 else 0
+            )
+        }
+    }
+    
+    with open(model_dir / "topology_signatures.json", 'w') as f:
+        json.dump(topology_data, f, indent=2)
+    print("✅ Topology signatures saved (both dynamic and static)")
+    
+    print(f"\n🎉 Universal test data generated in {model_dir}")
+    print(f"   - baseline.onnx (dynamic axes, {topology_dynamic.get('total_nodes', '?')} nodes)")
+    print(f"   - baseline_static.onnx (no dynamic axes, {topology_static.get('total_nodes', '?')} nodes)")
 
 
 def main():

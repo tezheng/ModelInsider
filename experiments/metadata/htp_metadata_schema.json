@@ -1,0 +1,131 @@
+{
+  "$defs": {
+    "ExportContext": {
+      "description": "Export context with Pydantic.",
+      "properties": {
+        "timestamp": {
+          "description": "Export timestamp in ISO format",
+          "title": "Timestamp",
+          "type": "string"
+        },
+        "strategy": {
+          "default": "htp",
+          "description": "Must be 'htp'",
+          "pattern": "^htp$",
+          "title": "Strategy",
+          "type": "string"
+        },
+        "version": {
+          "default": "1.0",
+          "description": "Version X.Y format",
+          "pattern": "^\\d+\\.\\d+$",
+          "title": "Version",
+          "type": "string"
+        },
+        "embed_hierarchy_attributes": {
+          "default": true,
+          "description": "Embed tags in ONNX",
+          "title": "Embed Hierarchy Attributes",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "timestamp"
+      ],
+      "title": "ExportContext",
+      "type": "object"
+    },
+    "ModelInfo": {
+      "description": "Model information.",
+      "properties": {
+        "name_or_path": {
+          "description": "Model name or HuggingFace path",
+          "title": "Name Or Path",
+          "type": "string"
+        },
+        "class": {
+          "description": "Model class name",
+          "title": "Class",
+          "type": "string"
+        },
+        "total_modules": {
+          "description": "Total number of modules",
+          "minimum": 0,
+          "title": "Total Modules",
+          "type": "integer"
+        },
+        "total_parameters": {
+          "description": "Total parameter count",
+          "minimum": 0,
+          "title": "Total Parameters",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name_or_path",
+        "class",
+        "total_modules",
+        "total_parameters"
+      ],
+      "title": "ModelInfo",
+      "type": "object"
+    },
+    "TaggingCoverage": {
+      "description": "Coverage statistics with validation.",
+      "properties": {
+        "total_onnx_nodes": {
+          "description": "Total ONNX nodes",
+          "minimum": 0,
+          "title": "Total Onnx Nodes",
+          "type": "integer"
+        },
+        "tagged_nodes": {
+          "description": "Number of tagged nodes",
+          "minimum": 0,
+          "title": "Tagged Nodes",
+          "type": "integer"
+        },
+        "coverage_percentage": {
+          "description": "Coverage percentage",
+          "maximum": 100.0,
+          "minimum": 0.0,
+          "title": "Coverage Percentage",
+          "type": "number"
+        },
+        "empty_tags": {
+          "description": "Number of empty tags",
+          "minimum": 0,
+          "title": "Empty Tags",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "total_onnx_nodes",
+        "tagged_nodes",
+        "coverage_percentage",
+        "empty_tags"
+      ],
+      "title": "TaggingCoverage",
+      "type": "object"
+    }
+  },
+  "description": "Complete HTP metadata model.",
+  "properties": {
+    "export_context": {
+      "$ref": "#/$defs/ExportContext"
+    },
+    "model": {
+      "$ref": "#/$defs/ModelInfo"
+    },
+    "coverage": {
+      "$ref": "#/$defs/TaggingCoverage"
+    }
+  },
+  "required": [
+    "export_context",
+    "model",
+    "coverage"
+  ],
+  "title": "HTPMetadata",
+  "type": "object"
+}

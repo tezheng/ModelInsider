@@ -1,0 +1,67 @@
+{
+  "test_date": "2025-07-19 07:11:55",
+  "models_tested": 6,
+  "successes": 6,
+  "results": [
+    {
+      "model_name": "prajjwal1/bert-tiny",
+      "model_class": "BertModel",
+      "total_modules": 48,
+      "total_parameters": 4385920,
+      "export_time": 0.007519245147705078,
+      "console_lines": 131,
+      "has_ansi": true,
+      "success": true
+    },
+    {
+      "model_name": "distilbert-base-uncased",
+      "model_class": "DistilBertModel",
+      "total_modules": 92,
+      "total_parameters": 66362880,
+      "export_time": 0.006827592849731445,
+      "console_lines": 131,
+      "has_ansi": true,
+      "success": true
+    },
+    {
+      "model_name": "albert-base-v2",
+      "model_class": "AlbertModel",
+      "total_modules": 28,
+      "total_parameters": 11683584,
+      "export_time": 0.0066547393798828125,
+      "console_lines": 131,
+      "has_ansi": true,
+      "success": true
+    },
+    {
+      "model_name": "microsoft/resnet-18",
+      "model_class": "ResNetForImageClassification",
+      "total_modules": 124,
+      "total_parameters": 11689512,
+      "export_time": 0.008775472640991211,
+      "console_lines": 130,
+      "has_ansi": true,
+      "success": true
+    },
+    {
+      "model_name": "google/mobilenet_v2_0.35_96",
+      "model_class": "MobileNetV2ForImageClassification",
+      "total_modules": 214,
+      "total_parameters": 1678409,
+      "export_time": 0.008350849151611328,
+      "console_lines": 133,
+      "has_ansi": true,
+      "success": true
+    },
+    {
+      "model_name": "sshleifer/tiny-gpt2",
+      "model_class": "GPT2Model",
+      "total_modules": 32,
+      "total_parameters": 102714,
+      "export_time": 0.00728607177734375,
+      "console_lines": 131,
+      "has_ansi": true,
+      "success": true
+    }
+  ]
+}

@@ -1,0 +1,381 @@
+--- baseline
++++ iteration_1
+@@ -1,15 +1,13 @@
+ 🔄 Loading model and exporting: prajjwal1/bert-tiny
+
+ 🧠 Using HTP (Hierarchical Trace-and-Project) strategy
+
+-Auto-loading model from: prajjwal1/bert-tiny
+
+-Successfully loaded BertModel
+
+-Starting HTP export for BertModel
+
+ 
+
+ ================================================================================
+
+ 📋 STEP 1/8: MODEL PREPARATION
+
+ ================================================================================
+
+ ✅ Model loaded: BertModel (48 modules, 4.4M parameters)
+
+-🎯 Export target: temp/baseline/model.onnx
+
++🎯 Export target: experiments/export_monitor/iterations/iteration_001/model.onnx
+
+ ⚙️ Strategy: HTP (Hierarchy-Preserving)
+
++✅ Hierarchy attributes will be embedded in ONNX
+
+ ✅ Model set to evaluation mode
+
+ 
+
+ ================================================================================
+
+@@ -17,7 +15,7 @@
+ ================================================================================
+
+ 🤖 Auto-generating inputs for: prajjwal1/bert-tiny
+
+    • Model type: bert
+
+-   • Auto-detected task: feature-extraction
+
++   • Task: feature-extraction
+
+ ✅ Created onnx export config for bert with task feature-extraction
+
+ 🔧 Generated 3 input tensors:
+
+    • input_ids: [2, 16] (torch.int64)
+
+@@ -36,31 +34,31 @@
+ BertModel
+
+ ├── BertEmbeddings: embeddings
+
+ ├── BertEncoder: encoder
+
+-│   ├── BertLayer: encoder.layer.0
+
+-│   │   ├── BertAttention: encoder.layer.0.attention
+
+-│   │   │   ├── BertSdpaSelfAttention: encoder.layer.0.attention.self
+
+-│   │   │   └── BertSelfOutput: encoder.layer.0.attention.output
+
+-│   │   ├── BertIntermediate: encoder.layer.0.intermediate
+
+-│   │   │   └── GELUActivation: encoder.layer.0.intermediate.intermediate_act_fn
+
+-│   │   └── BertOutput: encoder.layer.0.output
+
+-│   └── BertLayer: encoder.layer.1
+
+-│       ├── BertAttention: encoder.layer.1.attention
+
+-│       │   ├── BertSdpaSelfAttention: encoder.layer.1.attention.self
+
+-│       │   └── BertSelfOutput: encoder.layer.1.attention.output
+
+-│       ├── BertIntermediate: encoder.layer.1.intermediate
+
+-│       │   └── GELUActivation: encoder.layer.1.intermediate.intermediate_act_fn
+
+-│       └── BertOutput: encoder.layer.1.output
+
++│   ├── BertLayer: layer.0
+
++│   │   ├── BertAttention: attention
+
++│   │   │   ├── BertSelfOutput: output
+
++│   │   │   └── BertSdpaSelfAttention: self
+
++│   │   ├── BertIntermediate: intermediate
+
++│   │   │   └── GELUActivation: intermediate_act_fn
+
++│   │   └── BertOutput: output
+
++│   └── BertLayer: layer.1
+
++│       ├── BertAttention: attention
+
++│       │   ├── BertSelfOutput: output
+
++│       │   └── BertSdpaSelfAttention: self
+
++│       ├── BertIntermediate: intermediate
+
++│       │   └── GELUActivation: intermediate_act_fn
+
++│       └── BertOutput: output
+
+ └── BertPooler: pooler
+
++(showing 18/18 lines)
+
+ 
+
+ ================================================================================
+
+ 📦 STEP 4/8: ONNX EXPORT
+
+ ================================================================================
+
+-🎯 Target file: temp/baseline/model.onnx
+
++🎯 Target file: experiments/export_monitor/iterations/iteration_001/model.onnx
+
+ ⚙️ Export config:
+
+    • opset_version: 17
+
+    • do_constant_folding: True
+
+    • verbose: False
+
+-   • input_names: ['input_ids', 'attention_mask', 'token_type_ids']
+
+ ✅ ONNX export completed successfully
+
+ 
+
+ ================================================================================
+
+@@ -81,7 +79,7 @@
+    • Root fallbacks: 19 (14.0%)
+
+ ✅ Empty tags: 0
+
+ 
+
+-📊 Top 20 Nodes by Hierarchy:
+
++📊 Top 13 Nodes by Hierarchy:
+
+ ------------------------------
+
+  1. /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention: 35 nodes
+
+  2. /BertModel/BertEncoder/BertLayer.1/BertAttention/BertSdpaSelfAttention: 35 nodes
+
+@@ -101,56 +99,64 @@
+ ------------------------------------------------------------
+
+ BertModel (136 ONNX nodes)
+
+ ├── BertEmbeddings: embeddings (8 nodes)
+
+-│   ├── Add (2 ops)
+
+-│   ├── Constant (2 ops)
+
+-│   ├── Gather (3 ops)
+
+-│   └── LayerNormalization: /embeddings/LayerNorm/LayerNormalization
+
+-├── BertEncoder: encoder (106 nodes)
+
+-│   ├── BertLayer: encoder.layer.0 (53 nodes)
+
+-│   │   ├── BertAttention: encoder.layer.0.attention (39 nodes)
+
+-│   │   │   ├── BertSdpaSelfAttention: encoder.layer.0.attention.self (35 nodes)
+
+-│   │   │   │   ├── Add (4 ops)
+
+-│   │   │   │   ├── Cast (2 ops)
+
+-│   │   │   │   ├── Constant (7 ops)
+
+-│   │   │   │   ├── Div: /encoder/layer.0/attention/self/Div
+
+-│   │   │   │   ├── MatMul (5 ops)
+
+-│   │   │   │   ├── Mul (2 ops)
+
+-│   │   │   │   ├── Reshape (4 ops)
+
+-│   │   │   │   ├── Shape: /encoder/layer.0/attention/self/Shape
+
+-│   │   │   │   ├── Slice: /encoder/layer.0/attention/self/Slice
+
+-│   │   │   │   ├── Softmax: /encoder/layer.0/attention/self/Softmax
+
+-│   │   │   │   ├── Sqrt (3 ops)
+
+-│   │   │   │   └── Transpose (4 ops)
+
+-│   │   │   └── BertSelfOutput: encoder.layer.0.attention.output (4 nodes)
+
+-│   │   │       ├── Add (2 ops)
+
+-│   │   │       ├── LayerNormalization:
+
+-│   │   │       │   /encoder/layer.0/attention/output/LayerNorm/LayerNormalizati
+
+-│   │   │       │   on
+
+-│   │   │       └── MatMul: /encoder/layer.0/attention/output/dense/MatMul
+
+-│   │   ├── BertIntermediate: encoder.layer.0.intermediate (10 nodes)
+
+-│   │   │   ├── Add: /encoder/layer.0/intermediate/dense/Add
+
+-... and 53 more lines (truncated for console)
+
+-(showing 30/83 lines)
+
++│   ├── /embeddings/Constant (2 ops)
+
++│   ├── /embeddings/Add (2 ops)
+
++│   ├── /embeddings/word: /embeddings/word_embeddings/Gather
+
++│   ├── /embeddings/token: /embeddings/token_type_embeddings/Gather
+
++│   ├── /embeddings/position: /embeddings/position_embeddings/Gather
+
++├── BertEncoder: encoder (0 nodes)
+
++│   ├── BertLayer: layer.0 (0 nodes)
+
++│   │   ├── BertAttention: attention (0 nodes)
+
++│   │   │   ├── BertSelfOutput: output (4 nodes)
+
++│   │   │   ├── BertSdpaSelfAttention: self (35 nodes)
+
++│   │   ├── BertIntermediate: intermediate (2 nodes)
+
++│   │   │   ├── /encoder/layer.0/intermediate/dense/MatMul: /encoder/layer.0/intermediate/dense/MatMul
+
++│   │   │   ├── /encoder/layer.0/intermediate/dense/Add: /encoder/layer.0/intermediate/dense/Add
+
++│   │   │   ├── GELUActivation: intermediate_act_fn (8 nodes)
+
++│   │   ├── BertOutput: output (4 nodes)
+
++│   │   │   ├── /encoder/layer.0/output/dense/MatMul: /encoder/layer.0/output/dense/MatMul
+
++│   │   │   ├── /encoder/layer.0/output/dense/Add: /encoder/layer.0/output/dense/Add
+
++│   │   │   ├── /encoder/layer.0/output/Add: /encoder/layer.0/output/Add
+
++│   │   │   ├── /encoder/layer.0/output/LayerNorm/LayerNormalization: /encoder/layer.0/output/LayerNorm/LayerNormalization
+
++│   ├── BertLayer: layer.1 (0 nodes)
+
++│   │   ├── BertAttention: attention (0 nodes)
+
++│   │   │   ├── BertSelfOutput: output (4 nodes)
+
++│   │   │   ├── BertSdpaSelfAttention: self (35 nodes)
+
++│   │   ├── BertIntermediate: intermediate (2 nodes)
+
++│   │   │   ├── /encoder/layer.1/intermediate/dense/MatMul: /encoder/layer.1/intermediate/dense/MatMul
+
++│   │   │   ├── /encoder/layer.1/intermediate/dense/Add: /encoder/layer.1/intermediate/dense/Add
+
++│   │   │   ├── GELUActivation: intermediate_act_fn (8 nodes)
+
++│   │   ├── BertOutput: output (4 nodes)
+
++│   │   │   ├── /encoder/layer.1/output/dense/MatMul: /encoder/layer.1/output/dense/MatMul
+
++│   │   │   ├── /encoder/layer.1/output/dense/Add: /encoder/layer.1/output/dense/Add
+
++│   │   │   ├── /encoder/layer.1/output/Add: /encoder/layer.1/output/Add
+
++│   │   │   ├── /encoder/layer.1/output/LayerNorm/LayerNormalization: /encoder/layer.1/output/LayerNorm/LayerNormalization
+
++├── BertPooler: pooler (3 nodes)
+
++│   ├── /pooler/Gather: /pooler/Gather
+
++│   ├── /pooler/dense/Gemm: /pooler/dense/Gemm
+
++│   ├── /pooler/activation/Tanh: /pooler/activation/Tanh
+
++... and 98 more lines (truncated for console)
+
++(showing 38/136 lines)
+
+ 
+
+ ================================================================================
+
+ 🏷️ STEP 7/8: TAG INJECTION
+
+ ================================================================================
+
+ 🏷️ Hierarchy tag attributes: enabled
+
+ ✅ Tags injected into ONNX model successfully
+
+-📄 Updated ONNX file: temp/baseline/model.onnx
+
++📄 Updated ONNX file: experiments/export_monitor/iterations/iteration_001/model.onnx
+
+ 
+
+ ================================================================================
+
+ 📄 STEP 8/8: METADATA GENERATION
+
+ ================================================================================
+
+ ✅ Metadata file created successfully
+
+-📄 Metadata file: temp/baseline/model_htp_metadata.json
+
++📄 Metadata file: experiments/export_monitor/iterations/iteration_001/model_htp_metadata.json
+
+ 
+
+ ================================================================================
+
+ 📋 FINAL EXPORT SUMMARY
+
+ ================================================================================
+
+-🎉 HTP Export completed successfully in 4.83s!
+
++🎉 HTP Export completed successfully in 4.42s!
+
+ 📊 Export Statistics:
+
+-   • Export time: 4.83s
+
++   • Export time: 4.42s
+
+    • Hierarchy modules: 18
+
+    • ONNX nodes: 136
+
+    • Tagged nodes: 136
+
+@@ -158,6 +164,6 @@
+    • Empty tags: 0 ✅
+
+ 
+
+ 📁 Output Files:
+
+-   • ONNX model: temp/baseline/model.onnx
+
+-   • Metadata: temp/baseline/model_htp_metadata.json
+
+-   • Report: temp/baseline/model_htp_export_report.txt
+
++   • ONNX model: experiments/export_monitor/iterations/iteration_001/model.onnx
+
++   • Metadata: experiments/export_monitor/iterations/iteration_001/model_htp_metadata.json
+
++   • Report: experiments/export_monitor/iterations/iteration_001/model_full_report.txt

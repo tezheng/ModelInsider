@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+
+body {
+    color: #000000;
+    background-color: #ffffff;
+}
+</style>
+</head>
+<body>
+    <pre style="font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><code style="font-family:inherit">
+<span style="font-weight: bold">[</span><span style="color: #808000; text-decoration-color: #808000">94m</span>============================================================================
+====<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>;97m📋 STEP <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>/<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8</span>: MODEL PREPARATION<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span><span style="color: #808000; text-decoration-color: #808000">94m</span>============================================================================
+====<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>32m✅ Model loaded: BertModel <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">48</span> modules, <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">4.</span>4M parameters<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>36m🎯 Export target: <span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>36m/home/zhengte/modelexport_allmodels/experiments/export_monitor/iterations/it
+erat<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>36mion_007/model.onnx<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>33m⚙️ Strategy: HTP <span style="font-weight: bold">(</span>Hierarchy-Preserving<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>32m✅ Hierarchy attributes will be embedded in ONNX<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>32m✅ Model set to evaluation mode<span style="font-weight: bold">[</span>0m
+
+<span style="font-weight: bold">[</span><span style="color: #808000; text-decoration-color: #808000">94m</span>============================================================================
+====<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>;97m🔧 STEP <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span>/<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8</span>: INPUT GENERATION &amp; VALIDATION<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span><span style="color: #808000; text-decoration-color: #808000">94m</span>============================================================================
+====<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>34m🤖 Auto-generating inputs for: prajjwal1/bert-tiny<span style="font-weight: bold">[</span>0m
+   • Model type: bert
+   • Auto-detected task: feature-extraction
+<span style="font-weight: bold">[</span>32m✅ Created onnx export config for bert with task feature-extraction<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>33m🔧 Generated <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span> input tensors:<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>2m   • input_ids: <span style="color: #800080; text-decoration-color: #800080; font-weight: bold">torch.Size</span><span style="font-weight: bold">([</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>, <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">128</span><span style="font-weight: bold">])</span> <span style="font-weight: bold">(</span>torch.int64<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>2m   • attention_mask: <span style="color: #800080; text-decoration-color: #800080; font-weight: bold">torch.Size</span><span style="font-weight: bold">([</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>, <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">128</span><span style="font-weight: bold">])</span> <span style="font-weight: bold">(</span>torch.int64<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+
+<span style="font-weight: bold">[</span><span style="color: #808000; text-decoration-color: #808000">94m</span>============================================================================
+====<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>;97m🏗️ STEP <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3</span>/<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8</span>: HIERARCHY BUILDING<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span><span style="color: #808000; text-decoration-color: #808000">94m</span>============================================================================
+====<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>32m✅ Hierarchy building completed with TracingHierarchyBuilder<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>36m📈 Traced <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">18</span> modules<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>33m🔄 Execution steps: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">36</span><span style="font-weight: bold">[</span>0m
+
+<span style="font-weight: bold">[</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>;32m🌳 Module Hierarchy:<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>2m------------------------------------------------------------<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>;36mBertModel<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>37m├── BertEmbeddings: embeddings<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>37m├── BertEncoder: encoder<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>97m│   ├── BertLayer: encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>97m│   │   ├── BertAttention: encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.</span>attention<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>97m│   │   │   ├── BertSelfOutput: encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.</span>attention.output<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>97m│   │   │   └── BertSdpaSelfAttention: encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.</span>attention.self<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>97m│   │   ├── BertIntermediate: encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.</span>intermediate<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>97m│   │   │   └── GELUActivation: 
+encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.</span>intermediate.intermediate_act_fn<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>97m│   │   └── BertOutput: encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.</span>output<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>97m│   └── BertLayer: encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>97m│       ├── BertAttention: encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.</span>attention<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>97m│       │   ├── BertSelfOutput: encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.</span>attention.output<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>97m│       │   └── BertSdpaSelfAttention: encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.</span>attention.self<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>97m│       ├── BertIntermediate: encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.</span>intermediate<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>97m│       │   └── GELUActivation: 
+encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.</span>intermediate.intermediate_act_fn<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>97m│       └── BertOutput: encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.</span>output<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>37m└── BertPooler: pooler<span style="font-weight: bold">[</span>0m
+
+<span style="font-weight: bold">[</span><span style="color: #808000; text-decoration-color: #808000">94m</span>============================================================================
+====<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>;97m📦 STEP <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">4</span>/<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8</span>: ONNX EXPORT<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span><span style="color: #808000; text-decoration-color: #808000">94m</span>============================================================================
+====<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>36m🎯 Target file: <span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>36m/home/zhengte/modelexport_allmodels/experiments/export_monitor/iterations/it
+erat<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>36mion_007/model.onnx<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>33m⚙️ Export config:<span style="font-weight: bold">[</span>0m
+   • opset_version: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">17</span>
+   • do_constant_folding: <span style="color: #00ff00; text-decoration-color: #00ff00; font-style: italic">True</span>
+   • verbose: <span style="color: #ff0000; text-decoration-color: #ff0000; font-style: italic">False</span>
+<span style="font-weight: bold">[</span>32m✅ ONNX export completed successfully<span style="font-weight: bold">[</span>0m
+
+<span style="font-weight: bold">[</span><span style="color: #808000; text-decoration-color: #808000">94m</span>============================================================================
+====<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>;97m🏷️ STEP <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5</span>/<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8</span>: NODE TAGGER CREATION<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span><span style="color: #808000; text-decoration-color: #808000">94m</span>============================================================================
+====<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>32m✅ Node tagger created successfully<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>36m🏷️ Model root tag: <span style="color: #800080; text-decoration-color: #800080">/</span><span style="color: #ff00ff; text-decoration-color: #ff00ff">BertModel</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>33m🔧 Operation fallback: disabled<span style="font-weight: bold">[</span>0m
+
+<span style="font-weight: bold">[</span><span style="color: #808000; text-decoration-color: #808000">94m</span>============================================================================
+====<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>;97m🔗 STEP <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">6</span>/<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8</span>: ONNX NODE TAGGING<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span><span style="color: #808000; text-decoration-color: #808000">94m</span>============================================================================
+====<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>32m✅ Node tagging completed successfully<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>36m📈 Coverage: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">100.0</span>%<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>33m📊 Tagged nodes: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">136</span>/<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">136</span><span style="font-weight: bold">[</span>0m
+   • Direct matches: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">83</span> <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">61.0</span>%<span style="font-weight: bold">)</span>
+   • Parent matches: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">34</span> <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">25.0</span>%<span style="font-weight: bold">)</span>
+   • Root fallbacks: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">19</span> <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">14.0</span>%<span style="font-weight: bold">)</span>
+<span style="font-weight: bold">[</span>32m✅ Empty tags: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span><span style="font-weight: bold">[</span>0m
+
+<span style="font-weight: bold">[</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>;33m📊 Top <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">20</span> Nodes by Hierarchy:<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>2m------------------------------<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>37m <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>. <span style="color: #800080; text-decoration-color: #800080">/BertModel/BertEncoder/BertLayer.0/BertAttention/</span><span style="color: #ff00ff; text-decoration-color: #ff00ff">BertSdpaSelfAttention</span>:
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">35</span> <span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>37mnodes<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>37m <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">2</span>. <span style="color: #800080; text-decoration-color: #800080">/BertModel/BertEncoder/BertLayer.1/BertAttention/</span><span style="color: #ff00ff; text-decoration-color: #ff00ff">BertSdpaSelfAttention</span>:
+<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">35</span> <span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>37mnodes<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>37m <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3</span>. <span style="color: #800080; text-decoration-color: #800080">/</span><span style="color: #ff00ff; text-decoration-color: #ff00ff">BertModel</span>: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">19</span> nodes<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>37m <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">4</span>. <span style="color: #800080; text-decoration-color: #800080">/BertModel/BertEncoder/BertLayer.0/</span><span style="color: #ff00ff; text-decoration-color: #ff00ff">BertIntermediate</span>: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10</span> nodes<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>37m <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">5</span>. <span style="color: #800080; text-decoration-color: #800080">/BertModel/BertEncoder/BertLayer.1/</span><span style="color: #ff00ff; text-decoration-color: #ff00ff">BertIntermediate</span>: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10</span> nodes<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>37m <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">6</span>. <span style="color: #800080; text-decoration-color: #800080">/BertModel/</span><span style="color: #ff00ff; text-decoration-color: #ff00ff">BertEmbeddings</span>: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8</span> nodes<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>37m <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">7</span>. <span style="color: #800080; text-decoration-color: #800080">/BertModel/BertEncoder/BertLayer.0/BertAttention/</span><span style="color: #ff00ff; text-decoration-color: #ff00ff">BertSelfOutput</span>: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">4</span> 
+nodes<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>37m <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8</span>. <span style="color: #800080; text-decoration-color: #800080">/BertModel/BertEncoder/BertLayer.1/BertAttention/</span><span style="color: #ff00ff; text-decoration-color: #ff00ff">BertSelfOutput</span>: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">4</span> 
+nodes<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>37m <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">9</span>. <span style="color: #800080; text-decoration-color: #800080">/BertModel/BertEncoder/BertLayer.0/</span><span style="color: #ff00ff; text-decoration-color: #ff00ff">BertOutput</span>: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">4</span> nodes<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>37m10. <span style="color: #800080; text-decoration-color: #800080">/BertModel/BertEncoder/BertLayer.1/</span><span style="color: #ff00ff; text-decoration-color: #ff00ff">BertOutput</span>: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">4</span> nodes<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>2m11. <span style="color: #800080; text-decoration-color: #800080">/BertModel/</span><span style="color: #ff00ff; text-decoration-color: #ff00ff">BertPooler</span>: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3</span> nodes<span style="font-weight: bold">[</span>0m
+
+<span style="font-weight: bold">[</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>;32m🌳 Complete HF Hierarchy with ONNX Nodes:<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>2m------------------------------------------------------------<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>;36mBertModel <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">136</span> ONNX nodes<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>97m├── BertEmbeddings: embeddings <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8</span> nodes<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>35m│   └── node <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8</span> ops<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>2m├── BertEncoder: encoder <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> nodes<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>2m│   ├── BertLayer: encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> nodes<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>2m│   │   ├── BertAttention: encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.</span>attention <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> nodes<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>97m│   │   │   ├── BertSelfOutput: encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.</span>attention.output <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">4</span> 
+nodes<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>97m│   │   │   └── BertSdpaSelfAttention: encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.</span>attention.self <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">35</span> 
+nodes<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>97m│   │   ├── BertIntermediate: encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.</span>intermediate <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10</span> nodes<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>35m│   │   │   └── node <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10</span> ops<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>2m│   │   │   └── GELUActivation: 
+encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.</span>intermediate.intermediate_act_fn<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">2m</span><span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> nodes<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>97m│   │   └── BertOutput: encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.</span>output <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">4</span> nodes<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>35m│   │       └── node <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">4</span> ops<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>2m│   └── BertLayer: encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span> <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> nodes<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>2m│       ├── BertAttention: encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.</span>attention <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> nodes<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>97m│       │   ├── BertSelfOutput: encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.</span>attention.output <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">4</span> 
+nodes<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>97m│       │   └── BertSdpaSelfAttention: encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.</span>attention.self <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">35</span> 
+nodes<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>97m│       ├── BertIntermediate: encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.</span>intermediate <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10</span> nodes<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>35m│       │   └── node <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">10</span> ops<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>2m│       │   └── GELUActivation: 
+encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.</span>intermediate.intermediate_act_fn<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">2m</span><span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> nodes<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>97m│       └── BertOutput: encoder.layer.<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1.</span>output <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">4</span> nodes<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>35m│           └── node <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">4</span> ops<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>97m└── BertPooler: pooler <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3</span> nodes<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>35m    └── node <span style="font-weight: bold">(</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">3</span> ops<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span><span style="color: #800080; text-decoration-color: #800080; font-weight: bold">2m</span><span style="font-weight: bold">(</span>showing <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">23</span>/<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">135</span> lines<span style="font-weight: bold">)</span><span style="font-weight: bold">[</span>0m
+
+<span style="font-weight: bold">[</span><span style="color: #808000; text-decoration-color: #808000">94m</span>============================================================================
+====<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>;97m🏷️ STEP <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">7</span>/<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8</span>: TAG INJECTION<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span><span style="color: #808000; text-decoration-color: #808000">94m</span>============================================================================
+====<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>36m🏷️ Hierarchy tag attributes: enabled<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>32m✅ Tags injected into ONNX model successfully<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>33m📄 Updated ONNX file: <span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>33m/home/zhengte/modelexport_allmodels/experiments/export_monitor/iterations/it
+erat<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>33mion_007/model.onnx<span style="font-weight: bold">[</span>0m
+
+<span style="font-weight: bold">[</span><span style="color: #808000; text-decoration-color: #808000">94m</span>============================================================================
+====<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>;97m📄 STEP <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8</span>/<span style="color: #008080; text-decoration-color: #008080; font-weight: bold">8</span>: METADATA GENERATION<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span><span style="color: #808000; text-decoration-color: #808000">94m</span>============================================================================
+====<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>32m✅ Metadata file created successfully<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>33m📄 Metadata file: <span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>33m/home/zhengte/modelexport_allmodels/experiments/export_monitor/iterations/it
+erat<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>33mion_007/model_htp_metadata.json<span style="font-weight: bold">[</span>0m
+
+<span style="font-weight: bold">[</span><span style="color: #808000; text-decoration-color: #808000">94m</span>============================================================================
+====<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>;97m📋 FINAL EXPORT SUMMARY<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span><span style="color: #808000; text-decoration-color: #808000">94m</span>============================================================================
+====<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>;32m🎉 HTP Export completed successfully in <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.</span>02s!<span style="font-weight: bold">[</span>0m
+<span style="font-weight: bold">[</span>36m📊 Export Statistics:<span style="font-weight: bold">[</span>0m
+   • Export time: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0.</span>02s
+   • Hierarchy modules: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">18</span>
+   • ONNX nodes: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">136</span>
+   • Tagged nodes: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">136</span>
+   • Coverage: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">100.0</span>%
+<span style="font-weight: bold">[</span>32m   • Empty tags: <span style="color: #008080; text-decoration-color: #008080; font-weight: bold">0</span> ✅<span style="font-weight: bold">[</span>0m
+
+<span style="font-weight: bold">[</span><span style="color: #008080; text-decoration-color: #008080; font-weight: bold">1</span>;36m📁 Output Files:<span style="font-weight: bold">[</span>0m
+   • ONNX model: 
+<span style="color: #800080; text-decoration-color: #800080">/home/zhengte/modelexport_allmodels/experiments/export_monitor/iterations/</span><span style="color: #ff00ff; text-decoration-color: #ff00ff">iterat</span>
+ion_007/model.onnx
+   • Metadata: 
+<span style="color: #800080; text-decoration-color: #800080">/home/zhengte/modelexport_allmodels/experiments/export_monitor/iterations/</span><span style="color: #ff00ff; text-decoration-color: #ff00ff">iterat</span>
+ion_007/model_htp_metadata.json
+   • Report: 
+<span style="color: #800080; text-decoration-color: #800080">/home/zhengte/modelexport_allmodels/experiments/export_monitor/iterations/</span><span style="color: #ff00ff; text-decoration-color: #ff00ff">iterat</span>
+ion_007/model_full_report.txt
+
+</code></pre>
+</body>
+</html>

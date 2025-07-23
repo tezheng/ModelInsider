@@ -1,0 +1,1662 @@
+HTP Integrated Export Report
+============================================================
+Generated: 2025-07-09 20:37:15
+Model: sam-vit-base-correct
+Strategy: htp_integrated
+
+📊 Export Statistics:
+------------------------------
+export_time: 30.72
+hierarchy_modules: 76
+onnx_nodes: 4803
+tagged_nodes: 4803
+empty_tags: 0
+coverage_percentage: 100.00
+
+🌳 Module Hierarchy Tree:
+------------------------------
+SamModel
+├── SamPositionalEmbedding: shared_image_embedding
+├── SamVisionEncoder: vision_encoder
+│   ├── SamPatchEmbeddings: vision_encoder.patch_embed
+│   └── SamVisionNeck: vision_encoder.neck
+│       ├── SamLayerNorm: vision_encoder.neck.layer_norm1
+│       └── SamLayerNorm: vision_encoder.neck.layer_norm2
+├── SamVisionLayer: vision_encoder.layers.0
+│   ├── SamVisionAttention: vision_encoder.layers.0.attn
+│   └── SamMLPBlock: vision_encoder.layers.0.mlp
+│       └── GELUActivation: vision_encoder.layers.0.mlp.act
+├── SamVisionLayer: vision_encoder.layers.1
+│   ├── SamVisionAttention: vision_encoder.layers.1.attn
+│   └── SamMLPBlock: vision_encoder.layers.1.mlp
+│       └── GELUActivation: vision_encoder.layers.1.mlp.act
+├── SamVisionLayer: vision_encoder.layers.2
+│   ├── SamVisionAttention: vision_encoder.layers.2.attn
+│   └── SamMLPBlock: vision_encoder.layers.2.mlp
+│       └── GELUActivation: vision_encoder.layers.2.mlp.act
+├── SamVisionLayer: vision_encoder.layers.3
+│   ├── SamVisionAttention: vision_encoder.layers.3.attn
+│   └── SamMLPBlock: vision_encoder.layers.3.mlp
+│       └── GELUActivation: vision_encoder.layers.3.mlp.act
+├── SamVisionLayer: vision_encoder.layers.4
+│   ├── SamVisionAttention: vision_encoder.layers.4.attn
+│   └── SamMLPBlock: vision_encoder.layers.4.mlp
+│       └── GELUActivation: vision_encoder.layers.4.mlp.act
+├── SamVisionLayer: vision_encoder.layers.5
+│   ├── SamVisionAttention: vision_encoder.layers.5.attn
+│   └── SamMLPBlock: vision_encoder.layers.5.mlp
+│       └── GELUActivation: vision_encoder.layers.5.mlp.act
+├── SamVisionLayer: vision_encoder.layers.6
+│   ├── SamVisionAttention: vision_encoder.layers.6.attn
+│   └── SamMLPBlock: vision_encoder.layers.6.mlp
+│       └── GELUActivation: vision_encoder.layers.6.mlp.act
+├── SamVisionLayer: vision_encoder.layers.7
+│   ├── SamVisionAttention: vision_encoder.layers.7.attn
+│   └── SamMLPBlock: vision_encoder.layers.7.mlp
+│       └── GELUActivation: vision_encoder.layers.7.mlp.act
+├── SamVisionLayer: vision_encoder.layers.8
+│   ├── SamVisionAttention: vision_encoder.layers.8.attn
+│   └── SamMLPBlock: vision_encoder.layers.8.mlp
+│       └── GELUActivation: vision_encoder.layers.8.mlp.act
+├── SamVisionLayer: vision_encoder.layers.9
+│   ├── SamVisionAttention: vision_encoder.layers.9.attn
+│   └── SamMLPBlock: vision_encoder.layers.9.mlp
+│       └── GELUActivation: vision_encoder.layers.9.mlp.act
+├── SamVisionLayer: vision_encoder.layers.10
+│   ├── SamVisionAttention: vision_encoder.layers.10.attn
+│   └── SamMLPBlock: vision_encoder.layers.10.mlp
+│       └── GELUActivation: vision_encoder.layers.10.mlp.act
+├── SamVisionLayer: vision_encoder.layers.11
+│   ├── SamVisionAttention: vision_encoder.layers.11.attn
+│   └── SamMLPBlock: vision_encoder.layers.11.mlp
+│       └── GELUActivation: vision_encoder.layers.11.mlp.act
+├── SamPromptEncoder: prompt_encoder
+│   └── SamPositionalEmbedding: prompt_encoder.shared_embedding
+├── SamMaskDecoder: mask_decoder
+│   ├── SamTwoWayTransformer: mask_decoder.transformer
+│   │   └── SamAttention: mask_decoder.transformer.final_attn_token_to_image
+│   ├── SamLayerNorm: mask_decoder.upscale_layer_norm
+│   └── SamFeedForward: mask_decoder.iou_prediction_head
+├── SamTwoWayAttentionBlock: mask_decoder.transformer.layers.0
+│   ├── SamAttention: mask_decoder.transformer.layers.0.self_attn
+│   ├── SamAttention: mask_decoder.transformer.layers.0.cross_attn_token_to_image
+│   ├── SamMLPBlock: mask_decoder.transformer.layers.0.mlp
+│   └── SamAttention: mask_decoder.transformer.layers.0.cross_attn_image_to_token
+├── SamTwoWayAttentionBlock: mask_decoder.transformer.layers.1
+│   ├── SamAttention: mask_decoder.transformer.layers.1.self_attn
+│   ├── SamAttention: mask_decoder.transformer.layers.1.cross_attn_token_to_image
+│   ├── SamMLPBlock: mask_decoder.transformer.layers.1.mlp
+│   └── SamAttention: mask_decoder.transformer.layers.1.cross_attn_image_to_token
+├── SamFeedForward: mask_decoder.output_hypernetworks_mlps.0
+├── SamFeedForward: mask_decoder.output_hypernetworks_mlps.1
+├── SamFeedForward: mask_decoder.output_hypernetworks_mlps.2
+└── SamFeedForward: mask_decoder.output_hypernetworks_mlps.3
+
+
+📂 Top 20 Scopes by Node Count:
+------------------------------
+ 1. __root__: 429 nodes
+ 2. vision_encoder.layers.0.attn: 132 nodes
+ 3. vision_encoder.layers.1.attn: 132 nodes
+ 4. vision_encoder.layers.2.attn: 132 nodes
+ 5. vision_encoder.layers.3.attn: 132 nodes
+ 6. vision_encoder.layers.4.attn: 132 nodes
+ 7. vision_encoder.layers.5.attn: 132 nodes
+ 8. vision_encoder.layers.6.attn: 132 nodes
+ 9. vision_encoder.layers.7.attn: 132 nodes
+10. vision_encoder.layers.8.attn: 132 nodes
+11. vision_encoder.layers.9.attn: 132 nodes
+12. vision_encoder.layers.10.attn: 132 nodes
+13. vision_encoder.layers.11.attn: 132 nodes
+14. vision_encoder.layers.1: 127 nodes
+15. vision_encoder.layers.3: 127 nodes
+16. vision_encoder.layers.4: 127 nodes
+17. vision_encoder.layers.6: 127 nodes
+18. vision_encoder.layers.7: 127 nodes
+19. vision_encoder.layers.9: 127 nodes
+20. vision_encoder.layers.10: 127 nodes
+
+📋 ONNX Node Tagging Analysis:
+------------------------------
+Model root: /SamModel
+Scope mappings: 76
+Operation fallback: Disabled
+
+🏷️ Tagging Statistics:
+------------------------------
+total_nodes: 4803
+root_nodes: 429
+scoped_nodes: 4374
+unique_scopes: 203
+direct_matches: 3788
+parent_matches: 586
+operation_matches: 0
+root_fallbacks: 429
+
+🌳 Complete HF Hierarchy with ONNX Nodes:
+------------------------------
+SamModel (4803 ONNX nodes)
+├── SamPositionalEmbedding: shared_image_embedding (7 nodes)
+│   ├── Concat: /shared_image_embedding/Concat
+│   ├── Constant (2 ops)
+│   ├── Cos: /shared_image_embedding/Cos
+│   ├── MatMul: /shared_image_embedding/MatMul
+│   ├── Mul: /shared_image_embedding/Mul
+│   └── Sin: /shared_image_embedding/Sin
+├── SamVisionEncoder: vision_encoder (1 nodes)
+│   ├── Add: /vision_encoder/Add
+│   ├── SamPatchEmbeddings: vision_encoder.patch_embed (2 nodes)
+│   │   ├── Conv: /vision_encoder/patch_embed/projection/Conv
+│   │   └── Transpose: /vision_encoder/patch_embed/Transpose
+│   └── SamVisionNeck: vision_encoder.neck (3 nodes)
+│       ├── Conv (2 ops)
+│       ├── Transpose: /vision_encoder/neck/Transpose
+│       ├── SamLayerNorm: vision_encoder.neck.layer_norm1 (26 nodes)
+│       │   ├── Add (4 ops)
+│       │   ├── Cast (4 ops)
+│       │   ├── Constant (4 ops)
+│       │   ├── Div (2 ops)
+│       │   ├── Mul (2 ops)
+│       │   ├── Pow (2 ops)
+│       │   ├── ReduceMean (4 ops)
+│       │   ├── Sqrt (2 ops)
+│       │   └── Sub (2 ops)
+│       └── SamLayerNorm: vision_encoder.neck.layer_norm2 (26 nodes)
+│           ├── Add (4 ops)
+│           ├── Cast (4 ops)
+│           ├── Constant (4 ops)
+│           ├── Div (2 ops)
+│           ├── Mul (2 ops)
+│           ├── Pow (2 ops)
+│           ├── ReduceMean (4 ops)
+│           ├── Sqrt (2 ops)
+│           └── Sub (2 ops)
+├── SamVisionLayer: vision_encoder.layers.0 (137 nodes)
+│   ├── Add (8 ops)
+│   ├── Cast (12 ops)
+│   ├── Concat (6 ops)
+│   ├── Constant (54 ops)
+│   ├── ConstantOfShape: /vision_encoder/layers.0/ConstantOfShape
+│   ├── Div (7 ops)
+│   ├── Gather (2 ops)
+│   ├── Mod (4 ops)
+│   ├── Mul (3 ops)
+│   ├── Pad: /vision_encoder/layers.0/Pad
+│   ├── Pow (2 ops)
+│   ├── ReduceMean (4 ops)
+│   ├── Reshape (6 ops)
+│   ├── Shape (2 ops)
+│   ├── Slice (3 ops)
+│   ├── Sqrt (2 ops)
+│   ├── Sub (5 ops)
+│   ├── Transpose (3 ops)
+│   ├── Unsqueeze (12 ops)
+│   ├── SamVisionAttention: vision_encoder.layers.0.attn (136 nodes)
+│   │   ├── Add (6 ops)
+│   │   ├── Cast (16 ops)
+│   │   ├── Concat (5 ops)
+│   │   ├── Constant (33 ops)
+│   │   ├── Div (2 ops)
+│   │   ├── Einsum (2 ops)
+│   │   ├── Gather (7 ops)
+│   │   ├── MatMul (4 ops)
+│   │   ├── Mul (9 ops)
+│   │   ├── Range (2 ops)
+│   │   ├── Reshape (8 ops)
+│   │   ├── Resize (2 ops)
+│   │   ├── Shape (6 ops)
+│   │   ├── Softmax: /vision_encoder/layers.0/attn/Softmax
+│   │   ├── Split: /vision_encoder/layers.0/attn/Split
+│   │   ├── Squeeze (3 ops)
+│   │   ├── Sub (4 ops)
+│   │   ├── Transpose (5 ops)
+│   │   └── Unsqueeze (20 ops)
+│   └── SamMLPBlock: vision_encoder.layers.0.mlp (4 nodes)
+│       ├── Add (2 ops)
+│       ├── MatMul (2 ops)
+│       └── GELUActivation: vision_encoder.layers.0.mlp.act (8 nodes)
+│           ├── Add: /vision_encoder/layers.0/mlp/act/Add
+│           ├── Constant (3 ops)
+│           ├── Div: /vision_encoder/layers.0/mlp/act/Div
+│           ├── Erf: /vision_encoder/layers.0/mlp/act/Erf
+│           └── Mul (2 ops)
+├── SamVisionLayer: vision_encoder.layers.1 (149 nodes)
+│   ├── Add (8 ops)
+│   ├── Cast (12 ops)
+│   ├── Concat (7 ops)
+│   ├── Constant (52 ops)
+│   ├── ConstantOfShape: /vision_encoder/layers.1/ConstantOfShape
+│   ├── Div (7 ops)
+│   ├── Gather (6 ops)
+│   ├── Mod (4 ops)
+│   ├── Mul (3 ops)
+│   ├── Pad: /vision_encoder/layers.1/Pad
+│   ├── Pow (2 ops)
+│   ├── ReduceMean (4 ops)
+│   ├── Reshape (6 ops)
+│   ├── Shape (6 ops)
+│   ├── Slice (3 ops)
+│   ├── Sqrt (2 ops)
+│   ├── Sub (5 ops)
+│   ├── Transpose (3 ops)
+│   ├── Unsqueeze (17 ops)
+│   ├── SamVisionAttention: vision_encoder.layers.1.attn (136 nodes)
+│   │   ├── Add (6 ops)
+│   │   ├── Cast (16 ops)
+│   │   ├── Concat (5 ops)
+│   │   ├── Constant (33 ops)
+│   │   ├── Div (2 ops)
+│   │   ├── Einsum (2 ops)
+│   │   ├── Gather (7 ops)
+│   │   ├── MatMul (4 ops)
+│   │   ├── Mul (9 ops)
+│   │   ├── Range (2 ops)
+│   │   ├── Reshape (8 ops)
+│   │   ├── Resize (2 ops)
+│   │   ├── Shape (6 ops)
+│   │   ├── Softmax: /vision_encoder/layers.1/attn/Softmax
+│   │   ├── Split: /vision_encoder/layers.1/attn/Split
+│   │   ├── Squeeze (3 ops)
+│   │   ├── Sub (4 ops)
+│   │   ├── Transpose (5 ops)
+│   │   └── Unsqueeze (20 ops)
+│   └── SamMLPBlock: vision_encoder.layers.1.mlp (4 nodes)
+│       ├── Add (2 ops)
+│       ├── MatMul (2 ops)
+│       └── GELUActivation: vision_encoder.layers.1.mlp.act (8 nodes)
+│           ├── Add: /vision_encoder/layers.1/mlp/act/Add
+│           ├── Constant (3 ops)
+│           ├── Div: /vision_encoder/layers.1/mlp/act/Div
+│           ├── Erf: /vision_encoder/layers.1/mlp/act/Erf
+│           └── Mul (2 ops)
+├── SamVisionLayer: vision_encoder.layers.2 (24 nodes)
+│   ├── Add (6 ops)
+│   ├── Constant (4 ops)
+│   ├── Div (2 ops)
+│   ├── Mul (2 ops)
+│   ├── Pow (2 ops)
+│   ├── ReduceMean (4 ops)
+│   ├── Sqrt (2 ops)
+│   ├── Sub (2 ops)
+│   ├── SamVisionAttention: vision_encoder.layers.2.attn (136 nodes)
+│   │   ├── Add (6 ops)
+│   │   ├── Cast (16 ops)
+│   │   ├── Concat (5 ops)
+│   │   ├── Constant (33 ops)
+│   │   ├── Div (2 ops)
+│   │   ├── Einsum (2 ops)
+│   │   ├── Gather (7 ops)
+│   │   ├── MatMul (4 ops)
+│   │   ├── Mul (9 ops)
+│   │   ├── Range (2 ops)
+│   │   ├── Reshape (8 ops)
+│   │   ├── Resize (2 ops)
+│   │   ├── Shape (6 ops)
+│   │   ├── Softmax: /vision_encoder/layers.2/attn/Softmax
+│   │   ├── Split: /vision_encoder/layers.2/attn/Split
+│   │   ├── Squeeze (3 ops)
+│   │   ├── Sub (4 ops)
+│   │   ├── Transpose (5 ops)
+│   │   └── Unsqueeze (20 ops)
+│   └── SamMLPBlock: vision_encoder.layers.2.mlp (4 nodes)
+│       ├── Add (2 ops)
+│       ├── MatMul (2 ops)
+│       └── GELUActivation: vision_encoder.layers.2.mlp.act (8 nodes)
+│           ├── Add: /vision_encoder/layers.2/mlp/act/Add
+│           ├── Constant (3 ops)
+│           ├── Div: /vision_encoder/layers.2/mlp/act/Div
+│           ├── Erf: /vision_encoder/layers.2/mlp/act/Erf
+│           └── Mul (2 ops)
+├── SamVisionLayer: vision_encoder.layers.3 (149 nodes)
+│   ├── Add (8 ops)
+│   ├── Cast (12 ops)
+│   ├── Concat (7 ops)
+│   ├── Constant (52 ops)
+│   ├── ConstantOfShape: /vision_encoder/layers.3/ConstantOfShape
+│   ├── Div (7 ops)
+│   ├── Gather (6 ops)
+│   ├── Mod (4 ops)
+│   ├── Mul (3 ops)
+│   ├── Pad: /vision_encoder/layers.3/Pad
+│   ├── Pow (2 ops)
+│   ├── ReduceMean (4 ops)
+│   ├── Reshape (6 ops)
+│   ├── Shape (6 ops)
+│   ├── Slice (3 ops)
+│   ├── Sqrt (2 ops)
+│   ├── Sub (5 ops)
+│   ├── Transpose (3 ops)
+│   ├── Unsqueeze (17 ops)
+│   ├── SamVisionAttention: vision_encoder.layers.3.attn (136 nodes)
+│   │   ├── Add (6 ops)
+│   │   ├── Cast (16 ops)
+│   │   ├── Concat (5 ops)
+│   │   ├── Constant (33 ops)
+│   │   ├── Div (2 ops)
+│   │   ├── Einsum (2 ops)
+│   │   ├── Gather (7 ops)
+│   │   ├── MatMul (4 ops)
+│   │   ├── Mul (9 ops)
+│   │   ├── Range (2 ops)
+│   │   ├── Reshape (8 ops)
+│   │   ├── Resize (2 ops)
+│   │   ├── Shape (6 ops)
+│   │   ├── Softmax: /vision_encoder/layers.3/attn/Softmax
+│   │   ├── Split: /vision_encoder/layers.3/attn/Split
+│   │   ├── Squeeze (3 ops)
+│   │   ├── Sub (4 ops)
+│   │   ├── Transpose (5 ops)
+│   │   └── Unsqueeze (20 ops)
+│   └── SamMLPBlock: vision_encoder.layers.3.mlp (4 nodes)
+│       ├── Add (2 ops)
+│       ├── MatMul (2 ops)
+│       └── GELUActivation: vision_encoder.layers.3.mlp.act (8 nodes)
+│           ├── Add: /vision_encoder/layers.3/mlp/act/Add
+│           ├── Constant (3 ops)
+│           ├── Div: /vision_encoder/layers.3/mlp/act/Div
+│           ├── Erf: /vision_encoder/layers.3/mlp/act/Erf
+│           └── Mul (2 ops)
+├── SamVisionLayer: vision_encoder.layers.4 (149 nodes)
+│   ├── Add (8 ops)
+│   ├── Cast (12 ops)
+│   ├── Concat (7 ops)
+│   ├── Constant (52 ops)
+│   ├── ConstantOfShape: /vision_encoder/layers.4/ConstantOfShape
+│   ├── Div (7 ops)
+│   ├── Gather (6 ops)
+│   ├── Mod (4 ops)
+│   ├── Mul (3 ops)
+│   ├── Pad: /vision_encoder/layers.4/Pad
+│   ├── Pow (2 ops)
+│   ├── ReduceMean (4 ops)
+│   ├── Reshape (6 ops)
+│   ├── Shape (6 ops)
+│   ├── Slice (3 ops)
+│   ├── Sqrt (2 ops)
+│   ├── Sub (5 ops)
+│   ├── Transpose (3 ops)
+│   ├── Unsqueeze (17 ops)
+│   ├── SamVisionAttention: vision_encoder.layers.4.attn (136 nodes)
+│   │   ├── Add (6 ops)
+│   │   ├── Cast (16 ops)
+│   │   ├── Concat (5 ops)
+│   │   ├── Constant (33 ops)
+│   │   ├── Div (2 ops)
+│   │   ├── Einsum (2 ops)
+│   │   ├── Gather (7 ops)
+│   │   ├── MatMul (4 ops)
+│   │   ├── Mul (9 ops)
+│   │   ├── Range (2 ops)
+│   │   ├── Reshape (8 ops)
+│   │   ├── Resize (2 ops)
+│   │   ├── Shape (6 ops)
+│   │   ├── Softmax: /vision_encoder/layers.4/attn/Softmax
+│   │   ├── Split: /vision_encoder/layers.4/attn/Split
+│   │   ├── Squeeze (3 ops)
+│   │   ├── Sub (4 ops)
+│   │   ├── Transpose (5 ops)
+│   │   └── Unsqueeze (20 ops)
+│   └── SamMLPBlock: vision_encoder.layers.4.mlp (4 nodes)
+│       ├── Add (2 ops)
+│       ├── MatMul (2 ops)
+│       └── GELUActivation: vision_encoder.layers.4.mlp.act (8 nodes)
+│           ├── Add: /vision_encoder/layers.4/mlp/act/Add
+│           ├── Constant (3 ops)
+│           ├── Div: /vision_encoder/layers.4/mlp/act/Div
+│           ├── Erf: /vision_encoder/layers.4/mlp/act/Erf
+│           └── Mul (2 ops)
+├── SamVisionLayer: vision_encoder.layers.5 (24 nodes)
+│   ├── Add (6 ops)
+│   ├── Constant (4 ops)
+│   ├── Div (2 ops)
+│   ├── Mul (2 ops)
+│   ├── Pow (2 ops)
+│   ├── ReduceMean (4 ops)
+│   ├── Sqrt (2 ops)
+│   ├── Sub (2 ops)
+│   ├── SamVisionAttention: vision_encoder.layers.5.attn (136 nodes)
+│   │   ├── Add (6 ops)
+│   │   ├── Cast (16 ops)
+│   │   ├── Concat (5 ops)
+│   │   ├── Constant (33 ops)
+│   │   ├── Div (2 ops)
+│   │   ├── Einsum (2 ops)
+│   │   ├── Gather (7 ops)
+│   │   ├── MatMul (4 ops)
+│   │   ├── Mul (9 ops)
+│   │   ├── Range (2 ops)
+│   │   ├── Reshape (8 ops)
+│   │   ├── Resize (2 ops)
+│   │   ├── Shape (6 ops)
+│   │   ├── Softmax: /vision_encoder/layers.5/attn/Softmax
+│   │   ├── Split: /vision_encoder/layers.5/attn/Split
+│   │   ├── Squeeze (3 ops)
+│   │   ├── Sub (4 ops)
+│   │   ├── Transpose (5 ops)
+│   │   └── Unsqueeze (20 ops)
+│   └── SamMLPBlock: vision_encoder.layers.5.mlp (4 nodes)
+│       ├── Add (2 ops)
+│       ├── MatMul (2 ops)
+│       └── GELUActivation: vision_encoder.layers.5.mlp.act (8 nodes)
+│           ├── Add: /vision_encoder/layers.5/mlp/act/Add
+│           ├── Constant (3 ops)
+│           ├── Div: /vision_encoder/layers.5/mlp/act/Div
+│           ├── Erf: /vision_encoder/layers.5/mlp/act/Erf
+│           └── Mul (2 ops)
+├── SamVisionLayer: vision_encoder.layers.6 (149 nodes)
+│   ├── Add (8 ops)
+│   ├── Cast (12 ops)
+│   ├── Concat (7 ops)
+│   ├── Constant (52 ops)
+│   ├── ConstantOfShape: /vision_encoder/layers.6/ConstantOfShape
+│   ├── Div (7 ops)
+│   ├── Gather (6 ops)
+│   ├── Mod (4 ops)
+│   ├── Mul (3 ops)
+│   ├── Pad: /vision_encoder/layers.6/Pad
+│   ├── Pow (2 ops)
+│   ├── ReduceMean (4 ops)
+│   ├── Reshape (6 ops)
+│   ├── Shape (6 ops)
+│   ├── Slice (3 ops)
+│   ├── Sqrt (2 ops)
+│   ├── Sub (5 ops)
+│   ├── Transpose (3 ops)
+│   ├── Unsqueeze (17 ops)
+│   ├── SamVisionAttention: vision_encoder.layers.6.attn (136 nodes)
+│   │   ├── Add (6 ops)
+│   │   ├── Cast (16 ops)
+│   │   ├── Concat (5 ops)
+│   │   ├── Constant (33 ops)
+│   │   ├── Div (2 ops)
+│   │   ├── Einsum (2 ops)
+│   │   ├── Gather (7 ops)
+│   │   ├── MatMul (4 ops)
+│   │   ├── Mul (9 ops)
+│   │   ├── Range (2 ops)
+│   │   ├── Reshape (8 ops)
+│   │   ├── Resize (2 ops)
+│   │   ├── Shape (6 ops)
+│   │   ├── Softmax: /vision_encoder/layers.6/attn/Softmax
+│   │   ├── Split: /vision_encoder/layers.6/attn/Split
+│   │   ├── Squeeze (3 ops)
+│   │   ├── Sub (4 ops)
+│   │   ├── Transpose (5 ops)
+│   │   └── Unsqueeze (20 ops)
+│   └── SamMLPBlock: vision_encoder.layers.6.mlp (4 nodes)
+│       ├── Add (2 ops)
+│       ├── MatMul (2 ops)
+│       └── GELUActivation: vision_encoder.layers.6.mlp.act (8 nodes)
+│           ├── Add: /vision_encoder/layers.6/mlp/act/Add
+│           ├── Constant (3 ops)
+│           ├── Div: /vision_encoder/layers.6/mlp/act/Div
+│           ├── Erf: /vision_encoder/layers.6/mlp/act/Erf
+│           └── Mul (2 ops)
+├── SamVisionLayer: vision_encoder.layers.7 (149 nodes)
+│   ├── Add (8 ops)
+│   ├── Cast (12 ops)
+│   ├── Concat (7 ops)
+│   ├── Constant (52 ops)
+│   ├── ConstantOfShape: /vision_encoder/layers.7/ConstantOfShape
+│   ├── Div (7 ops)
+│   ├── Gather (6 ops)
+│   ├── Mod (4 ops)
+│   ├── Mul (3 ops)
+│   ├── Pad: /vision_encoder/layers.7/Pad
+│   ├── Pow (2 ops)
+│   ├── ReduceMean (4 ops)
+│   ├── Reshape (6 ops)
+│   ├── Shape (6 ops)
+│   ├── Slice (3 ops)
+│   ├── Sqrt (2 ops)
+│   ├── Sub (5 ops)
+│   ├── Transpose (3 ops)
+│   ├── Unsqueeze (17 ops)
+│   ├── SamVisionAttention: vision_encoder.layers.7.attn (136 nodes)
+│   │   ├── Add (6 ops)
+│   │   ├── Cast (16 ops)
+│   │   ├── Concat (5 ops)
+│   │   ├── Constant (33 ops)
+│   │   ├── Div (2 ops)
+│   │   ├── Einsum (2 ops)
+│   │   ├── Gather (7 ops)
+│   │   ├── MatMul (4 ops)
+│   │   ├── Mul (9 ops)
+│   │   ├── Range (2 ops)
+│   │   ├── Reshape (8 ops)
+│   │   ├── Resize (2 ops)
+│   │   ├── Shape (6 ops)
+│   │   ├── Softmax: /vision_encoder/layers.7/attn/Softmax
+│   │   ├── Split: /vision_encoder/layers.7/attn/Split
+│   │   ├── Squeeze (3 ops)
+│   │   ├── Sub (4 ops)
+│   │   ├── Transpose (5 ops)
+│   │   └── Unsqueeze (20 ops)
+│   └── SamMLPBlock: vision_encoder.layers.7.mlp (4 nodes)
+│       ├── Add (2 ops)
+│       ├── MatMul (2 ops)
+│       └── GELUActivation: vision_encoder.layers.7.mlp.act (8 nodes)
+│           ├── Add: /vision_encoder/layers.7/mlp/act/Add
+│           ├── Constant (3 ops)
+│           ├── Div: /vision_encoder/layers.7/mlp/act/Div
+│           ├── Erf: /vision_encoder/layers.7/mlp/act/Erf
+│           └── Mul (2 ops)
+├── SamVisionLayer: vision_encoder.layers.8 (24 nodes)
+│   ├── Add (6 ops)
+│   ├── Constant (4 ops)
+│   ├── Div (2 ops)
+│   ├── Mul (2 ops)
+│   ├── Pow (2 ops)
+│   ├── ReduceMean (4 ops)
+│   ├── Sqrt (2 ops)
+│   ├── Sub (2 ops)
+│   ├── SamVisionAttention: vision_encoder.layers.8.attn (136 nodes)
+│   │   ├── Add (6 ops)
+│   │   ├── Cast (16 ops)
+│   │   ├── Concat (5 ops)
+│   │   ├── Constant (33 ops)
+│   │   ├── Div (2 ops)
+│   │   ├── Einsum (2 ops)
+│   │   ├── Gather (7 ops)
+│   │   ├── MatMul (4 ops)
+│   │   ├── Mul (9 ops)
+│   │   ├── Range (2 ops)
+│   │   ├── Reshape (8 ops)
+│   │   ├── Resize (2 ops)
+│   │   ├── Shape (6 ops)
+│   │   ├── Softmax: /vision_encoder/layers.8/attn/Softmax
+│   │   ├── Split: /vision_encoder/layers.8/attn/Split
+│   │   ├── Squeeze (3 ops)
+│   │   ├── Sub (4 ops)
+│   │   ├── Transpose (5 ops)
+│   │   └── Unsqueeze (20 ops)
+│   └── SamMLPBlock: vision_encoder.layers.8.mlp (4 nodes)
+│       ├── Add (2 ops)
+│       ├── MatMul (2 ops)
+│       └── GELUActivation: vision_encoder.layers.8.mlp.act (8 nodes)
+│           ├── Add: /vision_encoder/layers.8/mlp/act/Add
+│           ├── Constant (3 ops)
+│           ├── Div: /vision_encoder/layers.8/mlp/act/Div
+│           ├── Erf: /vision_encoder/layers.8/mlp/act/Erf
+│           └── Mul (2 ops)
+├── SamVisionLayer: vision_encoder.layers.9 (149 nodes)
+│   ├── Add (8 ops)
+│   ├── Cast (12 ops)
+│   ├── Concat (7 ops)
+│   ├── Constant (52 ops)
+│   ├── ConstantOfShape: /vision_encoder/layers.9/ConstantOfShape
+│   ├── Div (7 ops)
+│   ├── Gather (6 ops)
+│   ├── Mod (4 ops)
+│   ├── Mul (3 ops)
+│   ├── Pad: /vision_encoder/layers.9/Pad
+│   ├── Pow (2 ops)
+│   ├── ReduceMean (4 ops)
+│   ├── Reshape (6 ops)
+│   ├── Shape (6 ops)
+│   ├── Slice (3 ops)
+│   ├── Sqrt (2 ops)
+│   ├── Sub (5 ops)
+│   ├── Transpose (3 ops)
+│   ├── Unsqueeze (17 ops)
+│   ├── SamVisionAttention: vision_encoder.layers.9.attn (136 nodes)
+│   │   ├── Add (6 ops)
+│   │   ├── Cast (16 ops)
+│   │   ├── Concat (5 ops)
+│   │   ├── Constant (33 ops)
+│   │   ├── Div (2 ops)
+│   │   ├── Einsum (2 ops)
+│   │   ├── Gather (7 ops)
+│   │   ├── MatMul (4 ops)
+│   │   ├── Mul (9 ops)
+│   │   ├── Range (2 ops)
+│   │   ├── Reshape (8 ops)
+│   │   ├── Resize (2 ops)
+│   │   ├── Shape (6 ops)
+│   │   ├── Softmax: /vision_encoder/layers.9/attn/Softmax
+│   │   ├── Split: /vision_encoder/layers.9/attn/Split
+│   │   ├── Squeeze (3 ops)
+│   │   ├── Sub (4 ops)
+│   │   ├── Transpose (5 ops)
+│   │   └── Unsqueeze (20 ops)
+│   └── SamMLPBlock: vision_encoder.layers.9.mlp (4 nodes)
+│       ├── Add (2 ops)
+│       ├── MatMul (2 ops)
+│       └── GELUActivation: vision_encoder.layers.9.mlp.act (8 nodes)
+│           ├── Add: /vision_encoder/layers.9/mlp/act/Add
+│           ├── Constant (3 ops)
+│           ├── Div: /vision_encoder/layers.9/mlp/act/Div
+│           ├── Erf: /vision_encoder/layers.9/mlp/act/Erf
+│           └── Mul (2 ops)
+├── SamVisionLayer: vision_encoder.layers.10 (149 nodes)
+│   ├── Add (8 ops)
+│   ├── Cast (12 ops)
+│   ├── Concat (7 ops)
+│   ├── Constant (52 ops)
+│   ├── ConstantOfShape: /vision_encoder/layers.10/ConstantOfShape
+│   ├── Div (7 ops)
+│   ├── Gather (6 ops)
+│   ├── Mod (4 ops)
+│   ├── Mul (3 ops)
+│   ├── Pad: /vision_encoder/layers.10/Pad
+│   ├── Pow (2 ops)
+│   ├── ReduceMean (4 ops)
+│   ├── Reshape (6 ops)
+│   ├── Shape (6 ops)
+│   ├── Slice (3 ops)
+│   ├── Sqrt (2 ops)
+│   ├── Sub (5 ops)
+│   ├── Transpose (3 ops)
+│   ├── Unsqueeze (17 ops)
+│   ├── SamVisionAttention: vision_encoder.layers.10.attn (136 nodes)
+│   │   ├── Add (6 ops)
+│   │   ├── Cast (16 ops)
+│   │   ├── Concat (5 ops)
+│   │   ├── Constant (33 ops)
+│   │   ├── Div (2 ops)
+│   │   ├── Einsum (2 ops)
+│   │   ├── Gather (7 ops)
+│   │   ├── MatMul (4 ops)
+│   │   ├── Mul (9 ops)
+│   │   ├── Range (2 ops)
+│   │   ├── Reshape (8 ops)
+│   │   ├── Resize (2 ops)
+│   │   ├── Shape (6 ops)
+│   │   ├── Softmax: /vision_encoder/layers.10/attn/Softmax
+│   │   ├── Split: /vision_encoder/layers.10/attn/Split
+│   │   ├── Squeeze (3 ops)
+│   │   ├── Sub (4 ops)
+│   │   ├── Transpose (5 ops)
+│   │   └── Unsqueeze (20 ops)
+│   └── SamMLPBlock: vision_encoder.layers.10.mlp (4 nodes)
+│       ├── Add (2 ops)
+│       ├── MatMul (2 ops)
+│       └── GELUActivation: vision_encoder.layers.10.mlp.act (8 nodes)
+│           ├── Add: /vision_encoder/layers.10/mlp/act/Add
+│           ├── Constant (3 ops)
+│           ├── Div: /vision_encoder/layers.10/mlp/act/Div
+│           ├── Erf: /vision_encoder/layers.10/mlp/act/Erf
+│           └── Mul (2 ops)
+├── SamVisionLayer: vision_encoder.layers.11 (24 nodes)
+│   ├── Add (6 ops)
+│   ├── Constant (4 ops)
+│   ├── Div (2 ops)
+│   ├── Mul (2 ops)
+│   ├── Pow (2 ops)
+│   ├── ReduceMean (4 ops)
+│   ├── Sqrt (2 ops)
+│   ├── Sub (2 ops)
+│   ├── SamVisionAttention: vision_encoder.layers.11.attn (136 nodes)
+│   │   ├── Add (6 ops)
+│   │   ├── Cast (16 ops)
+│   │   ├── Concat (5 ops)
+│   │   ├── Constant (33 ops)
+│   │   ├── Div (2 ops)
+│   │   ├── Einsum (2 ops)
+│   │   ├── Gather (7 ops)
+│   │   ├── MatMul (4 ops)
+│   │   ├── Mul (9 ops)
+│   │   ├── Range (2 ops)
+│   │   ├── Reshape (8 ops)
+│   │   ├── Resize (2 ops)
+│   │   ├── Shape (6 ops)
+│   │   ├── Softmax: /vision_encoder/layers.11/attn/Softmax
+│   │   ├── Split: /vision_encoder/layers.11/attn/Split
+│   │   ├── Squeeze (3 ops)
+│   │   ├── Sub (4 ops)
+│   │   ├── Transpose (5 ops)
+│   │   └── Unsqueeze (20 ops)
+│   └── SamMLPBlock: vision_encoder.layers.11.mlp (4 nodes)
+│       ├── Add (2 ops)
+│       ├── MatMul (2 ops)
+│       └── GELUActivation: vision_encoder.layers.11.mlp.act (8 nodes)
+│           ├── Add: /vision_encoder/layers.11/mlp/act/Add
+│           ├── Constant (3 ops)
+│           ├── Div: /vision_encoder/layers.11/mlp/act/Div
+│           ├── Erf: /vision_encoder/layers.11/mlp/act/Erf
+│           └── Mul (2 ops)
+├── SamPromptEncoder: prompt_encoder (37 nodes)
+│   ├── Add (3 ops)
+│   ├── Cast: /prompt_encoder/Cast
+│   ├── Concat (2 ops)
+│   ├── Constant (14 ops)
+│   ├── ConstantOfShape: /prompt_encoder/ConstantOfShape
+│   ├── Equal (5 ops)
+│   ├── Expand: /prompt_encoder/Expand
+│   ├── Mul: /prompt_encoder/Mul
+│   ├── Not: /prompt_encoder/Not
+│   ├── Unsqueeze (3 ops)
+│   ├── Where (5 ops)
+│   └── SamPositionalEmbedding: prompt_encoder.shared_embedding (115 nodes)
+│       ├── Cast: /prompt_encoder/shared_embedding/Cast
+│       ├── Concat (5 ops)
+│       ├── Constant (37 ops)
+│       ├── ConstantOfShape (8 ops)
+│       ├── Cos: /prompt_encoder/shared_embedding/Cos
+│       ├── Div (2 ops)
+│       ├── Equal (8 ops)
+│       ├── Expand (10 ops)
+│       ├── Gather (4 ops)
+│       ├── MatMul: /prompt_encoder/shared_embedding/MatMul
+│       ├── Mul (10 ops)
+│       ├── Reshape (2 ops)
+│       ├── ScatterND (2 ops)
+│       ├── Shape (4 ops)
+│       ├── Sin: /prompt_encoder/shared_embedding/Sin
+│       ├── Slice (2 ops)
+│       ├── Sub: /prompt_encoder/shared_embedding/Sub
+│       ├── Unsqueeze (8 ops)
+│       └── Where (8 ops)
+├── SamMaskDecoder: mask_decoder (141 nodes)
+│   ├── Add (3 ops)
+│   ├── Cast: /mask_decoder/Cast
+│   ├── Concat (9 ops)
+│   ├── Constant (57 ops)
+│   ├── ConstantOfShape: /mask_decoder/ConstantOfShape
+│   ├── ConvTranspose (2 ops)
+│   ├── Div (2 ops)
+│   ├── Erf (2 ops)
+│   ├── Expand: /mask_decoder/Expand
+│   ├── Gather (12 ops)
+│   ├── MatMul: /mask_decoder/MatMul
+│   ├── Mul (6 ops)
+│   ├── Reshape (5 ops)
+│   ├── Shape (10 ops)
+│   ├── Slice (7 ops)
+│   ├── Tile (3 ops)
+│   ├── Transpose: /mask_decoder/Transpose
+│   ├── Unsqueeze (18 ops)
+│   ├── SamTwoWayTransformer: mask_decoder.transformer (35 nodes)
+│   │   ├── Add (4 ops)
+│   │   ├── Concat (2 ops)
+│   │   ├── Constant (12 ops)
+│   │   ├── Div: /mask_decoder/transformer/layer_norm_final_attn/Div
+│   │   ├── Mul: /mask_decoder/transformer/layer_norm_final_attn/Mul
+│   │   ├── Pow: /mask_decoder/transformer/layer_norm_final_attn/Pow
+│   │   ├── ReduceMean (2 ops)
+│   │   ├── Reshape (2 ops)
+│   │   ├── Shape (2 ops)
+│   │   ├── Slice (2 ops)
+│   │   ├── Sqrt: /mask_decoder/transformer/layer_norm_final_attn/Sqrt
+│   │   ├── Sub: /mask_decoder/transformer/layer_norm_final_attn/Sub
+│   │   ├── Transpose (2 ops)
+│   │   ├── Unsqueeze (2 ops)
+│   │   └── SamAttention: mask_decoder.transformer.final_attn_token_to_image (113 nodes)
+│   │       ├── Add (4 ops)
+│   │       ├── Cast (9 ops)
+│   │       ├── Concat (4 ops)
+│   │       ├── Constant (24 ops)
+│   │       ├── Div (5 ops)
+│   │       ├── Gather (17 ops)
+│   │       ├── MatMul (6 ops)
+│   │       ├── Mul (4 ops)
+│   │       ├── Pow: /mask_decoder/transformer/final_attn_token_to_image/Pow
+│   │       ├── Reshape (4 ops)
+│   │       ├── Shape (17 ops)
+│   │       ├── Softmax: /mask_decoder/transformer/final_attn_token_to_image/Softmax
+│   │       ├── Transpose (4 ops)
+│   │       └── Unsqueeze (13 ops)
+│   ├── SamLayerNorm: mask_decoder.upscale_layer_norm (13 nodes)
+│   │   ├── Add (2 ops)
+│   │   ├── Cast (2 ops)
+│   │   ├── Constant (2 ops)
+│   │   ├── Div: /mask_decoder/upscale_layer_norm/Div
+│   │   ├── Mul: /mask_decoder/upscale_layer_norm/Mul
+│   │   ├── Pow: /mask_decoder/upscale_layer_norm/Pow
+│   │   ├── ReduceMean (2 ops)
+│   │   ├── Sqrt: /mask_decoder/upscale_layer_norm/Sqrt
+│   │   └── Sub: /mask_decoder/upscale_layer_norm/Sub
+│   └── SamFeedForward: mask_decoder.iou_prediction_head (8 nodes)
+│       ├── Add (3 ops)
+│       ├── MatMul (3 ops)
+│       └── Relu (2 ops)
+├── SamTwoWayAttentionBlock: mask_decoder.transformer.layers.0 (50 nodes)
+│   ├── Add (14 ops)
+│   ├── Constant (8 ops)
+│   ├── Div (4 ops)
+│   ├── Mul (4 ops)
+│   ├── Pow (4 ops)
+│   ├── ReduceMean (8 ops)
+│   ├── Sqrt (4 ops)
+│   ├── Sub (4 ops)
+│   ├── SamAttention: mask_decoder.transformer.layers.0.self_attn (339 nodes)
+│   │   ├── Add (12 ops)
+│   │   ├── Cast (27 ops)
+│   │   ├── Concat (12 ops)
+│   │   ├── Constant (72 ops)
+│   │   ├── Div (15 ops)
+│   │   ├── Gather (51 ops)
+│   │   ├── MatMul (18 ops)
+│   │   ├── Mul (12 ops)
+│   │   ├── Pow (3 ops)
+│   │   ├── Reshape (12 ops)
+│   │   ├── Shape (51 ops)
+│   │   ├── Softmax (3 ops)
+│   │   ├── Transpose (12 ops)
+│   │   └── Unsqueeze (39 ops)
+│   ├── SamAttention: mask_decoder.transformer.layers.0.cross_attn_token_to_image (339 nodes)
+│   │   ├── Add (12 ops)
+│   │   ├── Cast (27 ops)
+│   │   ├── Concat (12 ops)
+│   │   ├── Constant (72 ops)
+│   │   ├── Div (15 ops)
+│   │   ├── Gather (51 ops)
+│   │   ├── MatMul (18 ops)
+│   │   ├── Mul (12 ops)
+│   │   ├── Pow (3 ops)
+│   │   ├── Reshape (12 ops)
+│   │   ├── Shape (51 ops)
+│   │   ├── Softmax (3 ops)
+│   │   ├── Transpose (12 ops)
+│   │   └── Unsqueeze (39 ops)
+│   ├── SamMLPBlock: mask_decoder.transformer.layers.0.mlp (5 nodes)
+│   │   ├── Add (2 ops)
+│   │   ├── MatMul (2 ops)
+│   │   └── Relu: /mask_decoder/transformer/layers.0/mlp/act/Relu
+│   └── SamAttention: mask_decoder.transformer.layers.0.cross_attn_image_to_token (339 nodes)
+│       ├── Add (12 ops)
+│       ├── Cast (27 ops)
+│       ├── Concat (12 ops)
+│       ├── Constant (72 ops)
+│       ├── Div (15 ops)
+│       ├── Gather (51 ops)
+│       ├── MatMul (18 ops)
+│       ├── Mul (12 ops)
+│       ├── Pow (3 ops)
+│       ├── Reshape (12 ops)
+│       ├── Shape (51 ops)
+│       ├── Softmax (3 ops)
+│       ├── Transpose (12 ops)
+│       └── Unsqueeze (39 ops)
+├── SamTwoWayAttentionBlock: mask_decoder.transformer.layers.1 (51 nodes)
+│   ├── Add (15 ops)
+│   ├── Constant (8 ops)
+│   ├── Div (4 ops)
+│   ├── Mul (4 ops)
+│   ├── Pow (4 ops)
+│   ├── ReduceMean (8 ops)
+│   ├── Sqrt (4 ops)
+│   ├── Sub (4 ops)
+│   ├── SamAttention: mask_decoder.transformer.layers.1.self_attn (339 nodes)
+│   │   ├── Add (12 ops)
+│   │   ├── Cast (27 ops)
+│   │   ├── Concat (12 ops)
+│   │   ├── Constant (72 ops)
+│   │   ├── Div (15 ops)
+│   │   ├── Gather (51 ops)
+│   │   ├── MatMul (18 ops)
+│   │   ├── Mul (12 ops)
+│   │   ├── Pow (3 ops)
+│   │   ├── Reshape (12 ops)
+│   │   ├── Shape (51 ops)
+│   │   ├── Softmax (3 ops)
+│   │   ├── Transpose (12 ops)
+│   │   └── Unsqueeze (39 ops)
+│   ├── SamAttention: mask_decoder.transformer.layers.1.cross_attn_token_to_image (339 nodes)
+│   │   ├── Add (12 ops)
+│   │   ├── Cast (27 ops)
+│   │   ├── Concat (12 ops)
+│   │   ├── Constant (72 ops)
+│   │   ├── Div (15 ops)
+│   │   ├── Gather (51 ops)
+│   │   ├── MatMul (18 ops)
+│   │   ├── Mul (12 ops)
+│   │   ├── Pow (3 ops)
+│   │   ├── Reshape (12 ops)
+│   │   ├── Shape (51 ops)
+│   │   ├── Softmax (3 ops)
+│   │   ├── Transpose (12 ops)
+│   │   └── Unsqueeze (39 ops)
+│   ├── SamMLPBlock: mask_decoder.transformer.layers.1.mlp (5 nodes)
+│   │   ├── Add (2 ops)
+│   │   ├── MatMul (2 ops)
+│   │   └── Relu: /mask_decoder/transformer/layers.1/mlp/act/Relu
+│   └── SamAttention: mask_decoder.transformer.layers.1.cross_attn_image_to_token (339 nodes)
+│       ├── Add (12 ops)
+│       ├── Cast (27 ops)
+│       ├── Concat (12 ops)
+│       ├── Constant (72 ops)
+│       ├── Div (15 ops)
+│       ├── Gather (51 ops)
+│       ├── MatMul (18 ops)
+│       ├── Mul (12 ops)
+│       ├── Pow (3 ops)
+│       ├── Reshape (12 ops)
+│       ├── Shape (51 ops)
+│       ├── Softmax (3 ops)
+│       ├── Transpose (12 ops)
+│       └── Unsqueeze (39 ops)
+├── SamFeedForward: mask_decoder.output_hypernetworks_mlps.0 (8 nodes)
+│   ├── Add (3 ops)
+│   ├── MatMul (3 ops)
+│   └── Relu (2 ops)
+├── SamFeedForward: mask_decoder.output_hypernetworks_mlps.1 (8 nodes)
+│   ├── Add (3 ops)
+│   ├── MatMul (3 ops)
+│   └── Relu (2 ops)
+├── SamFeedForward: mask_decoder.output_hypernetworks_mlps.2 (8 nodes)
+│   ├── Add (3 ops)
+│   ├── MatMul (3 ops)
+│   └── Relu (2 ops)
+└── SamFeedForward: mask_decoder.output_hypernetworks_mlps.3 (8 nodes)
+    ├── Add (3 ops)
+    ├── MatMul (3 ops)
+    └── Relu (2 ops)
+
+
+🏷️ Top 20 Tags by Node Count:
+------------------------------
+ 1. /SamModel: 429 nodes (8.9%)
+ 2. /SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.0/SamAttention: 339 nodes (7.1%)
+ 3. /SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.1/SamAttention: 339 nodes (7.1%)
+ 4. /SamModel/SamVisionEncoder/SamVisionLayer.1: 149 nodes (3.1%)
+ 5. /SamModel/SamVisionEncoder/SamVisionLayer.3: 149 nodes (3.1%)
+ 6. /SamModel/SamVisionEncoder/SamVisionLayer.4: 149 nodes (3.1%)
+ 7. /SamModel/SamVisionEncoder/SamVisionLayer.6: 149 nodes (3.1%)
+ 8. /SamModel/SamVisionEncoder/SamVisionLayer.7: 149 nodes (3.1%)
+ 9. /SamModel/SamVisionEncoder/SamVisionLayer.9: 149 nodes (3.1%)
+10. /SamModel/SamVisionEncoder/SamVisionLayer.10: 149 nodes (3.1%)
+11. /SamModel/SamMaskDecoder: 141 nodes (2.9%)
+12. /SamModel/SamVisionEncoder/SamVisionLayer.0: 137 nodes (2.9%)
+13. /SamModel/SamVisionEncoder/SamVisionLayer.0/SamVisionAttention: 136 nodes (2.8%)
+14. /SamModel/SamVisionEncoder/SamVisionLayer.1/SamVisionAttention: 136 nodes (2.8%)
+15. /SamModel/SamVisionEncoder/SamVisionLayer.2/SamVisionAttention: 136 nodes (2.8%)
+16. /SamModel/SamVisionEncoder/SamVisionLayer.3/SamVisionAttention: 136 nodes (2.8%)
+17. /SamModel/SamVisionEncoder/SamVisionLayer.4/SamVisionAttention: 136 nodes (2.8%)
+18. /SamModel/SamVisionEncoder/SamVisionLayer.5/SamVisionAttention: 136 nodes (2.8%)
+19. /SamModel/SamVisionEncoder/SamVisionLayer.6/SamVisionAttention: 136 nodes (2.8%)
+20. /SamModel/SamVisionEncoder/SamVisionLayer.7/SamVisionAttention: 136 nodes (2.8%)
+
+⚡ Execution Summary:
+------------------------------
+total_modules_traced: 76
+total_modules: 76
+execution_steps: 152
+hierarchy_mapping: {
+  "": "/SamModel",
+  "shared_image_embedding": "/SamModel/SamPositionalEmbedding",
+  "vision_encoder": "/SamModel/SamVisionEncoder",
+  "vision_encoder.patch_embed": "/SamModel/SamVisionEncoder/SamPatchEmbeddings",
+  "vision_encoder.layers.0": "/SamModel/SamVisionEncoder/SamVisionLayer.0",
+  "vision_encoder.layers.0.attn": "/SamModel/SamVisionEncoder/SamVisionLayer.0/SamVisionAttention",
+  "vision_encoder.layers.0.mlp": "/SamModel/SamVisionEncoder/SamVisionLayer.0/SamMLPBlock",
+  "vision_encoder.layers.0.mlp.act": "/SamModel/SamVisionEncoder/SamVisionLayer.0/SamMLPBlock/GELUActivation",
+  "vision_encoder.layers.1": "/SamModel/SamVisionEncoder/SamVisionLayer.1",
+  "vision_encoder.layers.1.attn": "/SamModel/SamVisionEncoder/SamVisionLayer.1/SamVisionAttention",
+  "vision_encoder.layers.1.mlp": "/SamModel/SamVisionEncoder/SamVisionLayer.1/SamMLPBlock",
+  "vision_encoder.layers.1.mlp.act": "/SamModel/SamVisionEncoder/SamVisionLayer.1/SamMLPBlock/GELUActivation",
+  "vision_encoder.layers.2": "/SamModel/SamVisionEncoder/SamVisionLayer.2",
+  "vision_encoder.layers.2.attn": "/SamModel/SamVisionEncoder/SamVisionLayer.2/SamVisionAttention",
+  "vision_encoder.layers.2.mlp": "/SamModel/SamVisionEncoder/SamVisionLayer.2/SamMLPBlock",
+  "vision_encoder.layers.2.mlp.act": "/SamModel/SamVisionEncoder/SamVisionLayer.2/SamMLPBlock/GELUActivation",
+  "vision_encoder.layers.3": "/SamModel/SamVisionEncoder/SamVisionLayer.3",
+  "vision_encoder.layers.3.attn": "/SamModel/SamVisionEncoder/SamVisionLayer.3/SamVisionAttention",
+  "vision_encoder.layers.3.mlp": "/SamModel/SamVisionEncoder/SamVisionLayer.3/SamMLPBlock",
+  "vision_encoder.layers.3.mlp.act": "/SamModel/SamVisionEncoder/SamVisionLayer.3/SamMLPBlock/GELUActivation",
+  "vision_encoder.layers.4": "/SamModel/SamVisionEncoder/SamVisionLayer.4",
+  "vision_encoder.layers.4.attn": "/SamModel/SamVisionEncoder/SamVisionLayer.4/SamVisionAttention",
+  "vision_encoder.layers.4.mlp": "/SamModel/SamVisionEncoder/SamVisionLayer.4/SamMLPBlock",
+  "vision_encoder.layers.4.mlp.act": "/SamModel/SamVisionEncoder/SamVisionLayer.4/SamMLPBlock/GELUActivation",
+  "vision_encoder.layers.5": "/SamModel/SamVisionEncoder/SamVisionLayer.5",
+  "vision_encoder.layers.5.attn": "/SamModel/SamVisionEncoder/SamVisionLayer.5/SamVisionAttention",
+  "vision_encoder.layers.5.mlp": "/SamModel/SamVisionEncoder/SamVisionLayer.5/SamMLPBlock",
+  "vision_encoder.layers.5.mlp.act": "/SamModel/SamVisionEncoder/SamVisionLayer.5/SamMLPBlock/GELUActivation",
+  "vision_encoder.layers.6": "/SamModel/SamVisionEncoder/SamVisionLayer.6",
+  "vision_encoder.layers.6.attn": "/SamModel/SamVisionEncoder/SamVisionLayer.6/SamVisionAttention",
+  "vision_encoder.layers.6.mlp": "/SamModel/SamVisionEncoder/SamVisionLayer.6/SamMLPBlock",
+  "vision_encoder.layers.6.mlp.act": "/SamModel/SamVisionEncoder/SamVisionLayer.6/SamMLPBlock/GELUActivation",
+  "vision_encoder.layers.7": "/SamModel/SamVisionEncoder/SamVisionLayer.7",
+  "vision_encoder.layers.7.attn": "/SamModel/SamVisionEncoder/SamVisionLayer.7/SamVisionAttention",
+  "vision_encoder.layers.7.mlp": "/SamModel/SamVisionEncoder/SamVisionLayer.7/SamMLPBlock",
+  "vision_encoder.layers.7.mlp.act": "/SamModel/SamVisionEncoder/SamVisionLayer.7/SamMLPBlock/GELUActivation",
+  "vision_encoder.layers.8": "/SamModel/SamVisionEncoder/SamVisionLayer.8",
+  "vision_encoder.layers.8.attn": "/SamModel/SamVisionEncoder/SamVisionLayer.8/SamVisionAttention",
+  "vision_encoder.layers.8.mlp": "/SamModel/SamVisionEncoder/SamVisionLayer.8/SamMLPBlock",
+  "vision_encoder.layers.8.mlp.act": "/SamModel/SamVisionEncoder/SamVisionLayer.8/SamMLPBlock/GELUActivation",
+  "vision_encoder.layers.9": "/SamModel/SamVisionEncoder/SamVisionLayer.9",
+  "vision_encoder.layers.9.attn": "/SamModel/SamVisionEncoder/SamVisionLayer.9/SamVisionAttention",
+  "vision_encoder.layers.9.mlp": "/SamModel/SamVisionEncoder/SamVisionLayer.9/SamMLPBlock",
+  "vision_encoder.layers.9.mlp.act": "/SamModel/SamVisionEncoder/SamVisionLayer.9/SamMLPBlock/GELUActivation",
+  "vision_encoder.layers.10": "/SamModel/SamVisionEncoder/SamVisionLayer.10",
+  "vision_encoder.layers.10.attn": "/SamModel/SamVisionEncoder/SamVisionLayer.10/SamVisionAttention",
+  "vision_encoder.layers.10.mlp": "/SamModel/SamVisionEncoder/SamVisionLayer.10/SamMLPBlock",
+  "vision_encoder.layers.10.mlp.act": "/SamModel/SamVisionEncoder/SamVisionLayer.10/SamMLPBlock/GELUActivation",
+  "vision_encoder.layers.11": "/SamModel/SamVisionEncoder/SamVisionLayer.11",
+  "vision_encoder.layers.11.attn": "/SamModel/SamVisionEncoder/SamVisionLayer.11/SamVisionAttention",
+  "vision_encoder.layers.11.mlp": "/SamModel/SamVisionEncoder/SamVisionLayer.11/SamMLPBlock",
+  "vision_encoder.layers.11.mlp.act": "/SamModel/SamVisionEncoder/SamVisionLayer.11/SamMLPBlock/GELUActivation",
+  "vision_encoder.neck": "/SamModel/SamVisionEncoder/SamVisionNeck",
+  "vision_encoder.neck.layer_norm1": "/SamModel/SamVisionEncoder/SamVisionNeck/SamLayerNorm",
+  "vision_encoder.neck.layer_norm2": "/SamModel/SamVisionEncoder/SamVisionNeck/SamLayerNorm",
+  "prompt_encoder": "/SamModel/SamPromptEncoder",
+  "prompt_encoder.shared_embedding": "/SamModel/SamPromptEncoder/SamPositionalEmbedding",
+  "mask_decoder": "/SamModel/SamMaskDecoder",
+  "mask_decoder.transformer": "/SamModel/SamMaskDecoder/SamTwoWayTransformer",
+  "mask_decoder.transformer.layers.0": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.0",
+  "mask_decoder.transformer.layers.0.self_attn": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.0/SamAttention",
+  "mask_decoder.transformer.layers.0.cross_attn_token_to_image": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.0/SamAttention",
+  "mask_decoder.transformer.layers.0.mlp": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.0/SamMLPBlock",
+  "mask_decoder.transformer.layers.0.cross_attn_image_to_token": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.0/SamAttention",
+  "mask_decoder.transformer.layers.1": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.1",
+  "mask_decoder.transformer.layers.1.self_attn": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.1/SamAttention",
+  "mask_decoder.transformer.layers.1.cross_attn_token_to_image": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.1/SamAttention",
+  "mask_decoder.transformer.layers.1.mlp": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.1/SamMLPBlock",
+  "mask_decoder.transformer.layers.1.cross_attn_image_to_token": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.1/SamAttention",
+  "mask_decoder.transformer.final_attn_token_to_image": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamAttention",
+  "mask_decoder.upscale_layer_norm": "/SamModel/SamMaskDecoder/SamLayerNorm",
+  "mask_decoder.output_hypernetworks_mlps.0": "/SamModel/SamMaskDecoder/SamFeedForward.0",
+  "mask_decoder.output_hypernetworks_mlps.1": "/SamModel/SamMaskDecoder/SamFeedForward.1",
+  "mask_decoder.output_hypernetworks_mlps.2": "/SamModel/SamMaskDecoder/SamFeedForward.2",
+  "mask_decoder.output_hypernetworks_mlps.3": "/SamModel/SamMaskDecoder/SamFeedForward.3",
+  "mask_decoder.iou_prediction_head": "/SamModel/SamMaskDecoder/SamFeedForward"
+}
+module_hierarchy: {
+  "": {
+    "name": "",
+    "class_name": "SamModel",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel",
+    "execution_order": 0,
+    "expected_tag": "/SamModel"
+  },
+  "shared_image_embedding": {
+    "name": "shared_image_embedding",
+    "class_name": "SamPositionalEmbedding",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamPositionalEmbedding",
+    "execution_order": 1,
+    "expected_tag": "/SamModel/SamPositionalEmbedding"
+  },
+  "vision_encoder": {
+    "name": "vision_encoder",
+    "class_name": "SamVisionEncoder",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder",
+    "execution_order": 2,
+    "expected_tag": "/SamModel/SamVisionEncoder"
+  },
+  "vision_encoder.patch_embed": {
+    "name": "vision_encoder.patch_embed",
+    "class_name": "SamPatchEmbeddings",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamPatchEmbeddings",
+    "execution_order": 3,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamPatchEmbeddings"
+  },
+  "vision_encoder.layers.0": {
+    "name": "vision_encoder.layers.0",
+    "class_name": "SamVisionLayer",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.0",
+    "execution_order": 4,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.0"
+  },
+  "vision_encoder.layers.0.attn": {
+    "name": "vision_encoder.layers.0.attn",
+    "class_name": "SamVisionAttention",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.0/SamVisionAttention",
+    "execution_order": 5,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.0/SamVisionAttention"
+  },
+  "vision_encoder.layers.0.mlp": {
+    "name": "vision_encoder.layers.0.mlp",
+    "class_name": "SamMLPBlock",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.0/SamMLPBlock",
+    "execution_order": 6,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.0/SamMLPBlock"
+  },
+  "vision_encoder.layers.0.mlp.act": {
+    "name": "vision_encoder.layers.0.mlp.act",
+    "class_name": "GELUActivation",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.0/SamMLPBlock/GELUActivation",
+    "execution_order": 7,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.0/SamMLPBlock/GELUActivation"
+  },
+  "vision_encoder.layers.1": {
+    "name": "vision_encoder.layers.1",
+    "class_name": "SamVisionLayer",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.1",
+    "execution_order": 8,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.1"
+  },
+  "vision_encoder.layers.1.attn": {
+    "name": "vision_encoder.layers.1.attn",
+    "class_name": "SamVisionAttention",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.1/SamVisionAttention",
+    "execution_order": 9,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.1/SamVisionAttention"
+  },
+  "vision_encoder.layers.1.mlp": {
+    "name": "vision_encoder.layers.1.mlp",
+    "class_name": "SamMLPBlock",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.1/SamMLPBlock",
+    "execution_order": 10,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.1/SamMLPBlock"
+  },
+  "vision_encoder.layers.1.mlp.act": {
+    "name": "vision_encoder.layers.1.mlp.act",
+    "class_name": "GELUActivation",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.1/SamMLPBlock/GELUActivation",
+    "execution_order": 11,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.1/SamMLPBlock/GELUActivation"
+  },
+  "vision_encoder.layers.2": {
+    "name": "vision_encoder.layers.2",
+    "class_name": "SamVisionLayer",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.2",
+    "execution_order": 12,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.2"
+  },
+  "vision_encoder.layers.2.attn": {
+    "name": "vision_encoder.layers.2.attn",
+    "class_name": "SamVisionAttention",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.2/SamVisionAttention",
+    "execution_order": 13,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.2/SamVisionAttention"
+  },
+  "vision_encoder.layers.2.mlp": {
+    "name": "vision_encoder.layers.2.mlp",
+    "class_name": "SamMLPBlock",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.2/SamMLPBlock",
+    "execution_order": 14,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.2/SamMLPBlock"
+  },
+  "vision_encoder.layers.2.mlp.act": {
+    "name": "vision_encoder.layers.2.mlp.act",
+    "class_name": "GELUActivation",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.2/SamMLPBlock/GELUActivation",
+    "execution_order": 15,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.2/SamMLPBlock/GELUActivation"
+  },
+  "vision_encoder.layers.3": {
+    "name": "vision_encoder.layers.3",
+    "class_name": "SamVisionLayer",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.3",
+    "execution_order": 16,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.3"
+  },
+  "vision_encoder.layers.3.attn": {
+    "name": "vision_encoder.layers.3.attn",
+    "class_name": "SamVisionAttention",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.3/SamVisionAttention",
+    "execution_order": 17,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.3/SamVisionAttention"
+  },
+  "vision_encoder.layers.3.mlp": {
+    "name": "vision_encoder.layers.3.mlp",
+    "class_name": "SamMLPBlock",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.3/SamMLPBlock",
+    "execution_order": 18,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.3/SamMLPBlock"
+  },
+  "vision_encoder.layers.3.mlp.act": {
+    "name": "vision_encoder.layers.3.mlp.act",
+    "class_name": "GELUActivation",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.3/SamMLPBlock/GELUActivation",
+    "execution_order": 19,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.3/SamMLPBlock/GELUActivation"
+  },
+  "vision_encoder.layers.4": {
+    "name": "vision_encoder.layers.4",
+    "class_name": "SamVisionLayer",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.4",
+    "execution_order": 20,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.4"
+  },
+  "vision_encoder.layers.4.attn": {
+    "name": "vision_encoder.layers.4.attn",
+    "class_name": "SamVisionAttention",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.4/SamVisionAttention",
+    "execution_order": 21,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.4/SamVisionAttention"
+  },
+  "vision_encoder.layers.4.mlp": {
+    "name": "vision_encoder.layers.4.mlp",
+    "class_name": "SamMLPBlock",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.4/SamMLPBlock",
+    "execution_order": 22,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.4/SamMLPBlock"
+  },
+  "vision_encoder.layers.4.mlp.act": {
+    "name": "vision_encoder.layers.4.mlp.act",
+    "class_name": "GELUActivation",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.4/SamMLPBlock/GELUActivation",
+    "execution_order": 23,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.4/SamMLPBlock/GELUActivation"
+  },
+  "vision_encoder.layers.5": {
+    "name": "vision_encoder.layers.5",
+    "class_name": "SamVisionLayer",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.5",
+    "execution_order": 24,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.5"
+  },
+  "vision_encoder.layers.5.attn": {
+    "name": "vision_encoder.layers.5.attn",
+    "class_name": "SamVisionAttention",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.5/SamVisionAttention",
+    "execution_order": 25,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.5/SamVisionAttention"
+  },
+  "vision_encoder.layers.5.mlp": {
+    "name": "vision_encoder.layers.5.mlp",
+    "class_name": "SamMLPBlock",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.5/SamMLPBlock",
+    "execution_order": 26,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.5/SamMLPBlock"
+  },
+  "vision_encoder.layers.5.mlp.act": {
+    "name": "vision_encoder.layers.5.mlp.act",
+    "class_name": "GELUActivation",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.5/SamMLPBlock/GELUActivation",
+    "execution_order": 27,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.5/SamMLPBlock/GELUActivation"
+  },
+  "vision_encoder.layers.6": {
+    "name": "vision_encoder.layers.6",
+    "class_name": "SamVisionLayer",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.6",
+    "execution_order": 28,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.6"
+  },
+  "vision_encoder.layers.6.attn": {
+    "name": "vision_encoder.layers.6.attn",
+    "class_name": "SamVisionAttention",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.6/SamVisionAttention",
+    "execution_order": 29,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.6/SamVisionAttention"
+  },
+  "vision_encoder.layers.6.mlp": {
+    "name": "vision_encoder.layers.6.mlp",
+    "class_name": "SamMLPBlock",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.6/SamMLPBlock",
+    "execution_order": 30,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.6/SamMLPBlock"
+  },
+  "vision_encoder.layers.6.mlp.act": {
+    "name": "vision_encoder.layers.6.mlp.act",
+    "class_name": "GELUActivation",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.6/SamMLPBlock/GELUActivation",
+    "execution_order": 31,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.6/SamMLPBlock/GELUActivation"
+  },
+  "vision_encoder.layers.7": {
+    "name": "vision_encoder.layers.7",
+    "class_name": "SamVisionLayer",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.7",
+    "execution_order": 32,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.7"
+  },
+  "vision_encoder.layers.7.attn": {
+    "name": "vision_encoder.layers.7.attn",
+    "class_name": "SamVisionAttention",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.7/SamVisionAttention",
+    "execution_order": 33,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.7/SamVisionAttention"
+  },
+  "vision_encoder.layers.7.mlp": {
+    "name": "vision_encoder.layers.7.mlp",
+    "class_name": "SamMLPBlock",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.7/SamMLPBlock",
+    "execution_order": 34,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.7/SamMLPBlock"
+  },
+  "vision_encoder.layers.7.mlp.act": {
+    "name": "vision_encoder.layers.7.mlp.act",
+    "class_name": "GELUActivation",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.7/SamMLPBlock/GELUActivation",
+    "execution_order": 35,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.7/SamMLPBlock/GELUActivation"
+  },
+  "vision_encoder.layers.8": {
+    "name": "vision_encoder.layers.8",
+    "class_name": "SamVisionLayer",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.8",
+    "execution_order": 36,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.8"
+  },
+  "vision_encoder.layers.8.attn": {
+    "name": "vision_encoder.layers.8.attn",
+    "class_name": "SamVisionAttention",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.8/SamVisionAttention",
+    "execution_order": 37,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.8/SamVisionAttention"
+  },
+  "vision_encoder.layers.8.mlp": {
+    "name": "vision_encoder.layers.8.mlp",
+    "class_name": "SamMLPBlock",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.8/SamMLPBlock",
+    "execution_order": 38,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.8/SamMLPBlock"
+  },
+  "vision_encoder.layers.8.mlp.act": {
+    "name": "vision_encoder.layers.8.mlp.act",
+    "class_name": "GELUActivation",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.8/SamMLPBlock/GELUActivation",
+    "execution_order": 39,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.8/SamMLPBlock/GELUActivation"
+  },
+  "vision_encoder.layers.9": {
+    "name": "vision_encoder.layers.9",
+    "class_name": "SamVisionLayer",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.9",
+    "execution_order": 40,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.9"
+  },
+  "vision_encoder.layers.9.attn": {
+    "name": "vision_encoder.layers.9.attn",
+    "class_name": "SamVisionAttention",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.9/SamVisionAttention",
+    "execution_order": 41,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.9/SamVisionAttention"
+  },
+  "vision_encoder.layers.9.mlp": {
+    "name": "vision_encoder.layers.9.mlp",
+    "class_name": "SamMLPBlock",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.9/SamMLPBlock",
+    "execution_order": 42,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.9/SamMLPBlock"
+  },
+  "vision_encoder.layers.9.mlp.act": {
+    "name": "vision_encoder.layers.9.mlp.act",
+    "class_name": "GELUActivation",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.9/SamMLPBlock/GELUActivation",
+    "execution_order": 43,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.9/SamMLPBlock/GELUActivation"
+  },
+  "vision_encoder.layers.10": {
+    "name": "vision_encoder.layers.10",
+    "class_name": "SamVisionLayer",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.10",
+    "execution_order": 44,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.10"
+  },
+  "vision_encoder.layers.10.attn": {
+    "name": "vision_encoder.layers.10.attn",
+    "class_name": "SamVisionAttention",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.10/SamVisionAttention",
+    "execution_order": 45,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.10/SamVisionAttention"
+  },
+  "vision_encoder.layers.10.mlp": {
+    "name": "vision_encoder.layers.10.mlp",
+    "class_name": "SamMLPBlock",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.10/SamMLPBlock",
+    "execution_order": 46,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.10/SamMLPBlock"
+  },
+  "vision_encoder.layers.10.mlp.act": {
+    "name": "vision_encoder.layers.10.mlp.act",
+    "class_name": "GELUActivation",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.10/SamMLPBlock/GELUActivation",
+    "execution_order": 47,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.10/SamMLPBlock/GELUActivation"
+  },
+  "vision_encoder.layers.11": {
+    "name": "vision_encoder.layers.11",
+    "class_name": "SamVisionLayer",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.11",
+    "execution_order": 48,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.11"
+  },
+  "vision_encoder.layers.11.attn": {
+    "name": "vision_encoder.layers.11.attn",
+    "class_name": "SamVisionAttention",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.11/SamVisionAttention",
+    "execution_order": 49,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.11/SamVisionAttention"
+  },
+  "vision_encoder.layers.11.mlp": {
+    "name": "vision_encoder.layers.11.mlp",
+    "class_name": "SamMLPBlock",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.11/SamMLPBlock",
+    "execution_order": 50,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.11/SamMLPBlock"
+  },
+  "vision_encoder.layers.11.mlp.act": {
+    "name": "vision_encoder.layers.11.mlp.act",
+    "class_name": "GELUActivation",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.11/SamMLPBlock/GELUActivation",
+    "execution_order": 51,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionLayer.11/SamMLPBlock/GELUActivation"
+  },
+  "vision_encoder.neck": {
+    "name": "vision_encoder.neck",
+    "class_name": "SamVisionNeck",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionNeck",
+    "execution_order": 52,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionNeck"
+  },
+  "vision_encoder.neck.layer_norm1": {
+    "name": "vision_encoder.neck.layer_norm1",
+    "class_name": "SamLayerNorm",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionNeck/SamLayerNorm",
+    "execution_order": 53,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionNeck/SamLayerNorm"
+  },
+  "vision_encoder.neck.layer_norm2": {
+    "name": "vision_encoder.neck.layer_norm2",
+    "class_name": "SamLayerNorm",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamVisionEncoder/SamVisionNeck/SamLayerNorm",
+    "execution_order": 54,
+    "expected_tag": "/SamModel/SamVisionEncoder/SamVisionNeck/SamLayerNorm"
+  },
+  "prompt_encoder": {
+    "name": "prompt_encoder",
+    "class_name": "SamPromptEncoder",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamPromptEncoder",
+    "execution_order": 55,
+    "expected_tag": "/SamModel/SamPromptEncoder"
+  },
+  "prompt_encoder.shared_embedding": {
+    "name": "prompt_encoder.shared_embedding",
+    "class_name": "SamPositionalEmbedding",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamPromptEncoder/SamPositionalEmbedding",
+    "execution_order": 56,
+    "expected_tag": "/SamModel/SamPromptEncoder/SamPositionalEmbedding"
+  },
+  "mask_decoder": {
+    "name": "mask_decoder",
+    "class_name": "SamMaskDecoder",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamMaskDecoder",
+    "execution_order": 57,
+    "expected_tag": "/SamModel/SamMaskDecoder"
+  },
+  "mask_decoder.transformer": {
+    "name": "mask_decoder.transformer",
+    "class_name": "SamTwoWayTransformer",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamMaskDecoder/SamTwoWayTransformer",
+    "execution_order": 58,
+    "expected_tag": "/SamModel/SamMaskDecoder/SamTwoWayTransformer"
+  },
+  "mask_decoder.transformer.layers.0": {
+    "name": "mask_decoder.transformer.layers.0",
+    "class_name": "SamTwoWayAttentionBlock",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.0",
+    "execution_order": 59,
+    "expected_tag": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.0"
+  },
+  "mask_decoder.transformer.layers.0.self_attn": {
+    "name": "mask_decoder.transformer.layers.0.self_attn",
+    "class_name": "SamAttention",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.0/SamAttention",
+    "execution_order": 60,
+    "expected_tag": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.0/SamAttention"
+  },
+  "mask_decoder.transformer.layers.0.cross_attn_token_to_image": {
+    "name": "mask_decoder.transformer.layers.0.cross_attn_token_to_image",
+    "class_name": "SamAttention",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.0/SamAttention",
+    "execution_order": 61,
+    "expected_tag": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.0/SamAttention"
+  },
+  "mask_decoder.transformer.layers.0.mlp": {
+    "name": "mask_decoder.transformer.layers.0.mlp",
+    "class_name": "SamMLPBlock",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.0/SamMLPBlock",
+    "execution_order": 62,
+    "expected_tag": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.0/SamMLPBlock"
+  },
+  "mask_decoder.transformer.layers.0.cross_attn_image_to_token": {
+    "name": "mask_decoder.transformer.layers.0.cross_attn_image_to_token",
+    "class_name": "SamAttention",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.0/SamAttention",
+    "execution_order": 63,
+    "expected_tag": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.0/SamAttention"
+  },
+  "mask_decoder.transformer.layers.1": {
+    "name": "mask_decoder.transformer.layers.1",
+    "class_name": "SamTwoWayAttentionBlock",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.1",
+    "execution_order": 64,
+    "expected_tag": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.1"
+  },
+  "mask_decoder.transformer.layers.1.self_attn": {
+    "name": "mask_decoder.transformer.layers.1.self_attn",
+    "class_name": "SamAttention",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.1/SamAttention",
+    "execution_order": 65,
+    "expected_tag": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.1/SamAttention"
+  },
+  "mask_decoder.transformer.layers.1.cross_attn_token_to_image": {
+    "name": "mask_decoder.transformer.layers.1.cross_attn_token_to_image",
+    "class_name": "SamAttention",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.1/SamAttention",
+    "execution_order": 66,
+    "expected_tag": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.1/SamAttention"
+  },
+  "mask_decoder.transformer.layers.1.mlp": {
+    "name": "mask_decoder.transformer.layers.1.mlp",
+    "class_name": "SamMLPBlock",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.1/SamMLPBlock",
+    "execution_order": 67,
+    "expected_tag": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.1/SamMLPBlock"
+  },
+  "mask_decoder.transformer.layers.1.cross_attn_image_to_token": {
+    "name": "mask_decoder.transformer.layers.1.cross_attn_image_to_token",
+    "class_name": "SamAttention",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.1/SamAttention",
+    "execution_order": 68,
+    "expected_tag": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamTwoWayAttentionBlock.1/SamAttention"
+  },
+  "mask_decoder.transformer.final_attn_token_to_image": {
+    "name": "mask_decoder.transformer.final_attn_token_to_image",
+    "class_name": "SamAttention",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamAttention",
+    "execution_order": 69,
+    "expected_tag": "/SamModel/SamMaskDecoder/SamTwoWayTransformer/SamAttention"
+  },
+  "mask_decoder.upscale_layer_norm": {
+    "name": "mask_decoder.upscale_layer_norm",
+    "class_name": "SamLayerNorm",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamMaskDecoder/SamLayerNorm",
+    "execution_order": 70,
+    "expected_tag": "/SamModel/SamMaskDecoder/SamLayerNorm"
+  },
+  "mask_decoder.output_hypernetworks_mlps.0": {
+    "name": "mask_decoder.output_hypernetworks_mlps.0",
+    "class_name": "SamFeedForward",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamMaskDecoder/SamFeedForward.0",
+    "execution_order": 71,
+    "expected_tag": "/SamModel/SamMaskDecoder/SamFeedForward.0"
+  },
+  "mask_decoder.output_hypernetworks_mlps.1": {
+    "name": "mask_decoder.output_hypernetworks_mlps.1",
+    "class_name": "SamFeedForward",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamMaskDecoder/SamFeedForward.1",
+    "execution_order": 72,
+    "expected_tag": "/SamModel/SamMaskDecoder/SamFeedForward.1"
+  },
+  "mask_decoder.output_hypernetworks_mlps.2": {
+    "name": "mask_decoder.output_hypernetworks_mlps.2",
+    "class_name": "SamFeedForward",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamMaskDecoder/SamFeedForward.2",
+    "execution_order": 73,
+    "expected_tag": "/SamModel/SamMaskDecoder/SamFeedForward.2"
+  },
+  "mask_decoder.output_hypernetworks_mlps.3": {
+    "name": "mask_decoder.output_hypernetworks_mlps.3",
+    "class_name": "SamFeedForward",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamMaskDecoder/SamFeedForward.3",
+    "execution_order": 74,
+    "expected_tag": "/SamModel/SamMaskDecoder/SamFeedForward.3"
+  },
+  "mask_decoder.iou_prediction_head": {
+    "name": "mask_decoder.iou_prediction_head",
+    "class_name": "SamFeedForward",
+    "module_type": "huggingface",
+    "traced_tag": "/SamModel/SamMaskDecoder/SamFeedForward",
+    "execution_order": 75,
+    "expected_tag": "/SamModel/SamMaskDecoder/SamFeedForward"
+  }
+}

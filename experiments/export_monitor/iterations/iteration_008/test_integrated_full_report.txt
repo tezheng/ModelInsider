@@ -1,0 +1,385 @@
+
+================================================================================
+COMPLETE MODULE HIERARCHY
+================================================================================
+
+Model Name: prajjwal1/bert-tiny
+Model Class: BertModel
+Total Modules: 48
+Total Parameters: 4,385,920
+
+INPUT GENERATION
+----------------------------------------
+Model Type: bert
+Task: feature-extraction
+Method: auto_generated
+
+Generated Inputs:
+  input_ids: shape=torch.Size([1, 128]), dtype=torch.int64
+  attention_mask: shape=torch.Size([1, 128]), dtype=torch.int64
+
+Module: [ROOT]
+  Class: BertModel
+  Tag: /BertModel
+
+Module: embeddings
+  Class: BertEmbeddings
+  Tag: /BertModel/embeddings
+
+Module: embeddings.word_embeddings
+  Class: Embedding
+  Tag: /BertModel/embeddings/word_embeddings
+
+Module: embeddings.position_embeddings
+  Class: Embedding
+  Tag: /BertModel/embeddings/position_embeddings
+
+Module: embeddings.token_type_embeddings
+  Class: Embedding
+  Tag: /BertModel/embeddings/token_type_embeddings
+
+Module: embeddings.LayerNorm
+  Class: LayerNorm
+  Tag: /BertModel/embeddings/LayerNorm
+
+Module: embeddings.dropout
+  Class: Dropout
+  Tag: /BertModel/embeddings/dropout
+
+Module: encoder
+  Class: BertEncoder
+  Tag: /BertModel/encoder
+
+Module: encoder.layer
+  Class: ModuleList
+  Tag: /BertModel/encoder/layer
+
+Module: encoder.layer.0
+  Class: BertLayer
+  Tag: /BertModel/encoder/layer/0
+
+Module: encoder.layer.0.attention
+  Class: BertAttention
+  Tag: /BertModel/encoder/layer/0/attention
+
+Module: encoder.layer.0.attention.self
+  Class: BertSdpaSelfAttention
+  Tag: /BertModel/encoder/layer/0/attention/self
+
+Module: encoder.layer.0.attention.self.query
+  Class: Linear
+  Tag: /BertModel/encoder/layer/0/attention/self/query
+
+Module: encoder.layer.0.attention.self.key
+  Class: Linear
+  Tag: /BertModel/encoder/layer/0/attention/self/key
+
+Module: encoder.layer.0.attention.self.value
+  Class: Linear
+  Tag: /BertModel/encoder/layer/0/attention/self/value
+
+Module: encoder.layer.0.attention.self.dropout
+  Class: Dropout
+  Tag: /BertModel/encoder/layer/0/attention/self/dropout
+
+Module: encoder.layer.0.attention.output
+  Class: BertSelfOutput
+  Tag: /BertModel/encoder/layer/0/attention/output
+
+Module: encoder.layer.0.attention.output.dense
+  Class: Linear
+  Tag: /BertModel/encoder/layer/0/attention/output/dense
+
+Module: encoder.layer.0.attention.output.LayerNorm
+  Class: LayerNorm
+  Tag: /BertModel/encoder/layer/0/attention/output/LayerNorm
+
+Module: encoder.layer.0.attention.output.dropout
+  Class: Dropout
+  Tag: /BertModel/encoder/layer/0/attention/output/dropout
+
+Module: encoder.layer.0.intermediate
+  Class: BertIntermediate
+  Tag: /BertModel/encoder/layer/0/intermediate
+
+Module: encoder.layer.0.intermediate.dense
+  Class: Linear
+  Tag: /BertModel/encoder/layer/0/intermediate/dense
+
+Module: encoder.layer.0.intermediate.intermediate_act_fn
+  Class: GELUActivation
+  Tag: /BertModel/encoder/layer/0/intermediate/intermediate_act_fn
+
+Module: encoder.layer.0.output
+  Class: BertOutput
+  Tag: /BertModel/encoder/layer/0/output
+
+Module: encoder.layer.0.output.dense
+  Class: Linear
+  Tag: /BertModel/encoder/layer/0/output/dense
+
+Module: encoder.layer.0.output.LayerNorm
+  Class: LayerNorm
+  Tag: /BertModel/encoder/layer/0/output/LayerNorm
+
+Module: encoder.layer.0.output.dropout
+  Class: Dropout
+  Tag: /BertModel/encoder/layer/0/output/dropout
+
+Module: encoder.layer.1
+  Class: BertLayer
+  Tag: /BertModel/encoder/layer/1
+
+Module: encoder.layer.1.attention
+  Class: BertAttention
+  Tag: /BertModel/encoder/layer/1/attention
+
+Module: encoder.layer.1.attention.self
+  Class: BertSdpaSelfAttention
+  Tag: /BertModel/encoder/layer/1/attention/self
+
+Module: encoder.layer.1.attention.self.query
+  Class: Linear
+  Tag: /BertModel/encoder/layer/1/attention/self/query
+
+Module: encoder.layer.1.attention.self.key
+  Class: Linear
+  Tag: /BertModel/encoder/layer/1/attention/self/key
+
+Module: encoder.layer.1.attention.self.value
+  Class: Linear
+  Tag: /BertModel/encoder/layer/1/attention/self/value
+
+Module: encoder.layer.1.attention.self.dropout
+  Class: Dropout
+  Tag: /BertModel/encoder/layer/1/attention/self/dropout
+
+Module: encoder.layer.1.attention.output
+  Class: BertSelfOutput
+  Tag: /BertModel/encoder/layer/1/attention/output
+
+Module: encoder.layer.1.attention.output.dense
+  Class: Linear
+  Tag: /BertModel/encoder/layer/1/attention/output/dense
+
+Module: encoder.layer.1.attention.output.LayerNorm
+  Class: LayerNorm
+  Tag: /BertModel/encoder/layer/1/attention/output/LayerNorm
+
+Module: encoder.layer.1.attention.output.dropout
+  Class: Dropout
+  Tag: /BertModel/encoder/layer/1/attention/output/dropout
+
+Module: encoder.layer.1.intermediate
+  Class: BertIntermediate
+  Tag: /BertModel/encoder/layer/1/intermediate
+
+Module: encoder.layer.1.intermediate.dense
+  Class: Linear
+  Tag: /BertModel/encoder/layer/1/intermediate/dense
+
+Module: encoder.layer.1.intermediate.intermediate_act_fn
+  Class: GELUActivation
+  Tag: /BertModel/encoder/layer/1/intermediate/intermediate_act_fn
+
+Module: encoder.layer.1.output
+  Class: BertOutput
+  Tag: /BertModel/encoder/layer/1/output
+
+Module: encoder.layer.1.output.dense
+  Class: Linear
+  Tag: /BertModel/encoder/layer/1/output/dense
+
+Module: encoder.layer.1.output.LayerNorm
+  Class: LayerNorm
+  Tag: /BertModel/encoder/layer/1/output/LayerNorm
+
+Module: encoder.layer.1.output.dropout
+  Class: Dropout
+  Tag: /BertModel/encoder/layer/1/output/dropout
+
+Module: pooler
+  Class: BertPooler
+  Tag: /BertModel/pooler
+
+Module: pooler.dense
+  Class: Linear
+  Tag: /BertModel/pooler/dense
+
+Module: pooler.activation
+  Class: Tanh
+  Tag: /BertModel/pooler/activation
+
+Total Modules: 48
+
+NODE TAGGING STATISTICS
+----------------------------------------
+Total ONNX Nodes: 145
+Tagged Nodes: 145
+Coverage: 100.0%
+  Root Nodes: 145
+  Scoped Nodes: 0
+  Unique Scopes: 1
+  Direct Matches: 0
+  Parent Matches: 0
+  Operation Matches: 0
+  Root Fallbacks: 145
+  Empty Tags: 0
+
+COMPLETE NODE MAPPINGS
+----------------------------------------
+/Cast -> /BertModel
+/Cast_1 -> /BertModel
+/Cast_2 -> /BertModel
+/Constant -> /BertModel
+/ConstantOfShape -> /BertModel
+/ConstantOfShape_1 -> /BertModel
+/Constant_1 -> /BertModel
+/Constant_10 -> /BertModel
+/Constant_11 -> /BertModel
+/Constant_2 -> /BertModel
+/Constant_3 -> /BertModel
+/Constant_4 -> /BertModel
+/Constant_5 -> /BertModel
+/Constant_6 -> /BertModel
+/Constant_7 -> /BertModel
+/Constant_8 -> /BertModel
+/Constant_9 -> /BertModel
+/Equal -> /BertModel
+/Equal_1 -> /BertModel
+/Expand -> /BertModel
+/Expand_1 -> /BertModel
+/Mul -> /BertModel
+/Mul_1 -> /BertModel
+/Sub -> /BertModel
+/Unsqueeze -> /BertModel
+/Unsqueeze_1 -> /BertModel
+/Where -> /BertModel
+/Where_1 -> /BertModel
+/Where_2 -> /BertModel
+/embeddings/Add -> /BertModel
+/embeddings/Add_1 -> /BertModel
+/embeddings/Constant -> /BertModel
+/embeddings/LayerNorm/LayerNormalization -> /BertModel
+/embeddings/position_embeddings/Gather -> /BertModel
+/embeddings/token_type_embeddings/Gather -> /BertModel
+/embeddings/word_embeddings/Gather -> /BertModel
+/encoder/layer.0/attention/output/Add -> /BertModel
+/encoder/layer.0/attention/output/LayerNorm/LayerNormalization -> /BertModel
+/encoder/layer.0/attention/output/dense/Add -> /BertModel
+/encoder/layer.0/attention/output/dense/MatMul -> /BertModel
+/encoder/layer.0/attention/self/Add -> /BertModel
+/encoder/layer.0/attention/self/Cast -> /BertModel
+/encoder/layer.0/attention/self/Cast_1 -> /BertModel
+/encoder/layer.0/attention/self/Constant -> /BertModel
+/encoder/layer.0/attention/self/Constant_1 -> /BertModel
+/encoder/layer.0/attention/self/Constant_2 -> /BertModel
+/encoder/layer.0/attention/self/Constant_3 -> /BertModel
+/encoder/layer.0/attention/self/Constant_4 -> /BertModel
+/encoder/layer.0/attention/self/Constant_5 -> /BertModel
+/encoder/layer.0/attention/self/Constant_6 -> /BertModel
+/encoder/layer.0/attention/self/Div -> /BertModel
+/encoder/layer.0/attention/self/MatMul -> /BertModel
+/encoder/layer.0/attention/self/MatMul_1 -> /BertModel
+/encoder/layer.0/attention/self/Mul -> /BertModel
+/encoder/layer.0/attention/self/Mul_1 -> /BertModel
+/encoder/layer.0/attention/self/Reshape -> /BertModel
+/encoder/layer.0/attention/self/Reshape_1 -> /BertModel
+/encoder/layer.0/attention/self/Reshape_2 -> /BertModel
+/encoder/layer.0/attention/self/Reshape_3 -> /BertModel
+/encoder/layer.0/attention/self/Shape -> /BertModel
+/encoder/layer.0/attention/self/Slice -> /BertModel
+/encoder/layer.0/attention/self/Softmax -> /BertModel
+/encoder/layer.0/attention/self/Sqrt -> /BertModel
+/encoder/layer.0/attention/self/Sqrt_1 -> /BertModel
+/encoder/layer.0/attention/self/Sqrt_2 -> /BertModel
+/encoder/layer.0/attention/self/Transpose -> /BertModel
+/encoder/layer.0/attention/self/Transpose_1 -> /BertModel
+/encoder/layer.0/attention/self/Transpose_2 -> /BertModel
+/encoder/layer.0/attention/self/Transpose_3 -> /BertModel
+/encoder/layer.0/attention/self/key/Add -> /BertModel
+/encoder/layer.0/attention/self/key/MatMul -> /BertModel
+/encoder/layer.0/attention/self/query/Add -> /BertModel
+/encoder/layer.0/attention/self/query/MatMul -> /BertModel
+/encoder/layer.0/attention/self/value/Add -> /BertModel
+/encoder/layer.0/attention/self/value/MatMul -> /BertModel
+/encoder/layer.0/intermediate/dense/Add -> /BertModel
+/encoder/layer.0/intermediate/dense/MatMul -> /BertModel
+/encoder/layer.0/intermediate/intermediate_act_fn/Add -> /BertModel
+/encoder/layer.0/intermediate/intermediate_act_fn/Constant -> /BertModel
+/encoder/layer.0/intermediate/intermediate_act_fn/Constant_1 -> /BertModel
+/encoder/layer.0/intermediate/intermediate_act_fn/Constant_2 -> /BertModel
+/encoder/layer.0/intermediate/intermediate_act_fn/Div -> /BertModel
+/encoder/layer.0/intermediate/intermediate_act_fn/Erf -> /BertModel
+/encoder/layer.0/intermediate/intermediate_act_fn/Mul -> /BertModel
+/encoder/layer.0/intermediate/intermediate_act_fn/Mul_1 -> /BertModel
+/encoder/layer.0/output/Add -> /BertModel
+/encoder/layer.0/output/LayerNorm/LayerNormalization -> /BertModel
+/encoder/layer.0/output/dense/Add -> /BertModel
+/encoder/layer.0/output/dense/MatMul -> /BertModel
+/encoder/layer.1/attention/output/Add -> /BertModel
+/encoder/layer.1/attention/output/LayerNorm/LayerNormalization -> /BertModel
+/encoder/layer.1/attention/output/dense/Add -> /BertModel
+/encoder/layer.1/attention/output/dense/MatMul -> /BertModel
+/encoder/layer.1/attention/self/Add -> /BertModel
+/encoder/layer.1/attention/self/Cast -> /BertModel
+/encoder/layer.1/attention/self/Cast_1 -> /BertModel
+/encoder/layer.1/attention/self/Constant -> /BertModel
+/encoder/layer.1/attention/self/Constant_1 -> /BertModel
+/encoder/layer.1/attention/self/Constant_2 -> /BertModel
+/encoder/layer.1/attention/self/Constant_3 -> /BertModel
+/encoder/layer.1/attention/self/Constant_4 -> /BertModel
+/encoder/layer.1/attention/self/Constant_5 -> /BertModel
+/encoder/layer.1/attention/self/Constant_6 -> /BertModel
+/encoder/layer.1/attention/self/Div -> /BertModel
+/encoder/layer.1/attention/self/MatMul -> /BertModel
+/encoder/layer.1/attention/self/MatMul_1 -> /BertModel
+/encoder/layer.1/attention/self/Mul -> /BertModel
+/encoder/layer.1/attention/self/Mul_1 -> /BertModel
+/encoder/layer.1/attention/self/Reshape -> /BertModel
+/encoder/layer.1/attention/self/Reshape_1 -> /BertModel
+/encoder/layer.1/attention/self/Reshape_2 -> /BertModel
+/encoder/layer.1/attention/self/Reshape_3 -> /BertModel
+/encoder/layer.1/attention/self/Shape -> /BertModel
+/encoder/layer.1/attention/self/Slice -> /BertModel
+/encoder/layer.1/attention/self/Softmax -> /BertModel
+/encoder/layer.1/attention/self/Sqrt -> /BertModel
+/encoder/layer.1/attention/self/Sqrt_1 -> /BertModel
+/encoder/layer.1/attention/self/Sqrt_2 -> /BertModel
+/encoder/layer.1/attention/self/Transpose -> /BertModel
+/encoder/layer.1/attention/self/Transpose_1 -> /BertModel
+/encoder/layer.1/attention/self/Transpose_2 -> /BertModel
+/encoder/layer.1/attention/self/Transpose_3 -> /BertModel
+/encoder/layer.1/attention/self/key/Add -> /BertModel
+/encoder/layer.1/attention/self/key/MatMul -> /BertModel
+/encoder/layer.1/attention/self/query/Add -> /BertModel
+/encoder/layer.1/attention/self/query/MatMul -> /BertModel
+/encoder/layer.1/attention/self/value/Add -> /BertModel
+/encoder/layer.1/attention/self/value/MatMul -> /BertModel
+/encoder/layer.1/intermediate/dense/Add -> /BertModel
+/encoder/layer.1/intermediate/dense/MatMul -> /BertModel
+/encoder/layer.1/intermediate/intermediate_act_fn/Add -> /BertModel
+/encoder/layer.1/intermediate/intermediate_act_fn/Constant -> /BertModel
+/encoder/layer.1/intermediate/intermediate_act_fn/Constant_1 -> /BertModel
+/encoder/layer.1/intermediate/intermediate_act_fn/Constant_2 -> /BertModel
+/encoder/layer.1/intermediate/intermediate_act_fn/Div -> /BertModel
+/encoder/layer.1/intermediate/intermediate_act_fn/Erf -> /BertModel
+/encoder/layer.1/intermediate/intermediate_act_fn/Mul -> /BertModel
+/encoder/layer.1/intermediate/intermediate_act_fn/Mul_1 -> /BertModel
+/encoder/layer.1/output/Add -> /BertModel
+/encoder/layer.1/output/LayerNorm/LayerNormalization -> /BertModel
+/encoder/layer.1/output/dense/Add -> /BertModel
+/encoder/layer.1/output/dense/MatMul -> /BertModel
+/pooler/Gather -> /BertModel
+/pooler/activation/Tanh -> /BertModel
+/pooler/dense/Gemm -> /BertModel
+
+EXPORT SUMMARY
+----------------------------------------
+Total Export Time: 0.30s
+ONNX File Size: 16.76MB
+Final Coverage: 100.0%
+Empty Tags: 0 ✅
+
+================================================================================
+Export completed successfully!

@@ -15,6 +15,7 @@ from pathlib import Path
 from typing import Any
 
 import onnx
+import torch
 
 
 class ONNXUtils:
@@ -335,3 +336,39 @@ class ONNXUtils:
             return {
                 "error": str(e)
             }
+
+
+def infer_output_names(outputs: Any) -> list[str] | None:
+    """
+    Infer output names from model outputs for Optimum compatibility.
+    
+    This is a universal approach that works with HuggingFace ModelOutput dataclasses
+    without hardcoding any specific model output names.
+    
+    Args:
+        outputs: Model outputs from forward pass
+        
+    Returns:
+        List of output names if outputs are a dataclass with tensor fields,
+        None otherwise (let ONNX export use default names)
+    """
+    if outputs is None:
+        return None
+        
+    # Check if outputs are a HuggingFace ModelOutput dataclass
+    if hasattr(outputs, "__dataclass_fields__"):
+        # Extract field names for simple tensor outputs only
+        # Complex outputs (tuples, lists) will use ONNX default names
+        output_names = []
+        
+        for field_name in outputs.__dataclass_fields__:
+            field_value = getattr(outputs, field_name, None)
+            if field_value is not None and isinstance(field_value, torch.Tensor):
+                output_names.append(field_name)
+        
+        # Only return names if we found simple tensor outputs
+        # This avoids issues with complex outputs like GPT2's past_key_values
+        return output_names if output_names else None
+    
+    # For non-dataclass outputs (tuple, tensor, etc.), let ONNX use default names
+    return None

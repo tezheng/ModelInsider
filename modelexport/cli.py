@@ -10,10 +10,9 @@ import sys
 from pathlib import Path
 
 import click
-import torch
 
 from .core import tag_utils
-from .strategies.htp.htp_exporter import HTPExporter
+from .strategies import HTPExporter
 
 
 @click.group()
@@ -27,67 +26,73 @@ def cli(ctx, verbose):
 
 
 @cli.command()
-@click.argument('model_name_or_path')
-@click.argument('output_path')
+@click.option('--model', '-m', 'model_name_or_path', required=True,
+              help='HuggingFace model name or local path to model')
+@click.option('--output', '-o', 'output_path', required=True,
+              help='Path where to save the ONNX model')
 @click.option('--strategy', default='htp', type=click.Choice(['htp']),
               help='Export strategy (only HTP supported)')
 @click.option('--input-specs', type=click.Path(exists=True), help='JSON file with input specifications (optional, auto-generates if not provided)')
-@click.option('--input-text', type=str, help='Text input for model (optional, auto-generates if not provided)')
-@click.option('--opset-version', default=14, type=int,
-              help='ONNX opset version to use')
-@click.option('--config', type=click.Path(exists=True),
-              help='Export configuration file (JSON)')
-@click.option('--temp-dir', type=click.Path(),
-              help='Directory for temporary files (default: system temp)')
+@click.option('--export-config', type=click.Path(exists=True),
+              help='ONNX export configuration file (JSON) - opset_version, do_constant_folding, etc.')
+@click.option('--enable-reporting', is_flag=True, help='Enable detailed HTP export reporting')
+@click.option('--no-hierarchy-attrs', '--clean-onnx', is_flag=True, help='Disable hierarchy_tag attributes in ONNX nodes (cleaner but loses traceability)')
+@click.option('--include-torch-nn', is_flag=True, help='Include torch.nn children of HF modules in hierarchy (needed for ResNet-like models)')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
 @click.pass_context
-def export(ctx, model_name_or_path, output_path, strategy, input_specs, input_text, opset_version, config, temp_dir, verbose):
+def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_config, enable_reporting, no_hierarchy_attrs, include_torch_nn, verbose):
     """
     Export a PyTorch model to ONNX with hierarchy preservation.
     
-    MODEL_NAME_OR_PATH: HuggingFace model name or local path to model
-    OUTPUT_PATH: Path where to save the ONNX model
+    Use --model to specify the HuggingFace model name or local path.
+    Use --output to specify where to save the ONNX model.
     """
     try:
         # Export with HTP strategy using simplified API
-        if verbose:
-            click.echo(f"🔄 Loading model and exporting: {model_name_or_path}")
-            click.echo(f"🧠 Using {strategy.upper()} (Hierarchical Trace-and-Project) strategy")
+        # Don't print messages here - the monitor will handle it
         
-        exporter = HTPExporter(verbose=verbose, enable_reporting=False)
+        exporter = HTPExporter(
+            verbose=verbose, 
+            enable_reporting=enable_reporting,
+            embed_hierarchy_attributes=not no_hierarchy_attrs,
+            include_torch_nn_children=include_torch_nn
+        )
         
-        # Use HTPExporter's auto-loading and input generation
+        # Load export config if provided
+        export_config_dict = None
+        if export_config:
+            with open(export_config) as f:
+                export_config_dict = json.load(f)
+        
+        # Use HTPExporter's auto-loading capability
         result = exporter.export(
             model_name_or_path=model_name_or_path,
             output_path=output_path,
             input_specs=json.load(open(input_specs)) if input_specs else None,
-            input_text=input_text,
-            opset_version=opset_version
+            export_config=export_config_dict
         )
         
         # HTPExporter automatically creates metadata files
         
-        # Output results
-        click.echo("✅ Export completed successfully!")
-        click.echo(f"   ONNX Output: {output_path}")
-        click.echo(f"   Metadata: {result.get('metadata_path', output_path.replace('.onnx', '_htp_metadata.json'))}")
-        if 'onnx_nodes' in result:
-            click.echo(f"   Total operations: {result['onnx_nodes']}")
-        if 'tagged_nodes' in result:
-            click.echo(f"   Tagged operations: {result['tagged_nodes']}")
-        if 'coverage_percentage' in result:
-            click.echo(f"   Coverage: {result['coverage_percentage']}%")
-        click.echo(f"   Strategy: {result['strategy']}")
+        # Output results only when verbose is off
+        # (When verbose is on, HTPExporter already prints detailed summary)
+        if not verbose:
+            click.echo("✅ Export completed successfully!")
+            click.echo(f"   ONNX Output: {output_path}")
+            click.echo(f"   Metadata: {result.get('metadata_path', output_path.replace('.onnx', '_htp_metadata.json'))}")
+            if 'onnx_nodes' in result:
+                click.echo(f"   Total operations: {result['onnx_nodes']}")
+            if 'tagged_nodes' in result:
+                click.echo(f"   Tagged operations: {result['tagged_nodes']}")
+            if 'coverage_percentage' in result:
+                click.echo(f"   Coverage: {result['coverage_percentage']}%")
+            click.echo(f"   Strategy: {result['strategy']}")
+            
+            # Show report file if reporting was enabled
+            if enable_reporting:
+                report_path = output_path.replace('.onnx', '_htp_export_report.txt')
+                click.echo(f"   Report: {report_path}")
         
-        if verbose:
-            # Show tag statistics
-            try:
-                stats = tag_utils.get_tag_statistics(output_path)
-                click.echo("\nTag Distribution:")
-                for tag, count in sorted(stats.items(), key=lambda x: x[1], reverse=True)[:5]:
-                    click.echo(f"   {tag}: {count} operations")
-            except Exception as e:
-                click.echo(f"Warning: Tag statistics unavailable: {e}", err=True)
         
     except Exception as e:
         import sys
@@ -189,9 +194,17 @@ def validate(onnx_path, check_consistency, repair, verbose):
         
         import onnx
         model = onnx.load(onnx_path)
-        onnx.checker.check_model(model)
         
-        click.echo("✅ ONNX model is valid")
+        # Try to validate with ONNX checker, but allow custom attributes
+        try:
+            onnx.checker.check_model(model)
+            click.echo("✅ ONNX model is valid")
+        except onnx.checker.ValidationError as e:
+            if "hierarchy_tag" in str(e):
+                click.echo("✅ ONNX model is valid (with custom hierarchy attributes)")
+            else:
+                # Re-raise if it's not about our custom attributes
+                raise
         
         # Check for hierarchy tags
         hierarchy_nodes = 0

@@ -39,7 +39,7 @@ import onnx
 import pytest
 from transformers import AutoModel
 
-from modelexport.strategies.htp.htp_exporter import HTPExporter
+from modelexport.strategies.htp_new import HTPExporter
 
 
 # Test configuration

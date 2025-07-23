@@ -1,0 +1,40 @@
+--- a/modelexport/strategies/htp/export_monitor.py
++++ b/modelexport/strategies/htp/export_monitor.py
+@@ -7,6 +7,7 @@ import json
+ import time
+ from io import StringIO
+ from pathlib import Path
++import re
+ from typing import Any, Dict, List, Optional, Set, Tuple, Union
+ 
+ from rich.console import Console
+@@ -158,6 +159,29 @@ class HTPConsoleWriter(StepAwareWriter):
+         self.console = console or Console(width=80, force_terminal=True)
+         self.verbose = verbose
+         self._total_steps = 8
++    
++    def _style_number(self, num: Any) -> str:
++        """Style a number with bold cyan."""
++        return f"[bold cyan]{num}[/bold cyan]"
++    
++    def _style_bold(self, text: str) -> str:
++        """Style text as bold."""
++        return f"[bold]{text}[/bold]"
++    
++    def _style_step_header(self, text: str) -> Text:
++        """Style step headers with proper number formatting."""
++        # Match pattern like "STEP 1/8"
++        match = re.search(r'(.*STEP )(\d+)(/)(\d+)(.*)', text)
++        if match:
++            before, num1, slash, num2, after = match.groups()
++            styled = Text()
++            styled.append(before)
++            styled.append(num1, style="bold cyan")
++            styled.append(slash)
++            styled.append(num2, style="bold cyan") 
++            styled.append(after)
++            return styled
++        return Text(text)
+ 
+     def _print_header(self, text: str) -> None:
+         """Print section header."""
