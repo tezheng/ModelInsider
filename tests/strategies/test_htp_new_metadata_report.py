@@ -259,7 +259,7 @@ class TestHTPReportValidation:
             # All modules should be in the report (within the collapsible section)
             class_names = extract_class_names(metadata["modules"])
             for class_name in class_names:
-                # Check either in mermaid diagram or in table
+                # Check in module table
                 assert class_name in report
             
             # No truncation markers in report

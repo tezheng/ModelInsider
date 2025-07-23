@@ -195,9 +195,8 @@ class TestMarkdownReportWriter:
             assert "flowchart LR" not in content
             assert "-->" not in content
             
-            # Verify informational note is present
-            assert "Hierarchy Visualization" in content
-            assert "Mermaid diagram temporarily disabled" in content
+            # Verify Mermaid references are removed
+            assert "Mermaid" not in content
             
             # Verify module data is still present in the module table
             assert "BertModel" in content
