@@ -13,12 +13,8 @@ import pytest
 import torch
 import torch.nn as nn
 
-from modelexport.strategies.htp_new.export_monitor import (
-    HTPExportMonitor,
-    ExportStep as HTPExportStep,
-    ExportData as HTPExportData,
-    TextStyler,
-)
+from modelexport.strategies.htp_new.export_monitor import HTPExportMonitor
+from modelexport.strategies.htp_new.base_writer import ExportStep as HTPExportStep, ExportData as HTPExportData
 
 
 class SimpleModel(nn.Module):
@@ -34,32 +30,7 @@ class SimpleModel(nn.Module):
         return self.linear(x)
 
 
-class TestTextStyler:
-    """Test the ANSI text styling utilities."""
-    
-    def test_bold_cyan(self):
-        """Test bold cyan formatting."""
-        assert TextStyler.bold_cyan(42) == "\033[1;36m42\033[0m"
-        assert TextStyler.bold_cyan("100") == "\033[1;36m100\033[0m"
-    
-    def test_bold_parentheses(self):
-        """Test bold parentheses formatting."""
-        result = TextStyler.bold_parens("content")
-        assert result == "\033[1m(\033[0mcontent\033[1m)\033[0m"
-    
-    def test_boolean_formatting(self):
-        """Test boolean value formatting."""
-        assert TextStyler.format_boolean(True) == "\033[3;92mTrue\033[0m"
-        assert TextStyler.format_boolean(False) == "\033[3;91mFalse\033[0m"
-    
-    def test_string_formatting(self):
-        """Test string formatting."""
-        assert TextStyler.green("'test'") == "\033[32m'test'\033[0m"
-    
-    def test_path_formatting(self):
-        """Test path and class name formatting."""
-        assert TextStyler.magenta("/path/") == "\033[35m/path/\033[0m"
-        assert TextStyler.bright_magenta("ClassName") == "\033[95mClassName\033[0m"
+# TextStyler tests removed - not present in new HTP implementation
 
 
 class TestHTPExportMonitor:

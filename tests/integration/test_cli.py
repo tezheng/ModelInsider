@@ -98,7 +98,8 @@ class TestCLIExport:
         
         # Validate report structure
         assert 'steps' in metadata['report'], "Missing steps in report"
-        assert 'node_tagging' in metadata['report'], "Missing node_tagging in report"
+        # In new implementation, node_tagging is under steps
+        assert 'node_tagging' in metadata['report']['steps'], "Missing node_tagging in report steps"
         
         # Validate statistics
         assert metadata['statistics']['onnx_nodes'] > 0
@@ -106,7 +107,7 @@ class TestCLIExport:
         assert metadata['statistics']['coverage_percentage'] == 100.0
         
         # Validate node tagging report
-        node_tagging = metadata['report']['node_tagging']
+        node_tagging = metadata['report']['steps']['node_tagging']
         assert 'statistics' in node_tagging
         stats = node_tagging['statistics']
         assert stats['direct_matches'] >= 0
@@ -155,7 +156,7 @@ class TestCLIAnalyze:
         """Create a sample ONNX model for analysis tests."""
         from transformers import AutoModel, AutoTokenizer
 
-        from modelexport.strategies.htp.htp_exporter import HTPExporter
+        from modelexport.strategies.htp_new import HTPExporter
         
         model = AutoModel.from_pretrained('prajjwal1/bert-tiny')
         tokenizer = AutoTokenizer.from_pretrained('prajjwal1/bert-tiny')
@@ -274,7 +275,7 @@ class TestCLIValidate:
         """Create a sample ONNX model for validation tests."""
         from transformers import AutoModel, AutoTokenizer
 
-        from modelexport.strategies.htp.htp_exporter import HTPExporter
+        from modelexport.strategies.htp_new import HTPExporter
         
         model = AutoModel.from_pretrained('prajjwal1/bert-tiny')
         tokenizer = AutoTokenizer.from_pretrained('prajjwal1/bert-tiny')
@@ -340,7 +341,7 @@ class TestCLICompare:
         """Create two sample ONNX models for comparison."""
         from transformers import AutoModel, AutoTokenizer
 
-        from modelexport.strategies.htp.htp_exporter import HTPExporter
+        from modelexport.strategies.htp_new import HTPExporter
         
         model = AutoModel.from_pretrained('prajjwal1/bert-tiny')
         tokenizer = AutoTokenizer.from_pretrained('prajjwal1/bert-tiny')
