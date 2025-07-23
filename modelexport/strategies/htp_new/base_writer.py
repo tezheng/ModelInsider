@@ -61,8 +61,11 @@ class ExportData:
     
     @property
     def timestamp(self) -> str:
-        """Current timestamp in ISO format."""
-        return time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime())
+        """Current timestamp in ISO format with millisecond precision."""
+        import datetime
+        dt = datetime.datetime.now(datetime.UTC)
+        # Format with milliseconds (3 digits) instead of microseconds (6 digits)
+        return dt.strftime("%Y-%m-%dT%H:%M:%S.") + f"{dt.microsecond // 1000:03d}Z"
     
     @property
     def elapsed_time(self) -> float:

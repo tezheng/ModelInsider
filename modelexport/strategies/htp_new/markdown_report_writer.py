@@ -7,6 +7,7 @@ following the specification in HTP_METADATA_REPORT_SPEC.md.
 
 from __future__ import annotations
 
+import datetime
 import time
 from pathlib import Path
 
@@ -53,11 +54,17 @@ class MarkdownReportWriter(StepAwareWriter):
         self._step_results = {}
         self._start_time = time.time()
     
+    def _get_step_timestamp(self) -> str:
+        """Generate a unique timestamp for the current step with millisecond precision."""
+        dt = datetime.datetime.now(datetime.UTC)
+        # Format with milliseconds (3 digits) instead of microseconds (6 digits)
+        return dt.strftime("%Y-%m-%dT%H:%M:%S.") + f"{dt.microsecond // 1000:03d}Z"
+    
     def _write_default(self, export_step: ExportStep, data: ExportData) -> int:
         """Default handler - record step completion."""
         self._step_results[export_step] = {
             "completed": True,
-            "timestamp": data.timestamp,
+            "timestamp": self._get_step_timestamp(),
         }
         return 0
     
@@ -67,7 +74,7 @@ class MarkdownReportWriter(StepAwareWriter):
         if data.model_prep:
             self._step_results[export_step] = {
                 "completed": True,
-                "timestamp": data.timestamp,
+                "timestamp": self._get_step_timestamp(),
                 "data": data.model_prep,
             }
         return 1
@@ -78,7 +85,7 @@ class MarkdownReportWriter(StepAwareWriter):
         if data.input_gen:
             self._step_results[export_step] = {
                 "completed": True,
-                "timestamp": data.timestamp,
+                "timestamp": self._get_step_timestamp(),
                 "data": data.input_gen,
             }
         return 1
@@ -89,7 +96,7 @@ class MarkdownReportWriter(StepAwareWriter):
         if data.hierarchy:
             self._step_results[export_step] = {
                 "completed": True,
-                "timestamp": data.timestamp,
+                "timestamp": self._get_step_timestamp(),
                 "data": data.hierarchy,
             }
         return 1
@@ -100,7 +107,7 @@ class MarkdownReportWriter(StepAwareWriter):
         if data.onnx_export:
             self._step_results[export_step] = {
                 "completed": True,
-                "timestamp": data.timestamp,
+                "timestamp": self._get_step_timestamp(),
                 "data": data.onnx_export,
             }
         return 1
@@ -111,7 +118,7 @@ class MarkdownReportWriter(StepAwareWriter):
         if data.node_tagging:
             self._step_results[export_step] = {
                 "completed": True,
-                "timestamp": data.timestamp,
+                "timestamp": self._get_step_timestamp(),
                 "data": data.node_tagging,
             }
         return 1
@@ -122,7 +129,7 @@ class MarkdownReportWriter(StepAwareWriter):
         if data.tag_injection:
             self._step_results[export_step] = {
                 "completed": True,
-                "timestamp": data.timestamp,
+                "timestamp": self._get_step_timestamp(),
                 "data": data.tag_injection,
             }
         
@@ -138,7 +145,7 @@ class MarkdownReportWriter(StepAwareWriter):
             self.doc.add_heading(self.TITLE, level=1)
             
             # Metadata lines
-            self.doc.add_paragraph(f"**Generated**: {data.timestamp}")
+            self.doc.add_paragraph(f"**Generated**: {self._get_step_timestamp()}")
             self.doc.add_paragraph(f"**Model**: {data.model_name}")
             self.doc.add_paragraph(f"**Output**: {data.output_path}")
             self.doc.add_paragraph("**Strategy**: HTP (Hierarchical Tracing and Projection)")
