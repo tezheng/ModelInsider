@@ -135,3 +135,38 @@ class TestSAMInputGenerationRegression:
         required_inputs = ['pixel_values', 'input_points', 'input_labels']
         for required_input in required_inputs:
             assert required_input in inputs, f"Required input missing: {required_input} (TEZ-48 fix)"
+    
+    def test_sam_separate_component_export(self):
+        """Test how to properly export SAM components separately using Optimum."""
+        from optimum.exporters.onnx.model_configs import SamOnnxConfig
+        from transformers import AutoConfig
+        
+        config = AutoConfig.from_pretrained('facebook/sam-vit-base')
+        
+        # Test 1: Vision encoder export (Optimum's intended way)
+        encoder_config = SamOnnxConfig(
+            config=config,
+            task='feature-extraction',
+            vision_encoder=True  # This is the key!
+        )
+        encoder_inputs = encoder_config.generate_dummy_inputs(framework='pt')
+        
+        # Vision encoder should only have pixel_values input
+        assert 'pixel_values' in encoder_inputs, "Vision encoder should have pixel_values"
+        assert 'image_embeddings' not in encoder_inputs, "Vision encoder should not have embeddings as input"
+        assert 'input_points' not in encoder_inputs, "Vision encoder should not have prompts"
+        
+        # Test 2: Mask decoder export (default Optimum behavior)
+        decoder_config = SamOnnxConfig(
+            config=config,
+            task='feature-extraction',
+            vision_encoder=False  # Default, but explicit for clarity
+        )
+        decoder_inputs = decoder_config.generate_dummy_inputs(framework='pt')
+        
+        # Mask decoder should have embeddings and prompts
+        assert 'image_embeddings' in decoder_inputs, "Mask decoder needs embeddings"
+        assert 'image_positional_embeddings' in decoder_inputs, "Mask decoder needs positional embeddings"
+        assert 'input_points' in decoder_inputs, "Mask decoder needs points"
+        assert 'input_labels' in decoder_inputs, "Mask decoder needs labels"
+        assert 'pixel_values' not in decoder_inputs, "Mask decoder should not have pixel_values"
