@@ -173,7 +173,7 @@ console = Console(
 ### Module Hierarchy
 Show the module structure with proper indentation and tree characters:
 ```
-BertModel (136 ONNX nodes)
+BertModel (136 nodes)
 ├── BertEmbeddings: embeddings (8 nodes)
 │   ├── Add (2 ops)
 │   ├── Constant (2 ops)
