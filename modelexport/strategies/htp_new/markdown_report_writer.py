@@ -24,7 +24,7 @@ class MarkdownReportWriter(StepAwareWriter):
     """Markdown report writer that generates reports independently from console output.
     
     The generated markdown uses GitHub-flavored markdown with HTML details/summary
-    tags for collapsible sections and Mermaid for diagrams.
+    tags for collapsible sections.
     """
     
     # Report string constants for potential i18n
@@ -352,8 +352,6 @@ class MarkdownReportWriter(StepAwareWriter):
         # Get hierarchy data for module table
         hierarchy = data.hierarchy.hierarchy
         
-        # Note about disabled Mermaid diagram
-        self.doc.add_paragraph("📊 **Hierarchy Visualization**: *Mermaid diagram temporarily disabled for stability.*")
         
         # Module table with reordered columns
         self.doc.add_heading("Module List (Sorted by Execution Order)", level=3)
