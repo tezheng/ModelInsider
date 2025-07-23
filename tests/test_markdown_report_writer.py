@@ -276,7 +276,7 @@ class TestMarkdownReportWriter:
         """Test that report is generated correctly without verbose flag."""
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = str(Path(tmpdir) / "test_model.onnx")
-            # This simulates --enable-reporting without --verbose
+            # This simulates --with-report without --verbose
             writer = MarkdownReportWriter(output_path)
             
             # Process all steps

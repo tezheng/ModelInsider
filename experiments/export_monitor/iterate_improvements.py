@@ -99,7 +99,7 @@ class ExportMonitorIterator:
             "--output", str(iteration_dir / "model.onnx"),
             "--strategy", "htp",
             "--verbose",
-            "--enable-reporting"
+            "--with-report"
         ]
         
         # Capture output

@@ -169,7 +169,7 @@ def enhance_exporter_config(
     Model-Specific Enhancements:
         SAM (Segment Anything Model):
             - "mask-generation" → "feature-extraction" + vision_encoder=False (decoder-only)
-            - "feature-extraction-encoder" → "feature-extraction" + vision_encoder=True (encoder-only)
+            - "feature-extraction" → "feature-extraction" + vision_encoder=True (encoder-only)
             - Other tasks passed through unchanged
     """
     # Base parameters for TasksManager
@@ -184,20 +184,19 @@ def enhance_exporter_config(
     # Model-specific task enhancements
     if model_type == "sam":
         if task == "mask-generation":
-            # Map semantic task to Optimum-supported configuration
-            logger.info("🎯 Mapping SAM mask-generation → feature-extraction + vision_encoder=False")
+            # Map semantic task to Optimum-supported configuration for decoder-only export
+            logger.info("🎯 Mapping SAM mask-generation → feature-extraction + vision_encoder=False (decoder-only)")
             exporter_params["task"] = "feature-extraction"
             enhanced_kwargs = {**config_kwargs, "vision_encoder": False}
             exporter_params["exporter_config_kwargs"] = enhanced_kwargs
             
-        elif task == "feature-extraction-encoder":
-            # Map semantic task to Optimum-supported configuration
-            logger.info("🎯 Mapping SAM feature-extraction-encoder → feature-extraction + vision_encoder=True")
-            exporter_params["task"] = "feature-extraction"
+        elif task == "feature-extraction":
+            # Map feature-extraction to encoder-only export for SAM
+            logger.info("🎯 Mapping SAM feature-extraction → feature-extraction + vision_encoder=True (encoder-only)")
             enhanced_kwargs = {**config_kwargs, "vision_encoder": True}
             exporter_params["exporter_config_kwargs"] = enhanced_kwargs
             
-        # feature-extraction and other tasks pass through unchanged
+        # Other tasks pass through unchanged
     
     # Future model enhancements can be added here:
     # elif model_type == "bert":
@@ -224,8 +223,9 @@ def get_export_config_from_model_path(
     Args:
         model_name_or_path: HuggingFace model name or local path
         exporter: Export backend ("onnx", "tflite", etc.)
-        task: Task name (auto-detects if None). Semantic tasks supported:
-            - SAM: "mask-generation" (decoder-only), "feature-extraction-encoder" (encoder-only)
+        task: Task name (auto-detects if None). SAM task mapping:
+            - "mask-generation": Decoder-only export (vision_encoder=False)
+            - "feature-extraction": Encoder-only export (vision_encoder=True)
         library_name: Library name ("transformers", "diffusers", etc.)
         **config_kwargs: Additional config constructor arguments
 
@@ -236,9 +236,9 @@ def get_export_config_from_model_path(
         >>> config = get_export_config_from_model_path("bert-base-uncased")
         >>> inputs = config.generate_dummy_inputs()
         
-        >>> # SAM with semantic task names
+        >>> # SAM with standard HF tasks
         >>> decoder_config = get_export_config_from_model_path("facebook/sam-vit-base", task="mask-generation")
-        >>> encoder_config = get_export_config_from_model_path("facebook/sam-vit-base", task="feature-extraction-encoder")
+        >>> encoder_config = get_export_config_from_model_path("facebook/sam-vit-base", task="feature-extraction")
     """
     try:
         from optimum.exporters.tasks import TasksManager
@@ -310,73 +310,20 @@ def patch_export_config(export_config):
     Returns:
         Modified export config (may be the same object or a new one)
         
-    This function checks the config type and applies appropriate patches:
-    - SamOnnxConfig: Forces pixel_values generation for full model export
-    - Future models: Add additional patches as needed
+    This function checks the config type and applies appropriate patches.
+    Currently, all SAM task mapping is handled by enhance_exporter_config(),
+    so this function simply returns the config unchanged.
+    
+    Future models that need post-config patches can be added here.
     """
-    config_type = type(export_config).__name__
+    # SAM task mapping is now handled by enhance_exporter_config()
+    # No patching needed - return config unchanged
     
-    if config_type == "SamOnnxConfig":
-        # TEZ-48 Fix: Optimum's SAM export has three modes:
-        # 1. vision_encoder=True: Vision encoder only (pixel_values → embeddings)
-        # 2. vision_encoder=False (default): Mask decoder only (embeddings → masks)
-        # 3. What users want: Full model (pixel_values → masks) - NOT SUPPORTED!
-        #
-        # Our fix: Override the default mode to export the full model
-        
-        # Check if vision_encoder is already True (user wants encoder only)
-        if hasattr(export_config, 'vision_encoder') and export_config.vision_encoder:
-            # This exports vision encoder only - not what most users want
-            logger.info("🎯 SAM vision encoder-only mode detected (vision_encoder=True)")
-            return export_config
-        
-        # Otherwise, we're in the default mode (mask decoder with embeddings)
-        # For our use case (full model export), we need to override this
-        logger.info("🎯 SAM full model export requested, overriding default decoder-only mode")
-        
-        # Simple override - just replace the input generation
-        def generate_full_model_inputs(framework="pt", **kwargs):
-            """Generate inputs for full SAM model export with pixel_values."""
-            import torch
-            from optimum.utils import DEFAULT_DUMMY_SHAPES
-            
-            # Merge defaults with user overrides
-            shapes = DEFAULT_DUMMY_SHAPES.copy()
-            shapes.update(kwargs)
-            
-            batch_size = shapes.get("batch_size", 2)
-            
-            inputs = {
-                # Vision encoder input (for full model)
-                "pixel_values": torch.randn(batch_size, 3, 1024, 1024, dtype=torch.float32),
-                
-                # Prompt encoder inputs
-                "input_points": torch.tensor([[[[512.0, 512.0]]]] * batch_size, dtype=torch.float32),
-                "input_labels": torch.tensor([[[1]]] * batch_size, dtype=torch.int64),
-            }
-            
-            # Add variation to points for realism
-            if batch_size > 1:
-                for i in range(1, batch_size):
-                    inputs["input_points"][i, 0, 0, 0] += torch.randn(1).item() * 100
-                    inputs["input_points"][i, 0, 0, 1] += torch.randn(1).item() * 100
-            
-            logger.info(f"Generated full model SAM inputs: {list(inputs.keys())}")
-            for name, tensor in inputs.items():
-                logger.debug(f"  {name}: {list(tensor.shape)} ({tensor.dtype})")
-            
-            return inputs
-        
-        # Replace the method
-        export_config.generate_dummy_inputs = generate_full_model_inputs
-        
-        return export_config
-    
-    # Future model patches can be added here
-    # elif config_type == "SomeOtherConfig":
+    # Future model patches can be added here:
+    # config_type = type(export_config).__name__
+    # if config_type == "SomeOtherConfig":
     #     return apply_other_patch(export_config)
     
-    # Return unchanged config for other types
     return export_config
 
 

@@ -176,7 +176,6 @@ class TestModelInputGenerator:
         assert len(inputs) > 0, "Should generate at least one input tensor"
         
         # BERT models typically generate these inputs
-        expected_inputs = {"input_ids", "token_type_ids", "attention_mask"}
         generated_inputs = set(inputs.keys())
         
         # Should have at least input_ids (core requirement)
@@ -197,36 +196,30 @@ class TestModelInputGenerator:
                 assert isinstance(tensor, torch.Tensor), f"{input_name} should be torch.Tensor"
                 assert tensor.shape == input_ids.shape, f"{input_name} shape should match input_ids"
     
-    def test_sam_coordinate_fix_integration(self):
+    def test_sam_coordinate_generation(self):
         """
-        Test automatic SAM coordinate fix integration (NEW FEATURE).
+        Test SAM decoder coordinate generation.
         
-        This is a critical test for the newly implemented SAM coordinate fix.
-        The fix automatically detects SAM models and patches the coordinate
-        generation to use pixel coordinates [0, 1024] instead of normalized
-        coordinates [0, 1], which is required for proper SAM model inference.
+        This test validates that SAM decoder-only export generates appropriate
+        input coordinates using Optimum's default behavior.
         
         Test Scenario:
-        - Use facebook/sam-vit-base (canonical SAM model)
-        - Verify automatic type detection works (SamOnnxConfig)
-        - Confirm coordinate values are in correct range [0, 1024]
-        - Ensure no user configuration is required
+        - Use facebook/sam-vit-base with mask-generation task
+        - Verify decoder inputs are generated correctly
+        - Confirm coordinate values are in normalized range [0, 1]
         
         Expected Behavior:
-        - Detects SamOnnxConfig automatically via type checking
-        - Injects SemanticDummyPointsGenerator into DUMMY_INPUT_GENERATOR_CLASSES
-        - Generates input_points with values in [0, 1024] range (pixel coordinates)
-        - Logs confirmation message about patch application
-        - Other SAM inputs (image_embeddings, etc.) generated normally
-        - No side effects on non-SAM models
+        - Generates decoder inputs: image_embeddings, input_points, input_labels
+        - input_points contains normalized coordinates [0, 1]
+        - Follows Optimum's standard SAM decoder export behavior
         
         Technical Details:
-        - Uses injection pattern (modifies config instance, not global state)
-        - patch_export_config() function handles type-based detection
-        - Inner class SemanticDummyPointsGenerator overrides generate() method
-        - Only affects input_points, other inputs use original generators
+        - Uses enhance_exporter_config to map mask-generation -> decoder export
+        - Relies on Optimum's SamOnnxConfig with vision_encoder=False
+        - No custom coordinate patching needed
         """
-        inputs = generate_dummy_inputs(model_name_or_path="facebook/sam-vit-base")
+        # Use mask-generation task to get decoder inputs that include input_points
+        inputs = generate_dummy_inputs(model_name_or_path="facebook/sam-vit-base", task="mask-generation")
         
         # Validate SAM model inputs structure
         assert isinstance(inputs, dict), "Should return dictionary of inputs"
@@ -237,16 +230,17 @@ class TestModelInputGenerator:
         assert isinstance(input_points, torch.Tensor), "input_points should be torch.Tensor"
         assert input_points.dtype == torch.float32, f"input_points should be float32, got {input_points.dtype}"
         
-        # Verify coordinate fix: should be in [0, 1024] range, NOT [0, 1]
+        # With the new design, decoder-only export uses Optimum's default behavior
+        # which generates normalized coordinates [0, 1]
         min_val = float(input_points.min())
         max_val = float(input_points.max())
         
         assert min_val >= 0, f"Coordinates should be >= 0, got min={min_val}"
-        assert max_val <= 1024, f"Coordinates should be <= 1024, got max={max_val}"
+        assert max_val <= 1.0, f"Coordinates should be <= 1.0, got max={max_val}"
         
-        # This is the key assertion - coordinates should be in pixel space
-        # Without the fix, max would be ~1.0; with fix, should be in [0, 1024]
-        assert max_val > 10, f"Coordinates should be in pixel space [0, 1024], got max={max_val} (suggests normalized coordinates [0, 1])"
+        # Decoder-only export generates normalized coordinates by default
+        # This is Optimum's standard behavior for SAM decoder export
+        assert max_val < 2, f"Coordinates should be normalized [0, 1], got max={max_val}"
         
         # Validate shape (SAM expects [batch_size, point_batch_size, nb_points_per_image, 2])
         assert len(input_points.shape) == 4, f"input_points should be 4D tensor, got shape {input_points.shape}"
@@ -1211,7 +1205,7 @@ class TestUtilityFunctions:
         assert stats['root_nodes'] + stats['scoped_nodes'] == stats['total_nodes'], "Node categorization mismatch"
         assert stats['direct_matches'] + stats['parent_matches'] + stats['root_fallbacks'] >= stats['scoped_nodes'], "Tagging strategy accounting error"
         
-        print(f"ONNX Node Tagger comprehensive CARDINAL RULES validation passed")
+        print("ONNX Node Tagger comprehensive CARDINAL RULES validation passed")
         print(f"Statistics: {stats['total_nodes']} total nodes, {stats['direct_matches']} direct matches, {stats['parent_matches']} parent matches, {stats['root_fallbacks']} root fallbacks")
     
     def test_input_generator_detailed_validation(self):

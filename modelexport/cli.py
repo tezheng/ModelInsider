@@ -35,12 +35,12 @@ def cli(ctx, verbose):
 @click.option('--input-specs', type=click.Path(exists=True), help='JSON file with input specifications (optional, auto-generates if not provided)')
 @click.option('--export-config', type=click.Path(exists=True),
               help='ONNX export configuration file (JSON) - opset_version, do_constant_folding, etc.')
-@click.option('--enable-reporting', is_flag=True, help='Enable detailed HTP export reporting')
+@click.option('--with-report', is_flag=True, help='Enable detailed HTP export reporting')
 @click.option('--no-hierarchy-attrs', '--clean-onnx', is_flag=True, help='Disable hierarchy_tag attributes in ONNX nodes (cleaner but loses traceability)')
 @click.option('--torch-module', is_flag=True, help='Include torch.nn modules in hierarchy (e.g., LayerNorm, Embedding for models like ResNet)')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
 @click.pass_context
-def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_config, enable_reporting, no_hierarchy_attrs, torch_module, verbose):
+def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_config, with_report, no_hierarchy_attrs, torch_module, verbose):
     """
     Export a PyTorch model to ONNX with hierarchy preservation.
     
@@ -53,7 +53,7 @@ def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_c
         
         exporter = HTPExporter(
             verbose=verbose, 
-            enable_reporting=enable_reporting,
+            enable_reporting=with_report,
             embed_hierarchy_attributes=not no_hierarchy_attrs,
             torch_module=torch_module
         )
@@ -89,7 +89,7 @@ def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_c
             click.echo(f"   Strategy: {result['strategy']}")
             
             # Show report file if reporting was enabled
-            if enable_reporting:
+            if with_report:
                 report_path = output_path.replace('.onnx', '_htp_export_report.txt')
                 click.echo(f"   Report: {report_path}")
         
