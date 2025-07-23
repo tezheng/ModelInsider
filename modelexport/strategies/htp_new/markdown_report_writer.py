@@ -487,6 +487,9 @@ class MarkdownReportWriter(StepAwareWriter):
     def flush(self) -> None:
         """Write markdown to file."""
         try:
+            # Ensure output directory exists
+            Path(self.report_path).parent.mkdir(parents=True, exist_ok=True)
+            
             with open(self.report_path, 'w', encoding='utf-8') as f:
                 f.write(str(self.doc))
         except OSError as e:

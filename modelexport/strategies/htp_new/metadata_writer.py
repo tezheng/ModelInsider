@@ -277,6 +277,9 @@ class MetadataWriter(StepAwareWriter):
             from .validation_utils import validate_before_write
             validate_before_write(metadata)
             
+            # Ensure output directory exists
+            Path(self.metadata_path).parent.mkdir(parents=True, exist_ok=True)
+            
             # Write to file
             with open(self.metadata_path, 'w') as f:
                 json.dump(metadata, f, indent=2)
@@ -291,6 +294,8 @@ class MetadataWriter(StepAwareWriter):
                 },
                 "error": str(e),
             }
+            # Ensure output directory exists
+            Path(self.metadata_path).parent.mkdir(parents=True, exist_ok=True)
             with open(self.metadata_path, 'w') as f:
                 json.dump(minimal_metadata, f, indent=2)
     
