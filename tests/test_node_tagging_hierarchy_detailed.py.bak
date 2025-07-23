@@ -8,10 +8,11 @@ from rich.console import Console
 
 # Force reload to ensure we get the latest code
 import importlib
-import modelexport.strategies.htp.export_monitor
-importlib.reload(modelexport.strategies.htp.export_monitor)
+import modelexport.strategies.htp_new.export_monitor
+importlib.reload(modelexport.strategies.htp_new.export_monitor)
 
-from modelexport.strategies.htp.export_monitor import HTPExportMonitor, HTPExportStep, HTPExportMonitorConfig as Config
+from modelexport.strategies.htp_new.export_monitor import HTPExportMonitor, HTPExportMonitor
+from modelexport.strategies.htp_new.base_writer import ExportStep as HTPExportStep
 
 
 def test_node_tagging_hierarchy_missing_nodes(tmp_path):

@@ -37,7 +37,7 @@ from .core.strategy_selector import (
 from .core.unified_optimizer import UnifiedOptimizer, create_optimized_exporter
 
 # Individual strategies for direct access
-from .strategies.htp import HTPExporter
+from .strategies.htp_new import HTPExporter
 from .unified_export import UnifiedExporter, export_model
 
 # Backward compatibility
@@ -59,7 +59,7 @@ __all__ = [
     "create_optimized_exporter",
     
     # Individual strategies
-    "HTPHierarchyExporter",
+    "HTPExporter",
     
     # Utilities
     "BaseHierarchyExporter",
