@@ -37,10 +37,10 @@ def cli(ctx, verbose):
               help='ONNX export configuration file (JSON) - opset_version, do_constant_folding, etc.')
 @click.option('--enable-reporting', is_flag=True, help='Enable detailed HTP export reporting')
 @click.option('--no-hierarchy-attrs', '--clean-onnx', is_flag=True, help='Disable hierarchy_tag attributes in ONNX nodes (cleaner but loses traceability)')
-@click.option('--include-torch-nn', is_flag=True, help='Include torch.nn children of HF modules in hierarchy (needed for ResNet-like models)')
+@click.option('--torch-module', is_flag=True, help='Include torch.nn modules in hierarchy (e.g., LayerNorm, Embedding for models like ResNet)')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
 @click.pass_context
-def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_config, enable_reporting, no_hierarchy_attrs, include_torch_nn, verbose):
+def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_config, enable_reporting, no_hierarchy_attrs, torch_module, verbose):
     """
     Export a PyTorch model to ONNX with hierarchy preservation.
     
@@ -55,7 +55,7 @@ def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_c
             verbose=verbose, 
             enable_reporting=enable_reporting,
             embed_hierarchy_attributes=not no_hierarchy_attrs,
-            include_torch_nn_children=include_torch_nn
+            torch_module=torch_module
         )
         
         # Load export config if provided
