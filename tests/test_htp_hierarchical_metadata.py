@@ -235,6 +235,7 @@ class TestHierarchicalMetadata:
         builder.with_statistics(
             export_time=1.0,
             hierarchy_modules=8,
+            traced_modules=8,  # Same as hierarchy_modules for this test
             onnx_nodes=100,
             tagged_nodes=100,
             empty_tags=0,
@@ -366,6 +367,7 @@ class TestMetadataConsistency:
         builder.with_statistics(
             export_time=1.5,
             hierarchy_modules=18,
+            traced_modules=18,  # Same as hierarchy_modules for this test
             onnx_nodes=136,
             tagged_nodes=136,
             empty_tags=0,

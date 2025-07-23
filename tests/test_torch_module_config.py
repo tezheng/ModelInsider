@@ -4,6 +4,9 @@ Test the flexible torch_module configuration for HTP exporter.
 Tests the regression fix for TEZ-47 where torch_module should be:
 - bool: False (default), True (use default list)
 - list[str]: Custom list of torch.nn module types to include
+
+NOTE: After TEZ-24 fix, ALL modules are included in hierarchy for complete reports.
+The torch_module parameter is preserved for API compatibility but currently has no effect.
 """
 
 import pytest
@@ -49,7 +52,7 @@ class TestTorchModuleConfig:
         shutil.rmtree(self.temp_dir, ignore_errors=True)
     
     def test_default_behavior_false(self):
-        """Test default behavior (torch_module=False)."""
+        """Test default behavior (torch_module=False) - TEZ-24: ALL modules included."""
         exporter = HTPExporter(torch_module=False)
         output_path = Path(self.temp_dir) / "test_false.onnx"
         
@@ -60,18 +63,18 @@ class TestTorchModuleConfig:
             input_specs={"input_ids": {"shape": [1, 10], "dtype": "int64"}}
         )
         
-        # Check that torch.nn modules are NOT in hierarchy
-        assert "embedding" not in exporter._hierarchy_data
-        assert "layer_norm" not in exporter._hierarchy_data
-        assert "linear" not in exporter._hierarchy_data
-        assert "dropout" not in exporter._hierarchy_data
+        # TEZ-24 Fix: ALL modules are now included for complete hierarchy reports
+        assert "embedding" in exporter._hierarchy_data
+        assert "layer_norm" in exporter._hierarchy_data
+        assert "linear" in exporter._hierarchy_data
+        assert "dropout" in exporter._hierarchy_data
         
-        # Only the root module should be in hierarchy
-        assert len(exporter._hierarchy_data) == 1
+        # Should have all 5 modules (root + 4 torch.nn)
+        assert len(exporter._hierarchy_data) == 5
         assert "" in exporter._hierarchy_data  # Root module
         
     def test_default_list_true(self):
-        """Test using default list (torch_module=True)."""
+        """Test using default list (torch_module=True) - TEZ-24: ALL modules included."""
         exporter = HTPExporter(torch_module=True)
         output_path = Path(self.temp_dir) / "test_true.onnx"
         
@@ -82,20 +85,20 @@ class TestTorchModuleConfig:
             input_specs={"input_ids": {"shape": [1, 10], "dtype": "int64"}}
         )
         
-        # Check that default torch.nn modules are in hierarchy
+        # TEZ-24 Fix: ALL modules are included regardless of torch_module setting
         assert "embedding" in exporter._hierarchy_data
         assert "layer_norm" in exporter._hierarchy_data
+        assert "linear" in exporter._hierarchy_data
+        assert "dropout" in exporter._hierarchy_data
         
-        # Check that non-default modules are NOT in hierarchy
-        assert "linear" not in exporter._hierarchy_data
-        assert "dropout" not in exporter._hierarchy_data
-        
-        # Verify the class names match default list
+        # Verify the class names
         assert exporter._hierarchy_data["embedding"]["class_name"] == "Embedding"
         assert exporter._hierarchy_data["layer_norm"]["class_name"] == "LayerNorm"
+        assert exporter._hierarchy_data["linear"]["class_name"] == "Linear"
+        assert exporter._hierarchy_data["dropout"]["class_name"] == "Dropout"
         
     def test_custom_list(self):
-        """Test using custom list of torch.nn modules."""
+        """Test using custom list of torch.nn modules - TEZ-24: ALL modules included."""
         custom_list = ["Linear", "Dropout"]
         exporter = HTPExporter(torch_module=custom_list)
         output_path = Path(self.temp_dir) / "test_custom.onnx"
@@ -107,20 +110,20 @@ class TestTorchModuleConfig:
             input_specs={"input_ids": {"shape": [1, 10], "dtype": "int64"}}
         )
         
-        # Check that custom torch.nn modules are in hierarchy
+        # TEZ-24 Fix: ALL modules are included regardless of custom list
         assert "linear" in exporter._hierarchy_data
         assert "dropout" in exporter._hierarchy_data
+        assert "embedding" in exporter._hierarchy_data
+        assert "layer_norm" in exporter._hierarchy_data
         
-        # Check that non-custom modules are NOT in hierarchy
-        assert "embedding" not in exporter._hierarchy_data
-        assert "layer_norm" not in exporter._hierarchy_data
-        
-        # Verify the class names match custom list
+        # Verify the class names
         assert exporter._hierarchy_data["linear"]["class_name"] == "Linear"
         assert exporter._hierarchy_data["dropout"]["class_name"] == "Dropout"
+        assert exporter._hierarchy_data["embedding"]["class_name"] == "Embedding"
+        assert exporter._hierarchy_data["layer_norm"]["class_name"] == "LayerNorm"
         
     def test_empty_custom_list(self):
-        """Test using empty custom list (should behave like False)."""
+        """Test using empty custom list - TEZ-24: ALL modules included."""
         exporter = HTPExporter(torch_module=[])
         output_path = Path(self.temp_dir) / "test_empty.onnx"
         
@@ -131,14 +134,14 @@ class TestTorchModuleConfig:
             input_specs={"input_ids": {"shape": [1, 10], "dtype": "int64"}}
         )
         
-        # Check that no torch.nn modules are in hierarchy
-        assert "embedding" not in exporter._hierarchy_data
-        assert "layer_norm" not in exporter._hierarchy_data
-        assert "linear" not in exporter._hierarchy_data
-        assert "dropout" not in exporter._hierarchy_data
+        # TEZ-24 Fix: ALL modules are included even with empty list
+        assert "embedding" in exporter._hierarchy_data
+        assert "layer_norm" in exporter._hierarchy_data
+        assert "linear" in exporter._hierarchy_data
+        assert "dropout" in exporter._hierarchy_data
         
-        # Only the root module should be in hierarchy
-        assert len(exporter._hierarchy_data) == 1
+        # Should have all 5 modules
+        assert len(exporter._hierarchy_data) == 5
         
     def test_config_default_list(self):
         """Test that HTPConfig.DEFAULT_TORCH_MODULES is correctly defined."""
@@ -157,35 +160,34 @@ class TestTorchModuleConfig:
         HTPExporter(torch_module=[])
         
     def test_hierarchy_builder_receives_correct_exceptions(self):
-        """Test that TracingHierarchyBuilder receives the correct exceptions list."""
+        """Test that TracingHierarchyBuilder behavior - TEZ-24: ALL modules included."""
         # We need to set up example inputs for _trace_model_hierarchy to work
         example_inputs = {"input_ids": torch.randint(0, 100, (1, 10))}
         
-        # Test with False
+        # Test with False (TEZ-24: ALL modules included)
         exporter = HTPExporter(torch_module=False)
         exporter.example_inputs = example_inputs
         exporter._trace_model_hierarchy(self.model)
-        # Can't easily check the exceptions passed to TracingHierarchyBuilder
-        # without modifying the code, but we can verify the behavior through hierarchy
-        assert len(exporter._hierarchy_data) == 1  # Only root
+        # TEZ-24 Fix: ALL modules are included
+        assert len(exporter._hierarchy_data) == 5  # root + 4 torch.nn modules
         
-        # Test with True (default list)
+        # Test with True (TEZ-24: ALL modules included)
         exporter = HTPExporter(torch_module=True)
         exporter.example_inputs = example_inputs
         exporter._trace_model_hierarchy(self.model)
-        # Should have root + 2 default modules
-        assert len(exporter._hierarchy_data) == 3
+        # TEZ-24 Fix: Same result - ALL modules included
+        assert len(exporter._hierarchy_data) == 5
         
-        # Test with custom list
+        # Test with custom list (TEZ-24: ALL modules included)
         exporter = HTPExporter(torch_module=["Linear"])
         exporter.example_inputs = example_inputs
         exporter._trace_model_hierarchy(self.model)
-        # Should have root + 1 custom module
-        assert len(exporter._hierarchy_data) == 2
+        # TEZ-24 Fix: Same result - ALL modules included
+        assert len(exporter._hierarchy_data) == 5
         
     def test_case_sensitivity(self):
-        """Test that module names are case-sensitive."""
-        # Use wrong case - should not match
+        """Test module names - TEZ-24: ALL modules included regardless."""
+        # Use wrong case - TEZ-24: still includes all modules
         exporter = HTPExporter(torch_module=["linear", "layernorm"])  # lowercase
         output_path = Path(self.temp_dir) / "test_case.onnx"
         
@@ -195,12 +197,14 @@ class TestTorchModuleConfig:
             input_specs={"input_ids": {"shape": [1, 10], "dtype": "int64"}}
         )
         
-        # Should not find any modules due to case mismatch
-        assert "linear" not in exporter._hierarchy_data
-        assert "layer_norm" not in exporter._hierarchy_data
+        # TEZ-24 Fix: ALL modules are included regardless of case
+        assert "linear" in exporter._hierarchy_data
+        assert "layer_norm" in exporter._hierarchy_data
+        assert "embedding" in exporter._hierarchy_data
+        assert "dropout" in exporter._hierarchy_data
         
-        # Only root module
-        assert len(exporter._hierarchy_data) == 1
+        # Should have all 5 modules
+        assert len(exporter._hierarchy_data) == 5
 
 
 class TestBackwardCompatibility:

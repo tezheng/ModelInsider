@@ -13,7 +13,7 @@ class TestTracingHierarchyBuilder:
     """Test TracingHierarchyBuilder functionality."""
     
     def test_default_no_exceptions(self):
-        """Test default behavior - no torch.nn modules in hierarchy."""
+        """Test default behavior - ALL modules included in hierarchy per TEZ-24 fix."""
         model = AutoModel.from_pretrained("prajjwal1/bert-tiny")
         inputs = generate_dummy_inputs("prajjwal1/bert-tiny", exporter="onnx")
         
@@ -21,18 +21,25 @@ class TestTracingHierarchyBuilder:
         tracer.trace_model_execution(model, inputs)
         summary = tracer.get_execution_summary()
         
-        # Check no torch.nn modules in hierarchy
-        for info in summary["module_hierarchy"].values():
-            class_name = info.get("class_name", "")
-            # These are common torch.nn modules that should be filtered
-            assert class_name not in ["LayerNorm", "Embedding", "Linear", "Dropout"]
+        # TEZ-24 Fix: ALL modules are now included for complete hierarchy reports
+        # Check that torch.nn modules ARE included
+        class_names = [info.get("class_name", "") for info in summary["module_hierarchy"].values()]
+        
+        # These torch.nn modules should now be included for complete reports
+        assert "LayerNorm" in class_names
+        assert "Embedding" in class_names
+        assert "Linear" in class_names
+        assert "Dropout" in class_names
+        
+        # Should have significantly more modules than before
+        assert len(summary["module_hierarchy"]) > 25  # Was ~18 before fix
     
     def test_with_exceptions(self):
-        """Test with exceptions - specified torch.nn modules included."""
+        """Test with exceptions - ALL modules included per TEZ-24 fix, exceptions param ignored."""
         model = AutoModel.from_pretrained("prajjwal1/bert-tiny")
         inputs = generate_dummy_inputs("prajjwal1/bert-tiny", exporter="onnx")
         
-        # Include LayerNorm and Embedding in hierarchy
+        # TEZ-24 Fix: exceptions parameter is now ignored, ALL modules included
         tracer = TracingHierarchyBuilder(exceptions=["LayerNorm", "Embedding"])
         tracer.trace_model_execution(model, inputs)
         summary = tracer.get_execution_summary()
@@ -51,13 +58,22 @@ class TestTracingHierarchyBuilder:
         assert layernorm_count == 5
         assert embedding_count == 3
         
-        # Linear and Dropout should still be filtered
-        for info in summary["module_hierarchy"].values():
-            class_name = info.get("class_name", "")
-            assert class_name not in ["Linear", "Dropout"]
+        # TEZ-24 Fix: Linear and Dropout are now also included for complete reports
+        linear_count = sum(
+            1 for info in summary["module_hierarchy"].values() 
+            if info.get("class_name") == "Linear"
+        )
+        dropout_count = sum(
+            1 for info in summary["module_hierarchy"].values() 
+            if info.get("class_name") == "Dropout"
+        )
+        
+        # Should find these modules as well
+        assert linear_count > 0
+        assert dropout_count > 0
     
     def test_hierarchy_count_difference(self):
-        """Test that exceptions increase hierarchy module count."""
+        """Test hierarchy count - ALL modules included per TEZ-24 fix."""
         model = AutoModel.from_pretrained("prajjwal1/bert-tiny")
         inputs = generate_dummy_inputs("prajjwal1/bert-tiny", exporter="onnx")
         
@@ -66,15 +82,15 @@ class TestTracingHierarchyBuilder:
         tracer1.trace_model_execution(model, inputs)
         count_without = len(tracer1.get_execution_summary()["module_hierarchy"])
         
-        # With exceptions
+        # With exceptions (TEZ-24: exceptions param ignored, same result)
         tracer2 = TracingHierarchyBuilder(exceptions=["LayerNorm", "Embedding"])
         tracer2.trace_model_execution(model, inputs)
         count_with = len(tracer2.get_execution_summary()["module_hierarchy"])
         
-        # Should have more modules with exceptions
-        assert count_with > count_without
-        # Specifically, 8 more (5 LayerNorm + 3 Embedding)
-        assert count_with == count_without + 8
+        # TEZ-24 Fix: Both should have same count since ALL modules are included
+        assert count_with == count_without
+        # Both should have complete hierarchy
+        assert count_without > 25  # Complete hierarchy includes all modules
     
     def test_resnet_with_torch_nn(self):
         """Test ResNet with torch.nn children included."""
@@ -104,16 +120,21 @@ class TestTracingHierarchyBuilder:
         assert conv_layer_found, "Should find at least one ResNetConvLayer"
     
     def test_empty_exceptions(self):
-        """Test with empty exceptions list - same as default."""
+        """Test with empty exceptions list - ALL modules included per TEZ-24 fix."""
         model = AutoModel.from_pretrained("prajjwal1/bert-tiny")
         inputs = generate_dummy_inputs("prajjwal1/bert-tiny", exporter="onnx")
         
-        # Empty list should behave like default
+        # TEZ-24 Fix: Empty list behavior is same as any other - ALL modules included
         tracer = TracingHierarchyBuilder(exceptions=[])
         tracer.trace_model_execution(model, inputs)
         summary = tracer.get_execution_summary()
         
-        # Check no torch.nn modules
-        for info in summary["module_hierarchy"].values():
-            class_name = info.get("class_name", "")
-            assert class_name not in ["LayerNorm", "Embedding", "Linear", "Dropout"]
+        # Check that torch.nn modules ARE included
+        class_names = [info.get("class_name", "") for info in summary["module_hierarchy"].values()]
+        assert "LayerNorm" in class_names
+        assert "Embedding" in class_names
+        assert "Linear" in class_names
+        assert "Dropout" in class_names
+        
+        # Should have complete hierarchy
+        assert len(summary["module_hierarchy"]) > 25

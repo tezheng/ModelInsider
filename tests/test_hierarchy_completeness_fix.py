@@ -94,13 +94,36 @@ class TestHierarchyCompletenessFix:
         assert "modules" in metadata, "Metadata should contain modules"
         modules = metadata["modules"]
         
+        # Helper function to count all modules in hierarchical structure
+        def count_all_modules(module_dict):
+            count = 1  # Count this module
+            if "children" in module_dict:
+                for child in module_dict["children"].values():
+                    count += count_all_modules(child)
+            return count
+        
+        # Helper function to extract all class names from hierarchy
+        def get_all_class_names(module_dict, class_names=None):
+            if class_names is None:
+                class_names = []
+            class_names.append(module_dict.get("class_name", ""))
+            if "children" in module_dict:
+                for child in module_dict["children"].values():
+                    get_all_class_names(child, class_names)
+            return class_names
+        
+        # Count total modules in hierarchical structure
+        total_modules = count_all_modules(modules)
+        
         # Should now have significantly more modules
-        assert len(modules) > 25, f"Expected >25 modules in metadata, got {len(modules)}"
+        assert total_modules > 25, f"Expected >25 modules in metadata, got {total_modules}"
+        
+        # Get all class names from hierarchical structure
+        all_class_names = get_all_class_names(modules)
         
         # Verify torch.nn modules are included in metadata
-        class_names = [info["class_name"] for info in modules.values()]
         expected_torch_nn_classes = ["LayerNorm", "Linear", "Dropout", "Embedding"]
-        found_torch_nn_classes = [cls for cls in class_names if cls in expected_torch_nn_classes]
+        found_torch_nn_classes = [cls for cls in all_class_names if cls in expected_torch_nn_classes]
         
         assert len(found_torch_nn_classes) > 0, (
             f"Metadata should include torch.nn classes {expected_torch_nn_classes}, "
@@ -118,7 +141,7 @@ class TestHierarchyCompletenessFix:
                     f"Report should mention {torch_nn_class} class"
                 )
         
-        print(f"✅ Export metadata now includes {len(modules)} modules")
+        print(f"✅ Export metadata now includes {total_modules} modules")
         print(f"✅ Metadata contains torch.nn classes: {found_torch_nn_classes}")
 
     def test_hierarchy_contains_expected_bert_structure(self):
