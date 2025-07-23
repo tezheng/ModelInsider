@@ -1,0 +1,19 @@
+================================================================================
+HTP EXPORT FULL REPORT
+================================================================================
+Generated: 2025-07-18T19:04:11Z
+
+
+MODEL INFORMATION
+----------------------------------------
+Model Name: 
+Model Class: 
+Total Modules: 0
+Total Parameters: 0
+Export Strategy: HTP
+Output Path: test.onnx
+
+COMPLETE MODULE HIERARCHY
+----------------------------------------
+
+Total Modules: 0

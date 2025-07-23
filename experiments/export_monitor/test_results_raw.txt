@@ -1,0 +1,55 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.11, pytest-8.4.1, pluggy-1.6.0 -- /home/zhengte/modelexport_allmodels/.venv/bin/python3
+cachedir: .pytest_cache
+rootdir: /home/zhengte/modelexport_allmodels
+configfile: pytest.ini
+plugins: cov-6.2.1, anyio-4.9.0
+collecting ... collected 16 items
+
+test_export_monitor.py::TestExportData::test_coverage_calculation PASSED [  6%]
+test_export_monitor.py::TestExportData::test_elapsed_time PASSED         [ 12%]
+test_export_monitor.py::TestStepAwareWriter::test_step_decorator_discovery PASSED [ 18%]
+test_export_monitor.py::TestStepAwareWriter::test_inheritance_override PASSED [ 25%]
+test_export_monitor.py::TestConsoleWriter::test_console_output_structure PASSED [ 31%]
+test_export_monitor.py::TestConsoleWriter::test_hierarchy_truncation PASSED [ 37%]
+test_export_monitor.py::TestMetadataWriter::test_metadata_structure PASSED [ 43%]
+test_export_monitor.py::TestMetadataWriter::test_node_tagging_statistics FAILED [ 50%]
+test_export_monitor.py::TestReportWriter::test_report_completeness PASSED [ 56%]
+test_export_monitor.py::TestReportWriter::test_node_mappings_complete PASSED [ 62%]
+test_export_monitor.py::TestExportMonitor::test_basic_workflow PASSED    [ 68%]
+test_export_monitor.py::TestExportMonitor::test_conditional_writers FAILED [ 75%]
+test_export_monitor.py::TestExportMonitor::test_data_accumulation FAILED [ 81%]
+test_export_monitor.py::TestExportMonitor::test_error_handling FAILED    [ 87%]
+test_export_monitor.py::TestExportMonitor::test_real_bert_export_simulation PASSED [ 93%]
+test_export_monitor.py::test_integration_with_fixtures PASSED            [100%]
+
+=================================== FAILURES ===================================
+_______________ TestMetadataWriter.test_node_tagging_statistics ________________
+test_export_monitor.py:208: in test_node_tagging_statistics
+    assert coverage["percentage"] == pytest.approx(100.0)
+E   assert 37.5 == 100.0 ± 1.0e-04
+E     
+E     comparison failed
+E     Obtained: 37.5
+E     Expected: 100.0 ± 1.0e-04
+__________________ TestExportMonitor.test_conditional_writers __________________
+test_export_monitor.py:309: in test_conditional_writers
+    monitor1 = ExportMonitor(str(tmpdir / "test1.onnx"), verbose=True, enable_report=True)
+                                 ^^^^^^^^^^^^^^^^^^^^^
+E   TypeError: unsupported operand type(s) for /: 'str' and 'str'
+___________________ TestExportMonitor.test_data_accumulation ___________________
+test_export_monitor.py:328: in test_data_accumulation
+    monitor = ExportMonitor(str(tmpdir / "test.onnx"))
+                                ^^^^^^^^^^^^^^^^^^^^
+E   TypeError: unsupported operand type(s) for /: 'str' and 'str'
+____________________ TestExportMonitor.test_error_handling _____________________
+test_export_monitor.py:348: in test_error_handling
+    monitor = ExportMonitor(str(tmpdir / "test.onnx"))
+                                ^^^^^^^^^^^^^^^^^^^^
+E   TypeError: unsupported operand type(s) for /: 'str' and 'str'
+=========================== short test summary info ============================
+FAILED test_export_monitor.py::TestMetadataWriter::test_node_tagging_statistics
+FAILED test_export_monitor.py::TestExportMonitor::test_conditional_writers - ...
+FAILED test_export_monitor.py::TestExportMonitor::test_data_accumulation - Ty...
+FAILED test_export_monitor.py::TestExportMonitor::test_error_handling - TypeE...
+========================= 4 failed, 12 passed in 0.16s =========================

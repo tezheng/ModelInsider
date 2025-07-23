@@ -49,8 +49,8 @@ class TestCLIExport:
         result = cli_runner.invoke(cli, ['export', '--help'])
         assert result.exit_code == 0
         assert 'Export a PyTorch model to ONNX' in result.output
-        assert 'MODEL_NAME_OR_PATH' in result.output
-        assert 'OUTPUT_PATH' in result.output
+        assert '--model' in result.output
+        assert '--output' in result.output
     
     def test_export_bert_tiny(self, cli_runner, temp_workspace):
         """Test exporting BERT tiny model."""
@@ -59,8 +59,8 @@ class TestCLIExport:
         result = cli_runner.invoke(cli, [
             '--verbose',
             'export', 
-            'prajjwal1/bert-tiny',
-            str(output_path)
+            '--model', 'prajjwal1/bert-tiny',
+            '--output', str(output_path)
         ])
         
         # Check command succeeded
@@ -82,18 +82,37 @@ class TestCLIExport:
         with open(metadata_path) as f:
             metadata = json.load(f)
         
-        # Check for required fields in metadata
-        assert 'export_info' in metadata, "Missing export_info in metadata"
+        # Check for required fields in metadata (new HTP structure)
+        assert 'export_context' in metadata, "Missing export_context in metadata"
+        assert 'model' in metadata, "Missing model in metadata"
+        assert 'modules' in metadata, "Missing modules in metadata"
+        assert 'nodes' in metadata, "Missing nodes in metadata"
+        assert 'outputs' in metadata, "Missing outputs in metadata"
+        assert 'report' in metadata, "Missing report in metadata"
+        assert 'tracing' in metadata, "Missing tracing in metadata"
         assert 'statistics' in metadata, "Missing statistics in metadata"
-        assert 'hierarchy_data' in metadata, "Missing hierarchy_data in metadata"
-        assert 'tagged_nodes' in metadata, "Missing tagged_nodes in metadata"
         
-        # Validate tag statistics make sense
-        stats = metadata['statistics']
-        assert stats['onnx_nodes'] > 0
-        assert stats['tagged_nodes'] > 0
-        assert stats['empty_tags'] == 0
-        assert stats['coverage_percentage'] == 100.0
+        # Validate model info
+        assert metadata['model']['name_or_path'] == 'prajjwal1/bert-tiny'
+        assert metadata['model']['total_modules'] == 48
+        
+        # Validate report structure
+        assert 'steps' in metadata['report'], "Missing steps in report"
+        # In new implementation, node_tagging is under steps
+        assert 'node_tagging' in metadata['report']['steps'], "Missing node_tagging in report steps"
+        
+        # Validate statistics
+        assert metadata['statistics']['onnx_nodes'] > 0
+        assert metadata['statistics']['tagged_nodes'] > 0
+        assert metadata['statistics']['coverage_percentage'] == 100.0
+        
+        # Validate node tagging report
+        node_tagging = metadata['report']['steps']['node_tagging']
+        assert 'statistics' in node_tagging
+        stats = node_tagging['statistics']
+        assert stats['direct_matches'] >= 0
+        assert stats['parent_matches'] >= 0
+        assert stats['root_fallbacks'] >= 0
     
     def test_export_with_custom_options(self, cli_runner, temp_workspace):
         """Test export with custom options."""
@@ -101,10 +120,9 @@ class TestCLIExport:
         
         result = cli_runner.invoke(cli, [
             'export',
-            'prajjwal1/bert-tiny', 
-            str(output_path),
-            '--opset-version', '16',
-            '--temp-dir', str(temp_workspace['models'])
+            '--model', 'prajjwal1/bert-tiny', 
+            '--output', str(output_path),
+            '--verbose'
         ])
         
         assert result.exit_code == 0
@@ -121,8 +139,8 @@ class TestCLIExport:
         
         result = cli_runner.invoke(cli, [
             'export',
-            'nonexistent/model',
-            str(output_path)
+            '--model', 'nonexistent/model',
+            '--output', str(output_path)
         ])
         
         assert result.exit_code != 0
@@ -138,17 +156,16 @@ class TestCLIAnalyze:
         """Create a sample ONNX model for analysis tests."""
         from transformers import AutoModel, AutoTokenizer
 
-        from modelexport.strategies.htp.htp_hierarchy_exporter import HierarchyExporter
+        from modelexport.strategies.htp_new import HTPExporter
         
         model = AutoModel.from_pretrained('prajjwal1/bert-tiny')
         tokenizer = AutoTokenizer.from_pretrained('prajjwal1/bert-tiny')
         inputs = tokenizer('Sample for analysis', return_tensors='pt')
         
         output_path = temp_workspace['models'] / 'sample_for_analysis.onnx'
-        exporter = HierarchyExporter()
-        # Convert tokenizer output to tuple of tensors
-        input_values = tuple(inputs.values())
-        exporter.export(model, input_values, str(output_path))
+        exporter = HTPExporter()
+        # Use new HTPExporter interface with model_name_or_path for input generation
+        exporter.export(model=model, output_path=str(output_path), model_name_or_path='prajjwal1/bert-tiny')
         
         return output_path
     
@@ -203,16 +220,29 @@ class TestCLIAnalyze:
         ])
         
         assert result.exit_code == 0
-        assert '✅ Analysis exported to:' in result.output
         
-        # Check default CSV file was created
-        expected_csv = Path(str(sample_onnx_model).replace('.onnx', '_analysis.csv'))
-        assert expected_csv.exists()
+        # Current CLI outputs CSV to stdout, not file
+        output = result.output
+        assert 'Tag,Count' in output, "Should output CSV header"
+        assert '"/' in output, "Should contain hierarchy tags"
+        
+        # Test CSV output to file
+        csv_file = temp_workspace['analysis'] / 'test_analysis.csv'
+        result = cli_runner.invoke(cli, [
+            'analyze',
+            str(sample_onnx_model),
+            '--output-format', 'csv',
+            '--output-file', str(csv_file)
+        ])
+        
+        assert result.exit_code == 0
+        assert '✅ Analysis exported to:' in result.output
+        assert csv_file.exists()
         
         # Validate CSV content
-        with open(expected_csv) as f:
+        with open(csv_file) as f:
             content = f.read()
-            assert 'Node Name,Op Type,Tag Count,Primary Tag,All Tags' in content
+            assert 'Tag,Count' in content
     
     def test_analyze_with_filter(self, cli_runner, sample_onnx_model):
         """Test analysis with tag filtering."""
@@ -245,17 +275,16 @@ class TestCLIValidate:
         """Create a sample ONNX model for validation tests."""
         from transformers import AutoModel, AutoTokenizer
 
-        from modelexport.strategies.htp.htp_hierarchy_exporter import HierarchyExporter
+        from modelexport.strategies.htp_new import HTPExporter
         
         model = AutoModel.from_pretrained('prajjwal1/bert-tiny')
         tokenizer = AutoTokenizer.from_pretrained('prajjwal1/bert-tiny')
         inputs = tokenizer('Sample for validation', return_tensors='pt')
         
         output_path = temp_workspace['models'] / 'sample_for_validation.onnx'
-        exporter = HierarchyExporter()
-        # Convert tokenizer output to tuple of tensors
-        input_values = tuple(inputs.values())
-        exporter.export(model, input_values, str(output_path))
+        exporter = HTPExporter()
+        # Use new HTPExporter interface with model_name_or_path for input generation
+        exporter.export(model=model, output_path=str(output_path), model_name_or_path='prajjwal1/bert-tiny')
         
         return output_path
     
@@ -273,7 +302,7 @@ class TestCLIValidate:
         ])
         
         assert result.exit_code == 0
-        assert '✅ ONNX model is valid' in result.output
+        assert '✅ ONNX model is valid' in result.output  # Works for both messages
         assert 'Found' in result.output and 'operations with hierarchy tags' in result.output
         assert 'Found sidecar file' in result.output
     
@@ -312,11 +341,11 @@ class TestCLICompare:
         """Create two sample ONNX models for comparison."""
         from transformers import AutoModel, AutoTokenizer
 
-        from modelexport.strategies.htp.htp_hierarchy_exporter import HierarchyExporter
+        from modelexport.strategies.htp_new import HTPExporter
         
         model = AutoModel.from_pretrained('prajjwal1/bert-tiny')
         tokenizer = AutoTokenizer.from_pretrained('prajjwal1/bert-tiny')
-        exporter = HierarchyExporter()
+        exporter = HTPExporter()
         
         # Create first model
         inputs1 = tokenizer('First model input', return_tensors='pt')
@@ -429,9 +458,8 @@ class TestCLIIntegration:
         # Step 1: Export
         export_result = cli_runner.invoke(cli, [
             'export',
-            'prajjwal1/bert-tiny',
-            str(model_path),
-            '--input-text', 'Workflow test input'
+            '--model', 'prajjwal1/bert-tiny',
+            '--output', str(model_path)
         ])
         assert export_result.exit_code == 0
         assert model_path.exists()

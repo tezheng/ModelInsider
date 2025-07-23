@@ -1,0 +1,121 @@
+================================================================================
+HTP EXPORT FULL REPORT
+================================================================================
+
+MODEL INFORMATION
+-----------------
+Model Class: BertModel
+Total Modules: 48
+Total Parameters: 4,400,000
+Output Path: bert-tiny.onnx
+
+INPUT GENERATION & VALIDATION
+-----------------------------
+Status: completed
+method: auto
+model_type: bert
+task: feature-extraction
+inputs: {'input_ids': {'shape': [2, 16], 'dtype': 'torch.int64'}, 'attention_mask': {'shape': [2, 16], 'dtype': 'torch.int64'}, 'token_type_ids': {'shape': [2, 16], 'dtype': 'torch.int64'}}
+
+HIERARCHY BUILDING
+------------------
+Status: completed
+builder: TracingHierarchyBuilder
+modules_traced: 18
+execution_steps: 36
+
+ONNX NODE TAGGING
+-----------------
+Status: completed
+
+MODULE HIERARCHY
+----------------
+BertModel
+└── embeddings
+    ├── _info
+    │   └── class: BertEmbeddings
+    │   └── tag: /BertModel/BertEmbeddings
+└── encoder
+    ├── _info
+    │   ├── class: BertEncoder
+    │   ├── tag: /BertModel/BertEncoder
+    ├── layer
+    │   └── 0
+    │       └── _info
+    │           ├── class: BertLayer
+    │           ├── tag: /BertModel/BertEncoder/BertLayer.0
+    │       └── attention
+    │           └── _info
+    │               ├── class: BertAttention
+    │               ├── tag: /BertModel/BertEncoder/BertLayer.0/BertAttention
+    │           └── self
+    │               └── _info
+    │                   └── class: BertSdpaSelfAttention
+    │                   └── tag: /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+└── pooler
+    └── _info
+        └── class: BertPooler
+        └── tag: /BertModel/BertPooler
+
+TAGGING STATISTICS
+------------------
+Coverage: 100.0%
+Tagged nodes: 136/136
+  Direct matches: 83 (61.0%)
+  Parent matches: 34 (25.0%)
+  Root fallbacks: 19 (14.0%)
+Empty tags: 0
+
+================================================================================
+EXPORT SUMMARY
+================================================================================
+Export Time: 7.72s
+Total Modules: 7
+Coverage: 100.0%
+Tagged nodes: 136/136
+  Direct matches: 83 (61.0%)
+  Parent matches: 34 (25.0%)
+  Root fallbacks: 19 (14.0%)
+Empty tags: 0
+
+================================================================================
+COMPLETE MODULE HIERARCHY
+================================================================================
+
+Module: [ROOT]
+  Class: BertModel
+  Tag: /BertModel
+
+Module: embeddings
+  Class: BertEmbeddings
+  Tag: /BertModel/BertEmbeddings
+
+Module: encoder
+  Class: BertEncoder
+  Tag: /BertModel/BertEncoder
+
+Module: encoder.layer.0
+  Class: BertLayer
+  Tag: /BertModel/BertEncoder/BertLayer.0
+
+Module: encoder.layer.0.attention
+  Class: BertAttention
+  Tag: /BertModel/BertEncoder/BertLayer.0/BertAttention
+
+Module: encoder.layer.0.attention.self
+  Class: BertSdpaSelfAttention
+  Tag: /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+
+Module: pooler
+  Class: BertPooler
+  Tag: /BertModel/BertPooler
+
+
+================================================================================
+COMPLETE NODE MAPPINGS
+================================================================================
+
+/Cast -> /BertModel
+/embeddings/Add -> /BertModel/BertEmbeddings
+/encoder/layer.0/attention/self/MatMul -> /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention
+/pooler/Gather -> /BertModel/BertPooler

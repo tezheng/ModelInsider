@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<style>
+.r1 {font-weight: bold}
+.r2 {color: #008080; text-decoration-color: #008080; font-weight: bold}
+.r3 {color: #00ff00; text-decoration-color: #00ff00; font-style: italic}
+.r4 {color: #ff0000; text-decoration-color: #ff0000; font-style: italic}
+.r5 {color: #800080; text-decoration-color: #800080}
+.r6 {color: #ff00ff; text-decoration-color: #ff00ff}
+.r7 {color: #808000; text-decoration-color: #808000}
+body {
+    color: #000000;
+    background-color: #ffffff;
+}
+</style>
+</head>
+<body>
+    <pre style="font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace"><code style="font-family:inherit">🔄 Loading model and exporting: prajjwal1/bert-tiny
+🧠 Using HTP <span class="r1">(</span>Hierarchical Trace-and-Project<span class="r1">)</span> strategy
+
+================================================================================
+📋 STEP <span class="r2">1</span>/<span class="r2">8</span>: MODEL PREPARATION
+================================================================================
+✅ Model loaded: BertModel <span class="r1">(</span><span class="r2">48</span> modules, <span class="r2">4.</span>4M parameters<span class="r1">)</span>
+🎯 Export target: experiments/export_monitor/iterations/iteration_001/model.onnx
+⚙️ Strategy: HTP <span class="r1">(</span>Hierarchy-Preserving<span class="r1">)</span>
+✅ Hierarchy attributes will be embedded in ONNX
+✅ Model set to evaluation mode
+
+================================================================================
+🔧 STEP <span class="r2">2</span>/<span class="r2">8</span>: INPUT GENERATION &amp; VALIDATION
+================================================================================
+🤖 Auto-generating inputs for: prajjwal1/bert-tiny
+   • Model type: bert
+   • Task: feature-extraction
+✅ Created onnx export config for bert with task feature-extraction
+🔧 Generated <span class="r2">3</span> input tensors:
+   • input_ids: <span class="r1">[</span><span class="r2">2</span>, <span class="r2">16</span><span class="r1">]</span> <span class="r1">(</span>torch.int64<span class="r1">)</span>
+   • attention_mask: <span class="r1">[</span><span class="r2">2</span>, <span class="r2">16</span><span class="r1">]</span> <span class="r1">(</span>torch.int64<span class="r1">)</span>
+   • token_type_ids: <span class="r1">[</span><span class="r2">2</span>, <span class="r2">16</span><span class="r1">]</span> <span class="r1">(</span>torch.int64<span class="r1">)</span>
+
+================================================================================
+🏗️ STEP <span class="r2">3</span>/<span class="r2">8</span>: HIERARCHY BUILDING
+================================================================================
+✅ Hierarchy building completed with TracingHierarchyBuilder
+📈 Traced <span class="r2">18</span> modules
+🔄 Execution steps: <span class="r2">36</span>
+
+🌳 Module Hierarchy:
+------------------------------------------------------------
+BertModel
+├── BertEmbeddings: embeddings
+├── BertEncoder: encoder
+│   ├── BertLayer: layer.<span class="r2">0</span>
+│   │   ├── BertAttention: attention
+│   │   │   ├── BertSelfOutput: output
+│   │   │   └── BertSdpaSelfAttention: self
+│   │   ├── BertIntermediate: intermediate
+│   │   │   └── GELUActivation: intermediate_act_fn
+│   │   └── BertOutput: output
+│   └── BertLayer: layer.<span class="r2">1</span>
+│       ├── BertAttention: attention
+│       │   ├── BertSelfOutput: output
+│       │   └── BertSdpaSelfAttention: self
+│       ├── BertIntermediate: intermediate
+│       │   └── GELUActivation: intermediate_act_fn
+│       └── BertOutput: output
+└── BertPooler: pooler
+<span class="r1">(</span>showing <span class="r2">18</span>/<span class="r2">18</span> lines<span class="r1">)</span>
+
+================================================================================
+📦 STEP <span class="r2">4</span>/<span class="r2">8</span>: ONNX EXPORT
+================================================================================
+🎯 Target file: experiments/export_monitor/iterations/iteration_001/model.onnx
+⚙️ Export config:
+   • opset_version: <span class="r2">17</span>
+   • do_constant_folding: <span class="r3">True</span>
+   • verbose: <span class="r4">False</span>
+✅ ONNX export completed successfully
+
+================================================================================
+🏷️ STEP <span class="r2">5</span>/<span class="r2">8</span>: NODE TAGGER CREATION
+================================================================================
+✅ Node tagger created successfully
+🏷️ Model root tag: <span class="r5">/</span><span class="r6">BertModel</span>
+🔧 Operation fallback: disabled
+
+================================================================================
+🔗 STEP <span class="r2">6</span>/<span class="r2">8</span>: ONNX NODE TAGGING
+================================================================================
+✅ Node tagging completed successfully
+📈 Coverage: <span class="r2">100.0</span>%
+📊 Tagged nodes: <span class="r2">136</span>/<span class="r2">136</span>
+   • Direct matches: <span class="r2">83</span> <span class="r1">(</span><span class="r2">61.0</span>%<span class="r1">)</span>
+   • Parent matches: <span class="r2">34</span> <span class="r1">(</span><span class="r2">25.0</span>%<span class="r1">)</span>
+   • Root fallbacks: <span class="r2">19</span> <span class="r1">(</span><span class="r2">14.0</span>%<span class="r1">)</span>
+✅ Empty tags: <span class="r2">0</span>
+
+📊 Top <span class="r2">13</span> Nodes by Hierarchy:
+------------------------------
+ <span class="r2">1</span>. <span class="r5">/BertModel/BertEncoder/BertLayer.0/BertAttention/</span><span class="r6">BertSdpaSelfAttention</span>: <span class="r2">35</span> nodes
+ <span class="r2">2</span>. <span class="r5">/BertModel/BertEncoder/BertLayer.1/BertAttention/</span><span class="r6">BertSdpaSelfAttention</span>: <span class="r2">35</span> nodes
+ <span class="r2">3</span>. <span class="r5">/</span><span class="r6">BertModel</span>: <span class="r2">19</span> nodes
+ <span class="r2">4</span>. <span class="r5">/BertModel/</span><span class="r6">BertEmbeddings</span>: <span class="r2">8</span> nodes
+ <span class="r2">5</span>. <span class="r5">/BertModel/BertEncoder/BertLayer.0/BertIntermediate/</span><span class="r6">GELUActivation</span>: <span class="r2">8</span> nodes
+ <span class="r2">6</span>. <span class="r5">/BertModel/BertEncoder/BertLayer.1/BertIntermediate/</span><span class="r6">GELUActivation</span>: <span class="r2">8</span> nodes
+ <span class="r2">7</span>. <span class="r5">/BertModel/BertEncoder/BertLayer.0/BertAttention/</span><span class="r6">BertSelfOutput</span>: <span class="r2">4</span> nodes
+ <span class="r2">8</span>. <span class="r5">/BertModel/BertEncoder/BertLayer.0/</span><span class="r6">BertOutput</span>: <span class="r2">4</span> nodes
+ <span class="r2">9</span>. <span class="r5">/BertModel/BertEncoder/BertLayer.1/BertAttention/</span><span class="r6">BertSelfOutput</span>: <span class="r2">4</span> nodes
+<span class="r2">10</span>. <span class="r5">/BertModel/BertEncoder/BertLayer.1/</span><span class="r6">BertOutput</span>: <span class="r2">4</span> nodes
+<span class="r2">11</span>. <span class="r5">/BertModel/</span><span class="r6">BertPooler</span>: <span class="r2">3</span> nodes
+<span class="r2">12</span>. <span class="r5">/BertModel/BertEncoder/BertLayer.0/</span><span class="r6">BertIntermediate</span>: <span class="r2">2</span> nodes
+<span class="r2">13</span>. <span class="r5">/BertModel/BertEncoder/BertLayer.1/</span><span class="r6">BertIntermediate</span>: <span class="r2">2</span> nodes
+
+🌳 Complete HF Hierarchy with ONNX Nodes:
+------------------------------------------------------------
+BertModel <span class="r1">(</span><span class="r2">136</span> ONNX nodes<span class="r1">)</span>
+├── BertEmbeddings: embeddings <span class="r1">(</span><span class="r2">8</span> nodes<span class="r1">)</span>
+│   ├── <span class="r5">/embeddings/</span><span class="r6">Constant</span> <span class="r1">(</span><span class="r2">2</span> ops<span class="r1">)</span>
+│   ├── <span class="r5">/embeddings/</span><span class="r6">Add</span> <span class="r1">(</span><span class="r2">2</span> ops<span class="r1">)</span>
+│   ├── <span class="r5">/embeddings/</span><span class="r6">word</span>: <span class="r5">/embeddings/word_embeddings/</span><span class="r6">Gather</span>
+│   ├── <span class="r5">/embeddings/</span><span class="r6">token</span>: <span class="r5">/embeddings/token_type_embeddings/</span><span class="r6">Gather</span>
+│   ├── <span class="r5">/embeddings/</span><span class="r6">position</span>: <span class="r5">/embeddings/position_embeddings/</span><span class="r6">Gather</span>
+├── BertEncoder: encoder <span class="r1">(</span><span class="r2">0</span> nodes<span class="r1">)</span>
+│   ├── BertLayer: layer.<span class="r2">0</span> <span class="r1">(</span><span class="r2">0</span> nodes<span class="r1">)</span>
+│   │   ├── BertAttention: attention <span class="r1">(</span><span class="r2">0</span> nodes<span class="r1">)</span>
+│   │   │   ├── BertSelfOutput: output <span class="r1">(</span><span class="r2">4</span> nodes<span class="r1">)</span>
+│   │   │   ├── BertSdpaSelfAttention: self <span class="r1">(</span><span class="r2">35</span> nodes<span class="r1">)</span>
+│   │   ├── BertIntermediate: intermediate <span class="r1">(</span><span class="r2">2</span> nodes<span class="r1">)</span>
+│   │   │   ├── <span class="r5">/encoder/layer.0/intermediate/dense/</span><span class="r6">MatMul</span>: <span class="r5">/encoder/layer.0/intermediate/dense/</span><span class="r6">MatMul</span>
+│   │   │   ├── <span class="r5">/encoder/layer.0/intermediate/dense/</span><span class="r6">Add</span>: <span class="r5">/encoder/layer.0/intermediate/dense/</span><span class="r6">Add</span>
+│   │   │   ├── GELUActivation: intermediate_act_fn <span class="r1">(</span><span class="r2">8</span> nodes<span class="r1">)</span>
+│   │   ├── BertOutput: output <span class="r1">(</span><span class="r2">4</span> nodes<span class="r1">)</span>
+│   │   │   ├── <span class="r5">/encoder/layer.0/output/dense/</span><span class="r6">MatMul</span>: <span class="r5">/encoder/layer.0/output/dense/</span><span class="r6">MatMul</span>
+│   │   │   ├── <span class="r5">/encoder/layer.0/output/dense/</span><span class="r6">Add</span>: <span class="r5">/encoder/layer.0/output/dense/</span><span class="r6">Add</span>
+│   │   │   ├── <span class="r5">/encoder/layer.0/output/</span><span class="r6">Add</span>: <span class="r5">/encoder/layer.0/output/</span><span class="r6">Add</span>
+│   │   │   ├── <span class="r5">/encoder/layer.0/output/LayerNorm/</span><span class="r6">LayerNormalization</span>: 
+<span class="r5">/encoder/layer.0/output/LayerNorm/</span><span class="r6">LayerNormalization</span>
+│   ├── BertLayer: layer.<span class="r2">1</span> <span class="r1">(</span><span class="r2">0</span> nodes<span class="r1">)</span>
+│   │   ├── BertAttention: attention <span class="r1">(</span><span class="r2">0</span> nodes<span class="r1">)</span>
+│   │   │   ├── BertSelfOutput: output <span class="r1">(</span><span class="r2">4</span> nodes<span class="r1">)</span>
+│   │   │   ├── BertSdpaSelfAttention: self <span class="r1">(</span><span class="r2">35</span> nodes<span class="r1">)</span>
+│   │   ├── BertIntermediate: intermediate <span class="r1">(</span><span class="r2">2</span> nodes<span class="r1">)</span>
+│   │   │   ├── <span class="r5">/encoder/layer.1/intermediate/dense/</span><span class="r6">MatMul</span>: <span class="r5">/encoder/layer.1/intermediate/dense/</span><span class="r6">MatMul</span>
+│   │   │   ├── <span class="r5">/encoder/layer.1/intermediate/dense/</span><span class="r6">Add</span>: <span class="r5">/encoder/layer.1/intermediate/dense/</span><span class="r6">Add</span>
+│   │   │   ├── GELUActivation: intermediate_act_fn <span class="r1">(</span><span class="r2">8</span> nodes<span class="r1">)</span>
+│   │   ├── BertOutput: output <span class="r1">(</span><span class="r2">4</span> nodes<span class="r1">)</span>
+│   │   │   ├── <span class="r5">/encoder/layer.1/output/dense/</span><span class="r6">MatMul</span>: <span class="r5">/encoder/layer.1/output/dense/</span><span class="r6">MatMul</span>
+│   │   │   ├── <span class="r5">/encoder/layer.1/output/dense/</span><span class="r6">Add</span>: <span class="r5">/encoder/layer.1/output/dense/</span><span class="r6">Add</span>
+│   │   │   ├── <span class="r5">/encoder/layer.1/output/</span><span class="r6">Add</span>: <span class="r5">/encoder/layer.1/output/</span><span class="r6">Add</span>
+│   │   │   ├── <span class="r5">/encoder/layer.1/output/LayerNorm/</span><span class="r6">LayerNormalization</span>: 
+<span class="r5">/encoder/layer.1/output/LayerNorm/</span><span class="r6">LayerNormalization</span>
+├── BertPooler: pooler <span class="r1">(</span><span class="r2">3</span> nodes<span class="r1">)</span>
+│   ├── <span class="r5">/pooler/</span><span class="r6">Gather</span>: <span class="r5">/pooler/</span><span class="r6">Gather</span>
+│   ├── <span class="r5">/pooler/dense/</span><span class="r6">Gemm</span>: <span class="r5">/pooler/dense/</span><span class="r6">Gemm</span>
+│   ├── <span class="r5">/pooler/activation/</span><span class="r6">Tanh</span>: <span class="r5">/pooler/activation/</span><span class="r6">Tanh</span>
+<span class="r7">...</span> and <span class="r2">98</span> more lines <span class="r1">(</span>truncated for console<span class="r1">)</span>
+<span class="r1">(</span>showing <span class="r2">38</span>/<span class="r2">136</span> lines<span class="r1">)</span>
+
+================================================================================
+🏷️ STEP <span class="r2">7</span>/<span class="r2">8</span>: TAG INJECTION
+================================================================================
+🏷️ Hierarchy tag attributes: enabled
+✅ Tags injected into ONNX model successfully
+📄 Updated ONNX file: experiments/export_monitor/iterations/iteration_001/model.onnx
+
+================================================================================
+📄 STEP <span class="r2">8</span>/<span class="r2">8</span>: METADATA GENERATION
+================================================================================
+✅ Metadata file created successfully
+📄 Metadata file: experiments/export_monitor/iterations/iteration_001/model_htp_metadata.json
+
+================================================================================
+📋 FINAL EXPORT SUMMARY
+================================================================================
+🎉 HTP Export completed successfully in <span class="r2">4.</span>42s!
+📊 Export Statistics:
+   • Export time: <span class="r2">4.</span>42s
+   • Hierarchy modules: <span class="r2">18</span>
+   • ONNX nodes: <span class="r2">136</span>
+   • Tagged nodes: <span class="r2">136</span>
+   • Coverage: <span class="r2">100.0</span>%
+   • Empty tags: <span class="r2">0</span> ✅
+
+📁 Output Files:
+   • ONNX model: experiments/export_monitor/iterations/iteration_001/model.onnx
+   • Metadata: experiments/export_monitor/iterations/iteration_001/model_htp_metadata.json
+   • Report: experiments/export_monitor/iterations/iteration_001/model_full_report.txt
+</code></pre>
+</body>
+</html>

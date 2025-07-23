@@ -1,0 +1,31 @@
+{
+  "pixel_values": {
+    "shape": [
+      1,
+      3,
+      1024,
+      1024
+    ],
+    "dtype": "float32",
+    "description": "Input images preprocessed for SAM"
+  },
+  "input_points": {
+    "shape": [
+      1,
+      1,
+      1,
+      2
+    ],
+    "dtype": "float32",
+    "description": "Point prompts (batch_size, point_batch_size, nb_points_per_image, 2)"
+  },
+  "input_labels": {
+    "shape": [
+      1,
+      1,
+      1
+    ],
+    "dtype": "int64",
+    "description": "Labels for input points (batch_size, point_batch_size, nb_points_per_image)"
+  }
+}

@@ -1,0 +1,98 @@
+================================================================================
+HTP EXPORT FULL REPORT
+================================================================================
+Generated: 2025-07-19T10:43:39Z
+
+🔄 Loading model and exporting: prajjwal1/bert-tiny
+🧠 Using HTP (Hierarchical Trace-and-Project) strategy
+Auto-loading model from: prajjwal1/bert-tiny
+Successfully loaded BertModel
+Starting HTP export for BertModel
+
+================================================================================
+📋 STEP 1/8: MODEL PREPARATION
+================================================================================
+✅ Model loaded: BertModel (48 modules, 4.4M parameters)
+🎯 Export target: test_model.onnx
+⚙️ Strategy: HTP (Hierarchy-Preserving)
+✅ Hierarchy attributes will be embedded in ONNX
+✅ Model set to evaluation mode
+
+================================================================================
+📋 STEP 2/8: INPUT GENERATION & VALIDATION
+================================================================================
+🤖 Auto-generating inputs for: prajjwal1/bert-tiny
+   • Model type: bert
+   • Auto-detected task: feature-extraction
+✅ Created onnx export config for bert with task feature-extraction
+🔧 Generated 3 input tensors:
+   • input_ids: [2, 16] (torch.int64)
+   • attention_mask: [2, 16] (torch.int64)
+   • token_type_ids: [2, 16] (torch.int64)
+
+================================================================================
+📋 STEP 3/8: HIERARCHY BUILDING
+================================================================================
+✅ Hierarchy building completed with TracingHierarchyBuilder
+📈 Traced 7 modules
+🔄 Execution steps: 36
+
+🌳 Module Hierarchy:
+------------------------------------------------------------
+BertModel
+
+================================================================================
+📋 STEP 4/8: ONNX EXPORT
+================================================================================
+🎯 Target file: test_model.onnx
+⚙️ Export config:
+   • opset_version: 17
+   • do_constant_folding: True
+   • verbose: False
+   • input_names: ['input_ids', 'attention_mask', 'token_type_ids']
+✅ ONNX export completed successfully
+
+================================================================================
+📋 STEP 5/8: NODE TAGGER CREATION
+================================================================================
+✅ Node tagger created successfully
+🏷️ Model root tag: /BertModel
+🔧 Operation fallback: disabled
+
+================================================================================
+📋 STEP 6/8: ONNX NODE TAGGING
+================================================================================
+✅ Node tagging completed successfully
+📈 Coverage: 100.0%
+📊 Tagged nodes: 35/136
+   • Direct matches: 83 (61.0%)
+   • Parent matches: 34 (25.0%)
+   • Root fallbacks: 19 (14.0%)
+✅ Empty tags: 0
+
+📊 Top 1 Nodes by Hierarchy:
+------------------------------
+ 1. /BertModel/BertEncoder/BertLayer.0/BertAttention/BertSdpaSelfAttention: 35 nodes
+
+🌳 Complete HF Hierarchy with ONNX Nodes:
+------------------------------------------------------------
+BertModel (0 ONNX nodes)
+
+================================================================================
+📋 STEP 7/8: SAVE ONNX MODEL
+================================================================================
+✅ Model saved to: test_model.onnx
+⚙️ Hierarchy attributes: Embedded in ONNX
+
+================================================================================
+📋 STEP 8/8: EXPORT COMPLETE
+================================================================================
+🎉 HTP Export completed successfully in 2.35s!
+📊 Export Statistics:
+   • Export time: 2.35s
+   • Hierarchy modules: 7
+   • ONNX nodes: 136
+   • Tagged nodes: 35
+   • Coverage: 100.0%
+📁 Output files:
+   • ONNX model: test_model.onnx (17.5 MB)

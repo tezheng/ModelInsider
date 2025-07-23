@@ -18,6 +18,10 @@ dependencies = [
     "datasets>=3.6.0",
     "optimum>=1.26.1",
     "rich>=14.0.0",
+    "pytest>=8.4.1",
+    "pytest-cov>=6.2.1",
+    "pydantic>=2.11.7",
+    "snakemd>=2.3.0",
 ]
 
 [project.scripts]
@@ -133,5 +137,6 @@ line-ending = "auto"
 
 [dependency-groups]
 dev = [
+    "graphviz>=0.21",
     "jupyter>=1.1.1",
 ]
