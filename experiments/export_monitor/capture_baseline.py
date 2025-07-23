@@ -39,7 +39,7 @@ def capture_original_outputs():
             "--output", str(baseline_dir / "model.onnx"),
             "--strategy", "htp",
             "--verbose",
-            "--enable-reporting"
+            "--with-report"
         ]
         
         # Capture console output with colors

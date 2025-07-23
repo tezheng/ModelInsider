@@ -5,12 +5,9 @@ This test validates the universal task enhancement system that maps semantic tas
 to Optimum-supported configurations.
 """
 
-import pytest
-import torch
 from modelexport.core.model_input_generator import (
     enhance_exporter_config,
     get_export_config_from_model_path,
-    generate_dummy_inputs_from_model_path
 )
 
 
@@ -76,26 +73,7 @@ class TestEnhanceExporterConfig:
         assert params == expected, "Should map mask-generation to decoder config"
     
     def test_sam_feature_extraction_encoder_enhancement(self):
-        """Test SAM feature-extraction-encoder task enhancement."""
-        params = enhance_exporter_config(
-            exporter="onnx",
-            model_type="sam",
-            task="feature-extraction-encoder",
-            library_name="transformers"
-        )
-        
-        expected = {
-            "exporter": "onnx",
-            "model_type": "sam",
-            "task": "feature-extraction",  # Mapped
-            "library_name": "transformers",
-            "exporter_config_kwargs": {"vision_encoder": True}  # Enhanced
-        }
-        
-        assert params == expected, "Should map feature-extraction-encoder to encoder config"
-    
-    def test_sam_feature_extraction_passthrough(self):
-        """Test SAM feature-extraction passes through unchanged."""
+        """Test SAM feature-extraction task enhancement for encoder-only export."""
         params = enhance_exporter_config(
             exporter="onnx",
             model_type="sam",
@@ -104,14 +82,33 @@ class TestEnhanceExporterConfig:
         )
         
         expected = {
-            "exporter": "onnx", 
+            "exporter": "onnx",
             "model_type": "sam",
             "task": "feature-extraction",  # Unchanged
+            "library_name": "transformers",
+            "exporter_config_kwargs": {"vision_encoder": True}  # Enhanced for encoder-only
+        }
+        
+        assert params == expected, "Should enhance feature-extraction to encoder-only config"
+    
+    def test_sam_other_task_passthrough(self):
+        """Test SAM with other tasks passes through unchanged."""
+        params = enhance_exporter_config(
+            exporter="onnx",
+            model_type="sam",
+            task="image-segmentation",
+            library_name="transformers"
+        )
+        
+        expected = {
+            "exporter": "onnx", 
+            "model_type": "sam",
+            "task": "image-segmentation",  # Unchanged
             "library_name": "transformers",
             "exporter_config_kwargs": None  # No enhancement
         }
         
-        assert params == expected, "Should pass through feature-extraction unchanged"
+        assert params == expected, "Should pass through other tasks unchanged"
     
     def test_sam_enhancement_preserves_existing_kwargs(self):
         """Test SAM enhancements preserve existing config kwargs."""
@@ -157,14 +154,14 @@ class TestSAMTaskIntegration:
         assert 'pixel_values' not in inputs, "Decoder should not have pixel_values"
     
     def test_sam_feature_extraction_encoder_integration(self):
-        """Test feature-extraction-encoder task integration creates encoder config.""" 
+        """Test feature-extraction task integration creates encoder config.""" 
         config = get_export_config_from_model_path(
             'facebook/sam-vit-base',
-            task='feature-extraction-encoder'
+            task='feature-extraction'
         )
         
         # Should be configured for encoder-only
-        assert config.vision_encoder == True, "feature-extraction-encoder should set vision_encoder=True"
+        assert config.vision_encoder == True, "feature-extraction should set vision_encoder=True"
         
         # Test input generation
         inputs = config.generate_dummy_inputs()
@@ -177,22 +174,23 @@ class TestSAMTaskIntegration:
         assert 'input_points' not in inputs, "Encoder should not have prompts"
         assert 'input_labels' not in inputs, "Encoder should not have labels"
     
-    def test_sam_feature_extraction_full_model_integration(self):
-        """Test feature-extraction task produces full model (via patch_export_config)."""
-        # Test via the full pipeline that includes patch_export_config 
-        inputs = generate_dummy_inputs_from_model_path(
+    def test_sam_auto_detection_defaults_to_encoder(self):
+        """Test SAM auto-detection defaults to encoder-only when task is feature-extraction."""
+        # When task is explicitly feature-extraction, it should map to encoder-only
+        config = get_export_config_from_model_path(
             'facebook/sam-vit-base',
             task='feature-extraction'
         )
         
-        # Full model inputs: vision + prompts (from TEZ-48 patch)
-        assert 'pixel_values' in inputs, "Full model should have pixel_values"
-        assert 'input_points' in inputs, "Full model should have input_points"
-        assert 'input_labels' in inputs, "Full model should have input_labels"
+        # Should be configured for encoder-only 
+        assert config.vision_encoder == True, "feature-extraction should map to encoder-only"
         
-        # Should NOT have pre-computed embeddings
-        assert 'image_embeddings' not in inputs, "Full model should not have pre-computed embeddings"
-        assert 'image_positional_embeddings' not in inputs, "Full model should not have pre-computed positional embeddings"
+        inputs = config.generate_dummy_inputs()
+        
+        # Encoder-only inputs
+        assert 'pixel_values' in inputs, "Encoder should have pixel_values"
+        assert 'image_embeddings' not in inputs, "Encoder should not have embeddings"
+        assert 'input_points' not in inputs, "Encoder should not have prompts"
 
 
 class TestRegressionPrevention:
@@ -218,11 +216,16 @@ class TestRegressionPrevention:
     
     def test_sam_with_no_task_auto_detection_unchanged(self):
         """Test that SAM without explicit task still works (auto-detection)."""
-        inputs = generate_dummy_inputs_from_model_path('facebook/sam-vit-base')  # No task specified
+        # When no task is specified, Optimum auto-detects feature-extraction
+        # Our enhancement should then map it to encoder-only
+        config = get_export_config_from_model_path('facebook/sam-vit-base')  # No task specified
         
-        # Should default to full model (TEZ-48 patch behavior)
-        assert 'pixel_values' in inputs, "Auto-detected SAM should default to full model"
-        assert 'input_points' in inputs, "Auto-detected SAM should include prompts"
+        # Auto-detected task should be enhanced to encoder-only
+        assert config.vision_encoder == True, "Auto-detected SAM should be enhanced to encoder-only"
+        
+        inputs = config.generate_dummy_inputs()
+        assert 'pixel_values' in inputs, "Should have pixel_values for encoder"
+        assert 'image_embeddings' not in inputs, "Should not have decoder inputs"
     
     def test_enhance_exporter_config_backwards_compatibility(self):
         """Test enhance_exporter_config is backwards compatible."""
@@ -244,36 +247,33 @@ class TestRegressionPrevention:
 class TestSAMTaskDocumentation:
     """Test that the SAM task mapping works as documented."""
     
-    def test_three_sam_export_modes_produce_different_inputs(self):
-        """Verify the three SAM modes produce distinct input patterns."""
+    def test_two_sam_export_modes_produce_different_inputs(self):
+        """Verify the two SAM modes produce distinct input patterns."""
         
-        # Mode 1: Encoder-only
-        encoder_inputs = generate_dummy_inputs_from_model_path(
+        # Mode 1: Encoder-only (via feature-extraction)
+        encoder_config = get_export_config_from_model_path(
             'facebook/sam-vit-base',
-            task='feature-extraction-encoder' 
+            task='feature-extraction' 
         )
+        encoder_inputs = encoder_config.generate_dummy_inputs()
         
-        # Mode 2: Decoder-only
+        # Mode 2: Decoder-only (via mask-generation)
         decoder_config = get_export_config_from_model_path(
             'facebook/sam-vit-base',
             task='mask-generation'
         )
         decoder_inputs = decoder_config.generate_dummy_inputs()
         
-        # Mode 3: Full model
-        full_inputs = generate_dummy_inputs_from_model_path(
-            'facebook/sam-vit-base',
-            task='feature-extraction'
-        )
-        
         # Verify distinct input patterns
         assert set(encoder_inputs.keys()) == {'pixel_values'}
         assert set(decoder_inputs.keys()) == {'image_embeddings', 'image_positional_embeddings', 'input_points', 'input_labels'}
-        assert set(full_inputs.keys()) == {'pixel_values', 'input_points', 'input_labels'}
         
         # Verify no overlap between encoder-only and decoder-only
         assert not (set(encoder_inputs.keys()) & set(decoder_inputs.keys())), "Encoder and decoder should have no common inputs"
         
-        # Verify full model combines vision input with prompts
-        assert 'pixel_values' in full_inputs, "Full model should include vision input"
-        assert 'input_points' in full_inputs and 'input_labels' in full_inputs, "Full model should include prompts"
+        # Verify encoder has vision input
+        assert 'pixel_values' in encoder_inputs, "Encoder should have pixel_values"
+        
+        # Verify decoder has embeddings and prompts
+        assert 'image_embeddings' in decoder_inputs, "Decoder should have embeddings"
+        assert 'input_points' in decoder_inputs and 'input_labels' in decoder_inputs, "Decoder should have prompts"
