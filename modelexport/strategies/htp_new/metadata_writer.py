@@ -7,6 +7,7 @@ following the new structure specified in REPORT_IMPROVEMENTS.md.
 
 from __future__ import annotations
 
+import datetime
 import json
 from pathlib import Path
 from typing import Any
@@ -36,11 +37,17 @@ class MetadataWriter(StepAwareWriter):
         self._export_time = 0.0
         self._steps_data = {}
     
+    def _get_step_timestamp(self) -> str:
+        """Generate a unique timestamp for the current step with millisecond precision."""
+        dt = datetime.datetime.now(datetime.UTC)
+        # Format with milliseconds (3 digits) instead of microseconds (6 digits)
+        return dt.strftime("%Y-%m-%dT%H:%M:%S.") + f"{dt.microsecond // 1000:03d}Z"
+    
     def _write_default(self, export_step: ExportStep, data: ExportData) -> int:
         """Default handler - record step completion."""
         self._steps_data[export_step.value] = {
             "completed": True,
-            "timestamp": data.timestamp,
+            "timestamp": self._get_step_timestamp(),
         }
         return 0
     
@@ -66,7 +73,7 @@ class MetadataWriter(StepAwareWriter):
         # Record step completion
         self._steps_data["model_preparation"] = {
             "completed": True,
-            "timestamp": data.timestamp,
+            "timestamp": self._get_step_timestamp(),
             "model_class": data.model_prep.model_class,
             "total_modules": data.model_prep.total_modules,
             "total_parameters": data.model_prep.total_parameters,
@@ -90,7 +97,7 @@ class MetadataWriter(StepAwareWriter):
         
         # This will be part of tracing info
         self._steps_data["input_generation"] = {
-            "timestamp": data.timestamp,
+            "timestamp": self._get_step_timestamp(),
             "method": data.input_gen.method,
             "model_type": data.input_gen.model_type,
             "task": data.input_gen.task,
@@ -124,7 +131,7 @@ class MetadataWriter(StepAwareWriter):
         # Record step completion
         self._steps_data["hierarchy_building"] = {
             "completed": True,
-            "timestamp": data.timestamp,
+            "timestamp": self._get_step_timestamp(),
             "modules_traced": len(data.hierarchy.hierarchy),
             "execution_steps": data.hierarchy.execution_steps,
         }
@@ -139,7 +146,7 @@ class MetadataWriter(StepAwareWriter):
         
         # Store ONNX details for final output
         self._steps_data["onnx_export"] = {
-            "timestamp": data.timestamp,
+            "timestamp": self._get_step_timestamp(),
             "opset_version": data.onnx_export.opset_version,
             "do_constant_folding": data.onnx_export.do_constant_folding,
             "onnx_size_mb": data.onnx_export.onnx_size_mb,
@@ -167,7 +174,7 @@ class MetadataWriter(StepAwareWriter):
         # Record step completion with enhanced structure per spec
         self._steps_data["node_tagging"] = {
             "completed": True,
-            "timestamp": data.timestamp,
+            "timestamp": self._get_step_timestamp(),
             "total_nodes": data.node_tagging.total_nodes,
             "tagged_nodes_count": len(data.node_tagging.tagged_nodes),
             "coverage_percentage": data.node_tagging.coverage,
@@ -196,7 +203,7 @@ class MetadataWriter(StepAwareWriter):
             return 0
         
         self._steps_data["tag_injection"] = {
-            "timestamp": data.timestamp,
+            "timestamp": self._get_step_timestamp(),
             "tags_injected": data.tag_injection.tags_injected,
             "tags_stripped": data.tag_injection.tags_stripped,
         }
