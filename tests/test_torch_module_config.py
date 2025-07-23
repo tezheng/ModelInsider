@@ -1,7 +1,7 @@
 """
-Test the flexible include_torch_nn_children configuration for HTP exporter.
+Test the flexible torch_module configuration for HTP exporter.
 
-Tests the regression fix for TEZ-47 where include_torch_nn_children should be:
+Tests the regression fix for TEZ-47 where torch_module should be:
 - bool: False (default), True (use default list)
 - list[str]: Custom list of torch.nn module types to include
 """
@@ -34,8 +34,8 @@ class SimpleModel(nn.Module):
         return x
 
 
-class TestTorchNNChildrenConfig:
-    """Test the flexible include_torch_nn_children configuration."""
+class TestTorchModuleConfig:
+    """Test the flexible torch_module configuration."""
     
     def setup_method(self):
         """Set up test fixtures."""
@@ -49,8 +49,8 @@ class TestTorchNNChildrenConfig:
         shutil.rmtree(self.temp_dir, ignore_errors=True)
     
     def test_default_behavior_false(self):
-        """Test default behavior (include_torch_nn_children=False)."""
-        exporter = HTPExporter(include_torch_nn_children=False)
+        """Test default behavior (torch_module=False)."""
+        exporter = HTPExporter(torch_module=False)
         output_path = Path(self.temp_dir) / "test_false.onnx"
         
         # Export model
@@ -71,8 +71,8 @@ class TestTorchNNChildrenConfig:
         assert "" in exporter._hierarchy_data  # Root module
         
     def test_default_list_true(self):
-        """Test using default list (include_torch_nn_children=True)."""
-        exporter = HTPExporter(include_torch_nn_children=True)
+        """Test using default list (torch_module=True)."""
+        exporter = HTPExporter(torch_module=True)
         output_path = Path(self.temp_dir) / "test_true.onnx"
         
         # Export model
@@ -97,7 +97,7 @@ class TestTorchNNChildrenConfig:
     def test_custom_list(self):
         """Test using custom list of torch.nn modules."""
         custom_list = ["Linear", "Dropout"]
-        exporter = HTPExporter(include_torch_nn_children=custom_list)
+        exporter = HTPExporter(torch_module=custom_list)
         output_path = Path(self.temp_dir) / "test_custom.onnx"
         
         # Export model
@@ -121,7 +121,7 @@ class TestTorchNNChildrenConfig:
         
     def test_empty_custom_list(self):
         """Test using empty custom list (should behave like False)."""
-        exporter = HTPExporter(include_torch_nn_children=[])
+        exporter = HTPExporter(torch_module=[])
         output_path = Path(self.temp_dir) / "test_empty.onnx"
         
         # Export model
@@ -141,9 +141,9 @@ class TestTorchNNChildrenConfig:
         assert len(exporter._hierarchy_data) == 1
         
     def test_config_default_list(self):
-        """Test that HTPConfig.DEFAULT_TORCH_NN_CHILDREN is correctly defined."""
+        """Test that HTPConfig.DEFAULT_TORCH_MODULES is correctly defined."""
         # Check the default list contains only LayerNorm and Embedding
-        assert HTPConfig.DEFAULT_TORCH_NN_CHILDREN == ["LayerNorm", "Embedding"]
+        assert HTPConfig.DEFAULT_TORCH_MODULES == ["LayerNorm", "Embedding"]
         
     def test_type_validation(self):
         """Test that invalid types are handled properly."""
@@ -151,10 +151,10 @@ class TestTorchNNChildrenConfig:
         # In a statically typed environment, this would be caught by the type checker
         
         # Valid types - should not raise errors
-        HTPExporter(include_torch_nn_children=False)
-        HTPExporter(include_torch_nn_children=True)
-        HTPExporter(include_torch_nn_children=["Linear", "Conv2d"])
-        HTPExporter(include_torch_nn_children=[])
+        HTPExporter(torch_module=False)
+        HTPExporter(torch_module=True)
+        HTPExporter(torch_module=["Linear", "Conv2d"])
+        HTPExporter(torch_module=[])
         
     def test_hierarchy_builder_receives_correct_exceptions(self):
         """Test that TracingHierarchyBuilder receives the correct exceptions list."""
@@ -162,7 +162,7 @@ class TestTorchNNChildrenConfig:
         example_inputs = {"input_ids": torch.randint(0, 100, (1, 10))}
         
         # Test with False
-        exporter = HTPExporter(include_torch_nn_children=False)
+        exporter = HTPExporter(torch_module=False)
         exporter.example_inputs = example_inputs
         exporter._trace_model_hierarchy(self.model)
         # Can't easily check the exceptions passed to TracingHierarchyBuilder
@@ -170,14 +170,14 @@ class TestTorchNNChildrenConfig:
         assert len(exporter._hierarchy_data) == 1  # Only root
         
         # Test with True (default list)
-        exporter = HTPExporter(include_torch_nn_children=True)
+        exporter = HTPExporter(torch_module=True)
         exporter.example_inputs = example_inputs
         exporter._trace_model_hierarchy(self.model)
         # Should have root + 2 default modules
         assert len(exporter._hierarchy_data) == 3
         
         # Test with custom list
-        exporter = HTPExporter(include_torch_nn_children=["Linear"])
+        exporter = HTPExporter(torch_module=["Linear"])
         exporter.example_inputs = example_inputs
         exporter._trace_model_hierarchy(self.model)
         # Should have root + 1 custom module
@@ -186,7 +186,7 @@ class TestTorchNNChildrenConfig:
     def test_case_sensitivity(self):
         """Test that module names are case-sensitive."""
         # Use wrong case - should not match
-        exporter = HTPExporter(include_torch_nn_children=["linear", "layernorm"])  # lowercase
+        exporter = HTPExporter(torch_module=["linear", "layernorm"])  # lowercase
         output_path = Path(self.temp_dir) / "test_case.onnx"
         
         result = exporter.export(
@@ -209,12 +209,12 @@ class TestBackwardCompatibility:
     def test_existing_code_continues_working(self):
         """Test that existing code using bool continues to work."""
         # This should work as before
-        exporter1 = HTPExporter(include_torch_nn_children=False)
-        assert exporter1.include_torch_nn_children is False
+        exporter1 = HTPExporter(torch_module=False)
+        assert exporter1.torch_module is False
         
-        exporter2 = HTPExporter(include_torch_nn_children=True)
-        assert exporter2.include_torch_nn_children is True
+        exporter2 = HTPExporter(torch_module=True)
+        assert exporter2.torch_module is True
         
         # Default should still be False
         exporter3 = HTPExporter()
-        assert exporter3.include_torch_nn_children is False
+        assert exporter3.torch_module is False
