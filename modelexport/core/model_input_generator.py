@@ -140,6 +140,75 @@ def generate_dummy_inputs(
         )
 
 
+
+
+
+def enhance_exporter_config(
+    exporter: str,
+    model_type: str,
+    task: str,
+    library_name: str,
+    **config_kwargs
+) -> dict:
+    """
+    Enhance exporter config parameters for models with non-standard task requirements.
+    
+    Returns a dict of all parameters to pass to TasksManager.get_exporter_config_constructor().
+    Universal function that can be extended for any model requiring task mapping.
+    
+    Args:
+        exporter: Export backend ("onnx", "tflite", etc.)
+        model_type: Model type from HuggingFace config (e.g., "sam", "bert")
+        task: Requested task name (may be semantic/custom)
+        library_name: Library name ("transformers", "diffusers", etc.) 
+        **config_kwargs: Additional config constructor arguments
+        
+    Returns:
+        Dict of enhanced parameters for TasksManager.get_exporter_config_constructor()
+        
+    Model-Specific Enhancements:
+        SAM (Segment Anything Model):
+            - "mask-generation" → "feature-extraction" + vision_encoder=False (decoder-only)
+            - "feature-extraction-encoder" → "feature-extraction" + vision_encoder=True (encoder-only)
+            - Other tasks passed through unchanged
+    """
+    # Base parameters for TasksManager
+    exporter_params = {
+        "exporter": exporter,
+        "model_type": model_type,
+        "task": task,
+        "library_name": library_name,
+        "exporter_config_kwargs": config_kwargs if config_kwargs else None
+    }
+    
+    # Model-specific task enhancements
+    if model_type == "sam":
+        if task == "mask-generation":
+            # Map semantic task to Optimum-supported configuration
+            logger.info("🎯 Mapping SAM mask-generation → feature-extraction + vision_encoder=False")
+            exporter_params["task"] = "feature-extraction"
+            enhanced_kwargs = {**config_kwargs, "vision_encoder": False}
+            exporter_params["exporter_config_kwargs"] = enhanced_kwargs
+            
+        elif task == "feature-extraction-encoder":
+            # Map semantic task to Optimum-supported configuration
+            logger.info("🎯 Mapping SAM feature-extraction-encoder → feature-extraction + vision_encoder=True")
+            exporter_params["task"] = "feature-extraction"
+            enhanced_kwargs = {**config_kwargs, "vision_encoder": True}
+            exporter_params["exporter_config_kwargs"] = enhanced_kwargs
+            
+        # feature-extraction and other tasks pass through unchanged
+    
+    # Future model enhancements can be added here:
+    # elif model_type == "bert":
+    #     if task == "next-sentence-prediction":
+    #         exporter_params["task"] = "text-classification"
+    #         enhanced_kwargs = {**config_kwargs, "num_labels": 2}
+    #         exporter_params["exporter_config_kwargs"] = enhanced_kwargs
+    
+    return exporter_params
+
+
 def get_export_config_from_model_path(
     model_name_or_path: str,
     exporter: str = "onnx",
@@ -155,7 +224,8 @@ def get_export_config_from_model_path(
     Args:
         model_name_or_path: HuggingFace model name or local path
         exporter: Export backend ("onnx", "tflite", etc.)
-        task: Task name (auto-detects if None)
+        task: Task name (auto-detects if None). Semantic tasks supported:
+            - SAM: "mask-generation" (decoder-only), "feature-extraction-encoder" (encoder-only)
         library_name: Library name ("transformers", "diffusers", etc.)
         **config_kwargs: Additional config constructor arguments
 
@@ -165,6 +235,10 @@ def get_export_config_from_model_path(
     Example:
         >>> config = get_export_config_from_model_path("bert-base-uncased")
         >>> inputs = config.generate_dummy_inputs()
+        
+        >>> # SAM with semantic task names
+        >>> decoder_config = get_export_config_from_model_path("facebook/sam-vit-base", task="mask-generation")
+        >>> encoder_config = get_export_config_from_model_path("facebook/sam-vit-base", task="feature-extraction-encoder")
     """
     try:
         from optimum.exporters.tasks import TasksManager
@@ -197,15 +271,17 @@ def get_export_config_from_model_path(
             task = "feature-extraction"
             logger.info(f"Using fallback task: {task}")
 
-    # This is the key function - directly from Optimum TasksManager
+    # Enhanced exporter config with semantic task mapping
     try:
-        constructor = TasksManager.get_exporter_config_constructor(
+        exporter_params = enhance_exporter_config(
             exporter=exporter,
             model_type=model_type,
             task=task,
             library_name=library_name or "transformers",
-            exporter_config_kwargs=config_kwargs if config_kwargs else None,
+            **config_kwargs
         )
+        
+        constructor = TasksManager.get_exporter_config_constructor(**exporter_params)
 
         # Create the actual export config
         export_config = constructor(config)
@@ -224,12 +300,15 @@ def get_export_config_from_model_path(
         ) from e
 
 
-def patch_export_config(export_config) -> None:
+def patch_export_config(export_config):
     """
     Apply model-specific patches to export configurations.
     
     Args:
         export_config: Optimum export config instance to patch
+        
+    Returns:
+        Modified export config (may be the same object or a new one)
         
     This function checks the config type and applies appropriate patches:
     - SamOnnxConfig: Forces pixel_values generation for full model export
@@ -238,31 +317,49 @@ def patch_export_config(export_config) -> None:
     config_type = type(export_config).__name__
     
     if config_type == "SamOnnxConfig":
-        # TEZ-48 Fix: Override generate_dummy_inputs to force pixel_values generation
-        original_generate = export_config.generate_dummy_inputs
+        # TEZ-48 Fix: Optimum's SAM export has three modes:
+        # 1. vision_encoder=True: Vision encoder only (pixel_values → embeddings)
+        # 2. vision_encoder=False (default): Mask decoder only (embeddings → masks)
+        # 3. What users want: Full model (pixel_values → masks) - NOT SUPPORTED!
+        #
+        # Our fix: Override the default mode to export the full model
         
+        # Check if vision_encoder is already True (user wants encoder only)
+        if hasattr(export_config, 'vision_encoder') and export_config.vision_encoder:
+            # This exports vision encoder only - not what most users want
+            logger.info("🎯 SAM vision encoder-only mode detected (vision_encoder=True)")
+            return export_config
+        
+        # Otherwise, we're in the default mode (mask decoder with embeddings)
+        # For our use case (full model export), we need to override this
+        logger.info("🎯 SAM full model export requested, overriding default decoder-only mode")
+        
+        # Simple override - just replace the input generation
         def generate_full_model_inputs(framework="pt", **kwargs):
-            """Generate inputs for full SAM model export with pixel_values"""
+            """Generate inputs for full SAM model export with pixel_values."""
             import torch
             from optimum.utils import DEFAULT_DUMMY_SHAPES
             
-            # Merge default shapes with user overrides
+            # Merge defaults with user overrides
             shapes = DEFAULT_DUMMY_SHAPES.copy()
             shapes.update(kwargs)
             
-            # Generate inputs for full model export
-            batch_size = shapes.get("batch_size", 1)
+            batch_size = shapes.get("batch_size", 2)
             
             inputs = {
-                # Generate pixel_values for full model (includes vision encoder)
+                # Vision encoder input (for full model)
                 "pixel_values": torch.randn(batch_size, 3, 1024, 1024, dtype=torch.float32),
                 
-                # Generate semantic input points (center region)
+                # Prompt encoder inputs
                 "input_points": torch.tensor([[[[512.0, 512.0]]]] * batch_size, dtype=torch.float32),
-                
-                # Generate input labels (foreground point)
-                "input_labels": torch.tensor([[[1]]] * batch_size, dtype=torch.long),
+                "input_labels": torch.tensor([[[1]]] * batch_size, dtype=torch.int64),
             }
+            
+            # Add variation to points for realism
+            if batch_size > 1:
+                for i in range(1, batch_size):
+                    inputs["input_points"][i, 0, 0, 0] += torch.randn(1).item() * 100
+                    inputs["input_points"][i, 0, 0, 1] += torch.randn(1).item() * 100
             
             logger.info(f"Generated full model SAM inputs: {list(inputs.keys())}")
             for name, tensor in inputs.items():
@@ -270,13 +367,17 @@ def patch_export_config(export_config) -> None:
             
             return inputs
         
-        # Replace the generate_dummy_inputs method
+        # Replace the method
         export_config.generate_dummy_inputs = generate_full_model_inputs
-        logger.info(f"🎯 Applied full model export fix for {config_type} (pixel_values instead of embeddings)")
+        
+        return export_config
     
     # Future model patches can be added here
     # elif config_type == "SomeOtherConfig":
-    #     apply_other_patch(export_config)
+    #     return apply_other_patch(export_config)
+    
+    # Return unchanged config for other types
+    return export_config
 
 
 def generate_dummy_inputs_from_model_path(
@@ -319,11 +420,14 @@ def generate_dummy_inputs_from_model_path(
     shapes.update(shape_kwargs)
 
     # Apply model-specific patches if needed
-    patch_export_config(export_config)
+    export_config = patch_export_config(export_config)
     
     # Generate dummy inputs using Optimum
     dummy_inputs = export_config.generate_dummy_inputs(framework="pt", **shapes)
 
+    # Filter out None values from disabled generators
+    dummy_inputs = {k: v for k, v in dummy_inputs.items() if v is not None}
+    
     logger.info(f"Generated inputs: {list(dummy_inputs.keys())}")
     for name, tensor in dummy_inputs.items():
         logger.debug(f"  {name}: {list(tensor.shape)} ({tensor.dtype})")
