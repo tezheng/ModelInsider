@@ -55,13 +55,12 @@ class TracingHierarchyBuilder:
         """
         Determine if module should create a new hierarchy level - UNIVERSAL.
 
-        TEZ-24 Fix: Include ALL modules for complete hierarchy visibility.
-        This ensures reports contain the complete model structure including torch.nn layers.
-        ONNX node tagging will still work correctly via scope-based matching.
+        Respects the exceptions parameter to control which torch.nn modules are included.
+        When exceptions=None (default), torch.nn modules are excluded per MUST-002.
         """
-        # Simple fix: Include ALL modules for complete hierarchy visibility in reports
-        # This gives users a complete view of the model structure
-        return True
+        # Use the universal should_include_in_hierarchy function
+        # This properly filters torch.nn modules based on the exceptions list
+        return should_include_in_hierarchy(module, exceptions=self.exceptions)
 
     def create_pre_hook(self, module_name: str, module: nn.Module):
         """Create pre-forward hook - ultra simple version."""
