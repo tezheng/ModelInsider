@@ -1,19 +1,16 @@
 """Test cases for TracingHierarchyBuilder with exceptions parameter."""
 
-import pytest
-import torch
-import torch.nn as nn
 from transformers import AutoModel
 
-from modelexport.core.tracing_hierarchy_builder import TracingHierarchyBuilder
 from modelexport.core.model_input_generator import generate_dummy_inputs
+from modelexport.core.tracing_hierarchy_builder import TracingHierarchyBuilder
 
 
 class TestTracingHierarchyBuilder:
     """Test TracingHierarchyBuilder functionality."""
     
     def test_default_no_exceptions(self):
-        """Test default behavior - no torch.nn modules in hierarchy."""
+        """Test default behavior - torch.nn modules excluded per MUST-002."""
         model = AutoModel.from_pretrained("prajjwal1/bert-tiny")
         inputs = generate_dummy_inputs("prajjwal1/bert-tiny", exporter="onnx")
         
@@ -21,18 +18,25 @@ class TestTracingHierarchyBuilder:
         tracer.trace_model_execution(model, inputs)
         summary = tracer.get_execution_summary()
         
-        # Check no torch.nn modules in hierarchy
-        for info in summary["module_hierarchy"].values():
-            class_name = info.get("class_name", "")
-            # These are common torch.nn modules that should be filtered
-            assert class_name not in ["LayerNorm", "Embedding", "Linear", "Dropout"]
+        # MUST-002: torch.nn modules should NOT be included by default
+        class_names = [info.get("class_name", "") for info in summary["module_hierarchy"].values()]
+        
+        # These torch.nn modules should NOT be included
+        assert "LayerNorm" not in class_names
+        assert "Embedding" not in class_names
+        assert "Linear" not in class_names
+        assert "Dropout" not in class_names
+        
+        # Should only have HuggingFace modules
+        assert len(summary["module_hierarchy"]) >= 15  # Typical HF module count
+        assert len(summary["module_hierarchy"]) < 25   # Not including torch.nn modules
     
     def test_with_exceptions(self):
-        """Test with exceptions - specified torch.nn modules included."""
+        """Test with exceptions - specified torch.nn modules are included."""
         model = AutoModel.from_pretrained("prajjwal1/bert-tiny")
         inputs = generate_dummy_inputs("prajjwal1/bert-tiny", exporter="onnx")
         
-        # Include LayerNorm and Embedding in hierarchy
+        # With exceptions, specified torch.nn modules should be included
         tracer = TracingHierarchyBuilder(exceptions=["LayerNorm", "Embedding"])
         tracer.trace_model_execution(model, inputs)
         summary = tracer.get_execution_summary()
@@ -51,43 +55,71 @@ class TestTracingHierarchyBuilder:
         assert layernorm_count == 5
         assert embedding_count == 3
         
-        # Linear and Dropout should still be filtered
-        for info in summary["module_hierarchy"].values():
-            class_name = info.get("class_name", "")
-            assert class_name not in ["Linear", "Dropout"]
+        # Linear and Dropout are NOT in the exceptions list, so should NOT be included
+        linear_count = sum(
+            1 for info in summary["module_hierarchy"].values() 
+            if info.get("class_name") == "Linear"
+        )
+        dropout_count = sum(
+            1 for info in summary["module_hierarchy"].values() 
+            if info.get("class_name") == "Dropout"
+        )
+        
+        # Should NOT find these modules (not in exceptions)
+        assert linear_count == 0
+        assert dropout_count == 0
     
     def test_hierarchy_count_difference(self):
-        """Test that exceptions increase hierarchy module count."""
+        """Test hierarchy count difference with and without exceptions."""
         model = AutoModel.from_pretrained("prajjwal1/bert-tiny")
         inputs = generate_dummy_inputs("prajjwal1/bert-tiny", exporter="onnx")
         
-        # Without exceptions
+        # Without exceptions (default - exclude torch.nn)
         tracer1 = TracingHierarchyBuilder()
         tracer1.trace_model_execution(model, inputs)
         count_without = len(tracer1.get_execution_summary()["module_hierarchy"])
         
-        # With exceptions
+        # With exceptions (include specified torch.nn modules)
         tracer2 = TracingHierarchyBuilder(exceptions=["LayerNorm", "Embedding"])
         tracer2.trace_model_execution(model, inputs)
         count_with = len(tracer2.get_execution_summary()["module_hierarchy"])
         
-        # Should have more modules with exceptions
+        # With exceptions should have MORE modules
         assert count_with > count_without
-        # Specifically, 8 more (5 LayerNorm + 3 Embedding)
-        assert count_with == count_without + 8
+        # Without exceptions should have only HF modules
+        assert count_without < 25  # Only HF modules
+        # With exceptions should include LayerNorm and Embedding
+        assert count_with > count_without + 5  # At least 5 LayerNorm + 3 Embedding
     
     def test_resnet_with_torch_nn(self):
         """Test ResNet with torch.nn children included."""
         model = AutoModel.from_pretrained("microsoft/resnet-50")
         inputs = generate_dummy_inputs("microsoft/resnet-50", exporter="onnx")
         
-        # Include common torch.nn modules used in ResNet
+        # Test 1: Default behavior - torch.nn modules excluded
+        tracer_default = TracingHierarchyBuilder()
+        tracer_default.trace_model_execution(model, inputs)
+        summary_default = tracer_default.get_execution_summary()
+        
+        # Should NOT have torch.nn modules by default
+        class_names_default = [info.get("class_name", "") for info in summary_default["module_hierarchy"].values()]
+        assert "Conv2d" not in class_names_default
+        assert "BatchNorm2d" not in class_names_default
+        assert "ReLU" not in class_names_default
+        assert "MaxPool2d" not in class_names_default
+        
+        # Test 2: With exceptions - include specified torch.nn modules
         exceptions = ["Conv2d", "BatchNorm2d", "ReLU", "MaxPool2d"]
         tracer = TracingHierarchyBuilder(exceptions=exceptions)
         tracer.trace_model_execution(model, inputs)
         summary = tracer.get_execution_summary()
         
-        # Check that ResNetConvLayer has Conv2d, BatchNorm2d children
+        # Now these torch.nn modules should be included
+        class_names = [info.get("class_name", "") for info in summary["module_hierarchy"].values()]
+        assert "Conv2d" in class_names
+        assert "BatchNorm2d" in class_names
+        
+        # Check that ResNetConvLayer has Conv2d, BatchNorm2d children when exceptions are used
         conv_layer_found = False
         for path, info in summary["module_hierarchy"].items():
             if info.get("class_name") == "ResNetConvLayer":
@@ -104,16 +136,21 @@ class TestTracingHierarchyBuilder:
         assert conv_layer_found, "Should find at least one ResNetConvLayer"
     
     def test_empty_exceptions(self):
-        """Test with empty exceptions list - same as default."""
+        """Test with empty exceptions list - torch.nn modules still excluded per MUST-002."""
         model = AutoModel.from_pretrained("prajjwal1/bert-tiny")
         inputs = generate_dummy_inputs("prajjwal1/bert-tiny", exporter="onnx")
         
-        # Empty list should behave like default
+        # Empty list should behave like None - exclude torch.nn modules
         tracer = TracingHierarchyBuilder(exceptions=[])
         tracer.trace_model_execution(model, inputs)
         summary = tracer.get_execution_summary()
         
-        # Check no torch.nn modules
-        for info in summary["module_hierarchy"].values():
-            class_name = info.get("class_name", "")
-            assert class_name not in ["LayerNorm", "Embedding", "Linear", "Dropout"]
+        # Check that torch.nn modules are NOT included (MUST-002)
+        class_names = [info.get("class_name", "") for info in summary["module_hierarchy"].values()]
+        assert "LayerNorm" not in class_names
+        assert "Embedding" not in class_names
+        assert "Linear" not in class_names
+        assert "Dropout" not in class_names
+        
+        # Should only have HuggingFace modules
+        assert len(summary["module_hierarchy"]) < 25

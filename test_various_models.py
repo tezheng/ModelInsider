@@ -31,7 +31,7 @@ def test_model(model_name: str, arch_name: str):
         "--model", model_name,
         "--output", str(output_path),
         "--verbose",
-        "--enable-reporting"
+        "--with-report"
     ]
     
     try:

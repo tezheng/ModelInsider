@@ -60,7 +60,8 @@ class TestCLIExport:
             '--verbose',
             'export', 
             '--model', 'prajjwal1/bert-tiny',
-            '--output', str(output_path)
+            '--output', str(output_path),
+            '--with-report'
         ])
         
         # Check command succeeded
