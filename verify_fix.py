@@ -75,7 +75,7 @@ def main():
         "uv", "run", "modelexport", "export",
         "--model", "prajjwal1/bert-tiny",
         "--output", "temp/verify/model.onnx",
-        "--verbose", "--enable-reporting"
+        "--verbose", "--with-report"
     ]
     
     result = subprocess.run(cmd, capture_output=True, text=True)

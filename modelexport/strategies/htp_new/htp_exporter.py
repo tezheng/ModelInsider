@@ -60,6 +60,12 @@ class HTPConfig:
         "verbose": False,  # ONNX internal verbose
     }
 
+    # Default torch.nn modules to include when torch_module=True
+    DEFAULT_TORCH_MODULES: ClassVar[list[str]] = [
+        "LayerNorm",
+        "Embedding",
+    ]
+    
     # Default export statistics structure
     DEFAULT_EXPORT_STATS: ClassVar[dict[str, Any]] = {
         "export_time": 0.0,
@@ -86,7 +92,7 @@ class HTPExporter:
         verbose: bool = False,
         enable_reporting: bool = False,
         embed_hierarchy_attributes: bool = True,
-        include_torch_nn_children: bool = False,
+        torch_module: bool | list[str] = False,
     ):
         """
         Initialize HTP exporter.
@@ -96,13 +102,17 @@ class HTPExporter:
             enable_reporting: Enable report file generation
             embed_hierarchy_attributes: Whether to embed hierarchy_tag attributes in ONNX
                                        (disabled by --clean-onnx or --no-hierarchy-attrs)
-            include_torch_nn_children: Include torch.nn children of HF modules in hierarchy
-                                      for proper operation attribution (e.g., ResNet)
+            torch_module: Include torch.nn modules in hierarchy for proper operation
+                         attribution (e.g., ResNet).
+                         Can be:
+                         - False: Don't include any torch.nn modules (default)
+                         - True: Include default modules (LayerNorm, Embedding)
+                         - List[str]: Include specific torch.nn module types
         """
         self.verbose = verbose
         self.enable_reporting = enable_reporting
         self.embed_hierarchy_attributes = embed_hierarchy_attributes
-        self.include_torch_nn_children = include_torch_nn_children
+        self.torch_module = torch_module
         self.strategy = HTPConfig.STRATEGY_NAME
 
         # Core components
@@ -355,30 +365,13 @@ class HTPExporter:
         """Build hierarchy internally."""
         # Determine if we need torch.nn exceptions for this model
         exceptions = None
-        if self.include_torch_nn_children:
-            # Common torch.nn modules that might be children of HF modules
-            exceptions = [
-                "Conv1d",
-                "Conv2d",
-                "Conv3d",
-                "BatchNorm1d",
-                "BatchNorm2d",
-                "BatchNorm3d",
-                "Linear",
-                "Embedding",
-                "ReLU",
-                "GELU",
-                "Tanh",
-                "Sigmoid",
-                "Dropout",
-                "LayerNorm",
-                "MaxPool1d",
-                "MaxPool2d",
-                "MaxPool3d",
-                "AvgPool1d",
-                "AvgPool2d",
-                "AvgPool3d",
-            ]
+        if self.torch_module is True:
+            # Use default torch.nn modules from config
+            exceptions = HTPConfig.DEFAULT_TORCH_MODULES
+        elif isinstance(self.torch_module, list):
+            # Use user-provided list of torch.nn modules
+            exceptions = self.torch_module
+        # If False, exceptions remains None (no torch.nn modules included)
 
         self._hierarchy_builder = TracingHierarchyBuilder(exceptions=exceptions)
 

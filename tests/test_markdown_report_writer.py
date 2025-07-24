@@ -195,9 +195,8 @@ class TestMarkdownReportWriter:
             assert "flowchart LR" not in content
             assert "-->" not in content
             
-            # Verify informational note is present
-            assert "Hierarchy Visualization" in content
-            assert "Mermaid diagram temporarily disabled" in content
+            # Verify Mermaid references are removed
+            assert "Mermaid" not in content
             
             # Verify module data is still present in the module table
             assert "BertModel" in content
@@ -277,7 +276,7 @@ class TestMarkdownReportWriter:
         """Test that report is generated correctly without verbose flag."""
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = str(Path(tmpdir) / "test_model.onnx")
-            # This simulates --enable-reporting without --verbose
+            # This simulates --with-report without --verbose
             writer = MarkdownReportWriter(output_path)
             
             # Process all steps

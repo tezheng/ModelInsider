@@ -47,21 +47,21 @@ BertModel
 
 ### 3. Complete Module Hierarchy
 **Before**: "Complete Module Hierarchy" without node counts
-**After**: "Complete HF Hierarchy with ONNX Nodes" with node counts per module
+**After**: "Complete HF Hierarchy with Nodes" with node counts per module
 
 ```markdown
-### Complete HF Hierarchy with ONNX Nodes
+### Complete HF Hierarchy with Nodes
 
 <details>
 <summary>Click to expand complete hierarchy with node counts</summary>
 
 ```
-BertModel (136 ONNX nodes)
-├── BertEmbeddings: embeddings (8 ONNX nodes)
-│   ├── LayerNorm: LayerNorm (1 ONNX nodes)
-│   ├── Dropout: dropout (0 ONNX nodes)
+BertModel (136 nodes)
+├── BertEmbeddings: embeddings (8 nodes)
+│   ├── LayerNorm: LayerNorm (1 nodes)
+│   ├── Dropout: dropout (0 nodes)
 │   └── ... (with counts)
-└── BertEncoder: encoder (0 ONNX nodes)
+└── BertEncoder: encoder (0 nodes)
     └── ... (complete hierarchy with counts)
 ```
 
@@ -80,14 +80,14 @@ BertModel (136 ONNX nodes)
 - Added numbered list formatting (1-20)
 
 ### 3. Updated `_write_module_hierarchy_section`
-- Changed heading to "Complete HF Hierarchy with ONNX Nodes"
+- Changed heading to "Complete HF Hierarchy with Nodes"
 - Added `_build_hierarchy_tree_with_counts` method
-- Shows ONNX node counts for each module
+- Shows node counts for each module
 
 ### 4. New Method: `_build_hierarchy_tree_with_counts`
 - Builds ASCII tree with node counts
 - Matches console output format
-- Shows "(X ONNX nodes)" for each module
+- Shows "(X nodes)" for each module
 
 ## Testing
 

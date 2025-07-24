@@ -358,10 +358,7 @@ The report is generated as a **Markdown file (.md)** with structured sections us
 
 ## Module Hierarchy
 
-```mermaid
-flowchart LR
-    {SIMPLIFIED_MERMAID_DIAGRAM}
-```
+*Mermaid diagram disabled for stability.*
 
 ### Module List (Sorted by Execution Order)
 
@@ -439,7 +436,7 @@ flowchart LR
 
 1. **Header**: Title and metadata
 2. **Export Process**: Step-by-step details with node tagging results
-3. **Module Hierarchy**: Mermaid diagram and detailed module table
+3. **Module Hierarchy**: Detailed module table
 4. **Complete Mappings**: Raw node-to-tag data
 5. **Export Summary**: Performance and coverage metrics
 
@@ -451,7 +448,7 @@ flowchart LR
    - Markdown formatting with headers, tables, and lists
    - Collapsible sections for long content
    - Proper syntax highlighting in code blocks
-4. **Visual Hierarchy**: Mermaid flowchart for module relationships
+4. **Visual Hierarchy**: Module hierarchy representation
 5. **Professional Appearance**: Can be rendered in GitHub, VS Code, documentation tools
 6. **Export Flexibility**: Can be converted to HTML, PDF if needed
 
@@ -473,7 +470,7 @@ Detailed information for each of the 6 export steps:
 - Tag Injection
 
 #### 3. Module Hierarchy
-- Mermaid flowchart visualization (LR layout)
+- Visual hierarchy representation
 - Complete module list in collapsible table
 - Shows all modules without truncation
 
@@ -527,7 +524,7 @@ The markdown report is generated independently from console output, ensuring con
 3. No truncation in module hierarchy or node mappings
 4. Report is generated regardless of verbose flag
 5. Proper markdown formatting (headers, tables, code blocks)
-6. Mermaid flowchart syntax is valid
+6. Report structure is valid
 7. Summary statistics match metadata
 
 ### Example Test Assertions:
@@ -541,8 +538,7 @@ assert 0 <= metadata["report"]["node_tagging"]["coverage"]["percentage"] <= 100
 assert report_path.endswith("_htp_export_report.md")
 assert "# HTP ONNX Export Report" in report
 assert "## Export Process" in report
-assert "```mermaid" in report
-assert "flowchart LR" in report
+assert "## Module Hierarchy" in report
 assert all_modules_in_report(report, metadata["modules"])
 assert no_truncation_marker_in_sections(report)
 
@@ -559,7 +555,7 @@ The markdown report generation requires:
 - Standard library modules (no additional dependencies for basic implementation)
 
 ### Tree Visualization Options
-1. **Initial**: Mermaid flowchart LR for hierarchy visualization
+1. **Current**: Module hierarchy table with execution order
 2. **Future Options**: 
    - ASCII tree using `anytree` or `treelib` in code blocks
    - Rich export to SVG (optional enhancement)

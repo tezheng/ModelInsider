@@ -32,36 +32,32 @@ The HTP export process generates a hierarchical module structure that needs to b
 
 ## Decision Outcome
 
-**Chosen option**: Hybrid approach using **Mermaid Flowchart LR** for visual overview and **ASCII Tree in Code Blocks** for complete hierarchy.
+**Chosen option**: **ASCII Tree in Code Blocks** for complete hierarchy visualization. *(Mermaid component disabled for stability)*
 
 ### Rationale
 
-- Mermaid provides excellent visual representation when markdown is rendered (limited to first 10-20 relationships)
 - ASCII tree in code blocks ensures complete hierarchy is shown without truncation
 - No Python dependencies needed for report viewing - ASCII trees are generated using built-in string manipulation
 - Works in all markdown viewers (GitHub, VS Code, etc.)
 - Consistent with console output format (Rich trees converted to ASCII)
-- Graceful degradation - if Mermaid doesn't render, ASCII tree is still readable
+- Mermaid component disabled for stability reasons
 
 ### Consequences
 
 **Positive:**
-- Universal compatibility with markdown renderers
+- Universal compatibility with markdown renderers  
 - Complete hierarchy information preserved without truncation
-- Visual and textual representations complement each other
 - No additional Python dependencies required
 - Fast generation and rendering
 - Familiar ASCII tree format matches console output
 - Collapsible sections manage large hierarchies
+- Simplified implementation without Mermaid complexity
 
 **Negative:**
-- Mermaid diagrams limited to first 10-20 relationships to avoid clutter
-- Two representations might seem redundant
-- Limited styling options in both Mermaid and ASCII trees
+- Limited styling options in ASCII trees
+- Less visually rich than graphical diagrams
 
 **Neutral:**
-- Report size slightly larger due to dual representation
-- Requires learning Mermaid syntax for maintenance
 - ASCII trees use fixed-width fonts for proper alignment
 
 ## Implementation Notes
@@ -69,14 +65,7 @@ The HTP export process generates a hierarchical module structure that needs to b
 ```markdown
 ## Module Hierarchy
 
-```mermaid
-flowchart LR
-    M0[BertModel] --> M1[BertEmbeddings]
-    M0 --> M2[BertEncoder]
-    M0 --> M3[BertPooler]
-    M2 --> M4[BertLayer]
-    %% ... and 10 more relationships
-```
+*Mermaid diagram disabled for stability.*
 
 ### Complete Module Hierarchy
 <details>
@@ -199,7 +188,6 @@ The ASCII tree is generated using:
 
 1. **Export Process**: Shows module hierarchy preview in Step 3/6
 2. **Module Hierarchy Section**: 
-   - Mermaid diagram (first 10-20 relationships)
    - Complete ASCII tree in collapsible section
    - Module list table with reordered columns: Execution Order | Class Name | Tag | Scope
 3. **Node Distribution**: Shows node distribution preview in Step 5/6

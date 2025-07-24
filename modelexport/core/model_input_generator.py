@@ -140,6 +140,74 @@ def generate_dummy_inputs(
         )
 
 
+
+
+
+def enhance_exporter_config(
+    exporter: str,
+    model_type: str,
+    task: str,
+    library_name: str,
+    **config_kwargs
+) -> dict:
+    """
+    Enhance exporter config parameters for models with non-standard task requirements.
+    
+    Returns a dict of all parameters to pass to TasksManager.get_exporter_config_constructor().
+    Universal function that can be extended for any model requiring task mapping.
+    
+    Args:
+        exporter: Export backend ("onnx", "tflite", etc.)
+        model_type: Model type from HuggingFace config (e.g., "sam", "bert")
+        task: Requested task name (may be semantic/custom)
+        library_name: Library name ("transformers", "diffusers", etc.) 
+        **config_kwargs: Additional config constructor arguments
+        
+    Returns:
+        Dict of enhanced parameters for TasksManager.get_exporter_config_constructor()
+        
+    Model-Specific Enhancements:
+        SAM (Segment Anything Model):
+            - "mask-generation" → "feature-extraction" + vision_encoder=False (decoder-only)
+            - "feature-extraction" → "feature-extraction" + vision_encoder=True (encoder-only)
+            - Other tasks passed through unchanged
+    """
+    # Base parameters for TasksManager
+    exporter_params = {
+        "exporter": exporter,
+        "model_type": model_type,
+        "task": task,
+        "library_name": library_name,
+        "exporter_config_kwargs": config_kwargs if config_kwargs else None
+    }
+    
+    # Model-specific task enhancements
+    if model_type == "sam":
+        if task == "mask-generation":
+            # Map semantic task to Optimum-supported configuration for decoder-only export
+            logger.info("🎯 Mapping SAM mask-generation → feature-extraction + vision_encoder=False (decoder-only)")
+            exporter_params["task"] = "feature-extraction"
+            enhanced_kwargs = {**config_kwargs, "vision_encoder": False}
+            exporter_params["exporter_config_kwargs"] = enhanced_kwargs
+            
+        elif task == "feature-extraction":
+            # Map feature-extraction to encoder-only export for SAM
+            logger.info("🎯 Mapping SAM feature-extraction → feature-extraction + vision_encoder=True (encoder-only)")
+            enhanced_kwargs = {**config_kwargs, "vision_encoder": True}
+            exporter_params["exporter_config_kwargs"] = enhanced_kwargs
+            
+        # Other tasks pass through unchanged
+    
+    # Future model enhancements can be added here:
+    # elif model_type == "bert":
+    #     if task == "next-sentence-prediction":
+    #         exporter_params["task"] = "text-classification"
+    #         enhanced_kwargs = {**config_kwargs, "num_labels": 2}
+    #         exporter_params["exporter_config_kwargs"] = enhanced_kwargs
+    
+    return exporter_params
+
+
 def get_export_config_from_model_path(
     model_name_or_path: str,
     exporter: str = "onnx",
@@ -155,7 +223,9 @@ def get_export_config_from_model_path(
     Args:
         model_name_or_path: HuggingFace model name or local path
         exporter: Export backend ("onnx", "tflite", etc.)
-        task: Task name (auto-detects if None)
+        task: Task name (auto-detects if None). SAM task mapping:
+            - "mask-generation": Decoder-only export (vision_encoder=False)
+            - "feature-extraction": Encoder-only export (vision_encoder=True)
         library_name: Library name ("transformers", "diffusers", etc.)
         **config_kwargs: Additional config constructor arguments
 
@@ -165,6 +235,10 @@ def get_export_config_from_model_path(
     Example:
         >>> config = get_export_config_from_model_path("bert-base-uncased")
         >>> inputs = config.generate_dummy_inputs()
+        
+        >>> # SAM with standard HF tasks
+        >>> decoder_config = get_export_config_from_model_path("facebook/sam-vit-base", task="mask-generation")
+        >>> encoder_config = get_export_config_from_model_path("facebook/sam-vit-base", task="feature-extraction")
     """
     try:
         from optimum.exporters.tasks import TasksManager
@@ -197,15 +271,17 @@ def get_export_config_from_model_path(
             task = "feature-extraction"
             logger.info(f"Using fallback task: {task}")
 
-    # This is the key function - directly from Optimum TasksManager
+    # Enhanced exporter config with semantic task mapping
     try:
-        constructor = TasksManager.get_exporter_config_constructor(
+        exporter_params = enhance_exporter_config(
             exporter=exporter,
             model_type=model_type,
             task=task,
             library_name=library_name or "transformers",
-            exporter_config_kwargs=config_kwargs if config_kwargs else None,
+            **config_kwargs
         )
+        
+        constructor = TasksManager.get_exporter_config_constructor(**exporter_params)
 
         # Create the actual export config
         export_config = constructor(config)
@@ -224,50 +300,31 @@ def get_export_config_from_model_path(
         ) from e
 
 
-def patch_export_config(export_config) -> None:
+def patch_export_config(export_config):
     """
     Apply model-specific patches to export configurations.
     
     Args:
         export_config: Optimum export config instance to patch
         
-    This function checks the config type and applies appropriate patches:
-    - SamOnnxConfig: Replaces DummyPointsGenerator with semantic version
-    - Future models: Add additional patches as needed
+    Returns:
+        Modified export config (may be the same object or a new one)
+        
+    This function checks the config type and applies appropriate patches.
+    Currently, all SAM task mapping is handled by enhance_exporter_config(),
+    so this function simply returns the config unchanged.
+    
+    Future models that need post-config patches can be added here.
     """
-    config_type = type(export_config).__name__
+    # SAM task mapping is now handled by enhance_exporter_config()
+    # No patching needed - return config unchanged
     
-    if config_type == "SamOnnxConfig":
-        from optimum.utils.input_generators import DummyPointsGenerator
-        
-        class SemanticDummyPointsGenerator(DummyPointsGenerator):
-            """Enhanced dummy points generator with semantic coordinates for SAM models"""
-            
-            def generate(self, input_name: str, framework: str = "pt", int_dtype: str = "int64", float_dtype: str = "fp32"):
-                if input_name == "input_points":
-                    # Generate semantic pixel coordinates [0, 1024] instead of random [0, 1]
-                    shape = [self.batch_size, self.point_batch_size, self.nb_points_per_image, 2]
-                    return self.random_float_tensor(
-                        shape, 
-                        min_value=0, 
-                        max_value=1024, 
-                        framework=framework, 
-                        dtype=float_dtype
-                    )
-                return super().generate(input_name, framework, int_dtype, float_dtype)
-        
-        # Inject semantic generator into this config instance
-        original_classes = export_config.DUMMY_INPUT_GENERATOR_CLASSES
-        export_config.DUMMY_INPUT_GENERATOR_CLASSES = (
-            original_classes[0],  # DummyVisionInputGenerator (unchanged)
-            SemanticDummyPointsGenerator,  # Our semantic version
-            original_classes[2],  # DummyVisionEmbeddingsGenerator (unchanged)
-        )
-        logger.info(f"🎯 Applied semantic coordinate fix for {config_type}")
+    # Future model patches can be added here:
+    # config_type = type(export_config).__name__
+    # if config_type == "SomeOtherConfig":
+    #     return apply_other_patch(export_config)
     
-    # Future model patches can be added here
-    # elif config_type == "SomeOtherConfig":
-    #     apply_other_patch(export_config)
+    return export_config
 
 
 def generate_dummy_inputs_from_model_path(
@@ -310,11 +367,14 @@ def generate_dummy_inputs_from_model_path(
     shapes.update(shape_kwargs)
 
     # Apply model-specific patches if needed
-    patch_export_config(export_config)
+    export_config = patch_export_config(export_config)
     
     # Generate dummy inputs using Optimum
     dummy_inputs = export_config.generate_dummy_inputs(framework="pt", **shapes)
 
+    # Filter out None values from disabled generators
+    dummy_inputs = {k: v for k, v in dummy_inputs.items() if v is not None}
+    
     logger.info(f"Generated inputs: {list(dummy_inputs.keys())}")
     for name, tensor in dummy_inputs.items():
         logger.debug(f"  {name}: {list(tensor.shape)} ({tensor.dtype})")
