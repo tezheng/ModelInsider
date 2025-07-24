@@ -10,9 +10,12 @@ from __future__ import annotations
 import contextlib
 import io
 import time
+import uuid
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass, field
+
+# datetime imports removed - following ADR-006 to use float timestamps only
 from enum import Enum
 from functools import wraps
 
@@ -41,6 +44,9 @@ class ExportStep(Enum):
 class ExportData:
     """Unified export data shared across all writers."""
     
+    # Session tracking
+    export_id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    
     # Basic info
     model_name: str = ""
     output_path: str = ""
@@ -48,7 +54,7 @@ class ExportData:
     embed_hierarchy: bool = True
     
     # Timing
-    start_time: float = field(default_factory=time.time)
+    start_time: float = field(default_factory=lambda: time.time())
     export_time: float = 0.0
     
     # Typed step data
@@ -59,18 +65,24 @@ class ExportData:
     node_tagging: NodeTaggingData | None = None
     tag_injection: TagInjectionData | None = None
     
+    def get_step_timestamp(self, step: ExportStep) -> float | None:
+        """Get the Unix epoch timestamp for a step."""
+        # Convert enum name to attribute name (e.g., MODEL_PREP -> model_prep)
+        attr_name = step.name.lower()
+        data = getattr(self, attr_name, None)
+        return data.timestamp if data else None
+    
     @property
     def timestamp(self) -> str:
-        """Current timestamp in ISO format with millisecond precision."""
-        import datetime
-        dt = datetime.datetime.now(datetime.UTC)
-        # Format with milliseconds (3 digits) instead of microseconds (6 digits)
-        return dt.strftime("%Y-%m-%dT%H:%M:%S.") + f"{dt.microsecond // 1000:03d}Z"
+        """Export start timestamp in ISO 8601 format with Z suffix."""
+        from .timestamp_utils import format_timestamp_iso
+        return format_timestamp_iso(self.start_time) or ""
     
     @property
     def elapsed_time(self) -> float:
-        """Total elapsed time."""
+        """Total elapsed time in seconds."""
         return time.time() - self.start_time
+    
 
 
 def step(export_step: ExportStep):

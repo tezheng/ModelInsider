@@ -7,7 +7,6 @@ following the specification in HTP_METADATA_REPORT_SPEC.md.
 
 from __future__ import annotations
 
-import datetime
 import time
 from pathlib import Path
 
@@ -19,6 +18,7 @@ from ...core.hierarchy_utils import (
     count_nodes_per_tag,
 )
 from .base_writer import ExportData, ExportStep, StepAwareWriter, step
+from .timestamp_utils import format_timestamp_iso
 
 
 class MarkdownReportWriter(StepAwareWriter):
@@ -53,28 +53,29 @@ class MarkdownReportWriter(StepAwareWriter):
         # Store step data for final report generation
         self._step_results = {}
         self._start_time = time.time()
+        self._export_data = None  # Will be set on first write
+        self._report_generated = False  # Track if report was generated
     
-    def _get_step_timestamp(self) -> str:
-        """Generate a unique timestamp for the current step with millisecond precision."""
-        dt = datetime.datetime.now(datetime.UTC)
-        # Format with milliseconds (3 digits) instead of microseconds (6 digits)
-        return dt.strftime("%Y-%m-%dT%H:%M:%S.") + f"{dt.microsecond // 1000:03d}Z"
     
     def _write_default(self, export_step: ExportStep, data: ExportData) -> int:
         """Default handler - record step completion."""
         self._step_results[export_step] = {
             "completed": True,
-            "timestamp": self._get_step_timestamp(),
+            "timestamp": format_timestamp_iso(data.get_step_timestamp(export_step)),
         }
         return 0
     
     @step(ExportStep.MODEL_PREP)
     def write_model_prep(self, export_step: ExportStep, data: ExportData) -> int:
         """Record model preparation data."""
+        # Store reference to ExportData for use in flush()
+        if self._export_data is None:
+            self._export_data = data
+            
         if data.model_prep:
             self._step_results[export_step] = {
                 "completed": True,
-                "timestamp": self._get_step_timestamp(),
+                "timestamp": format_timestamp_iso(data.get_step_timestamp(export_step)),
                 "data": data.model_prep,
             }
         return 1
@@ -85,7 +86,7 @@ class MarkdownReportWriter(StepAwareWriter):
         if data.input_gen:
             self._step_results[export_step] = {
                 "completed": True,
-                "timestamp": self._get_step_timestamp(),
+                "timestamp": format_timestamp_iso(data.get_step_timestamp(export_step)),
                 "data": data.input_gen,
             }
         return 1
@@ -96,7 +97,7 @@ class MarkdownReportWriter(StepAwareWriter):
         if data.hierarchy:
             self._step_results[export_step] = {
                 "completed": True,
-                "timestamp": self._get_step_timestamp(),
+                "timestamp": format_timestamp_iso(data.get_step_timestamp(export_step)),
                 "data": data.hierarchy,
             }
         return 1
@@ -107,7 +108,7 @@ class MarkdownReportWriter(StepAwareWriter):
         if data.onnx_export:
             self._step_results[export_step] = {
                 "completed": True,
-                "timestamp": self._get_step_timestamp(),
+                "timestamp": format_timestamp_iso(data.get_step_timestamp(export_step)),
                 "data": data.onnx_export,
             }
         return 1
@@ -118,38 +119,48 @@ class MarkdownReportWriter(StepAwareWriter):
         if data.node_tagging:
             self._step_results[export_step] = {
                 "completed": True,
-                "timestamp": self._get_step_timestamp(),
+                "timestamp": format_timestamp_iso(data.get_step_timestamp(export_step)),
                 "data": data.node_tagging,
             }
         return 1
     
     @step(ExportStep.TAG_INJECTION)
     def write_tag_injection(self, export_step: ExportStep, data: ExportData) -> int:
-        """Final step - generate the complete markdown report."""
+        """Record tag injection data."""
         if data.tag_injection:
             self._step_results[export_step] = {
                 "completed": True,
-                "timestamp": self._get_step_timestamp(),
+                "timestamp": format_timestamp_iso(data.get_step_timestamp(export_step)),
                 "data": data.tag_injection,
             }
         
-        # Generate the complete report
-        self._generate_report(data)
+        # Report generation moved to flush() to get final export_time
         
         return 1
     
     def _generate_report(self, data: ExportData) -> None:
         """Generate the complete markdown report."""
+        # Only generate once
+        if self._report_generated:
+            return
+            
         try:
             # Header
             self.doc.add_heading(self.TITLE, level=1)
             
             # Metadata lines
-            self.doc.add_paragraph(f"**Generated**: {self._get_step_timestamp()}")
+            # Get export start time from first step or current time
+            export_start = data.get_step_timestamp(ExportStep.MODEL_PREP)
+            if export_start:
+                self.doc.add_paragraph(f"**Generated**: {format_timestamp_iso(export_start)}")
+            else:
+                self.doc.add_paragraph(f"**Generated**: {format_timestamp_iso(time.time())}")
             self.doc.add_paragraph(f"**Model**: {data.model_name}")
             self.doc.add_paragraph(f"**Output**: {data.output_path}")
             self.doc.add_paragraph("**Strategy**: HTP (Hierarchical Tracing and Projection)")
-            self.doc.add_paragraph(f"**Export Time**: {data.export_time:.2f}s")
+            # Calculate export time from timestamps
+            export_time = self._calculate_export_time(self._export_data if self._export_data else data)
+            self.doc.add_paragraph(f"**Export Time**: {export_time:.2f}s")
             
             # Export Process Steps
             self.doc.add_heading(self.SECTION_EXPORT_STEPS, level=2)
@@ -191,7 +202,8 @@ class MarkdownReportWriter(StepAwareWriter):
             self.doc.add_heading("HTP ONNX Export Report - Error", level=1)
             self.doc.add_paragraph(f"**Error generating report**: {e!s}")
             self.doc.add_paragraph(f"**Model**: {data.model_name}")
-            self.doc.add_paragraph(f"**Export Time**: {data.export_time:.2f}s")
+            export_time = self._calculate_export_time(data)
+            self.doc.add_paragraph(f"**Export Time**: {export_time:.2f}s")
     
     def _write_model_prep_section(self, data: ExportData) -> None:
         """Write model preparation section."""
@@ -426,6 +438,14 @@ class MarkdownReportWriter(StepAwareWriter):
         self.doc.add_raw("")
         self.doc.add_raw("</details>")
     
+    def _calculate_export_time(self, data: ExportData) -> float:
+        """Get export time from ExportData."""
+        # Use the stored reference if available (which has the final export_time)
+        if self._export_data and self._export_data.export_time > 0:
+            return self._export_data.export_time
+        # Otherwise use the passed data
+        return data.export_time if data.export_time > 0 else 0.0
+    
     def _write_summary_section(self, data: ExportData) -> None:
         """Write export summary section."""
         self.doc.add_heading("Export Summary", level=2)
@@ -433,8 +453,8 @@ class MarkdownReportWriter(StepAwareWriter):
         # Performance Metrics
         self.doc.add_heading("Performance Metrics", level=3)
         
-        # Calculate approximate step timings (simplified for now)
-        total_time = data.export_time
+        # Calculate export time from timestamps
+        total_time = self._calculate_export_time(data)
         metrics = [
             f"**Export Time**: {total_time:.2f}s",
             f"**Module Processing**: ~{total_time * 0.2:.2f}s",
@@ -489,11 +509,17 @@ class MarkdownReportWriter(StepAwareWriter):
         # Replace pipe characters and newlines
         return text.replace("|", "\\|").replace("\n", " ").replace("\r", "")
     
+    
+    
     # Using shared hierarchy_utils for all tree building
     
     def flush(self) -> None:
-        """Write markdown to file."""
+        """Generate report and write markdown to file."""
         try:
+            # Generate the report with the latest data (including final export_time)
+            if self._export_data:
+                self._generate_report(self._export_data)
+            
             # Ensure output directory exists
             Path(self.report_path).parent.mkdir(parents=True, exist_ok=True)
             
