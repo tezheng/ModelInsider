@@ -32,12 +32,7 @@ class TestComprehensiveIntegration:
             "attention_mask": {"shape": [1, 128], "dtype": "int", "range": [0, 1]}
         }
         
-        # Test 2: Using manual tensor creation
-        manual_inputs = {
-            "input_ids": torch.randint(0, 1000, (1, 128)),
-            "token_type_ids": torch.randint(0, 1, (1, 128)),
-            "attention_mask": torch.ones(1, 128, dtype=torch.int64)
-        }
+        # Test 2: Removed unused manual tensor creation (was not being used)
         
         with tempfile.TemporaryDirectory() as temp_dir:
             # Export with config-style specs
@@ -97,7 +92,7 @@ class TestComprehensiveIntegration:
                 # All should succeed with full coverage
                 assert result["coverage_percentage"] == 100.0
                 assert result["empty_tags"] == 0
-                assert result["hierarchy_modules"] == 45  # BERT tiny has 45 modules (updated count)
+                assert result["hierarchy_modules"] == 18  # BERT tiny has 18 HF modules (torch.nn excluded per MUST-002)
     
     def test_error_recovery(self):
         """Test error handling and recovery"""

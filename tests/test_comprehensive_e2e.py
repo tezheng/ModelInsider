@@ -35,12 +35,10 @@ import tempfile
 import time
 from pathlib import Path
 
-import onnx
 import pytest
 from transformers import AutoModel
 
 from modelexport.strategies.htp.htp_exporter import HTPExporter
-
 
 # Test configuration
 TEST_CONFIG = {
@@ -57,7 +55,7 @@ CLASSIC_MODELS = {
         "model_name": "prajjwal1/bert-tiny",
         "domain": "language", 
         "architecture": "bert",
-        "expected_modules": 45,
+        "expected_modules": 18,  # After MUST-002: Only HF modules, no torch.nn
         "notes": "BERT tiny for fast testing"
     },
     "resnet18": {
@@ -293,8 +291,8 @@ class TestCrossArchitecture:
     def test_model_diversity_coverage(self):
         """Test that we cover diverse model types."""
         # Count domains and architectures
-        domains = set(config["domain"] for config in ALL_MODELS.values())
-        architectures = set(config["architecture"] for config in ALL_MODELS.values())
+        domains = {config["domain"] for config in ALL_MODELS.values()}
+        architectures = {config["architecture"] for config in ALL_MODELS.values()}
         
         # Ensure we have good diversity
         assert len(domains) >= 2, f"Should test multiple domains, got {domains}"

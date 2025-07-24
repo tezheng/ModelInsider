@@ -609,19 +609,28 @@ class TestTracingHierarchyBuilder:
         assert summary["execution_steps"] > 0, "Should track execution steps"
         assert len(hierarchy_data) > 0, "Should capture module hierarchy"
         
-        # Look for our linear layers in the hierarchy
+        # After MUST-002 fix, torch.nn modules like Linear are NOT included by default
+        # So we should only see the TrackedModel in hierarchy
+        assert len(hierarchy_data) == 1, f"Should only have root module (torch.nn excluded). Found: {list(hierarchy_data.keys())}"
+        
+        # The root module should be TrackedModel
+        root_info = hierarchy_data.get("", {})
+        assert root_info.get("class_name") == "TrackedModel", "Root should be TrackedModel"
+        
+        # To test with torch.nn modules included, we need to use exceptions
+        builder_with_exceptions = TracingHierarchyBuilder(exceptions=["Linear"])
+        builder_with_exceptions.trace_model_execution(model, (input_tensor,))
+        
+        summary_with_exceptions = builder_with_exceptions.get_execution_summary()
+        hierarchy_with_exceptions = summary_with_exceptions["module_hierarchy"]
+        
+        # Now we should see Linear modules
         linear_modules = []
-        for module_path, module_info in hierarchy_data.items():
+        for module_path, module_info in hierarchy_with_exceptions.items():
             if module_info.get("class_name") == "Linear":
                 linear_modules.append((module_path, module_info))
         
-        assert len(linear_modules) >= 2, f"Should find both linear layers. Found: {[path for path, _ in linear_modules]}"
-        
-        # Validate execution information is captured
-        for module_path, module_info in linear_modules:
-            if "execution_count" in module_info:
-                # Each linear layer should be executed at least once
-                assert module_info["execution_count"] >= 1, f"Layer {module_path} should have execution count >= 1"
+        assert len(linear_modules) == 2, f"Should find both linear layers when exceptions used. Found: {[path for path, _ in linear_modules]}"
 
 
 class TestONNXNodeTagger:
