@@ -60,7 +60,8 @@ class TestCLIExport:
             '--verbose',
             'export', 
             '--model', 'prajjwal1/bert-tiny',
-            '--output', str(output_path)
+            '--output', str(output_path),
+            '--with-report'
         ])
         
         # Check command succeeded
@@ -98,7 +99,7 @@ class TestCLIExport:
         
         # Validate report structure
         assert 'steps' in metadata['report'], "Missing steps in report"
-        assert 'node_tagging' in metadata['report'], "Missing node_tagging in report"
+        assert 'node_tagging' in metadata['report']['steps'], "Missing node_tagging in report steps"
         
         # Validate statistics
         assert metadata['statistics']['onnx_nodes'] > 0
@@ -106,7 +107,7 @@ class TestCLIExport:
         assert metadata['statistics']['coverage_percentage'] == 100.0
         
         # Validate node tagging report
-        node_tagging = metadata['report']['node_tagging']
+        node_tagging = metadata['report']['steps']['node_tagging']
         assert 'statistics' in node_tagging
         stats = node_tagging['statistics']
         assert stats['direct_matches'] >= 0
