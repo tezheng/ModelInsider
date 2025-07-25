@@ -45,7 +45,8 @@ def validate_metadata(metadata: dict[str, Any], schema: dict[str, Any] | None = 
         import warnings
         warnings.warn(
             "jsonschema not installed. Skipping metadata validation. "
-            "Install with: pip install jsonschema"
+            "Install with: pip install jsonschema",
+            stacklevel=2
         )
         return
     

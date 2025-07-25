@@ -311,7 +311,8 @@ class HTPExporter:
             monitor.update(ExportStep.TAG_INJECTION)
 
             # Calculate final statistics before metadata generation
-            self._export_stats["export_time"] = time.time() - start_time
+            export_time = time.time() - start_time
+            self._export_stats["export_time"] = export_time
             self._export_stats["hierarchy_modules"] = len(self._hierarchy_data)
             self._export_stats["onnx_nodes"] = len(onnx_model.graph.node)
             self._export_stats["tagged_nodes"] = len(self._tagged_nodes)
@@ -327,6 +328,11 @@ class HTPExporter:
             tagged_nodes = len(self._tagged_nodes)
             coverage = (tagged_nodes / total_nodes * 100.0) if total_nodes > 0 else 0.0
             self._export_stats["coverage_percentage"] = coverage
+            
+            # Update monitor with actual export time
+            monitor.data.export_time = export_time
+            # Also update the start_time to ensure elapsed_time is correct
+            monitor.data.start_time = start_time
 
             # Step 8: Metadata Generation
             # Metadata generation is handled by MetadataWriter in monitor
