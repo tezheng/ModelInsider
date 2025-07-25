@@ -8,12 +8,15 @@ following the new structure specified in REPORT_IMPROVEMENTS.md.
 from __future__ import annotations
 
 import json
+import time
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
 from .base_writer import ExportData, ExportStep, StepAwareWriter, step
 from .metadata_builder import HTPMetadataBuilder
 from .step_data import ModuleInfo
+from .timestamp_utils import format_timestamp_iso
 
 
 class MetadataWriter(StepAwareWriter):
@@ -35,18 +38,25 @@ class MetadataWriter(StepAwareWriter):
         self._model_info_set = False
         self._export_time = 0.0
         self._steps_data = {}
+        self._export_data = None  # Will be set on first write
     
     def _write_default(self, export_step: ExportStep, data: ExportData) -> int:
         """Default handler - record step completion."""
-        self._steps_data[export_step.value] = {
-            "completed": True,
-            "timestamp": data.timestamp,
-        }
+        epoch_time = data.get_step_timestamp(export_step)
+        if epoch_time:
+            self._steps_data[export_step.value] = {
+                "completed": True,
+                "timestamp": datetime.fromtimestamp(epoch_time, tz=UTC).isoformat(timespec='milliseconds').replace('+00:00', 'Z'),
+            }
         return 0
     
     @step(ExportStep.MODEL_PREP)
     def write_model_prep(self, export_step: ExportStep, data: ExportData) -> int:
         """Record model information."""
+        # Store reference to ExportData for use in flush()
+        if self._export_data is None:
+            self._export_data = data
+            
         if not data.model_prep:
             return 0
         
@@ -58,15 +68,15 @@ class MetadataWriter(StepAwareWriter):
         )
         self._model_info_set = True
         
+        # Note: export_time_seconds will be set in flush() when final time is available
         self.builder.with_export_context(
             embed_hierarchy_attributes=data.embed_hierarchy,
-            export_time_seconds=data.export_time,
         )
         
         # Record step completion
         self._steps_data["model_preparation"] = {
             "completed": True,
-            "timestamp": data.timestamp,
+            "timestamp": format_timestamp_iso(data.get_step_timestamp(export_step)) or "",
             "model_class": data.model_prep.model_class,
             "total_modules": data.model_prep.total_modules,
             "total_parameters": data.model_prep.total_parameters,
@@ -90,7 +100,7 @@ class MetadataWriter(StepAwareWriter):
         
         # This will be part of tracing info
         self._steps_data["input_generation"] = {
-            "timestamp": data.timestamp,
+            "timestamp": format_timestamp_iso(data.get_step_timestamp(export_step)) or "",
             "method": data.input_gen.method,
             "model_type": data.input_gen.model_type,
             "task": data.input_gen.task,
@@ -124,7 +134,7 @@ class MetadataWriter(StepAwareWriter):
         # Record step completion
         self._steps_data["hierarchy_building"] = {
             "completed": True,
-            "timestamp": data.timestamp,
+            "timestamp": format_timestamp_iso(data.get_step_timestamp(export_step)) or "",
             "modules_traced": len(data.hierarchy.hierarchy),
             "execution_steps": data.hierarchy.execution_steps,
         }
@@ -139,7 +149,7 @@ class MetadataWriter(StepAwareWriter):
         
         # Store ONNX details for final output
         self._steps_data["onnx_export"] = {
-            "timestamp": data.timestamp,
+            "timestamp": format_timestamp_iso(data.get_step_timestamp(export_step)) or "",
             "opset_version": data.onnx_export.opset_version,
             "do_constant_folding": data.onnx_export.do_constant_folding,
             "onnx_size_mb": data.onnx_export.onnx_size_mb,
@@ -167,7 +177,7 @@ class MetadataWriter(StepAwareWriter):
         # Record step completion with enhanced structure per spec
         self._steps_data["node_tagging"] = {
             "completed": True,
-            "timestamp": data.timestamp,
+            "timestamp": format_timestamp_iso(data.get_step_timestamp(export_step)) or "",
             "total_nodes": data.node_tagging.total_nodes,
             "tagged_nodes_count": len(data.node_tagging.tagged_nodes),
             "coverage_percentage": data.node_tagging.coverage,
@@ -196,13 +206,10 @@ class MetadataWriter(StepAwareWriter):
             return 0
         
         self._steps_data["tag_injection"] = {
-            "timestamp": data.timestamp,
+            "timestamp": format_timestamp_iso(data.get_step_timestamp(export_step)) or "",
             "tags_injected": data.tag_injection.tags_injected,
             "tags_stripped": data.tag_injection.tags_stripped,
         }
-        
-        # This is the final step, so capture export time
-        self._export_time = data.export_time
         
         return 1
     
@@ -232,8 +239,24 @@ class MetadataWriter(StepAwareWriter):
             empty_tags = self.builder._tagging_info.coverage.empty_tags
             coverage = self.builder._tagging_info.coverage.coverage_percentage
         
+        # Use the actual export time from ExportData if available
+        export_time = self._export_data.export_time if self._export_data else self._export_time
+        
+        # Update export context with final export time and timestamp
+        if hasattr(self.builder, '_export_context') and self.builder._export_context:
+            self.builder._export_context.export_time_seconds = export_time
+            # Set the export start timestamp from ExportData
+            if self._export_data:
+                # Get the first step timestamp (MODEL_PREP) and format it
+                first_timestamp = self._export_data.get_step_timestamp(ExportStep.MODEL_PREP)
+                if first_timestamp:
+                    self.builder._export_context.timestamp = format_timestamp_iso(first_timestamp)
+                else:
+                    # No steps recorded yet, use current time as fallback
+                    self.builder._export_context.timestamp = format_timestamp_iso(time.time())
+        
         self.builder.with_export_report(
-            export_time_seconds=self._export_time,
+            export_time_seconds=export_time,
             steps=self._steps_data,
             empty_tags_guarantee=empty_tags,
             coverage_percentage=coverage,
@@ -259,7 +282,7 @@ class MetadataWriter(StepAwareWriter):
             module_types = self._extract_module_types(self.builder._modules)
         
         self.builder.with_statistics(
-            export_time=self._export_time,
+            export_time=export_time,
             hierarchy_modules=total_modules,
             traced_modules=traced_modules,
             onnx_nodes=onnx_nodes,
@@ -277,6 +300,9 @@ class MetadataWriter(StepAwareWriter):
             from .validation_utils import validate_before_write
             validate_before_write(metadata)
             
+            # Ensure output directory exists
+            Path(self.metadata_path).parent.mkdir(parents=True, exist_ok=True)
+            
             # Write to file
             with open(self.metadata_path, 'w') as f:
                 json.dump(metadata, f, indent=2)
@@ -285,12 +311,14 @@ class MetadataWriter(StepAwareWriter):
             # If builder validation fails, write minimal metadata
             minimal_metadata = {
                 "export_context": {
-                    "timestamp": self._steps_data.get("model_preparation", {}).get("timestamp", ""),
+                    "timestamp": self._steps_data.get("model_preparation", {}).get("timestamp", format_timestamp_iso(time.time())),
                     "strategy": "htp",
                     "version": "1.0",
                 },
                 "error": str(e),
             }
+            # Ensure output directory exists
+            Path(self.metadata_path).parent.mkdir(parents=True, exist_ok=True)
             with open(self.metadata_path, 'w') as f:
                 json.dump(minimal_metadata, f, indent=2)
     
@@ -444,3 +472,6 @@ class MetadataWriter(StepAwareWriter):
                 types.update(self._extract_module_types(child))
         
         return sorted(types)
+    
+    
+    

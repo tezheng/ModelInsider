@@ -393,6 +393,9 @@ class HTPExporter:
         """Export to ONNX internally."""
         import warnings
 
+        # Ensure output directory exists
+        Path(output_path).parent.mkdir(parents=True, exist_ok=True)
+
         # Filter out non-ONNX export keys
         filtered_kwargs = {
             k: v
