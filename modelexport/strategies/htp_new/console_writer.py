@@ -12,9 +12,9 @@ import io
 from rich.console import Console
 from rich.tree import Tree
 
-from ...core.hierarchy_utils import build_rich_tree, find_immediate_children
+from ...core.hierarchy_utils import build_rich_tree
 from .base_writer import ExportData, ExportStep, StepAwareWriter, step
-from .step_data import ModuleInfo, NodeTaggingData
+from .step_data import NodeTaggingData
 
 
 class ConsoleWriter(StepAwareWriter):
