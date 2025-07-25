@@ -50,7 +50,7 @@ class TestSAMExportRegression:
             captured_inputs = inputs
             
         with patch('torch.onnx.export', side_effect=capture_export):
-            with patch('modelexport.strategies.htp.htp_exporter.infer_output_names', return_value=None):
+            with patch('modelexport.core.onnx_utils.infer_output_names', return_value=None):
                 try:
                     # This is the core method that should preserve dict structure
                     exporter._convert_model_to_onnx(mock_model, self.output_path, {})
@@ -79,7 +79,7 @@ class TestSAMExportRegression:
             captured_inputs = inputs
             
         with patch('torch.onnx.export', side_effect=capture_export):
-            with patch('modelexport.strategies.htp.htp_exporter.infer_output_names', return_value=None):
+            with patch('modelexport.core.onnx_utils.infer_output_names', return_value=None):
                 try:
                     exporter._convert_model_to_onnx(mock_model, self.output_path, {})
                 except Exception:
@@ -106,7 +106,7 @@ class TestSAMExportRegression:
             captured_inputs = inputs
             
         with patch('torch.onnx.export', side_effect=capture_export):
-            with patch('modelexport.strategies.htp.htp_exporter.infer_output_names', return_value=None):
+            with patch('modelexport.core.onnx_utils.infer_output_names', return_value=None):
                 try:
                     exporter._convert_model_to_onnx(mock_model, self.output_path, {})
                 except Exception:
@@ -147,7 +147,7 @@ class TestSAMExportRegression:
             })
             
         with patch('torch.onnx.export', side_effect=track_export_call):
-            with patch('modelexport.strategies.htp.htp_exporter.infer_output_names', return_value=None):
+            with patch('modelexport.core.onnx_utils.infer_output_names', return_value=None):
                 try:
                     exporter._convert_model_to_onnx(mock_model, self.output_path, {})
                 except Exception:

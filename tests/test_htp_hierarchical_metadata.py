@@ -146,6 +146,12 @@ class TestHierarchicalMetadata:
         """Test that generated metadata validates against schema."""
         builder = HTPMetadataBuilder()
         
+        # Set export context with timestamp
+        builder.with_export_context(
+            export_time_seconds=1.0
+        )
+        builder._export_context.timestamp = "2025-07-22T12:00:00Z"  # Set timestamp manually for test
+        
         # Build metadata
         builder.with_model_info(
             name_or_path="test/model",

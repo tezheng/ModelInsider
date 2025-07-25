@@ -82,6 +82,7 @@ class TestMetadataSchemaValidation:
         builder.with_statistics(
             export_time=-1.0,  # Negative time!
             hierarchy_modules=-5,  # Negative count!
+            traced_modules=10,  # Add required parameter
             onnx_nodes=100,
             tagged_nodes=150,  # More than total!
             empty_tags=10,  # Should always be 0!

@@ -20,7 +20,7 @@ class TestRuntimeValidation:
         """Test that invalid timestamp formats are caught."""
         invalid_metadata = {
             "export_context": {
-                "timestamp": "2025-07-22 12:00:00",  # Invalid format
+                "timestamp": "2025-07-22 12:00:00",  # Invalid format (missing T and Z)
                 "strategy": "htp"
             },
             "model": {
@@ -56,6 +56,7 @@ class TestRuntimeValidation:
             "statistics": {
                 "export_time": 1.0,
                 "hierarchy_modules": 1,
+                "traced_modules": 1,
                 "onnx_nodes": 10,
                 "tagged_nodes": 8,
                 "empty_tags": 0,
@@ -108,6 +109,7 @@ class TestRuntimeValidation:
             "statistics": {
                 "export_time": 1.0,
                 "hierarchy_modules": 1,
+                "traced_modules": 1,
                 "onnx_nodes": 100,
                 "tagged_nodes": 150,  # More than total!
                 "empty_tags": 0,
@@ -161,6 +163,7 @@ class TestRuntimeValidation:
             "statistics": {
                 "export_time": 1.0,
                 "hierarchy_modules": 1,
+                "traced_modules": 1,
                 "onnx_nodes": 100,
                 "tagged_nodes": 80,
                 "empty_tags": 5,  # Should be 0!
@@ -214,6 +217,7 @@ class TestRuntimeValidation:
             "statistics": {
                 "export_time": 1.0,
                 "hierarchy_modules": 1,
+                "traced_modules": 1,
                 "onnx_nodes": 100,
                 "tagged_nodes": 80,
                 "empty_tags": 0,
