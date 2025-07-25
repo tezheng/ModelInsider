@@ -928,9 +928,9 @@ class TestUtilityFunctions:
         # Apply patching
         patch_export_config(sam_config)
         
-        # Should have been modified
+        # Should NOT be modified (patching is now handled by enhance_exporter_config)
         patched_classes = sam_config.DUMMY_INPUT_GENERATOR_CLASSES
-        assert patched_classes != original_classes, "SAM config should be patched"
+        assert patched_classes == original_classes, "SAM config should not be patched by patch_export_config"
         
         # Test with non-SAM model (should not be patched)
         bert_config = get_export_config_from_model_path("prajjwal1/bert-tiny")

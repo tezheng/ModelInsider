@@ -352,13 +352,13 @@ class TestCLICompare:
         inputs1 = tokenizer('First model input', return_tensors='pt')
         path1 = temp_workspace['models'] / 'model1.onnx'
         input_values1 = tuple(inputs1.values())
-        exporter.export(model, input_values1, str(path1))
+        exporter.export(model=model, output_path=str(path1), model_name_or_path='prajjwal1/bert-tiny')
         
         # Create second model (with different input to potentially get different graphs)
         inputs2 = tokenizer('Second model with different input text', return_tensors='pt')
         path2 = temp_workspace['models'] / 'model2.onnx'
         input_values2 = tuple(inputs2.values())
-        exporter.export(model, input_values2, str(path2))
+        exporter.export(model=model, output_path=str(path2), model_name_or_path='prajjwal1/bert-tiny')
         
         return path1, path2
     

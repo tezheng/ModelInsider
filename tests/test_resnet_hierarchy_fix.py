@@ -81,8 +81,8 @@ class TestResNetHierarchyFix:
         # Validate key structural elements
         assert "ResNetModel" in tree_text, "Missing root ResNetModel"
         assert "ResNetEncoder: encoder" in tree_text, "Missing ResNetEncoder"
-        assert "ResNetLayer: 0" in tree_text, "Missing layer.0 under encoder"
-        assert "ResNetLayer: 1" in tree_text, "Missing layer.1 under encoder" 
+        assert "ResNetLayer: encoder.layer.0" in tree_text, "Missing layer.0 under encoder"
+        assert "ResNetLayer: encoder.layer.1" in tree_text, "Missing layer.1 under encoder" 
         
         # Key test: encoder should NOT be a leaf node
         lines = tree_text.split('\n')

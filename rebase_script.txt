@@ -1,0 +1,4 @@
+pick 8a131f6 [TEZ-90] Fix MUST-002 regression: Exclude torch.nn modules from hierarchy
+squash 082e33c [TEZ-90] Update test expectations after MUST-002 fix
+squash 55370c1 [TEZ-90] Archive deprecated HTP export monitor tests
+squash 428784e [TEZ-90] Fix linting issues in test files
