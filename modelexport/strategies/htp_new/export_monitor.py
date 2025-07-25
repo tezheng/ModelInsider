@@ -8,7 +8,6 @@ coordinating multiple writers using the decorator pattern.
 from __future__ import annotations
 
 import contextlib
-import io
 import time
 from pathlib import Path
 
@@ -16,8 +15,8 @@ from rich.console import Console
 
 from .base_writer import ExportData, ExportStep, StepAwareWriter
 from .console_writer import ConsoleWriter
-from .metadata_writer import MetadataWriter
 from .markdown_report_writer import MarkdownReportWriter
+from .metadata_writer import MetadataWriter
 from .step_data import (
     HierarchyData,
     InputGenData,
@@ -104,11 +103,14 @@ class HTPExportMonitor:
         the step enum and arbitrary kwargs, then converting them
         to the appropriate typed data structures.
         
+        Timestamps are automatically captured when step data objects are created.
+        
         Args:
             step: The current export step
             **kwargs: Step-specific data
         """
         # Update typed step data based on the step
+        # (timestamps are automatically captured when step data objects are created)
         self._update_step_data(step, kwargs)
         
         # Notify all writers
@@ -238,7 +240,9 @@ class HTPExportMonitor:
         """Context manager exit - finalize all writers."""
         if exc_type is None:
             # Success - calculate final export time and finalize
-            self.data.export_time = self.data.elapsed_time
+            # Only set export_time if it hasn't been set by the exporter
+            if self.data.export_time == 0.0:
+                self.data.export_time = self.data.elapsed_time
             
             # Print summary if verbose
             if self.verbose and self.console_writer:

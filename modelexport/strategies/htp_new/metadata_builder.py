@@ -7,22 +7,15 @@ using dataclasses and the builder pattern for better maintainability.
 
 from __future__ import annotations
 
-import datetime
 from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
 
-def _generate_timestamp() -> str:
-    """Generate ISO 8601 timestamp with millisecond precision."""
-    dt = datetime.datetime.now(datetime.UTC)
-    return dt.strftime("%Y-%m-%dT%H:%M:%S.") + f"{dt.microsecond // 1000:03d}Z"
-
-
 @dataclass
 class ExportContext:
     """Export session context information."""
-    timestamp: str = field(default_factory=_generate_timestamp)
+    timestamp: str = ""  # Will be set from ExportData
     strategy: str = "htp"
     version: str = "1.0"
     exporter: str = "HTPExporter"
