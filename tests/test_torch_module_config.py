@@ -15,7 +15,7 @@ from pathlib import Path
 import torch
 import torch.nn as nn
 
-from modelexport.strategies.htp_new.htp_exporter import HTPConfig, HTPExporter
+from modelexport.strategies.htp.htp_exporter import HTPConfig, HTPExporter
 
 
 class SimpleModel(nn.Module):

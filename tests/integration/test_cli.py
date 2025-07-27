@@ -157,7 +157,7 @@ class TestCLIAnalyze:
         """Create a sample ONNX model for analysis tests."""
         from transformers import AutoModel, AutoTokenizer
 
-        from modelexport.strategies.htp_new import HTPExporter
+        from modelexport.strategies.htp import HTPExporter
         
         model = AutoModel.from_pretrained('prajjwal1/bert-tiny')
         tokenizer = AutoTokenizer.from_pretrained('prajjwal1/bert-tiny')
@@ -276,7 +276,7 @@ class TestCLIValidate:
         """Create a sample ONNX model for validation tests."""
         from transformers import AutoModel, AutoTokenizer
 
-        from modelexport.strategies.htp_new import HTPExporter
+        from modelexport.strategies.htp import HTPExporter
         
         model = AutoModel.from_pretrained('prajjwal1/bert-tiny')
         tokenizer = AutoTokenizer.from_pretrained('prajjwal1/bert-tiny')
@@ -342,7 +342,7 @@ class TestCLICompare:
         """Create two sample ONNX models for comparison."""
         from transformers import AutoModel, AutoTokenizer
 
-        from modelexport.strategies.htp_new import HTPExporter
+        from modelexport.strategies.htp import HTPExporter
         
         model = AutoModel.from_pretrained('prajjwal1/bert-tiny')
         tokenizer = AutoTokenizer.from_pretrained('prajjwal1/bert-tiny')

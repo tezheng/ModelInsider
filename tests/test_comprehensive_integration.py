@@ -12,7 +12,7 @@ import pytest
 import torch
 
 from modelexport.core.model_input_generator import generate_dummy_inputs
-from modelexport.strategies.htp_new import export_with_htp_reporting
+from modelexport.strategies.htp import export_with_htp_reporting
 
 
 class TestComprehensiveIntegration:

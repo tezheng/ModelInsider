@@ -11,9 +11,9 @@ import pytest
 import jsonschema
 import tempfile
 
-from modelexport.strategies.htp_new.metadata_builder import HTPMetadataBuilder
-from modelexport.strategies.htp_new.metadata_writer import MetadataWriter
-from modelexport.strategies.htp_new.step_data import ModuleInfo
+from modelexport.strategies.htp.metadata_builder import HTPMetadataBuilder
+from modelexport.strategies.htp.metadata_writer import MetadataWriter
+from modelexport.strategies.htp.step_data import ModuleInfo
 
 
 class TestHierarchicalMetadata:
@@ -22,7 +22,7 @@ class TestHierarchicalMetadata:
     @pytest.fixture
     def schema(self):
         """Load the HTP metadata schema."""
-        schema_path = Path(__file__).parent.parent / "modelexport/strategies/htp_new/htp_metadata_schema.json"
+        schema_path = Path(__file__).parent.parent / "modelexport/strategies/htp/htp_metadata_schema.json"
         with open(schema_path) as f:
             return json.load(f)
     
@@ -348,7 +348,7 @@ class TestMetadataConsistency:
         """Test that all 6 export steps are recorded."""
         # This would require a more complete integration test
         # For now, we verify the schema includes all steps
-        schema_path = Path(__file__).parent.parent / "modelexport/strategies/htp_new/htp_metadata_schema.json"
+        schema_path = Path(__file__).parent.parent / "modelexport/strategies/htp/htp_metadata_schema.json"
         with open(schema_path) as f:
             schema = json.load(f)
         
@@ -382,7 +382,7 @@ class TestMetadataConsistency:
         )
         
         # Build partial metadata (would fail full validation)
-        from modelexport.strategies.htp_new.metadata_builder import ModelInfo
+        from modelexport.strategies.htp.metadata_builder import ModelInfo
         builder._model_info = ModelInfo(
             name_or_path="test",
             class_name="TestModel",

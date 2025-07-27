@@ -8,8 +8,8 @@ from unittest.mock import patch
 
 import pytest
 
-from modelexport.strategies.htp_new import HTPExportMonitor, ExportStep
-from modelexport.strategies.htp_new.step_data import (
+from modelexport.strategies.htp import HTPExportMonitor, ExportStep
+from modelexport.strategies.htp.step_data import (
     ModelPrepData,
     InputGenData,
     TensorInfo,

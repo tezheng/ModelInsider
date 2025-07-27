@@ -5,13 +5,13 @@ from unittest.mock import Mock
 
 import pytest
 
-from modelexport.strategies.htp_new.base_writer import (
+from modelexport.strategies.htp.base_writer import (
     ExportData,
     ExportStep,
     StepAwareWriter,
     step,
 )
-from modelexport.strategies.htp_new.step_data import (
+from modelexport.strategies.htp.step_data import (
     ModelPrepData,
     InputGenData,
     TensorInfo,

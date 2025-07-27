@@ -316,7 +316,7 @@ def create_optimized_exporter(strategy: str, **kwargs) -> Any:
         from ..strategies.usage_based import UsageBasedExporter
         exporter = UsageBasedExporter(**kwargs)
     elif strategy == "htp":
-        from ..strategies.htp_new import HTPExporter
+        from ..strategies.htp import HTPExporter
         exporter = HTPExporter(**kwargs)
     elif strategy == "fx_graph" or strategy == "fx":
         from ..strategies.fx import FXHierarchyExporter
@@ -369,7 +369,7 @@ class OptimizationBenchmark:
                 from ..strategies.usage_based import UsageBasedExporter
                 exporter = UsageBasedExporter()
             elif strategy == "htp":
-                from ..strategies.htp_new import HTPExporter
+                from ..strategies.htp import HTPExporter
                 exporter = HTPExporter()
             else:
                 continue

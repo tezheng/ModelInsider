@@ -12,8 +12,8 @@ from unittest.mock import patch
 import pytest
 from freezegun import freeze_time
 
-from modelexport.strategies.htp_new.base_writer import ExportData, ExportStep
-from modelexport.strategies.htp_new.step_data import (
+from modelexport.strategies.htp.base_writer import ExportData, ExportStep
+from modelexport.strategies.htp.step_data import (
     HierarchyData,
     InputGenData,
     ModelPrepData,
@@ -291,7 +291,7 @@ class TestTimestampConsistency:
     @freeze_time("2024-01-15 12:30:45.123456")
     def test_export_monitor_timestamp_consistency(self):
         """Test that ExportMonitor doesn't interfere with embedded timestamps."""
-        from modelexport.strategies.htp_new.export_monitor import HTPExportMonitor
+        from modelexport.strategies.htp.export_monitor import HTPExportMonitor
         
         # This test ensures that the monitor correctly uses embedded timestamps
         # and doesn't try to override them with its own timestamp generation

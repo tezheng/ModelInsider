@@ -12,7 +12,7 @@ from pathlib import Path
 import jsonschema
 import pytest
 
-from modelexport.strategies.htp_new import HTPExporter
+from modelexport.strategies.htp import HTPExporter
 
 
 class TestHTPMetadataValidation:
@@ -21,7 +21,7 @@ class TestHTPMetadataValidation:
     @pytest.fixture
     def schema(self):
         """Load the HTP metadata JSON schema."""
-        schema_path = Path(__file__).parent.parent.parent / "modelexport/strategies/htp_new/htp_metadata_schema.json"
+        schema_path = Path(__file__).parent.parent.parent / "modelexport/strategies/htp/htp_metadata_schema.json"
         with open(schema_path, 'r') as f:
             return json.load(f)
     

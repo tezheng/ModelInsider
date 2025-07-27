@@ -174,7 +174,7 @@ class TestResNetHierarchyFix:
         # This would test with a real ResNet model from transformers
         # Skipped by default to avoid model downloads in CI
         from transformers import AutoModel
-        from modelexport.strategies.htp_new.htp_exporter import HTPExporter
+        from modelexport.strategies.htp.htp_exporter import HTPExporter
         
         model_name = "microsoft/resnet-50"  # Example ResNet model
         output_path = tmp_path / "resnet.onnx"

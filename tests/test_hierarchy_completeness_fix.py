@@ -7,7 +7,7 @@ works correctly by ensuring ALL executed modules appear in hierarchy reports.
 
 
 from modelexport.core.tracing_hierarchy_builder import TracingHierarchyBuilder
-from modelexport.strategies.htp_new.htp_exporter import HTPExporter
+from modelexport.strategies.htp.htp_exporter import HTPExporter
 
 
 class TestHierarchyCompletenessFix:

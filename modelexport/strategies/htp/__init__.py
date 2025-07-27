@@ -14,6 +14,12 @@ Key Features:
 Variations:
 - Standard HTP: Hook-based execution tracing
 - Built-in HTP: Uses PyTorch's internal module tracking
+
+TODO: Future folder structure refactoring
+Currently keeping the folder structure flat for simplicity.
+In the future, consider organizing into:
+- core/: Core HTP logic (htp_exporter.py, metadata_builder.py)
+- writers/: All output writers (console_writer.py, metadata_writer.py, markdown_report_writer.py, report_writer.py)
 """
 
 from .base_writer import ExportStep

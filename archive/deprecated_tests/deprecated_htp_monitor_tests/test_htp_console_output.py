@@ -12,8 +12,8 @@ from unittest.mock import Mock, patch
 
 import pytest
 
-from modelexport.strategies.htp_new.export_monitor import HTPExportMonitor
-from modelexport.strategies.htp_new.base_writer import ExportStep as HTPExportStep, ExportData as HTPExportData
+from modelexport.strategies.htp.export_monitor import HTPExportMonitor
+from modelexport.strategies.htp.base_writer import ExportStep as HTPExportStep, ExportData as HTPExportData
 
 
 class TestConsoleOutput:
@@ -218,7 +218,7 @@ class TestDuplicateOutputIssue:
     @patch('modelexport.strategies.htp.htp_exporter.HTPExporter.export')
     def test_no_duplicate_initial_messages(self, mock_export, tmp_path):
         """Test that initial messages are not duplicated when using HTPExporter."""
-        from modelexport.strategies.htp_new.htp_exporter import HTPExporter
+        from modelexport.strategies.htp.htp_exporter import HTPExporter
         
         output_path = str(tmp_path / "test.onnx")
         

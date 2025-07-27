@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from modelexport.strategies.htp_new.htp_exporter import HTPExporter
+from modelexport.strategies.htp.htp_exporter import HTPExporter
 
 
 class TestDirectoryCreation:

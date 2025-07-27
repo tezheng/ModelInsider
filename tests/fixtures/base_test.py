@@ -12,7 +12,7 @@ from typing import Any
 
 import pytest
 
-from modelexport.strategies.htp_new import HTPExporter
+from modelexport.strategies.htp import HTPExporter
 
 from .test_models import TestModelFixtures
 

@@ -18,7 +18,7 @@ from ...core.hierarchy_utils import (
     count_nodes_per_tag,
 )
 from .base_writer import ExportData, ExportStep, StepAwareWriter, step
-from .timestamp_utils import format_timestamp_iso
+from ...core.time_utils import format_timestamp_iso
 
 
 class MarkdownReportWriter(StepAwareWriter):
