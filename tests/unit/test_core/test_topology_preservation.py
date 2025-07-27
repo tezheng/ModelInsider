@@ -190,8 +190,17 @@ class TestTopologyPreservationDetailed:
                 f"baseline={baseline_count}, hierarchy={hierarchy_count}"
             )
     
-    def test_no_additional_operations_introduced(self, baseline_model, hierarchy_model):
+    def test_no_additional_operations_introduced(self):
         """Test that no new operations are introduced by hierarchy export."""
+        baseline_path = Path("temp/baseline_export.onnx")
+        hierarchy_path = Path("temp/bert_tiny_clean.onnx")
+        
+        if not baseline_path.exists() or not hierarchy_path.exists():
+            pytest.skip("Required ONNX files not found")
+        
+        baseline_model = onnx.load(str(baseline_path))
+        hierarchy_model = onnx.load(str(hierarchy_path))
+        
         baseline_ops = set(node.op_type for node in baseline_model.graph.node)
         hierarchy_ops = set(node.op_type for node in hierarchy_model.graph.node)
         
@@ -201,8 +210,17 @@ class TestTopologyPreservationDetailed:
         assert not additional_ops, f"Additional operations introduced: {additional_ops}"
         assert not missing_ops, f"Operations missing: {missing_ops}"
     
-    def test_tensor_flow_preservation(self, baseline_model, hierarchy_model):
+    def test_tensor_flow_preservation(self):
         """Test that tensor flow structure is preserved."""
+        baseline_path = Path("temp/baseline_export.onnx")
+        hierarchy_path = Path("temp/bert_tiny_clean.onnx")
+        
+        if not baseline_path.exists() or not hierarchy_path.exists():
+            pytest.skip("Required ONNX files not found")
+        
+        baseline_model = onnx.load(str(baseline_path))
+        hierarchy_model = onnx.load(str(hierarchy_path))
+        
         # This is a more complex test that would verify tensor connections
         # For now, we'll do a basic check on tensor names and counts
         

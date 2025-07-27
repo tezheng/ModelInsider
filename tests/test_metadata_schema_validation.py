@@ -10,7 +10,7 @@ import pytest
 import jsonschema
 from pathlib import Path
 
-from modelexport.strategies.htp_new.metadata_builder import HTPMetadataBuilder, ModelInfo, OutputFiles, OnnxModelOutput
+from modelexport.strategies.htp.metadata_builder import HTPMetadataBuilder, ModelInfo, OutputFiles, OnnxModelOutput
 
 
 class TestMetadataSchemaValidation:
@@ -19,7 +19,7 @@ class TestMetadataSchemaValidation:
     @pytest.fixture
     def schema(self):
         """Load the HTP metadata schema."""
-        schema_path = Path(__file__).parent.parent / "modelexport/strategies/htp_new/htp_metadata_schema.json"
+        schema_path = Path(__file__).parent.parent / "modelexport/strategies/htp/htp_metadata_schema.json"
         with open(schema_path) as f:
             return json.load(f)
     

@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from modelexport.strategies.htp_new.export_monitor import HTPExportMonitor
+from modelexport.strategies.htp.export_monitor import HTPExportMonitor
 
 
 class TestHTPExportMonitorFunctional:

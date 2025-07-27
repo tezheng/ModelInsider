@@ -232,7 +232,7 @@ class UnifiedExporter:
             from .strategies.usage_based import UsageBasedExporter
             return UsageBasedExporter(**kwargs)
         elif strategy == "htp":
-            from .strategies.htp_new import HTPExporter
+            from .strategies.htp import HTPExporter
             return HTPExporter(**kwargs)
         elif strategy in ["fx_graph", "fx"]:
             from .strategies.fx import FXHierarchyExporter

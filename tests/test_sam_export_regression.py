@@ -11,7 +11,7 @@ from pathlib import Path
 from unittest.mock import Mock, patch
 import pytest
 
-from modelexport.strategies.htp_new import HTPExporter
+from modelexport.strategies.htp import HTPExporter
 
 
 class TestSAMExportRegression:

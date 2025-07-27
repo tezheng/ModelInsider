@@ -11,9 +11,9 @@ from pathlib import Path
 
 import pytest
 
-from modelexport.strategies.htp_new.base_writer import ExportData, ExportStep
-from modelexport.strategies.htp_new.markdown_report_writer import MarkdownReportWriter
-from modelexport.strategies.htp_new.step_data import (
+from modelexport.strategies.htp.base_writer import ExportData, ExportStep
+from modelexport.strategies.htp.markdown_report_writer import MarkdownReportWriter
+from modelexport.strategies.htp.step_data import (
     HierarchyData,
     InputGenData,
     ModelPrepData,
@@ -471,7 +471,7 @@ class TestMarkdownReportIntegration:
     
     def test_export_monitor_integration(self, sample_export_data):
         """Test integration with HTPExportMonitor."""
-        from modelexport.strategies.htp_new.export_monitor import HTPExportMonitor
+        from modelexport.strategies.htp.export_monitor import HTPExportMonitor
         
         with tempfile.TemporaryDirectory() as tmpdir:
             output_path = str(Path(tmpdir) / "test_model.onnx")
@@ -498,7 +498,7 @@ class TestMarkdownReportIntegration:
             output_path = str(Path(tmpdir) / "test_model.onnx")
             
             # Create both writers
-            from modelexport.strategies.htp_new.metadata_writer import MetadataWriter
+            from modelexport.strategies.htp.metadata_writer import MetadataWriter
             
             metadata_writer = MetadataWriter(output_path)
             report_writer = MarkdownReportWriter(output_path)

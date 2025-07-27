@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from modelexport.strategies.htp_new import HTPExporter
+from modelexport.strategies.htp import HTPExporter
 
 
 class TestHTPInputIntegration:

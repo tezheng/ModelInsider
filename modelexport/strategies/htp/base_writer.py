@@ -75,7 +75,7 @@ class ExportData:
     @property
     def timestamp(self) -> str:
         """Export start timestamp in ISO 8601 format with Z suffix."""
-        from .timestamp_utils import format_timestamp_iso
+        from ...core.time_utils import format_timestamp_iso
         return format_timestamp_iso(self.start_time) or ""
     
     @property

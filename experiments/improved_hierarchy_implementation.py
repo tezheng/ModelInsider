@@ -3,7 +3,7 @@
 Improved hierarchy tree implementation merging best features from both versions.
 
 Combines:
-- Universal design and clarity from htp_new
+- Universal design and clarity from htp
 - Sophisticated compound component handling from export_monitor
 - Efficient single-pass algorithm
 - Custom sorting with numeric and attention-aware ordering

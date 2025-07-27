@@ -9,7 +9,7 @@ import pytest
 import torch
 from transformers import AutoModel
 
-from modelexport.strategies.htp_new import HTPExporter
+from modelexport.strategies.htp import HTPExporter
 
 
 class TestHTPE2E:
@@ -150,7 +150,7 @@ class TestHTPE2E:
     
     def test_backward_compatibility_api(self):
         """Test that the old API functions still work."""
-        from modelexport.strategies.htp_new import export_with_htp, export_with_htp_reporting
+        from modelexport.strategies.htp import export_with_htp, export_with_htp_reporting
         
         model_name = "prajjwal1/bert-tiny"
         

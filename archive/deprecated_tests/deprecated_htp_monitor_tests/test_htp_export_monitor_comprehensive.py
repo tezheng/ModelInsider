@@ -17,8 +17,8 @@ import pytest
 import torch
 import torch.nn as nn
 
-from modelexport.strategies.htp_new.export_monitor import HTPExportMonitor
-from modelexport.strategies.htp_new.base_writer import ExportStep as HTPExportStep, ExportData as HTPExportData
+from modelexport.strategies.htp.export_monitor import HTPExportMonitor
+from modelexport.strategies.htp.base_writer import ExportStep as HTPExportStep, ExportData as HTPExportData
 
 
 # ============================================================================

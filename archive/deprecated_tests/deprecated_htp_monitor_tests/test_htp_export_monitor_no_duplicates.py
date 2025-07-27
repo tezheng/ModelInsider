@@ -11,9 +11,9 @@ from unittest.mock import Mock, patch, MagicMock
 
 import pytest
 
-from modelexport.strategies.htp_new.export_monitor import HTPExportMonitor
-from modelexport.strategies.htp_new.base_writer import ExportStep as HTPExportStep, ExportData as HTPExportData
-from modelexport.strategies.htp_new.htp_exporter import HTPExporter
+from modelexport.strategies.htp.export_monitor import HTPExportMonitor
+from modelexport.strategies.htp.base_writer import ExportStep as HTPExportStep, ExportData as HTPExportData
+from modelexport.strategies.htp.htp_exporter import HTPExporter
 
 
 class TestNoDuplicateOutput:
@@ -130,7 +130,7 @@ class TestNoDuplicateOutput:
         tmp_path
     ):
         """Test full export flow has no duplicate messages."""
-        from modelexport.strategies.htp_new.htp_exporter import HTPExporter
+        from modelexport.strategies.htp.htp_exporter import HTPExporter
         import torch.nn as nn
         
         # Create a simple model

@@ -4,9 +4,9 @@
 import tempfile
 from pathlib import Path
 
-from modelexport.strategies.htp_new.base_writer import ExportData, ExportStep
-from modelexport.strategies.htp_new.markdown_report_writer import MarkdownReportWriter
-from modelexport.strategies.htp_new.step_data import (
+from modelexport.strategies.htp.base_writer import ExportData, ExportStep
+from modelexport.strategies.htp.markdown_report_writer import MarkdownReportWriter
+from modelexport.strategies.htp.step_data import (
     HierarchyData,
     InputGenData,
     ModelPrepData,

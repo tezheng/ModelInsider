@@ -38,7 +38,7 @@ from pathlib import Path
 import pytest
 from transformers import AutoModel
 
-from modelexport.strategies.htp_new import HTPExporter
+from modelexport.strategies.htp import HTPExporter
 
 # Test configuration
 TEST_CONFIG = {

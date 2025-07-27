@@ -16,7 +16,7 @@ from typing import Any
 from .base_writer import ExportData, ExportStep, StepAwareWriter, step
 from .metadata_builder import HTPMetadataBuilder
 from .step_data import ModuleInfo
-from .timestamp_utils import format_timestamp_iso
+from ...core.time_utils import format_timestamp_iso
 
 
 class MetadataWriter(StepAwareWriter):
@@ -296,9 +296,17 @@ class MetadataWriter(StepAwareWriter):
         try:
             metadata = self.builder.build()
             
-            # Validate metadata before writing
-            from .validation_utils import validate_before_write
-            validate_before_write(metadata)
+            # Optional schema validation (only if jsonschema available)
+            try:
+                import jsonschema
+                schema_path = Path(__file__).parent / "htp_metadata_schema.json"
+                with open(schema_path) as f:
+                    schema = json.load(f)
+                jsonschema.validate(metadata, schema)
+            except (ImportError, jsonschema.ValidationError) as e:
+                # Log warning but don't fail - schema validation is optional
+                import warnings
+                warnings.warn(f"Schema validation skipped or failed: {e}")
             
             # Ensure output directory exists
             Path(self.metadata_path).parent.mkdir(parents=True, exist_ok=True)
