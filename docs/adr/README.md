@@ -28,6 +28,7 @@ All ADRs follow the template in `adr-template.md`. Key sections include:
 | [ADR-006](ADR-006-timestamp-handling-best-practices.md) | Timestamp Handling Best Practices | Accepted | 2025-07-12 |
 | [ADR-007](ADR-007-root-module-hook-strategy.md) | Root Module Hook Strategy | Accepted | - |
 | [ADR-008](ADR-008-onnx-to-graphml-package-selection.md) | ONNX to GraphML Package Selection | Proposed | 2025-07-28 |
+| [ADR-009](ADR-009-graphml-converter-architecture.md) | GraphML Converter Architecture | Proposed | 2025-07-28 |
 
 ## Creating a New ADR
 
