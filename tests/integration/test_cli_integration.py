@@ -7,6 +7,7 @@ Tests for the command-line interface across all strategies.
 import json
 import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -75,7 +76,9 @@ class TestCLIIntegration:
         """Test export command with different strategies."""
         # Skip this test if transformers not available
         try:
-            import transformers
+            import importlib.util
+            if importlib.util.find_spec("transformers") is None:
+                raise ImportError
         except ImportError:
             pytest.skip("transformers not available")
         
@@ -94,7 +97,7 @@ class TestCLIIntegration:
         ])
             
         if result.exit_code != 0:
-            print(f"Export failed for HTP:")
+            print("Export failed for HTP:")
             print(f"Output: {result.output}")
             print(f"Exception: {result.exception}")
             # Don't fail the test immediately - model might not be available
@@ -114,7 +117,9 @@ class TestCLIIntegration:
         """Test analyze command functionality."""
         # First create a model to analyze
         try:
-            import transformers
+            import importlib.util
+            if importlib.util.find_spec("transformers") is None:
+                raise ImportError
         except ImportError:
             pytest.skip("transformers not available")
         
@@ -155,7 +160,9 @@ class TestCLIIntegration:
     def test_validate_command(self):
         """Test validate command functionality."""
         try:
-            import transformers
+            import importlib.util
+            if importlib.util.find_spec("transformers") is None:
+                raise ImportError
         except ImportError:
             pytest.skip("transformers not available")
         
@@ -194,7 +201,9 @@ class TestCLIIntegration:
     def test_compare_command(self):
         """Test compare command functionality."""
         try:
-            import transformers
+            import importlib.util
+            if importlib.util.find_spec("transformers") is None:
+                raise ImportError
         except ImportError:
             pytest.skip("transformers not available")
         
@@ -279,7 +288,6 @@ class TestCLIIntegration:
         assert result.exit_code == 0
         
         # Test with absolute path
-        output_path = self.temp_path / "test_output.onnx"
         # Would test actual export if we had a suitable test model
 
 
@@ -299,8 +307,8 @@ class TestCLIProcessIntegration:
         """Test running CLI as a module."""
         # Test help command
         result = subprocess.run([
-            'python', '-m', 'modelexport', '--help'
-        ], capture_output=True, text=True, cwd='/mnt/d/BYOM/modelexport')
+            sys.executable, '-m', 'modelexport', '--help'
+        ], capture_output=True, text=True)
         
         assert result.returncode == 0
         assert 'export' in result.stdout
@@ -311,7 +319,7 @@ class TestCLIProcessIntegration:
         # Test help command
         result = subprocess.run([
             'uv', 'run', 'modelexport', '--help'
-        ], capture_output=True, text=True, cwd='/mnt/d/BYOM/modelexport')
+        ], capture_output=True, text=True)
         
         assert result.returncode == 0
         assert 'export' in result.stdout
@@ -320,7 +328,7 @@ class TestCLIProcessIntegration:
         """Test that all strategies are listed in help."""
         result = subprocess.run([
             'uv', 'run', 'modelexport', 'export', '--help'
-        ], capture_output=True, text=True, cwd='/mnt/d/BYOM/modelexport')
+        ], capture_output=True, text=True)
         
         assert result.returncode == 0
         assert 'htp' in result.stdout.lower() or 'hierarchy' in result.stdout.lower()
