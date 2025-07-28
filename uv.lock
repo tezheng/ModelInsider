@@ -1362,6 +1362,7 @@ dev = [
     { name = "freezegun" },
     { name = "graphviz" },
     { name = "jupyter" },
+    { name = "ruff" },
 ]
 
 [package.metadata]
@@ -1396,6 +1397,7 @@ dev = [
     { name = "freezegun", specifier = ">=1.5.3" },
     { name = "graphviz", specifier = ">=0.21" },
     { name = "jupyter", specifier = ">=1.1.1" },
+    { name = "ruff", specifier = ">=0.12.0" },
 ]
 
 [[package]]

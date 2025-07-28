@@ -140,4 +140,5 @@ dev = [
     "freezegun>=1.5.3",
     "graphviz>=0.21",
     "jupyter>=1.1.1",
+    "ruff>=0.12.0",
 ]
