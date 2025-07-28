@@ -194,17 +194,14 @@ class ONNXGraphParser:
                 tensor_producers[input_proto.name] = input_id
         
         # Node outputs produce tensors
-        for node in graph.node:
-            node_id = sanitize_node_id(node.name) if node.name else None
-            if node_id and node_id in node_map:
-                for output in node.output:
-                    tensor_producers[output] = node_id
+        for idx, node in enumerate(graph.node):
+            node_id = sanitize_node_id(node.name) if node.name else f"node_{idx}"
+            for output in node.output:
+                tensor_producers[output] = node_id
         
         # Create edges from producers to consumers
-        for node in graph.node:
-            node_id = sanitize_node_id(node.name) if node.name else None
-            if not node_id or node_id not in node_map:
-                continue
+        for idx, node in enumerate(graph.node):
+            node_id = sanitize_node_id(node.name) if node.name else f"node_{idx}"
             
             for input_tensor in node.input:
                 # Skip initializers if requested
