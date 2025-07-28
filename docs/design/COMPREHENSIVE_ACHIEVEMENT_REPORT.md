@@ -268,7 +268,7 @@ The remaining 5 cases (28% of original contamination) represent genuine edge cas
 
 1. **`BUILTIN_TRACKING_ANALYSIS.md`** - Technical analysis of built-in tracking approach
 2. **`BREAKTHROUGH_ANALYSIS.md`** - Complete solution analysis with 72% reduction results
-3. **`docs/ADR-001-root-module-hook-strategy.md`** - Architecture decision documentation
+3. **`docs/adr/ADR-007-root-module-hook-strategy.md`** - Architecture decision documentation
 4. **`TAGGING_STRATEGY.md`** - Phase-based tagging approach documentation
 
 ### Validation Artifacts
