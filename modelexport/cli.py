@@ -2,7 +2,7 @@
 Command Line Interface for modelexport.
 
 This module provides a simple CLI for HTP (Hierarchical Trace-and-Project) 
-ONNX export with hierarchy preservation.
+ONNX export with hierarchy preservation and GraphML v1.1 bidirectional conversion.
 """
 
 import json
@@ -38,14 +38,32 @@ def cli(ctx, verbose):
 @click.option('--with-report', is_flag=True, help='Enable detailed HTP export reporting')
 @click.option('--no-hierarchy-attrs', '--clean-onnx', is_flag=True, help='Disable hierarchy_tag attributes in ONNX nodes (cleaner but loses traceability)')
 @click.option('--torch-module', is_flag=True, help='Include torch.nn modules in hierarchy (e.g., LayerNorm, Embedding for models like ResNet)')
+@click.option('--with-graphml', '--graphml', is_flag=True, help='Export hierarchical GraphML v1.1 alongside ONNX (Phase 1: sidecar parameters, creates model_hierarchical_graph.graphml + .onnxdata)')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
 @click.pass_context
-def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_config, with_report, no_hierarchy_attrs, torch_module, verbose):
+def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_config, with_report, no_hierarchy_attrs, torch_module, with_graphml, verbose):
     """
     Export a PyTorch model to ONNX with hierarchy preservation.
     
     Use --model to specify the HuggingFace model name or local path.
     Use --output to specify where to save the ONNX model.
+    
+    Examples:
+    
+        # Basic export
+        modelexport export --model prajjwal1/bert-tiny --output bert.onnx
+        
+        # Export with GraphML v1.1 for visualization and round-trip conversion
+        modelexport export --model prajjwal1/bert-tiny --output bert.onnx --with-graphml
+        
+        # Export with all features enabled
+        modelexport export --model prajjwal1/bert-tiny --output bert.onnx \\
+            --with-graphml --with-report --verbose
+    
+    When --with-graphml is used:
+    - Creates model_hierarchical_graph.graphml (hierarchical visualization)
+    - Creates model_hierarchical_graph.onnxdata (parameter storage)
+    - Supports bidirectional conversion (GraphML → ONNX)
     """
     try:
         # Export with HTP strategy using simplified API
@@ -65,10 +83,15 @@ def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_c
                 export_config_dict = json.load(f)
         
         # Use HTPExporter's auto-loading capability
+        input_specs_data = None
+        if input_specs:
+            with open(input_specs) as f:
+                input_specs_data = json.load(f)
+        
         result = exporter.export(
             model_name_or_path=model_name_or_path,
             output_path=output_path,
-            input_specs=json.load(open(input_specs)) if input_specs else None,
+            input_specs=input_specs_data,
             export_config=export_config_dict
         )
         
@@ -93,6 +116,51 @@ def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_c
                 report_path = output_path.replace('.onnx', '_htp_export_report.txt')
                 click.echo(f"   Report: {report_path}")
         
+        # Generate GraphML if requested
+        if with_graphml:
+            try:
+                from .graphml.enhanced_converter import EnhancedGraphMLConverter
+                
+                # Check if HTP metadata exists
+                metadata_path = result.get('metadata_path', output_path.replace('.onnx', '_htp_metadata.json'))
+                if not Path(metadata_path).exists():
+                    click.echo("Warning: HTP metadata not found, skipping GraphML export", err=True)
+                else:
+                    # Use enhanced converter for bidirectional GraphML with parameters
+                    converter = EnhancedGraphMLConverter(
+                        htp_metadata_path=metadata_path,
+                        parameter_strategy='sidecar',
+                        exclude_initializers=True
+                    )
+                    
+                    # Convert to bidirectional GraphML
+                    if verbose:
+                        click.echo("\n🎨 Generating bidirectional GraphML with parameters...")
+                    
+                    # The convert method returns the result paths
+                    # Use consistent naming: model_hierarchical_graph.graphml
+                    base_name = output_path.replace('.onnx', '')
+                    output_base = f"{base_name}_hierarchical_graph"
+                    
+                    result_paths = converter.convert(
+                        onnx_model_path=output_path,
+                        output_base=output_base
+                    )
+                    
+                    if not verbose:
+                        click.echo(f"   GraphML: {result_paths['graphml']}")
+                        if 'parameters' in result_paths:
+                            click.echo(f"   Parameters: {result_paths['parameters']}")
+                    else:
+                        click.echo(f"✅ GraphML export completed:")
+                        click.echo(f"   GraphML: {result_paths['graphml']}")
+                        if 'parameters' in result_paths:
+                            click.echo(f"   Parameters: {result_paths['parameters']}")
+                        click.echo(f"   Format: GraphML v1.1 (bidirectional)")
+                    
+            except Exception as e:
+                click.echo(f"Warning: GraphML export failed: {e}", err=True)
+                # Don't fail the entire export if GraphML fails
         
     except Exception as e:
         import sys
@@ -317,6 +385,250 @@ def compare(model1_path, model2_path, output_file, verbose):
     except Exception as e:
         click.echo(f"Error during comparison: {e}", err=True)
         sys.exit(1)
+
+
+@cli.command()
+@click.argument('onnx_path', type=click.Path(exists=True))
+@click.option('--output', '-o', 'output_path', help='Output GraphML file path (default: <model>_graph.graphml)')
+@click.option('--htp-metadata', type=click.Path(exists=True), 
+              help='HTP metadata JSON file for hierarchical GraphML (optional)')
+@click.option('--exclude-initializers', is_flag=True, default=True,
+              help='Exclude weight initializers from graph (default: True)')
+@click.option('--exclude-attributes', multiple=True,
+              help='Node attributes to exclude from GraphML')
+@click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
+def graphml(onnx_path, output_path, htp_metadata, exclude_initializers, exclude_attributes, verbose):
+    """Convert ONNX model to GraphML format for visualization.
+    
+    Creates a GraphML file that can be opened in graph visualization tools
+    like yEd, Gephi, or Cytoscape. If HTP metadata is provided, creates
+    a hierarchical graph with compound nodes representing module structure.
+    
+    Examples:
+        # Basic conversion (flat graph)
+        modelexport graphml model.onnx
+        
+        # Hierarchical conversion with HTP metadata
+        modelexport graphml model.onnx --htp-metadata model_htp_metadata.json
+        
+        # Custom output path
+        modelexport graphml model.onnx -o custom_graph.graphml
+    """
+    try:
+        from .graphml import EnhancedHierarchicalConverter, ONNXToGraphMLConverter
+        
+        # Determine output path if not provided
+        if not output_path:
+            base_name = Path(onnx_path).stem
+            if htp_metadata:
+                output_path = f"{base_name}_hierarchical_graph.graphml"
+            else:
+                output_path = f"{base_name}_graph.graphml"
+        
+        if verbose:
+            click.echo("🎨 Converting ONNX to GraphML")
+            click.echo(f"   Input: {onnx_path}")
+            if htp_metadata:
+                click.echo(f"   HTP Metadata: {htp_metadata}")
+            click.echo(f"   Output: {output_path}")
+        
+        # Choose converter based on whether HTP metadata is provided
+        if htp_metadata:
+            converter = EnhancedHierarchicalConverter(
+                htp_metadata_path=htp_metadata,
+                exclude_initializers=exclude_initializers,
+                exclude_attributes=set(exclude_attributes) if exclude_attributes else None,
+                use_hybrid_hierarchy=True  # Enable hybrid approach for complete module discovery
+            )
+        else:
+            converter = ONNXToGraphMLConverter(
+                exclude_initializers=exclude_initializers,
+                exclude_attributes=set(exclude_attributes) if exclude_attributes else None
+            )
+        
+        # Convert to GraphML
+        graphml_str = converter.convert(onnx_path)
+        
+        # Write output
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write(graphml_str)
+        
+        # Get statistics
+        if hasattr(converter, 'parser'):
+            parser = converter.parser
+            nodes = parser.last_node_count
+            edges = parser.last_edge_count
+            excluded_inits = parser.last_initializer_count if exclude_initializers else 0
+        else:
+            # Basic stats from GraphML
+            import xml.etree.ElementTree as ET
+            root = ET.fromstring(graphml_str)
+            nodes_elem = root.findall(".//{http://graphml.graphdrawing.org/xmlns}node")
+            edges_elem = root.findall(".//{http://graphml.graphdrawing.org/xmlns}edge")
+            nodes = len(nodes_elem)
+            edges = len(edges_elem)
+            excluded_inits = 0
+        
+        click.echo("✅ GraphML export completed successfully!")
+        click.echo(f"   Output: {output_path}")
+        click.echo(f"   Nodes: {nodes}")
+        click.echo(f"   Edges: {edges}")
+        if excluded_inits > 0:
+            click.echo(f"   Excluded initializers: {excluded_inits}")
+        if htp_metadata:
+            # Count compound nodes - nodes that contain graph elements (not simple nodes)
+            import xml.etree.ElementTree as ET
+            root = ET.fromstring(graphml_str)
+            all_nodes = root.findall(".//{http://graphml.graphdrawing.org/xmlns}node")
+            compound_nodes = []
+            for node in all_nodes:
+                # Check if this node contains a nested graph element (compound node)
+                nested_graph = node.find("./{http://graphml.graphdrawing.org/xmlns}graph")
+                if nested_graph is not None:
+                    compound_nodes.append(node)
+            if compound_nodes:
+                click.echo(f"   Compound nodes: {len(compound_nodes)}")
+        
+        if verbose:
+            click.echo("\n💡 Tips:")
+            click.echo("   - Open the GraphML file in yEd (https://www.yworks.com/products/yed)")
+            click.echo("   - Use Tools > Fit Node to Label to resize nodes")
+            click.echo("   - Apply hierarchical layout for better visualization")
+            if htp_metadata:
+                click.echo("   - Compound nodes can be collapsed/expanded in yEd")
+        
+    except Exception as e:
+        click.echo(f"Error during GraphML conversion: {e}", err=True)
+        if verbose:
+            import traceback
+            click.echo(traceback.format_exc(), err=True)
+        sys.exit(1)
+
+
+@cli.command()
+@click.argument('onnx_path', type=click.Path(exists=True))
+@click.argument('htp_metadata', type=click.Path(exists=True))
+@click.option('--output', '-o', 'output_base', help='Output base path (without extension)')
+@click.option('--strategy', default='sidecar', type=click.Choice(['sidecar', 'embedded', 'reference']),
+              help='Parameter storage strategy')
+@click.option('--format', default='v1.1', type=click.Choice(['v1.1']),
+              help='GraphML format version')
+@click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
+@click.pass_context
+def export_graphml(ctx, onnx_path, htp_metadata, output_base, strategy, format, verbose):
+    """
+    Export ONNX to GraphML v1.1 format with complete model interchange capability.
+    
+    This creates GraphML v1.1 format capable of perfect ONNX reconstruction.
+    Requires HTP metadata for hierarchy information.
+    
+    ONNX_PATH: Path to ONNX model file
+    HTP_METADATA: Path to HTP metadata JSON file
+    """
+    try:
+        from .graphml.enhanced_converter import EnhancedGraphMLConverter
+        
+        if verbose:
+            click.echo("🚀 Converting ONNX to GraphML v1.1 (Complete Model Interchange Format)")
+            click.echo(f"   ONNX Model: {onnx_path}")
+            click.echo(f"   HTP Metadata: {htp_metadata}")
+            click.echo(f"   Parameter Strategy: {strategy}")
+        
+        # Initialize v1.1 converter
+        converter = EnhancedGraphMLConverter(
+            htp_metadata_path=htp_metadata,
+            parameter_strategy=strategy
+        )
+        
+        # Convert to GraphML v1.1
+        if not output_base:
+            output_base = Path(onnx_path).stem
+            
+        result = converter.convert(onnx_path, output_base)
+        
+        # Display results
+        click.echo("✅ GraphML v1.1 export completed successfully!")
+        click.echo(f"   GraphML: {result['graphml']}")
+        click.echo(f"   Format Version: {result['format_version']}")
+        
+        # Display parameter file info
+        if strategy != 'embedded' and 'parameters' in result:
+            param_size = Path(result['parameters']).stat().st_size / (1024 * 1024)
+            click.echo(f"   Parameters: {result['parameters']} ({param_size:.1f} MB)")
+        
+        if verbose:
+            click.echo("\n💡 GraphML v1.1 Features:")
+            click.echo("   ✅ Complete ONNX node attributes")
+            click.echo("   ✅ Tensor type and shape information")
+            click.echo("   ✅ Model metadata preservation")
+            click.echo("   ✅ Parameter storage management")
+            click.echo("   ✅ Bidirectional conversion ready")
+            
+    except Exception as e:
+        click.echo(f"Error during GraphML v1.1 export: {e}", err=True)
+        if verbose:
+            import traceback
+            click.echo(traceback.format_exc(), err=True)
+        sys.exit(1)
+
+
+@cli.command()
+@click.argument('graphml_path', type=click.Path(exists=True))
+@click.argument('output_path')
+@click.option('--validate', is_flag=True, help='Validate reconstructed ONNX model')
+@click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
+@click.pass_context
+def import_onnx(ctx, graphml_path, output_path, validate, verbose):
+    """
+    Convert GraphML v1.1 back to ONNX model (reverse conversion).
+    
+    GRAPHML_PATH: Path to GraphML v1.1 file
+    OUTPUT_PATH: Path for output ONNX file
+    """
+    try:
+        from .graphml.graphml_to_onnx_converter import GraphMLToONNXConverter
+        
+        if verbose:
+            click.echo("🔄 Converting GraphML v1.1 to ONNX (Reverse Conversion)")
+            click.echo(f"   GraphML: {graphml_path}")
+            click.echo(f"   Output: {output_path}")
+            if validate:
+                click.echo("   Validation: Enabled")
+        
+        # Get conversion info
+        converter = GraphMLToONNXConverter()
+        info = converter.get_conversion_info(graphml_path)
+        
+        if verbose:
+            click.echo(f"\n📊 GraphML Analysis:")
+            click.echo(f"   Format Version: {info['format_version']}")
+            click.echo(f"   Model: {info['model_name']}")
+            click.echo(f"   Nodes: {info['node_count']}")
+            click.echo(f"   Edges: {info['edge_count']}")
+            click.echo(f"   Parameter Strategy: {info['parameter_strategy']}")
+            click.echo(f"   Estimated Size: {info['estimated_size_mb']:.1f} MB")
+        
+        # Convert to ONNX
+        result_path = converter.convert(graphml_path, output_path, validate=validate)
+        
+        # Get file size
+        onnx_size = Path(result_path).stat().st_size / (1024 * 1024)
+        
+        click.echo("✅ ONNX reconstruction completed successfully!")
+        click.echo(f"   Output: {result_path}")
+        click.echo(f"   Size: {onnx_size:.1f} MB")
+        
+        if validate:
+            click.echo("   ✅ Model validation passed")
+            
+    except Exception as e:
+        click.echo(f"Error during ONNX reconstruction: {e}", err=True)
+        if verbose:
+            import traceback
+            click.echo(traceback.format_exc(), err=True)
+        sys.exit(1)
+
+
 
 
 if __name__ == '__main__':
