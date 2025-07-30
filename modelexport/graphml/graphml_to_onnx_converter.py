@@ -172,6 +172,17 @@ class GraphMLToONNXConverter:
                 continue
             seen_nodes.add(node_id)
             
+            # Universal approach: Check if this node has nested graphs
+            # Module containers have nested <graph> elements, ONNX operations don't
+            has_nested_graph = (
+                node_elem.find("{http://graphml.graphdrawing.org/xmlns}graph") is not None or
+                node_elem.find("graph") is not None
+            )
+            
+            # Skip compound nodes (module containers with nested graphs)
+            if has_nested_graph:
+                continue
+            
             node_data = {"id": node_id}
             
             # Extract node data
@@ -190,105 +201,19 @@ class GraphMLToONNXConverter:
                     else:
                         node_data[attr_name] = value
             
-            # Only include ONNX operation nodes (have valid ONNX op_type AND node structure)
+            # Only include nodes with op_type (ONNX operations must have op_type)
             if "op_type" in node_data and node_data["op_type"]:
-                if self._is_valid_onnx_op_type(node_data["op_type"]):
-                    if self._is_onnx_operation_node(node_data):
-                        nodes.append(node_data)
-                    else:
-                        pass  # Node filtered out
+                nodes.append(node_data)
         
         return nodes
     
     def _is_valid_onnx_op_type(self, op_type: str) -> bool:
-        """Check if op_type is a valid ONNX operation (not a PyTorch module)."""
-        
-        # Common ONNX operations (whitelist approach is more reliable)
-        onnx_operations = {
-            "Abs", "Acos", "Acosh", "Add", "And", "ArgMax", "ArgMin", "Asin", "Asinh", "Atan", "Atanh",
-            "AveragePool", "BatchNormalization", "Cast", "Ceil", "Clip", "Concat", "Constant", "ConstantOfShape",
-            "Conv", "ConvTranspose", "Cos", "Cosh", "CumSum", "DepthToSpace", "Div", "Dropout", "Elu", "Equal",
-            "Erf", "Exp", "Expand", "EyeLike", "Flatten", "Floor", "Gather", "GatherElements", "GatherND",
-            "Gemm", "GlobalAveragePool", "GlobalMaxPool", "Greater", "GreaterOrEqual", "HardSigmoid", "HardSwish",
-            "Identity", "If", "InstanceNormalization", "IsInf", "IsNaN", "LRN", "LSTM", "LayerNormalization",
-            "LeakyRelu", "Less", "LessOrEqual", "Log", "LogSoftmax", "Loop", "LpNormalization", "LpPool", 
-            "MatMul", "Max", "MaxPool", "Mean", "Min", "Mod", "Mul", "Neg", "NonMaxSuppression", "NonZero", 
-            "Not", "OneHot", "Or", "PRelu", "Pad", "Pow", "QLinearConv", "QLinearMatMul", "QuantizeLinear", 
-            "RNN", "RandomNormal", "RandomUniform", "Reciprocal", "ReduceMax", "ReduceMean", "ReduceMin", 
-            "ReduceProd", "ReduceSum", "Relu", "Reshape", "Resize", "ReverseSequence", "RoiAlign", "Round", 
-            "ScatterElements", "ScatterND", "Selu", "Shape", "Shrink", "Sigmoid", "Sign", "Sin", "Sinh", 
-            "Size", "Slice", "Softmax", "Softplus", "Softsign", "SpaceToDepth", "Split", "Sqrt", "Squeeze", 
-            "Sub", "Sum", "Tan", "Tanh", "ThresholdedRelu", "Tile", "TopK", "Transpose", "Trilu", "Unsqueeze", 
-            "Upsample", "Where", "Xor"
-        }
-        
-        # Check if it's a known ONNX operation
-        if op_type in onnx_operations:
-            return True
-        
-        # Common PyTorch module names and parameter types that should be excluded
-        pytorch_modules = {
-            "BertModel", "BertEmbeddings", "BertEncoder", "BertLayer", 
-            "BertAttention", "BertSdpaSelfAttention", "BertSelfOutput",
-            "BertIntermediate", "BertOutput", "BertPooler", "GELUActivation",
-            "Linear", "LayerNorm", "Embedding", "Module", "Sequential", 
-            "ModuleList", "ModuleDict", "ResNet", "TestModel", "LinearLayer",
-            # Compound node parameter types
-            "word_embeddings", "position_embeddings", "token_type_embeddings",
-            "dense", "query", "key", "value", "activation", "dropout",
-            "layer", "attention", "intermediate", "output"
-        }
-        
-        # If it's a known PyTorch module or parameter type, exclude it
-        if op_type in pytorch_modules:
-            return False
-            
-        # If it contains common PyTorch module patterns, exclude it
-        pytorch_patterns = ["Bert", "Layer", "Norm", "Embedding", "Activation"]
-        if any(pattern in op_type for pattern in pytorch_patterns):
-            return False
-            
-        # Check for compound node patterns (contain dots or underscores indicating hierarchical names)
-        if "." in op_type or "_" in op_type:
-            # These are likely compound node identifiers, not ONNX operations
-            return False
-            
-        # If it's not in the ONNX whitelist and looks like a class name, exclude it
-        if op_type[0].isupper() and len(op_type) > 3:
-            return False
-            
-        # Otherwise, assume it's a valid ONNX operation
-        return True
+        """Check if op_type is valid (basic check, real validation happens at node level)."""
+        # Basic validation - just ensure op_type exists and is not empty
+        # The real check for ONNX operation vs module container happens in _extract_nodes
+        # by checking for nested graphs (universal approach)
+        return bool(op_type and op_type.strip())
     
-    def _is_onnx_operation_node(self, node_data: Dict[str, Any]) -> bool:
-        """Check if this is an actual ONNX operation node vs a compound/module node."""
-        
-        node_id = node_data.get("id", "")
-        
-        # ONNX operation nodes typically have paths with slashes (e.g., "/embeddings/Add")
-        # Compound nodes typically have dotted names (e.g., "embeddings.dropout")
-        if "." in node_id and "/" not in node_id:
-            # This is likely a compound node representing a PyTorch module
-            return False
-        
-        # ONNX nodes should have input/output information
-        inputs = node_data.get("input_names", [])
-        outputs = node_data.get("output_names", [])
-        
-        # If it has no inputs and no outputs, it's likely a compound node
-        if not inputs and not outputs:
-            return False
-        
-        # Additional check: compound nodes often have hierarchy_tag but no actual ONNX attributes
-        onnx_attrs = node_data.get("onnx_attributes", {})
-        hierarchy_tag = node_data.get("hierarchy_tag", "")
-        
-        # If it only has hierarchy info but no real ONNX attributes, it's a compound node
-        if hierarchy_tag and not onnx_attrs:
-            return False
-        
-        # If we get here, it's likely a real ONNX operation
-        return True
     
     def _extract_edges(
         self, 
