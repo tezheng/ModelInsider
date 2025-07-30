@@ -5,12 +5,18 @@ This module extracts graph structure from ONNX models, focusing on the
 computational graph while optionally excluding parameter tensors.
 """
 
-from typing import Dict, List, Set, Optional, Any
+from typing import Any
+
 import onnx
 
 from .utils import (
-    NodeData, EdgeData, GraphData, NodeType,
-    sanitize_node_id, get_tensor_dtype_name, format_tensor_shape
+    EdgeData,
+    GraphData,
+    NodeData,
+    NodeType,
+    format_tensor_shape,
+    get_tensor_dtype_name,
+    sanitize_node_id,
 )
 
 
@@ -26,7 +32,7 @@ class ONNXGraphParser:
     def __init__(
         self,
         exclude_initializers: bool = True,
-        exclude_attributes: Optional[Set[str]] = None
+        exclude_attributes: set[str] | None = None
     ):
         self.exclude_initializers = exclude_initializers
         self.exclude_attributes = exclude_attributes or set()
@@ -85,7 +91,7 @@ class ONNXGraphParser:
         
         return graph_data
     
-    def _extract_metadata(self, model: onnx.ModelProto) -> Dict[str, Any]:
+    def _extract_metadata(self, model: onnx.ModelProto) -> dict[str, Any]:
         """Extract model metadata."""
         metadata = {
             "model_version": model.model_version if hasattr(model, 'model_version') else 0,
@@ -109,8 +115,9 @@ class ONNXGraphParser:
     
     def _extract_node(self, node: Any, index: int) -> NodeData:
         """Extract data from an ONNX node."""
-        # Generate unique ID
-        node_id = sanitize_node_id(node.name) if node.name else f"node_{index}"
+        # Use original node name as ID (with forward slashes) to match baseline
+        node_id = node.name if node.name else f"node_{index}"
+        node_name = node.name if node.name else f"node_{index}"
         
         # Extract attributes (filtering excluded ones)
         attributes = {}
@@ -119,14 +126,30 @@ class ONNXGraphParser:
                 if attr.name not in self.exclude_attributes:
                     attributes[attr.name] = self._extract_attribute_value(attr)
         
+        # Extract special attributes if present
+        hierarchy_tag = None
+        if 'hierarchy_tag' in attributes:
+            hierarchy_tag = attributes.pop('hierarchy_tag')
+        
+        module_type = None
+        if 'module_type' in attributes:
+            module_type = attributes.pop('module_type')
+        
+        execution_order = None
+        if 'execution_order' in attributes:
+            execution_order = attributes.pop('execution_order')
+        
         return NodeData(
             id=node_id,
-            name=node.name if node.name else f"node_{index}",
+            name=node_name,
             op_type=node.op_type,
             node_type=NodeType.OPERATION,
             inputs=list(node.input),
             outputs=list(node.output),
-            attributes=attributes
+            attributes=attributes,
+            hierarchy_tag=hierarchy_tag,
+            module_type=module_type,
+            execution_order=execution_order
         )
     
     def _extract_input(self, input_proto: Any) -> NodeData:
@@ -140,7 +163,7 @@ class ONNXGraphParser:
             type_info["dtype"] = get_tensor_dtype_name(tensor_type.elem_type)
             if tensor_type.shape:
                 type_info["shape"] = format_tensor_shape(
-                    [dim for dim in tensor_type.shape.dim]
+                    list(tensor_type.shape.dim)
                 )
         
         return NodeData(
@@ -163,7 +186,7 @@ class ONNXGraphParser:
             type_info["dtype"] = get_tensor_dtype_name(tensor_type.elem_type)
             if tensor_type.shape:
                 type_info["shape"] = format_tensor_shape(
-                    [dim for dim in tensor_type.shape.dim]
+                    list(tensor_type.shape.dim)
                 )
         
         return NodeData(
@@ -178,9 +201,9 @@ class ONNXGraphParser:
     def _extract_edges(
         self,
         graph: Any,
-        node_map: Dict[str, NodeData],
-        initializer_names: Set[str]
-    ) -> List[EdgeData]:
+        node_map: dict[str, NodeData],
+        initializer_names: set[str]
+    ) -> list[EdgeData]:
         """Extract edges (tensor connections) from the graph."""
         edges = []
         
@@ -195,13 +218,15 @@ class ONNXGraphParser:
         
         # Node outputs produce tensors
         for idx, node in enumerate(graph.node):
-            node_id = sanitize_node_id(node.name) if node.name else f"node_{idx}"
+            # Use original node name as ID to match baseline
+            node_id = node.name if node.name else f"node_{idx}"
             for output in node.output:
                 tensor_producers[output] = node_id
         
         # Create edges from producers to consumers
         for idx, node in enumerate(graph.node):
-            node_id = sanitize_node_id(node.name) if node.name else f"node_{idx}"
+            # Use original node name as ID to match baseline
+            node_id = node.name if node.name else f"node_{idx}"
             
             for input_tensor in node.input:
                 # Skip initializers if requested

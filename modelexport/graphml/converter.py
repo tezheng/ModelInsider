@@ -7,12 +7,11 @@ excluding parameter tensors by default.
 """
 
 from pathlib import Path
-from typing import Optional, Set
 
 import onnx
 
-from .onnx_parser import ONNXGraphParser
 from .graphml_writer import GraphMLWriter
+from .onnx_parser import ONNXGraphParser
 
 
 class ONNXToGraphMLConverter:
@@ -30,7 +29,7 @@ class ONNXToGraphMLConverter:
     def __init__(
         self,
         exclude_initializers: bool = True,
-        exclude_attributes: Optional[Set[str]] = None
+        exclude_attributes: set[str] | None = None
     ):
         self.exclude_initializers = exclude_initializers
         self.exclude_attributes = exclude_attributes or set()
