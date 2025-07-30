@@ -469,6 +469,78 @@ class TestCLIExport:
         
         # GraphML might fail but shouldn't crash the export
         # The implementation has try/except to handle this
+    
+    def test_export_with_all_features_e2e(self, cli_runner, temp_workspace):
+        """End-to-end test with all features: --with-report --with-graphml --verbose."""
+        output_path = temp_workspace['exports'] / 'bert_full_features.onnx'
+        
+        result = cli_runner.invoke(cli, [
+            '--verbose',
+            'export',
+            '--model', 'prajjwal1/bert-tiny',
+            '--output', str(output_path),
+            '--with-report',
+            '--with-graphml',
+            '--verbose'
+        ])
+        
+        assert result.exit_code == 0
+        # In verbose mode, check for the detailed completion message
+        assert 'EXPORT COMPLETE' in result.output or 'Export completed successfully!' in result.output
+        
+        # Verify all expected files exist
+        base_name = output_path.stem
+        expected_files = {
+            'onnx': output_path,
+            'metadata': output_path.parent / f'{base_name}_htp_metadata.json',
+            'report': output_path.parent / f'{base_name}_htp_export_report.md',
+            'graphml': output_path.parent / f'{base_name}_hierarchical_graph.graphml',
+            'parameters': output_path.parent / f'{base_name}_hierarchical_graph.onnxdata'
+        }
+        
+        for file_type, file_path in expected_files.items():
+            assert file_path.exists(), f"Missing {file_type} file: {file_path}"
+        
+        # Test file sizes are reasonable
+        onnx_size = expected_files['onnx'].stat().st_size
+        report_size = expected_files['report'].stat().st_size
+        graphml_size = expected_files['graphml'].stat().st_size
+        params_size = expected_files['parameters'].stat().st_size
+        
+        assert onnx_size > 1024 * 1024, "ONNX file too small"
+        assert report_size > 1024, "Report file too small"
+        assert graphml_size > 1024, "GraphML file too small"
+        assert params_size > 1024 * 1024, "Parameter file too small"
+        
+        # Verify report contains expected sections
+        report_content = expected_files['report'].read_text()
+        expected_sections = [
+            "# HTP ONNX Export Report",
+            "## Export Process Steps",
+            "Step 1/6: Model Preparation",
+            "Step 6/6: Tag Injection",
+            "Export Summary"
+        ]
+        for section in expected_sections:
+            assert section in report_content, f"Missing report section: {section}"
+        
+        # Test GraphML round-trip conversion
+        reconstructed_path = temp_workspace['exports'] / 'bert_reconstructed_e2e.onnx'
+        round_trip_result = cli_runner.invoke(cli, [
+            'import-onnx',
+            str(expected_files['graphml']),
+            str(reconstructed_path),
+            '--validate'
+        ])
+        
+        assert round_trip_result.exit_code == 0
+        assert reconstructed_path.exists()
+        assert 'Model validation passed' in round_trip_result.output
+        
+        # Verify round-trip preservation (file sizes should be similar)
+        reconstructed_size = reconstructed_path.stat().st_size
+        size_ratio = abs(onnx_size - reconstructed_size) / onnx_size
+        assert size_ratio < 0.1, f"Round-trip size difference too large: {size_ratio:.2%}"
 
 
 class TestCLIAnalyze:
