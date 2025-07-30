@@ -278,11 +278,14 @@ class EnhancedGraphMLConverter(EnhancedHierarchicalConverter):
         # Add enhanced metadata
         self._add_v2_graph_metadata(main_graph, onnx_model, parameter_info)
         
+        # Initialize tracking for node placement to prevent duplication
+        self.placed_nodes = set()
+        
         # Add hierarchical structure (compound nodes)
         self._add_hierarchical_structure(main_graph, graph_data)
         
-        # Add ONNX operation nodes with v1.1 attributes
-        self._add_v2_onnx_nodes(main_graph, graph_data)
+        # Add remaining ONNX operation nodes with v1.1 attributes
+        self._add_remaining_v2_onnx_nodes(main_graph, graph_data)
         
         # Add edges with tensor information
         self._add_v2_edges(main_graph, graph_data)
@@ -422,33 +425,37 @@ class EnhancedGraphMLConverter(EnhancedHierarchicalConverter):
         # Initializers reference
         graph.append(self._create_data_element("g3", parameter_info.get("parameter_file", "")))
     
-    def _add_v2_onnx_nodes(self, graph: ET.Element, graph_data: GraphData):
-        """Add ONNX operation nodes with v1.1 enhanced attributes."""
+    def _add_remaining_v2_onnx_nodes(self, graph: ET.Element, graph_data: GraphData):
+        """Add ONNX operation nodes that haven't been placed in subgraphs yet."""
         
         for node in graph_data.nodes:
             if hasattr(node, 'op_type') and node.op_type:
-                node_elem = ET.Element("node", attrib={"id": node.name})
-                
-                # Basic node information
-                node_elem.append(self._create_data_element("n0", node.op_type))
-                node_elem.append(self._create_data_element("n1", node.hierarchy_tag or ""))
-                
-                # ENHANCED: Actual ONNX attributes (not empty {})
-                onnx_attrs = getattr(node, 'onnx_attributes', {})
-                node_elem.append(self._create_data_element("n2", json.dumps(onnx_attrs)))
-                
-                node_elem.append(self._create_data_element("n3", node.name))
-                
-                # NEW: Input/output names and domain
-                input_names = getattr(node, 'input_names', [])
-                output_names = getattr(node, 'output_names', [])
-                domain = getattr(node, 'domain', '')
-                
-                node_elem.append(self._create_data_element("n4", json.dumps(input_names)))
-                node_elem.append(self._create_data_element("n5", json.dumps(output_names)))
-                node_elem.append(self._create_data_element("n6", domain))
-                
-                graph.append(node_elem)
+                # Only add nodes that haven't been placed yet to prevent duplication
+                if node.name not in self.placed_nodes:
+                    node_elem = ET.Element("node", attrib={"id": node.name})
+                    
+                    # Basic node information
+                    node_elem.append(self._create_data_element("n0", node.op_type))
+                    node_elem.append(self._create_data_element("n1", node.hierarchy_tag or ""))
+                    
+                    # ENHANCED: Actual ONNX attributes (not empty {})
+                    onnx_attrs = getattr(node, 'onnx_attributes', {})
+                    node_elem.append(self._create_data_element("n2", json.dumps(onnx_attrs)))
+                    
+                    node_elem.append(self._create_data_element("n3", node.name))
+                    
+                    # NEW: Input/output names and domain
+                    input_names = getattr(node, 'input_names', [])
+                    output_names = getattr(node, 'output_names', [])
+                    domain = getattr(node, 'domain', '')
+                    
+                    node_elem.append(self._create_data_element("n4", json.dumps(input_names)))
+                    node_elem.append(self._create_data_element("n5", json.dumps(output_names)))
+                    node_elem.append(self._create_data_element("n6", domain))
+                    
+                    graph.append(node_elem)
+                    # Track that this node has been placed
+                    self.placed_nodes.add(node.name)
     
     def _add_v2_edges(self, graph: ET.Element, graph_data: GraphData):
         """Add edges with v1.1 tensor information."""
@@ -589,3 +596,5 @@ class EnhancedGraphMLConverter(EnhancedHierarchicalConverter):
                     node_elem.append(self._create_data_element("n6", domain))
                     
                     graph_elem.append(node_elem)
+                    # Track that this node has been placed to prevent duplication
+                    self.placed_nodes.add(node.name)
