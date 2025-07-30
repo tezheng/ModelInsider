@@ -437,14 +437,9 @@ class TestGraphMLStructuralValidation:
         if not nodes:
             nodes = tree.findall('.//node')
         
-        # ONNX operation types (not module types)
-        onnx_op_types = {
-            'Constant', 'Gather', 'Add', 'MatMul', 'Reshape', 'LayerNormalization',
-            'Mul', 'Div', 'Sub', 'Pow', 'Sqrt', 'Transpose', 'Cast', 'Slice',
-            'Concat', 'Split', 'Expand', 'Unsqueeze', 'Squeeze', 'Shape',
-            'ReduceMean', 'Softmax', 'Dropout', 'Relu', 'Gelu', 'Tanh',
-            'Sigmoid', 'Where', 'Equal', 'Greater', 'Less', 'And', 'Or'
-        }
+        # Universal approach: Distinguish ONNX operations from module containers
+        # ONNX operation nodes do NOT have nested graphs (they are leaf nodes)
+        # Module containers HAVE nested graphs (they contain other nodes)
         
         for node in nodes:
             # Check if this is an operation node (has op_type)
@@ -453,9 +448,13 @@ class TestGraphMLStructuralValidation:
                 op_type_elem = node.find('./data[@key="n0"]')
             
             if op_type_elem is not None and op_type_elem.text:
-                op_type = op_type_elem.text
-                # Only count ONNX operations, not module containers
-                if op_type in onnx_op_types:
+                # Check if this node has nested graphs (module container)
+                has_nested_graph = node.find('.//gml:graph', namespaces) is not None
+                if not has_nested_graph:
+                    has_nested_graph = node.find('.//graph') is not None
+                
+                # Only count as operation if it doesn't have nested graphs
+                if not has_nested_graph:
                     graphml_operation_nodes.append(node.get('id'))
         
         graphml_node_count = len(graphml_operation_nodes)
@@ -801,7 +800,17 @@ class TestGraphMLEnhancedE2E:
                 continue
             
             parent = parent_map.get(node)
-            if parent is None or parent.tag != 'graph':
+            if parent is None:
+                nesting_violations.append(node_id)
+                continue
+                
+            # Handle namespace in parent tag check
+            parent_tag = parent.tag
+            if parent_tag.startswith('{'):
+                # Remove namespace prefix
+                parent_tag = parent_tag.split('}')[1]
+            
+            if parent_tag != 'graph':
                 nesting_violations.append(node_id)
         
         assert len(nesting_violations) == 0, f"Nesting violations: {nesting_violations}"
@@ -823,9 +832,14 @@ class TestGraphMLEnhancedE2E:
             nodes = root.findall('.//node')
         
         for node in nodes:
-            op_type_elem = node.find('.//data[@key="n0"]')
+            # Handle namespace for data elements
+            op_type_elem = node.find('.//gml:data[@key="n0"]', namespaces)
+            if op_type_elem is None:
+                op_type_elem = node.find('.//data[@key="n0"]')
             if op_type_elem is not None and op_type_elem.text:
-                hierarchy_elem = node.find('.//data[@key="n1"]')
+                hierarchy_elem = node.find('.//gml:data[@key="n1"]', namespaces)
+                if hierarchy_elem is None:
+                    hierarchy_elem = node.find('.//data[@key="n1"]')
                 if hierarchy_elem is None or not hierarchy_elem.text:
                     nodes_without_hierarchy.append(node.get('id'))
         
@@ -852,9 +866,23 @@ class TestGraphMLEnhancedE2E:
             nodes = root.findall('.//node')
         
         for node in nodes:
-            op_type_elem = node.find('.//data[@key="n0"]')
+            # Handle namespace for data elements too
+            op_type_elem = node.find('.//gml:data[@key="n0"]', namespaces)
+            if op_type_elem is None:
+                op_type_elem = node.find('.//data[@key="n0"]')
+            
             if op_type_elem is not None and op_type_elem.text:
-                graphml_operation_nodes.append(node.get('id'))
+                op_type = op_type_elem.text
+                
+                # Universal approach: Check if this node has child graphs
+                # Module containers have nested <graph> elements, ONNX ops don't
+                has_nested_graph = node.find('.//gml:graph', namespaces) is not None
+                if not has_nested_graph:
+                    has_nested_graph = node.find('.//graph') is not None
+                
+                # Only count as operation if it doesn't have nested graphs
+                if not has_nested_graph:
+                    graphml_operation_nodes.append(node.get('id'))
         
         graphml_node_count = len(graphml_operation_nodes)
         tolerance = max(1, int(onnx_node_count * 0.05))
