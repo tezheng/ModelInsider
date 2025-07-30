@@ -6,13 +6,10 @@ following the GraphML specification for compatibility with visualization tools.
 """
 
 import xml.etree.ElementTree as ET
-from typing import List, Dict, Optional
 from datetime import datetime
 
-from .utils import (
-    GraphData, NodeData, EdgeData, NodeType,
-    GraphMLConstants as GC
-)
+from .utils import EdgeData, GraphData, NodeData, NodeType
+from .utils import GraphMLConstants as GC
 
 
 class GraphMLWriter:
@@ -78,33 +75,26 @@ class GraphMLWriter:
     
     def _define_attribute_keys(self, graphml: ET.Element) -> None:
         """Define GraphML attribute keys."""
+        # Graph attributes (for compound nodes)
+        self._add_key(graphml, GC.GRAPH_CLASS_NAME, "graph", "class_name", "string")
+        self._add_key(graphml, GC.GRAPH_MODULE_TYPE, "graph", "module_type", "string")
+        self._add_key(graphml, GC.GRAPH_EXECUTION_ORDER, "graph", "execution_order", "int")
+        self._add_key(graphml, GC.GRAPH_TRACED_TAG, "graph", "traced_tag", "string")
+        
         # Node attributes
-        self._add_key(graphml, GC.NODE_OP_TYPE, "node", "op_type", "string", 
-                     "Operation type")
-        self._add_key(graphml, GC.NODE_HIERARCHY_TAG, "node", "hierarchy_tag", "string",
-                     "Hierarchy tag from HTP")
-        self._add_key(graphml, GC.NODE_MODULE_TYPE, "node", "module_type", "string",
-                     "Module class type")
-        self._add_key(graphml, GC.NODE_EXECUTION_ORDER, "node", "execution_order", "int",
-                     "Execution order index")
+        self._add_key(graphml, GC.NODE_OP_TYPE, "node", "op_type", "string")
+        self._add_key(graphml, GC.NODE_HIERARCHY_TAG, "node", "hierarchy_tag", "string")
+        self._add_key(graphml, GC.NODE_ATTRIBUTES_JSON, "node", "node_attributes", "string")
+        self._add_key(graphml, GC.NODE_NAME, "node", "name", "string")
         
         # Edge attributes
-        self._add_key(graphml, GC.EDGE_TENSOR_NAME, "edge", "tensor_name", "string",
-                     "Tensor name")
-        self._add_key(graphml, GC.EDGE_TENSOR_SHAPE, "edge", "tensor_shape", "string",
-                     "Tensor shape")
-        self._add_key(graphml, GC.EDGE_TENSOR_DTYPE, "edge", "tensor_dtype", "string",
-                     "Tensor data type")
+        self._add_key(graphml, GC.EDGE_TENSOR_NAME, "edge", "tensor_name", "string")
         
         # Graph metadata
-        self._add_key(graphml, GC.META_SOURCE_FILE, "graph", "source_file", "string",
-                     "Source ONNX file")
-        self._add_key(graphml, GC.META_HTP_FILE, "graph", "htp_file", "string",
-                     "HTP metadata file")
-        self._add_key(graphml, GC.META_FORMAT_VERSION, "graph", "format_version", "string",
-                     "GraphML format version")
-        self._add_key(graphml, GC.META_TIMESTAMP, "graph", "timestamp", "string",
-                     "Generation timestamp")
+        self._add_key(graphml, GC.META_SOURCE_ONNX, "graph", "source_onnx_text", "string")
+        self._add_key(graphml, GC.META_SOURCE_HTP, "graph", "source_htp", "string")
+        self._add_key(graphml, GC.META_FORMAT_VERSION, "graph", "format_version", "string")
+        self._add_key(graphml, GC.META_TIMESTAMP, "graph", "export_timestamp", "string")
     
     def _add_key(
         self,
@@ -113,7 +103,7 @@ class GraphMLWriter:
         for_type: str,
         attr_name: str,
         attr_type: str,
-        desc: Optional[str] = None
+        desc: str | None = None
     ) -> None:
         """Add a key definition to GraphML."""
         key = ET.SubElement(parent, "key", attrib={
@@ -164,14 +154,14 @@ class GraphMLWriter:
         
         # Source file
         if "source_file" in metadata:
-            self._add_data(graph, GC.META_SOURCE_FILE, metadata["source_file"])
+            self._add_data(graph, GC.META_SOURCE_ONNX, metadata["source_file"])
         
         # HTP file (if present)
         if "htp_file" in metadata:
-            self._add_data(graph, GC.META_HTP_FILE, metadata["htp_file"])
+            self._add_data(graph, GC.META_SOURCE_HTP, metadata["htp_file"])
         
         # Format version
-        self._add_data(graph, GC.META_FORMAT_VERSION, "1.0")
+        self._add_data(graph, GC.META_FORMAT_VERSION, "1.1")
         
         # Timestamp
         self._add_data(graph, GC.META_TIMESTAMP, datetime.now().isoformat())
@@ -180,20 +170,24 @@ class GraphMLWriter:
         """Create a node element."""
         node_elem = ET.Element("node", attrib={"id": node.id})
         
-        # Add operation type
-        self._add_data(node_elem, GC.NODE_OP_TYPE, node.op_type)
+        # Add operation type (can be empty for operations)
+        self._add_data(node_elem, GC.NODE_OP_TYPE, node.op_type if node.op_type else "")
         
         # Add hierarchy tag if present
         if node.hierarchy_tag:
             self._add_data(node_elem, GC.NODE_HIERARCHY_TAG, node.hierarchy_tag)
         
-        # Add module type if present
+        # Add node attributes as JSON
+        import json
+        node_attrs = {}
         if node.module_type:
-            self._add_data(node_elem, GC.NODE_MODULE_TYPE, node.module_type)
-        
-        # Add execution order if present
+            node_attrs["module_type"] = node.module_type
         if node.execution_order is not None:
-            self._add_data(node_elem, GC.NODE_EXECUTION_ORDER, str(node.execution_order))
+            node_attrs["execution_order"] = node.execution_order
+        self._add_data(node_elem, GC.NODE_ATTRIBUTES_JSON, json.dumps(node_attrs))
+        
+        # Add node name
+        self._add_data(node_elem, GC.NODE_NAME, node.name)
         
         # Add shape information for inputs/outputs
         if node.node_type in (NodeType.INPUT, NodeType.OUTPUT) and "shape" in node.attributes:
@@ -212,15 +206,6 @@ class GraphMLWriter:
         
         # Add tensor name
         self._add_data(edge_elem, GC.EDGE_TENSOR_NAME, edge.tensor_name)
-        
-        # Add shape if available
-        if edge.tensor_shape:
-            shape_str = f"[{', '.join(map(str, edge.tensor_shape))}]"
-            self._add_data(edge_elem, GC.EDGE_TENSOR_SHAPE, shape_str)
-        
-        # Add dtype if available
-        if edge.tensor_dtype:
-            self._add_data(edge_elem, GC.EDGE_TENSOR_DTYPE, edge.tensor_dtype)
         
         return edge_elem
     

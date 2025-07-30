@@ -430,7 +430,8 @@ class MetadataWriter(StepAwareWriter):
                 index = child_name.split(".")[-1]
                 key = f"{module_info.class_name}.{index}"
             else:
-                # Regular module, use class name
+                # Use class_name as key for consistency with expected structure
+                # This ensures tests expecting BertEmbeddings, BertEncoder keys work correctly
                 key = module_info.class_name
             
             # Build child structure

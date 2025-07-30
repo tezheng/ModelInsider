@@ -6,27 +6,33 @@ used across the GraphML conversion pipeline.
 """
 
 from dataclasses import dataclass, field
-from typing import Dict, List, Any, Optional
 from enum import Enum
+from typing import Any, ClassVar
 
 
 class GraphMLConstants:
     """GraphML namespace and attribute constants."""
     GRAPHML_NS = "http://graphml.graphdrawing.org/xmlns"
-    GRAPHML_NS_MAP = {"": GRAPHML_NS}
+    GRAPHML_NS_MAP: ClassVar[dict[str, str]] = {"": GRAPHML_NS}
     
-    # Standard attribute keys
-    NODE_OP_TYPE = "d0"
-    NODE_HIERARCHY_TAG = "d1"
-    NODE_MODULE_TYPE = "d2"
-    NODE_EXECUTION_ORDER = "d3"
-    EDGE_TENSOR_NAME = "d4"
-    EDGE_TENSOR_SHAPE = "d5"
-    EDGE_TENSOR_DTYPE = "d6"
+    # Graph attributes (for compound nodes)
+    GRAPH_CLASS_NAME = "d0"
+    GRAPH_MODULE_TYPE = "d1"
+    GRAPH_EXECUTION_ORDER = "d2"
+    GRAPH_TRACED_TAG = "d3"
+    
+    # Node attributes
+    NODE_OP_TYPE = "n0"
+    NODE_HIERARCHY_TAG = "n1"
+    NODE_ATTRIBUTES_JSON = "n2"
+    NODE_NAME = "n3"
+    
+    # Edge attributes
+    EDGE_TENSOR_NAME = "e0"
     
     # Metadata keys
-    META_SOURCE_FILE = "m0"
-    META_HTP_FILE = "m1"
+    META_SOURCE_ONNX = "m0"
+    META_SOURCE_HTP = "m1"
     META_FORMAT_VERSION = "m2"
     META_TIMESTAMP = "m3"
 
@@ -46,12 +52,12 @@ class NodeData:
     name: str
     op_type: str
     node_type: NodeType = NodeType.OPERATION
-    inputs: List[str] = field(default_factory=list)
-    outputs: List[str] = field(default_factory=list)
-    attributes: Dict[str, Any] = field(default_factory=dict)
-    hierarchy_tag: Optional[str] = None
-    module_type: Optional[str] = None
-    execution_order: Optional[int] = None
+    inputs: list[str] = field(default_factory=list)
+    outputs: list[str] = field(default_factory=list)
+    attributes: dict[str, Any] = field(default_factory=dict)
+    hierarchy_tag: str | None = None
+    module_type: str | None = None
+    execution_order: int | None = None
 
 
 @dataclass
@@ -60,8 +66,8 @@ class EdgeData:
     source_id: str
     target_id: str
     tensor_name: str
-    tensor_shape: Optional[List[int]] = None
-    tensor_dtype: Optional[str] = None
+    tensor_shape: list[int] | None = None
+    tensor_dtype: str | None = None
 
 
 @dataclass
@@ -71,19 +77,19 @@ class CompoundNode:
     name: str
     module_path: str
     class_name: str
-    children: List[str] = field(default_factory=list)
-    parent: Optional[str] = None
+    children: list[str] = field(default_factory=list)
+    parent: str | None = None
 
 
 @dataclass
 class GraphData:
     """Complete graph data structure."""
-    nodes: List[NodeData] = field(default_factory=list)
-    edges: List[EdgeData] = field(default_factory=list)
-    inputs: List[NodeData] = field(default_factory=list)
-    outputs: List[NodeData] = field(default_factory=list)
-    compounds: Dict[str, CompoundNode] = field(default_factory=dict)
-    metadata: Dict[str, Any] = field(default_factory=dict)
+    nodes: list[NodeData] = field(default_factory=list)
+    edges: list[EdgeData] = field(default_factory=list)
+    inputs: list[NodeData] = field(default_factory=list)
+    outputs: list[NodeData] = field(default_factory=list)
+    compounds: dict[str, CompoundNode] = field(default_factory=dict)
+    metadata: dict[str, Any] = field(default_factory=dict)
 
 
 def sanitize_node_id(name: str) -> str:
@@ -135,7 +141,7 @@ def get_tensor_dtype_name(dtype_int: int) -> str:
     return dtype_map.get(dtype_int, f"unknown_{dtype_int}")
 
 
-def format_tensor_shape(shape: List[Any]) -> str:
+def format_tensor_shape(shape: list[Any]) -> str:
     """
     Format tensor shape for display.
     
