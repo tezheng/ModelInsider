@@ -9,19 +9,18 @@ Tests the complete round-trip conversion functionality:
 - Parameter storage strategies
 """
 
+import hashlib
 import json
 import xml.etree.ElementTree as ET
 from pathlib import Path
-import tempfile
-import hashlib
-import numpy as np
 
+import numpy as np
 import onnx
 import pytest
 from click.testing import CliRunner
 
 from modelexport.cli import cli
-from modelexport.graphml.enhanced_converter import EnhancedGraphMLConverter
+from modelexport.graphml import ONNXToGraphMLConverter
 from modelexport.graphml.graphml_to_onnx_converter import GraphMLToONNXConverter
 from modelexport.graphml.round_trip_validator import RoundTripValidator
 
@@ -132,7 +131,7 @@ class TestGraphMLV2Export:
         """Test v1.1 converter initialization."""
         model_path, metadata_path = sample_onnx_model_with_metadata
         
-        converter = EnhancedGraphMLConverter(
+        converter = ONNXToGraphMLConverter(
             htp_metadata_path=str(metadata_path),
             parameter_strategy="sidecar"
         )
@@ -145,7 +144,7 @@ class TestGraphMLV2Export:
         """Test GraphML v1.1 export with sidecar parameter storage."""
         model_path, metadata_path = sample_onnx_model_with_metadata
         
-        converter = EnhancedGraphMLConverter(
+        converter = ONNXToGraphMLConverter(
             htp_metadata_path=str(metadata_path),
             parameter_strategy="sidecar"
         )
@@ -182,7 +181,7 @@ class TestGraphMLV2Export:
         """Test GraphML v1.1 export with embedded parameter storage."""
         model_path, metadata_path = sample_onnx_model_with_metadata
         
-        converter = EnhancedGraphMLConverter(
+        converter = ONNXToGraphMLConverter(
             htp_metadata_path=str(metadata_path),
             parameter_strategy="embedded"
         )
@@ -208,7 +207,7 @@ class TestGraphMLToONNXImport:
         model_path, metadata_path = sample_onnx_model_with_metadata
         
         # First export to GraphML v1.1
-        export_converter = EnhancedGraphMLConverter(
+        export_converter = ONNXToGraphMLConverter(
             htp_metadata_path=str(metadata_path),
             parameter_strategy="sidecar"
         )
@@ -243,7 +242,7 @@ class TestGraphMLToONNXImport:
         model_path, metadata_path = sample_onnx_model_with_metadata
         
         # Export to GraphML v1.1
-        export_converter = EnhancedGraphMLConverter(
+        export_converter = ONNXToGraphMLConverter(
             htp_metadata_path=str(metadata_path),
             parameter_strategy="sidecar"
         )
@@ -408,7 +407,7 @@ class TestParameterStrategies:
         """Test sidecar parameter storage strategy."""
         model_path, metadata_path = sample_onnx_model_with_metadata
         
-        converter = EnhancedGraphMLConverter(
+        converter = ONNXToGraphMLConverter(
             htp_metadata_path=str(metadata_path),
             parameter_strategy="sidecar"
         )
@@ -426,7 +425,7 @@ class TestParameterStrategies:
         """Test embedded parameter storage strategy."""
         model_path, metadata_path = sample_onnx_model_with_metadata
         
-        converter = EnhancedGraphMLConverter(
+        converter = ONNXToGraphMLConverter(
             htp_metadata_path=str(metadata_path),
             parameter_strategy="embedded"
         )
@@ -445,7 +444,7 @@ class TestErrorHandling:
     def test_missing_metadata_file(self, tmp_path):
         """Test error handling for missing metadata file."""
         with pytest.raises(FileNotFoundError):
-            EnhancedGraphMLConverter(
+            ONNXToGraphMLConverter(
                 htp_metadata_path="/nonexistent/metadata.json"
             )
     
@@ -454,7 +453,7 @@ class TestErrorHandling:
         model_path, metadata_path = sample_onnx_model_with_metadata
         
         with pytest.raises((ValueError, AssertionError)):
-            EnhancedGraphMLConverter(
+            ONNXToGraphMLConverter(
                 htp_metadata_path=str(metadata_path),
                 parameter_strategy="invalid_strategy"
             )
@@ -494,7 +493,7 @@ class TestFileIntegrity:
         """Test parameter file checksum generation and validation."""
         model_path, metadata_path = sample_onnx_model_with_metadata
         
-        converter = EnhancedGraphMLConverter(
+        converter = ONNXToGraphMLConverter(
             htp_metadata_path=str(metadata_path),
             parameter_strategy="sidecar"
         )
@@ -530,7 +529,7 @@ class TestFileIntegrity:
         original_size = Path(model_path).stat().st_size
         
         # Export to GraphML v1.1
-        export_converter = EnhancedGraphMLConverter(
+        export_converter = ONNXToGraphMLConverter(
             htp_metadata_path=str(metadata_path),
             parameter_strategy="sidecar"
         )

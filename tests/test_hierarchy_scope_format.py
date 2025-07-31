@@ -1,6 +1,5 @@
 """Test cases for hierarchy scope format regression."""
 
-import pytest
 from transformers import AutoModel
 
 from modelexport.core.hierarchy_utils import build_ascii_tree, build_rich_tree
@@ -71,8 +70,9 @@ class TestHierarchyScopeFormat:
         tree = build_rich_tree(hierarchy)
         
         # Convert to string for checking
-        from rich.console import Console
         from io import StringIO
+
+        from rich.console import Console
         
         output = StringIO()
         console = Console(file=output, force_terminal=True)

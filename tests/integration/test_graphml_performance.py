@@ -5,7 +5,6 @@ Tests the performance impact of enabling --with-graphml flag.
 """
 
 import time
-from pathlib import Path
 
 import pytest
 from click.testing import CliRunner

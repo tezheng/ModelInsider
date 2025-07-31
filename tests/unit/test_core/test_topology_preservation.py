@@ -201,8 +201,8 @@ class TestTopologyPreservationDetailed:
         baseline_model = onnx.load(str(baseline_path))
         hierarchy_model = onnx.load(str(hierarchy_path))
         
-        baseline_ops = set(node.op_type for node in baseline_model.graph.node)
-        hierarchy_ops = set(node.op_type for node in hierarchy_model.graph.node)
+        baseline_ops = {node.op_type for node in baseline_model.graph.node}
+        hierarchy_ops = {node.op_type for node in hierarchy_model.graph.node}
         
         additional_ops = hierarchy_ops - baseline_ops
         missing_ops = baseline_ops - hierarchy_ops

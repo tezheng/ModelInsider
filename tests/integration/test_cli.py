@@ -304,8 +304,6 @@ class TestCLIExport:
     
     def test_export_with_graphml_permission_error_recovery(self, cli_runner, temp_workspace):
         """Test --with-graphml handles permission errors gracefully."""
-        import os
-        import stat
         
         # Create a read-only directory to simulate permission issues
         readonly_dir = temp_workspace['exports'] / 'readonly'

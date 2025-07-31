@@ -8,7 +8,6 @@ Tests the CLI interface for:
 """
 
 import json
-import tempfile
 from pathlib import Path
 
 import onnx

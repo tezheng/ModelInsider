@@ -4,9 +4,10 @@ Unit tests for base hierarchy utilities.
 """
 
 import pytest
-import torch
 import torch.nn as nn
+
 from modelexport.core.base import should_include_in_hierarchy
+
 
 class TestShouldIncludeInHierarchy:
     """Test the should_include_in_hierarchy function."""

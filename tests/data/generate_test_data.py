@@ -9,20 +9,21 @@ Usage:
     python generate_test_data.py [--model bert-tiny] [--output-dir data/]
 """
 
+import argparse
+import json
+import os
+import sys
+import tempfile
+from pathlib import Path
+from typing import Any
+
 import torch
 import torch.onnx
-import json
-import argparse
-from pathlib import Path
-from typing import Dict, List, Any, Tuple
-import tempfile
-import sys
-import os
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from modelexport.core.base import should_include_in_hierarchy, build_hierarchy_path
+from modelexport.core.base import build_hierarchy_path, should_include_in_hierarchy
 
 try:
     from transformers import AutoModel, AutoTokenizer
@@ -31,7 +32,7 @@ except ImportError:
     HAS_TRANSFORMERS = False
 
 
-def generate_expected_tags_from_model(model: torch.nn.Module) -> Dict[str, Any]:
+def generate_expected_tags_from_model(model: torch.nn.Module) -> dict[str, Any]:
     """
     Generate expected tag mappings from model structure.
     
@@ -118,12 +119,12 @@ def generate_expected_tags_from_model(model: torch.nn.Module) -> Dict[str, Any]:
         "model_class": f"{model.__class__.__module__}.{model.__class__.__name__}",
         "model_signature": model_signature,
         "modules": expected_tags,
-        "hierarchy_depth": max(len(name.split('.')) for name in expected_tags.keys()) if expected_tags else 0,
+        "hierarchy_depth": max(len(name.split('.')) for name in expected_tags) if expected_tags else 0,
         "expected_hierarchy": expected_hierarchy
     }
 
 
-def export_baseline_onnx(model: torch.nn.Module, inputs: Dict, output_path: Path, export_config: Dict):
+def export_baseline_onnx(model: torch.nn.Module, inputs: dict, output_path: Path, export_config: dict):
     """Export model using standard PyTorch ONNX export (baseline for comparison)."""
     print(f"Exporting baseline ONNX to {output_path}")
     
@@ -158,7 +159,7 @@ def export_baseline_onnx(model: torch.nn.Module, inputs: Dict, output_path: Path
     print(f"✅ Baseline ONNX exported successfully")
 
 
-def export_static_baseline_onnx(model: torch.nn.Module, inputs: Dict, output_path: Path, export_config: Dict):
+def export_static_baseline_onnx(model: torch.nn.Module, inputs: dict, output_path: Path, export_config: dict):
     """Export model without dynamic axes for static optimized baseline."""
     print(f"Exporting static baseline ONNX to {output_path}")
     
@@ -194,7 +195,7 @@ def export_static_baseline_onnx(model: torch.nn.Module, inputs: Dict, output_pat
     print(f"✅ Static baseline ONNX exported successfully")
 
 
-def export_individual_modules(model: torch.nn.Module, model_inputs: Dict, output_dir: Path, export_config: Dict):
+def export_individual_modules(model: torch.nn.Module, model_inputs: dict, output_dir: Path, export_config: dict):
     """
     Export individual modules for comparison with subgraph extraction.
     
@@ -261,7 +262,7 @@ def export_individual_modules(model: torch.nn.Module, model_inputs: Dict, output
     return exported_modules
 
 
-def create_module_input(module: torch.nn.Module, model_inputs: Dict):
+def create_module_input(module: torch.nn.Module, model_inputs: dict):
     """
     Create appropriate input for individual module export.
     
@@ -291,7 +292,7 @@ def create_module_input(module: torch.nn.Module, model_inputs: Dict):
         return torch.randn(1, 128)  # Common hidden size
 
 
-def generate_topology_signatures(model: torch.nn.Module, model_inputs: Dict, export_config: Dict) -> Dict[str, Any]:
+def generate_topology_signatures(model: torch.nn.Module, model_inputs: dict, export_config: dict) -> dict[str, Any]:
     """
     Generate topology signatures for comparison testing.
     
@@ -357,7 +358,7 @@ def generate_topology_signatures(model: torch.nn.Module, model_inputs: Dict, exp
     return signatures
 
 
-def create_sample_inputs_from_config(export_config: Dict):
+def create_sample_inputs_from_config(export_config: dict):
     """
     Create sample inputs based on the export configuration - completely universal.
     
@@ -410,7 +411,7 @@ def create_sample_inputs_from_config(export_config: Dict):
     return sample_inputs
 
 
-def generate_universal_test_data(output_dir: Path, export_config: Dict, model_name: str):
+def generate_universal_test_data(output_dir: Path, export_config: dict, model_name: str):
     """Generate all reference data for any HuggingFace model - universal approach."""
     if not HAS_TRANSFORMERS:
         print("❌ transformers library not available, skipping test data generation")
@@ -511,7 +512,7 @@ def main():
     args = parser.parse_args()
     
     # Load export configuration
-    with open(args.config, 'r') as f:
+    with open(args.config) as f:
         export_config = json.load(f)
     
     # Convert dynamic_axes string keys to integers (JSON limitation workaround)

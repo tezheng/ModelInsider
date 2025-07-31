@@ -5,10 +5,10 @@ This test verifies that the runtime validation catches errors
 before metadata is written to disk.
 """
 
-import pytest
 # Validation utils removed - these tests need to be updated
 # to test validation at export time instead
 import pytest
+
 
 class MetadataValidationError(ValueError):
     """Placeholder for removed validation error."""

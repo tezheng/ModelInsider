@@ -22,7 +22,7 @@ class TestHTPMetadataValidation:
     def schema(self):
         """Load the HTP metadata JSON schema."""
         schema_path = Path(__file__).parent.parent.parent / "modelexport/strategies/htp/htp_metadata_schema.json"
-        with open(schema_path, 'r') as f:
+        with open(schema_path) as f:
             return json.load(f)
     
     def test_metadata_schema_compliance(self, schema):
@@ -37,7 +37,7 @@ class TestHTPMetadataValidation:
             )
             
             metadata_path = str(output_path).replace(".onnx", "_htp_metadata.json")
-            with open(metadata_path, 'r') as f:
+            with open(metadata_path) as f:
                 metadata = json.load(f)
             
             # Validate against schema
@@ -55,7 +55,7 @@ class TestHTPMetadataValidation:
             )
             
             metadata_path = str(output_path).replace(".onnx", "_htp_metadata.json")
-            with open(metadata_path, 'r') as f:
+            with open(metadata_path) as f:
                 metadata = json.load(f)
             
             # Check required top-level fields
@@ -86,7 +86,7 @@ class TestHTPMetadataValidation:
             )
             
             metadata_path = str(output_path).replace(".onnx", "_htp_metadata.json")
-            with open(metadata_path, 'r') as f:
+            with open(metadata_path) as f:
                 metadata = json.load(f)
             
             # Strategy must be "htp"
@@ -116,7 +116,7 @@ class TestHTPMetadataValidation:
             )
             
             metadata_path = str(output_path).replace(".onnx", "_htp_metadata.json")
-            with open(metadata_path, 'r') as f:
+            with open(metadata_path) as f:
                 metadata = json.load(f)
             
             # Modules is now hierarchical structure, get all tags recursively
@@ -154,7 +154,7 @@ class TestHTPMetadataValidation:
             )
             
             metadata_path = str(output_path).replace(".onnx", "_htp_metadata.json")
-            with open(metadata_path, 'r') as f:
+            with open(metadata_path) as f:
                 metadata = json.load(f)
             
             # Check statistics section exists
@@ -183,7 +183,7 @@ class TestHTPMetadataValidation:
             )
             
             metadata_path = str(output_path).replace(".onnx", "_htp_metadata.json")
-            with open(metadata_path, 'r') as f:
+            with open(metadata_path) as f:
                 metadata = json.load(f)
             
             # nodes should be at root level
@@ -211,7 +211,7 @@ class TestHTPReportValidation:
             )
             
             report_path = str(output_path).replace(".onnx", "_htp_export_report.md")
-            with open(report_path, 'r') as f:
+            with open(report_path) as f:
                 report = f.read()
             
             # Check required sections
@@ -234,11 +234,11 @@ class TestHTPReportValidation:
             
             # Load metadata to get module count
             metadata_path = str(output_path).replace(".onnx", "_htp_metadata.json")
-            with open(metadata_path, 'r') as f:
+            with open(metadata_path) as f:
                 metadata = json.load(f)
             
             report_path = str(output_path).replace(".onnx", "_htp_export_report.md")
-            with open(report_path, 'r') as f:
+            with open(report_path) as f:
                 report = f.read()
             
             # Check that module hierarchy section exists
@@ -279,11 +279,11 @@ class TestHTPReportValidation:
             
             # Load metadata to get node mappings
             metadata_path = str(output_path).replace(".onnx", "_htp_metadata.json")
-            with open(metadata_path, 'r') as f:
+            with open(metadata_path) as f:
                 metadata = json.load(f)
             
             report_path = str(output_path).replace(".onnx", "_htp_export_report.md")
-            with open(report_path, 'r') as f:
+            with open(report_path) as f:
                 report = f.read()
             
             # Check that node mappings section exists
@@ -308,7 +308,7 @@ class TestHTPReportValidation:
             )
             
             report_path = str(output_path).replace(".onnx", "_htp_export_report.md")
-            with open(report_path, 'r') as f:
+            with open(report_path) as f:
                 report = f.read()
             
             # Check export process steps in markdown format
@@ -334,7 +334,7 @@ class TestHTPReportValidation:
             )
             
             report_path = str(output_path).replace(".onnx", "_htp_export_report.md")
-            with open(report_path, 'r') as f:
+            with open(report_path) as f:
                 report = f.read()
             
             # Check summary section
@@ -377,7 +377,7 @@ class TestHTPCleanOnnxMode:
             )
             
             metadata_path = str(output_path).replace(".onnx", "_htp_metadata.json")
-            with open(metadata_path, 'r') as f:
+            with open(metadata_path) as f:
                 metadata = json.load(f)
             
             # Check that embed_hierarchy_attributes is False

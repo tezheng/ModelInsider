@@ -5,8 +5,6 @@ This test validates that the markdown report follows the same format
 as the console output, with proper titles and structure.
 """
 
-import tempfile
-from pathlib import Path
 
 import pytest
 

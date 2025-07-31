@@ -1,7 +1,5 @@
 """Unit tests for the base writer and step-aware architecture."""
 
-import io
-from unittest.mock import Mock
 
 import pytest
 
@@ -12,8 +10,8 @@ from modelexport.strategies.htp.base_writer import (
     step,
 )
 from modelexport.strategies.htp.step_data import (
-    ModelPrepData,
     InputGenData,
+    ModelPrepData,
     TensorInfo,
 )
 

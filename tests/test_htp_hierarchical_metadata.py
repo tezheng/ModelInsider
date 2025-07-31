@@ -6,10 +6,11 @@ in the HTP metadata, including schema validation and data integrity.
 """
 
 import json
-from pathlib import Path
-import pytest
-import jsonschema
 import tempfile
+from pathlib import Path
+
+import jsonschema
+import pytest
 
 from modelexport.strategies.htp.metadata_builder import HTPMetadataBuilder
 from modelexport.strategies.htp.metadata_writer import MetadataWriter

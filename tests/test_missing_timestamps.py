@@ -28,7 +28,7 @@ class TestMissingTimestamps:
             )
             
             metadata_path = str(output_path).replace(".onnx", "_htp_metadata.json")
-            with open(metadata_path, 'r') as f:
+            with open(metadata_path) as f:
                 metadata = json.load(f)
             
             # Check that all export steps have timestamps
@@ -70,7 +70,7 @@ class TestMissingTimestamps:
             )
             
             metadata_path = str(output_path).replace(".onnx", "_htp_metadata.json")
-            with open(metadata_path, 'r') as f:
+            with open(metadata_path) as f:
                 metadata = json.load(f)
             
             # Check specific steps that were missing timestamps

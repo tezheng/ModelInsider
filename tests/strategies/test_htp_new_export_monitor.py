@@ -1,6 +1,5 @@
 """Integration tests for the HTP Export Monitor."""
 
-import io
 import json
 import tempfile
 from pathlib import Path
@@ -8,16 +7,9 @@ from unittest.mock import patch
 
 import pytest
 
-from modelexport.strategies.htp import HTPExportMonitor, ExportStep
+from modelexport.strategies.htp import ExportStep, HTPExportMonitor
 from modelexport.strategies.htp.step_data import (
-    ModelPrepData,
-    InputGenData,
     TensorInfo,
-    HierarchyData,
-    ModuleInfo,
-    ONNXExportData,
-    NodeTaggingData,
-    TagInjectionData,
 )
 
 
@@ -174,7 +166,7 @@ class TestHTPExportMonitor:
         
         # Check metadata
         assert Path(metadata_path).exists()
-        with open(metadata_path, 'r') as f:
+        with open(metadata_path) as f:
             metadata = json.load(f)
         
         # Verify new metadata structure
@@ -186,7 +178,7 @@ class TestHTPExportMonitor:
         
         # Check report
         assert Path(report_path).exists()
-        with open(report_path, 'r') as f:
+        with open(report_path) as f:
             report = f.read()
         
         # Report should contain markdown sections
@@ -239,7 +231,7 @@ class TestHTPExportMonitor:
         report_path = f"{base_path}_htp_export_report.md"
         assert Path(report_path).exists()
         
-        with open(report_path, 'r') as f:
+        with open(report_path) as f:
             report = f.read()
         assert "TestModel" in report
         assert "10" in report  # Total modules
@@ -291,7 +283,6 @@ class TestHTPExportMonitor:
     def test_traced_modules_in_export_summary(self):
         """Test that 'Traced modules: X/Y' appears in Export Summary output."""
         # Capture console output
-        import sys
         from io import StringIO
         captured_output = StringIO()
         

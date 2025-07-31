@@ -6,9 +6,10 @@ This tests the specific issue where dict-to-tuple conversion breaks
 SAM model exports that require keyword arguments.
 """
 
+import contextlib
 import tempfile
-from pathlib import Path
 from unittest.mock import Mock, patch
+
 import pytest
 
 from modelexport.strategies.htp import HTPExporter
@@ -80,10 +81,8 @@ class TestSAMExportRegression:
             
         with patch('torch.onnx.export', side_effect=capture_export):
             with patch('modelexport.core.onnx_utils.infer_output_names', return_value=None):
-                try:
+                with contextlib.suppress(Exception):
                     exporter._convert_model_to_onnx(mock_model, self.output_path, {})
-                except Exception:
-                    pass
         
         # Tuple inputs should remain as tuple
         assert isinstance(captured_inputs, tuple), f"Expected tuple inputs, got {type(captured_inputs)}"
@@ -107,10 +106,8 @@ class TestSAMExportRegression:
             
         with patch('torch.onnx.export', side_effect=capture_export):
             with patch('modelexport.core.onnx_utils.infer_output_names', return_value=None):
-                try:
+                with contextlib.suppress(Exception):
                     exporter._convert_model_to_onnx(mock_model, self.output_path, {})
-                except Exception:
-                    pass
         
         # List inputs should remain as list
         assert isinstance(captured_inputs, list), f"Expected list inputs, got {type(captured_inputs)}"
@@ -148,10 +145,8 @@ class TestSAMExportRegression:
             
         with patch('torch.onnx.export', side_effect=track_export_call):
             with patch('modelexport.core.onnx_utils.infer_output_names', return_value=None):
-                try:
+                with contextlib.suppress(Exception):
                     exporter._convert_model_to_onnx(mock_model, self.output_path, {})
-                except Exception:
-                    pass
         
         # Verify export was called
         assert len(export_calls) == 1, "torch.onnx.export should be called exactly once"

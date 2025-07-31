@@ -8,14 +8,14 @@ from rich.console import Console
 from modelexport.strategies.htp.base_writer import ExportData, ExportStep
 from modelexport.strategies.htp.console_writer import ConsoleWriter
 from modelexport.strategies.htp.step_data import (
-    ModelPrepData,
-    InputGenData,
-    TensorInfo,
     HierarchyData,
+    InputGenData,
+    ModelPrepData,
     ModuleInfo,
-    ONNXExportData,
     NodeTaggingData,
+    ONNXExportData,
     TagInjectionData,
+    TensorInfo,
 )
 
 

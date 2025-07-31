@@ -26,7 +26,6 @@ class TestDirectoryCreation:
     @pytest.fixture
     def simple_model(self):
         """Create a simple PyTorch model for testing."""
-        import torch
         import torch.nn as nn
 
         class SimpleModel(nn.Module):
@@ -219,6 +218,7 @@ class TestDirectoryCreation:
     def test_cli_integration_directory_creation(self, temp_dir, monkeypatch):
         """Test directory creation through CLI interface."""
         from click.testing import CliRunner
+
         from modelexport.cli import cli
 
         # Use a non-existent directory path

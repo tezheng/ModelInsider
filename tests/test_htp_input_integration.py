@@ -51,7 +51,7 @@ class TestHTPInputIntegration:
     
     def test_htp_with_auto_input_generation(self):
         """Test HTP exporter with automatic input generation"""
-        from transformers import AutoModel, AutoTokenizer
+        from transformers import AutoModel
         
         # Load model
         model = AutoModel.from_pretrained("prajjwal1/bert-tiny")

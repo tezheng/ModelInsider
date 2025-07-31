@@ -5,7 +5,6 @@ Minimal functional tests for HTP Export Monitor.
 Tests core functionality without relying on internal implementation details.
 """
 
-import tempfile
 from pathlib import Path
 
 import pytest

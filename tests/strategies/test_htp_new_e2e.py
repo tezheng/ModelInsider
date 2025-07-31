@@ -7,7 +7,6 @@ from pathlib import Path
 
 import pytest
 import torch
-from transformers import AutoModel
 
 from modelexport.strategies.htp import HTPExporter
 
@@ -49,7 +48,7 @@ class TestHTPE2E:
             metadata_path = output_path.replace(".onnx", "_htp_metadata.json")
             assert Path(metadata_path).exists()
             
-            with open(metadata_path, 'r') as f:
+            with open(metadata_path) as f:
                 metadata = json.load(f)
             
             # Verify metadata structure (new format)
@@ -63,7 +62,7 @@ class TestHTPE2E:
             report_path = output_path.replace(".onnx", "_htp_export_report.md")
             assert Path(report_path).exists()
             
-            with open(report_path, 'r') as f:
+            with open(report_path) as f:
                 report = f.read()
             
             # Verify report content in markdown format
@@ -112,7 +111,6 @@ class TestHTPE2E:
     def test_verbose_console_output(self):
         """Test that verbose mode produces expected console output."""
         import io
-        import sys
         from contextlib import redirect_stdout
         
         model_name = "prajjwal1/bert-tiny"
@@ -150,7 +148,10 @@ class TestHTPE2E:
     
     def test_backward_compatibility_api(self):
         """Test that the old API functions still work."""
-        from modelexport.strategies.htp import export_with_htp, export_with_htp_reporting
+        from modelexport.strategies.htp import (
+            export_with_htp,
+            export_with_htp_reporting,
+        )
         
         model_name = "prajjwal1/bert-tiny"
         

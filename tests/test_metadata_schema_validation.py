@@ -6,11 +6,17 @@ schema violations before writing metadata to disk.
 """
 
 import json
-import pytest
-import jsonschema
 from pathlib import Path
 
-from modelexport.strategies.htp.metadata_builder import HTPMetadataBuilder, ModelInfo, OutputFiles, OnnxModelOutput
+import jsonschema
+import pytest
+
+from modelexport.strategies.htp.metadata_builder import (
+    HTPMetadataBuilder,
+    ModelInfo,
+    OnnxModelOutput,
+    OutputFiles,
+)
 
 
 class TestMetadataSchemaValidation:

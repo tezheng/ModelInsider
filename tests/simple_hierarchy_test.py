@@ -87,7 +87,7 @@ def export_with_metadata(model: nn.Module, dummy_input: torch.Tensor, output_pat
     param_to_module = {}
     for name, module in model.named_modules():
         if name:
-            for param_name, param in module.named_parameters(recurse=False):
+            for param_name, _param in module.named_parameters(recurse=False):
                 full_param_name = f"{name}.{param_name}"
                 param_to_module[full_param_name.replace('.', '_')] = name
     
@@ -222,7 +222,7 @@ def test_hierarchy_grouping(sample_onnx_path):
     
     for top_module in top_level_modules:
         # Find all child modules
-        child_modules = [name for name in hierarchy.keys() if name.startswith(top_module + '.')]
+        child_modules = [name for name in hierarchy if name.startswith(top_module + '.')]
         all_modules = [top_module] + child_modules
         
         # Count operations for this module group

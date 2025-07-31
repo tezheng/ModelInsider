@@ -6,10 +6,10 @@ patterns (layer.0, layer.1, etc.) are properly detected as hierarchical
 relationships, fixing the malformed hierarchy issue.
 """
 
-import pytest
-from pathlib import Path
 
-from modelexport.core.hierarchy_utils import find_immediate_children, build_ascii_tree
+import pytest
+
+from modelexport.core.hierarchy_utils import build_ascii_tree, find_immediate_children
 
 
 class TestResNetHierarchyFix:
@@ -173,7 +173,6 @@ class TestResNetHierarchyFix:
         """Test actual ResNet model export (requires model download)."""
         # This would test with a real ResNet model from transformers
         # Skipped by default to avoid model downloads in CI
-        from transformers import AutoModel
         from modelexport.strategies.htp.htp_exporter import HTPExporter
         
         model_name = "microsoft/resnet-50"  # Example ResNet model
@@ -197,7 +196,7 @@ class TestResNetHierarchyFix:
         # ResNet should have encoder with multiple layers
         modules = metadata.get("modules", {})
         encoder_children = [
-            path for path in modules.keys() 
+            path for path in modules 
             if path.startswith("encoder.") and path.count(".") == 2
         ]
         
