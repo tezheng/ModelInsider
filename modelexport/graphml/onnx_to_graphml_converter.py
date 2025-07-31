@@ -453,10 +453,14 @@ class ONNXToGraphMLConverter:
     def _add_module_onnx_nodes(self, graph_elem: ET.Element, module_tag: str, graph_data: GraphData):
         """Add ONNX operation nodes that belong to a specific module."""
         for node in graph_data.nodes:
+            # Skip nodes that have already been placed
+            if node.id in self.placed_nodes:
+                continue
+                
             if node.hierarchy_tag and node.hierarchy_tag.startswith(module_tag):
-                # Check if this node belongs directly to this module
+                # Check if this node belongs directly to this module (not to a submodule)
                 relative_path = node.hierarchy_tag[len(module_tag):].lstrip('/')
-                if '/' not in relative_path:  # Direct child
+                if '/' not in relative_path:  # Direct child - no deeper nesting
                     self._add_onnx_node(graph_elem, node)
                     self.placed_nodes.add(node.id)
     
@@ -493,11 +497,15 @@ class ONNXToGraphMLConverter:
     
     def _add_io_nodes(self, graph_elem: ET.Element, graph_data: GraphData):
         """Add input and output nodes."""
+        # Get model class for hierarchy tag
+        model_info = self.htp_data.get("model", {})
+        model_class = model_info.get("class_name", "Model")
+        
         # Add inputs
         for input_node in graph_data.inputs:
             node_elem = ET.Element("node", attrib={"id": input_node.id})
             self._add_data(node_elem, GC.NODE_OP_TYPE, "Input")
-            self._add_data(node_elem, GC.NODE_HIERARCHY_TAG, "")
+            self._add_data(node_elem, GC.NODE_HIERARCHY_TAG, f"/{model_class}")
             self._add_data(node_elem, GC.NODE_ATTRIBUTES_JSON, "{}")
             self._add_data(node_elem, GC.NODE_NAME, input_node.name)
             
@@ -512,7 +520,7 @@ class ONNXToGraphMLConverter:
         for output_node in graph_data.outputs:
             node_elem = ET.Element("node", attrib={"id": output_node.id})
             self._add_data(node_elem, GC.NODE_OP_TYPE, "Output")
-            self._add_data(node_elem, GC.NODE_HIERARCHY_TAG, "")
+            self._add_data(node_elem, GC.NODE_HIERARCHY_TAG, f"/{model_class}")
             self._add_data(node_elem, GC.NODE_ATTRIBUTES_JSON, "{}")
             self._add_data(node_elem, GC.NODE_NAME, output_node.name)
             
