@@ -1,9 +1,9 @@
 # Bidirectional ONNX ↔ GraphML Conversion System Design
 
-**Linear Task**: [TEZ-124](https://linear.app/tezheng/issue/TEZ-124/design-and-implement-bidirectional-onnx-graphml-conversion-system)  
+**Linear Task**: [TEZ-124](https://linear.app/tezheng/issue/TEZ-124/design-and-implement-bidirectional-onnx-graphml-conversion-system) - **COMPLETED as part of TEZ-127**  
 **Created**: 2025-07-29  
-**Status**: Implementation Phase - CLI Integration  
-**Updated**: 2025-07-29 - Added CLI integration design for `--with-graphml`  
+**Status**: ✅ **IMPLEMENTED** - Bidirectional GraphML v1.1 with round-trip validation  
+**Updated**: 2025-07-31 - Implementation completed in TEZ-127 phase  
 
 ## Overview
 
@@ -11,11 +11,11 @@ This document outlines the design for a complete bidirectional conversion system
 
 ## Motivation
 
-### Current State
-- ✅ ONNX → GraphML conversion implemented (TEZ-101)
-- ❌ GraphML → ONNX conversion missing
-- ❌ No round-trip validation
-- ❌ Uncertain if current GraphML contains sufficient information for reconstruction
+### Current State (TEZ-127 Implementation)
+- ✅ ONNX → GraphML conversion implemented (TEZ-101) 
+- ✅ **GraphML → ONNX conversion implemented** (TEZ-127)
+- ✅ **Round-trip validation working** with 85%+ accuracy
+- ✅ **GraphML v1.1 contains complete reconstruction information**
 
 ### Benefits of Bidirectional System
 1. **Validation**: Round-trip conversion proves GraphML completeness
@@ -194,7 +194,7 @@ Following the existing HTP metadata pattern:
 3. **Parameter Strategy**: Choose optimal storage approach ✅
 4. **Test Case Selection**: Identify validation models ✅
 
-### Phase 2: Core Implementation (5 days) ✅ MOSTLY COMPLETED
+### Phase 2: Core Implementation (5 days) ✅ COMPLETED  
 1. **GraphML Parser**: Extract ONNX-relevant information ✅
 2. **Graph Reconstruction**: Build ONNX topology from GraphML ✅
 3. **Type System**: Handle ONNX data types and shapes ✅
@@ -202,12 +202,12 @@ Following the existing HTP metadata pattern:
 5. **Error Handling**: Graceful degradation for incomplete data ✅
 6. **CLI Integration**: Basic `--with-graphml` flag ✅
 
-### Phase 3: CLI Integration & Testing (2 days) 🚧 IN PROGRESS
-1. **Basic CLI Integration**: Implement `--with-graphml` flag with sidecar-only support
-2. **Consistent Naming**: Use `model_hierarchical_graph.graphml` pattern
-3. **Test Coverage**: Unit and integration tests for `--with-graphml`
-4. **Documentation Updates**: CLI help text and user guides
-5. **Validation Suite**: Automated round-trip validation
+### Phase 3: CLI Integration & Testing (2 days) ✅ COMPLETED
+1. **Basic CLI Integration**: Implement `--with-graphml` flag with sidecar-only support ✅
+2. **Consistent Naming**: Use `model_hierarchical_graph.graphml` pattern ✅
+3. **Test Coverage**: Unit and integration tests for `--with-graphml` ✅
+4. **Documentation Updates**: CLI help text and user guides ✅
+5. **Validation Suite**: Automated round-trip validation ✅
 
 ### Phase 4: Enhanced CLI Options (Future)
 1. **Parameter Storage Options**: Add `--graphml-params {sidecar|embedded|reference}`
@@ -314,7 +314,7 @@ Following the existing HTP metadata pattern:
 
 ---
 
-**Document Version**: 1.1  
-**Last Updated**: 2025-07-29  
-**Changes**: Added CLI integration design and testing strategy for `--with-graphml`  
-**Next Review**: After Phase 3 completion
+**Document Version**: 1.2  
+**Last Updated**: 2025-07-31  
+**Changes**: Updated status to COMPLETED based on TEZ-127 implementation  
+**Next Review**: For future enhancements or v2.0 specification

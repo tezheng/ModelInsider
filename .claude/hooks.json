@@ -1,0 +1,12 @@
+{
+  "hooks": [
+    {
+      "name": "post-edit-python-ruff",
+      "description": "Run ruff linting after editing Python files",
+      "trigger": "post-tool",
+      "tools": ["Edit", "MultiEdit"],
+      "script": "post-edit-python-ruff.sh",
+      "enabled": true
+    }
+  ]
+}

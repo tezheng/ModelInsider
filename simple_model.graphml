@@ -1,0 +1,89 @@
+<?xml version='1.0' encoding='utf-8'?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key id="d0" for="graph" attr.name="class_name" attr.type="string" />
+  <key id="d1" for="graph" attr.name="module_type" attr.type="string" />
+  <key id="d2" for="graph" attr.name="execution_order" attr.type="int" />
+  <key id="d3" for="graph" attr.name="traced_tag" attr.type="string" />
+  <key id="n0" for="node" attr.name="op_type" attr.type="string" />
+  <key id="n1" for="node" attr.name="hierarchy_tag" attr.type="string" />
+  <key id="n2" for="node" attr.name="onnx_attributes" attr.type="string" />
+  <key id="n3" for="node" attr.name="name" attr.type="string" />
+  <key id="n4" for="node" attr.name="input_names" attr.type="string" />
+  <key id="n5" for="node" attr.name="output_names" attr.type="string" />
+  <key id="n6" for="node" attr.name="domain" attr.type="string" />
+  <key id="e0" for="edge" attr.name="tensor_name" attr.type="string" />
+  <key id="t0" for="edge" attr.name="tensor_type" attr.type="string" />
+  <key id="t1" for="edge" attr.name="tensor_shape" attr.type="string" />
+  <key id="t2" for="edge" attr.name="tensor_data_ref" attr.type="string" />
+  <key id="m0" for="graph" attr.name="source_onnx_text" attr.type="string" />
+  <key id="m1" for="graph" attr.name="source_htp" attr.type="string" />
+  <key id="m2" for="graph" attr.name="format_version" attr.type="string" />
+  <key id="m3" for="graph" attr.name="export_timestamp" attr.type="string" />
+  <key id="m4" for="graph" attr.name="opset_imports" attr.type="string" />
+  <key id="m5" for="graph" attr.name="producer_name" attr.type="string" />
+  <key id="m6" for="graph" attr.name="producer_version" attr.type="string" />
+  <key id="m7" for="graph" attr.name="model_version" attr.type="string" />
+  <key id="m8" for="graph" attr.name="doc_string" attr.type="string" />
+  <key id="p0" for="graph" attr.name="parameter_strategy" attr.type="string" />
+  <key id="p1" for="graph" attr.name="parameter_file" attr.type="string" />
+  <key id="p2" for="graph" attr.name="parameter_checksum" attr.type="string" />
+  <key id="g0" for="graph" attr.name="graph_inputs" attr.type="string" />
+  <key id="g1" for="graph" attr.name="graph_outputs" attr.type="string" />
+  <key id="g2" for="graph" attr.name="value_info" attr.type="string" />
+  <key id="g3" for="graph" attr.name="initializers_ref" attr.type="string" />
+  <graph id="Model" edgedefault="directed">
+    <data key="d0">Model</data>
+    <data key="d1">huggingface</data>
+    <data key="d2">0</data>
+    <data key="d3">/Model</data>
+    <data key="m2">1.1</data>
+    <data key="m3">2025-07-31T12:38:41.529797</data>
+    <data key="m4">[{"domain": "", "version": 17}]</data>
+    <data key="m5">pytorch</data>
+    <data key="m6">2.7.1</data>
+    <data key="m7">0</data>
+    <data key="m8" />
+    <data key="p0">sidecar</data>
+    <data key="p1">simple_model.onnxdata</data>
+    <data key="p2">sha256:cbb1baf1c17dfe7c518a49be007d2b0e5b3e9c61da2b9ccd8b5ffb38b8a2a7fd</data>
+    <data key="g0">[{"name": "input", "type": "float32", "shape": ["batch", 10]}]</data>
+    <data key="g1">[{"name": "output", "type": "float32", "shape": ["batch", 5]}]</data>
+    <data key="g2">[]</data>
+    <data key="g3">simple_model.onnxdata</data>
+    <node id="/linear/Gemm">
+      <data key="n0">Gemm</data>
+      <data key="n1" />
+      <data key="n2">{"alpha": 1.0, "beta": 1.0, "transB": 1}</data>
+      <data key="n3">/linear/Gemm</data>
+      <data key="n4">["input", "linear.weight", "linear.bias"]</data>
+      <data key="n5">["output"]</data>
+      <data key="n6" />
+    </node>
+    <node id="input_input">
+      <data key="n0">Input</data>
+      <data key="n1" />
+      <data key="n2">{}</data>
+      <data key="n3">input</data>
+      <!-- input: [?, 10] -->
+    </node>
+    <node id="output_output">
+      <data key="n0">Output</data>
+      <data key="n1" />
+      <data key="n2">{}</data>
+      <data key="n3">output</data>
+      <!-- output: [?, 5] -->
+    </node>
+    <edge source="input_input" target="/linear/Gemm">
+      <data key="e0">input</data>
+      <data key="t0">float32</data>
+      <data key="t1">["batch", 10]</data>
+      <data key="t2" />
+    </edge>
+    <edge source="/linear/Gemm" target="output_output">
+      <data key="e0">output</data>
+      <data key="t0">float32</data>
+      <data key="t1">["batch", 5]</data>
+      <data key="t2" />
+    </edge>
+  </graph>
+</graphml>

@@ -2,7 +2,7 @@
 
 | Status | Date | Decision Maker(s) | Consulted | Informed |
 |--------|------|-------------------|-----------|----------|
-| Proposed | 2025-07-28 | Development Team | Research Team | Project Team |
+| Accepted | 2025-07-28 | Development Team | Research Team | Project Team |
 
 ## Context and Problem Statement
 
