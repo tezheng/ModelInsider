@@ -16,20 +16,18 @@ Key Features:
 Linear Task: TEZ-124
 """
 
+import base64
 import json
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Union
-import hashlib
-import base64
+from typing import Any
 
 import onnx
-import numpy as np
 from onnx import AttributeProto, TensorProto
 
 from .hierarchical_converter import EnhancedHierarchicalConverter
-from .utils import GraphData, NodeData
 from .parameter_manager import ParameterManager
+from .utils import GraphData
 
 
 class EnhancedGraphMLConverter(EnhancedHierarchicalConverter):
@@ -59,7 +57,7 @@ class EnhancedGraphMLConverter(EnhancedHierarchicalConverter):
         self.parameter_manager = ParameterManager(strategy=parameter_strategy)
         self.format_version = "1.1"
         
-    def convert(self, onnx_model_path: str, output_base: str = None) -> Dict[str, str]:
+    def convert(self, onnx_model_path: str, output_base: str = None) -> dict[str, str]:
         """
         Convert ONNX model to GraphML v1.1 format.
         
@@ -194,7 +192,7 @@ class EnhancedGraphMLConverter(EnhancedHierarchicalConverter):
         else:
             return str(attr)
     
-    def _encode_tensor_attribute(self, tensor: TensorProto) -> Dict[str, Any]:
+    def _encode_tensor_attribute(self, tensor: TensorProto) -> dict[str, Any]:
         """Encode tensor attribute as base64 data for storage in GraphML."""
         
         # Convert tensor to numpy array then to base64
@@ -210,7 +208,7 @@ class EnhancedGraphMLConverter(EnhancedHierarchicalConverter):
             "numpy_dtype": str(np_array.dtype)
         }
     
-    def _extract_tensor_info(self, tensor_info) -> Dict[str, Any]:
+    def _extract_tensor_info(self, tensor_info) -> dict[str, Any]:
         """Extract tensor type and shape information."""
         info = {"type": "", "shape": []}
         
@@ -255,7 +253,7 @@ class EnhancedGraphMLConverter(EnhancedHierarchicalConverter):
         self, 
         graph_data: GraphData, 
         onnx_model: onnx.ModelProto,
-        parameter_info: Dict[str, Any]
+        parameter_info: dict[str, Any]
     ) -> ET.Element:
         """Create GraphML v1.1 with enhanced schema."""
         
@@ -355,7 +353,7 @@ class EnhancedGraphMLConverter(EnhancedHierarchicalConverter):
         self, 
         graph: ET.Element, 
         onnx_model: onnx.ModelProto,
-        parameter_info: Dict[str, Any]
+        parameter_info: dict[str, Any]
     ):
         """Add v1.1 graph metadata with complete ONNX information."""
         
@@ -502,7 +500,7 @@ class EnhancedGraphMLConverter(EnhancedHierarchicalConverter):
     def _add_compound_nodes_recursive(
         self, 
         parent_elem: ET.Element,
-        hierarchy_data: Dict[str, Any],
+        hierarchy_data: dict[str, Any],
         graph_data: GraphData,
         parent_scope: str
     ):

@@ -10,18 +10,17 @@ tracing with complete structural module discovery.
 import json
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
 
 import onnx
-import torch.nn as nn
 from transformers import AutoModel
 
+from ..core.structural_hierarchy_builder import StructuralHierarchyBuilder
 from .converter import ONNXToGraphMLConverter
 from .metadata_reader import MetadataReader
 from .onnx_parser import ONNXGraphParser
 from .utils import GraphData, NodeData
 from .utils import GraphMLConstants as GC
-from ..core.structural_hierarchy_builder import StructuralHierarchyBuilder
 
 
 class EnhancedHierarchicalConverter(ONNXToGraphMLConverter):
@@ -138,7 +137,7 @@ class EnhancedHierarchicalConverter(ONNXToGraphMLConverter):
         graphml.append(main_graph)
         return graphml
     
-    def _enhance_with_structural_hierarchy(self, traced_modules_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _enhance_with_structural_hierarchy(self, traced_modules_data: dict[str, Any]) -> dict[str, Any]:
         """
         Enhance traced module hierarchy with structural discovery to achieve 44 compound nodes.
         
@@ -173,7 +172,7 @@ class EnhancedHierarchicalConverter(ONNXToGraphMLConverter):
             print("⚠️ Falling back to traced hierarchy only")
             return traced_modules_data
     
-    def _merge_hierarchies(self, traced: Dict[str, Any], structural: Dict[str, Any]) -> Dict[str, Any]:
+    def _merge_hierarchies(self, traced: dict[str, Any], structural: dict[str, Any]) -> dict[str, Any]:
         """
         Merge traced and structural hierarchies with conflict resolution.
         
@@ -205,7 +204,7 @@ class EnhancedHierarchicalConverter(ONNXToGraphMLConverter):
         
         return merged
     
-    def _would_create_duplicates(self, struct_module: Dict[str, Any], traced_hierarchy: Dict[str, Any]) -> bool:
+    def _would_create_duplicates(self, struct_module: dict[str, Any], traced_hierarchy: dict[str, Any]) -> bool:
         """
         Check if adding a structural module would create duplicate compound nodes.
         
@@ -219,14 +218,14 @@ class EnhancedHierarchicalConverter(ONNXToGraphMLConverter):
         self._collect_node_ids(traced_hierarchy, traced_node_ids)
         
         # Check if structural module's children would conflict
-        for child_key, child_data in struct_module["children"].items():
+        for _child_key, child_data in struct_module["children"].items():
             child_scope = child_data.get("scope", "").lstrip("/").replace("/", ".")
             if child_scope in traced_node_ids:
                 return True
         
         return False
     
-    def _collect_node_ids(self, hierarchy: Dict[str, Any], node_ids: set):
+    def _collect_node_ids(self, hierarchy: dict[str, Any], node_ids: set):
         """Recursively collect all node IDs from hierarchy."""
         scope = hierarchy.get("scope", "")
         if scope:
@@ -237,7 +236,7 @@ class EnhancedHierarchicalConverter(ONNXToGraphMLConverter):
             for child in hierarchy["children"].values():
                 self._collect_node_ids(child, node_ids)
     
-    def _flatten_hierarchy(self, hierarchy: Dict[str, Any]):
+    def _flatten_hierarchy(self, hierarchy: dict[str, Any]):
         """Flatten hierarchy to count total modules."""
         yield hierarchy
         if "children" in hierarchy:
@@ -248,7 +247,7 @@ class EnhancedHierarchicalConverter(ONNXToGraphMLConverter):
         """Recursively create module hierarchy matching baseline structure."""
         # Handle root module's children
         if "children" in modules_data:
-            for child_name, child_data in modules_data["children"].items():
+            for _child_name, child_data in modules_data["children"].items():
                 self._create_compound_node(parent_elem, child_data, graph_data)
     
     def _create_compound_node(self, parent_elem: ET.Element, module_data: dict, graph_data: GraphData):
@@ -301,7 +300,7 @@ class EnhancedHierarchicalConverter(ONNXToGraphMLConverter):
         
         # Recursively add children
         if "children" in module_data:
-            for child_name, child_data in module_data["children"].items():
+            for _child_name, child_data in module_data["children"].items():
                 self._create_compound_node(nested_graph, child_data, graph_data)
         
         compound_node.append(nested_graph)
