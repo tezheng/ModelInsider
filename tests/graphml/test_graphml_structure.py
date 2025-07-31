@@ -7,17 +7,13 @@ with proper key definitions, nested graphs, and metadata.
 
 import json
 import xml.etree.ElementTree as ET
-from pathlib import Path
-from typing import Dict, List, Set
 
-import numpy as np
 import onnx
 import pytest
 import torch
 import torch.nn as nn
 
-from modelexport.graphml.converter import ONNXToGraphMLConverter
-from modelexport.graphml.hierarchical_converter import HierarchicalGraphMLConverter
+from modelexport.graphml import ONNXToGraphMLConverter
 
 
 class TestGraphMLStructure:
@@ -32,7 +28,7 @@ class TestGraphMLStructure:
         torch.onnx.export(model, dummy_input, str(onnx_path))
         
         # Convert to GraphML
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         root = ET.fromstring(graphml_str)
         
@@ -101,7 +97,7 @@ class TestGraphMLStructure:
         torch.onnx.export(model, dummy_input, str(onnx_path))
         
         # Convert to GraphML
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         root = ET.fromstring(graphml_str)
         
@@ -145,6 +141,9 @@ class TestGraphMLStructure:
         
         # Create mock HTP metadata with hierarchical structure
         htp_metadata = {
+            "model": {
+                "class_name": "NestedModel"
+            },
             "modules": {
                 "scope": "/NestedModel",
                 "class_name": "NestedModel", 
@@ -179,8 +178,17 @@ class TestGraphMLStructure:
         htp_path.write_text(json.dumps(htp_metadata))
         
         # Convert with hierarchical converter
-        converter = HierarchicalGraphMLConverter(str(htp_path))
-        graphml_str = converter.convert(str(onnx_path))
+        converter = ONNXToGraphMLConverter(hierarchical=True, htp_metadata_path=str(htp_path))
+        result = converter.convert(str(onnx_path))
+        
+        # Hierarchical mode returns a dict with file paths
+        if isinstance(result, dict):
+            graphml_path = result['graphml']
+            with open(graphml_path) as f:
+                graphml_str = f.read()
+        else:
+            graphml_str = result
+            
         root = ET.fromstring(graphml_str)
         
         # Check for nested graphs
@@ -197,7 +205,7 @@ class TestGraphMLStructure:
         torch.onnx.export(model, dummy_input, str(onnx_path))
         
         # Convert to GraphML
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         root = ET.fromstring(graphml_str)
         
@@ -257,7 +265,7 @@ class TestMissingFeatures:
         onnx.save(onnx_model, str(onnx_path))
         
         # Convert to GraphML
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         root = ET.fromstring(graphml_str)
         
@@ -380,7 +388,7 @@ class TestEdgeCasesAndErrors:
         onnx.save(onnx_model, str(onnx_path))
         
         # Should handle gracefully
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         assert graphml_str is not None
     
@@ -398,13 +406,13 @@ class TestEdgeCasesAndErrors:
             attr = onnx.AttributeProto()
             attr.name = 'hierarchy_tag'
             attr.type = onnx.AttributeProto.STRING
-            attr.s = '/Model<>Layer[0]/Sub-Module'.encode('utf-8')
+            attr.s = b'/Model<>Layer[0]/Sub-Module'
             node.attribute.append(attr)
         
         onnx.save(onnx_model, str(onnx_path))
         
         # Should handle special characters
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         
         # Parse to verify XML is valid
@@ -433,7 +441,7 @@ class TestEdgeCasesAndErrors:
         onnx.save(onnx_model, str(onnx_path))
         
         # Should handle deep hierarchies
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         assert deep_path in graphml_str
     
@@ -459,7 +467,7 @@ class TestEdgeCasesAndErrors:
         onnx.save(onnx_model, str(onnx_path))
         
         # Should handle duplicate tags
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         
         # Count occurrences
@@ -474,7 +482,7 @@ class TestQAPerspective:
         """Test conversion performance with large models."""
         # Create a reasonably large model
         layers = []
-        for i in range(20):
+        for _i in range(20):
             layers.extend([
                 nn.Linear(100, 100),
                 nn.ReLU(),
@@ -488,7 +496,7 @@ class TestQAPerspective:
         
         # Time the conversion
         import time
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         start = time.time()
         graphml_str = converter.convert(str(onnx_path))
         duration = time.time() - start
@@ -515,7 +523,7 @@ class TestQAPerspective:
         )
         
         # Should handle dynamic shapes
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         assert graphml_str is not None
     
@@ -536,7 +544,7 @@ class TestQAPerspective:
         torch.onnx.export(model, dummy_input, str(onnx_path))
         
         # Should handle custom ops
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         
         # Check that ops are preserved
@@ -546,7 +554,7 @@ class TestQAPerspective:
     def test_incremental_conversion(self, tmp_path):
         """Test converting multiple models in sequence (memory leaks)."""
         # Convert multiple models to check for memory issues
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         
         for i in range(5):
             model = nn.Linear(10 + i, 5 + i)
@@ -565,7 +573,7 @@ class TestQAPerspective:
     
     def test_error_recovery(self, tmp_path):
         """Test error handling and recovery."""
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         
         # Test with non-existent file
         with pytest.raises(FileNotFoundError):

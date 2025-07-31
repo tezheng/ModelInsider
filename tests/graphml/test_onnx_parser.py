@@ -8,10 +8,8 @@ Tests the ONNX parsing functionality including:
 - Initializer filtering
 """
 
-import pytest
 
 from modelexport.graphml.onnx_parser import ONNXGraphParser
-from modelexport.graphml.utils import NodeType
 
 
 class TestONNXGraphParser:

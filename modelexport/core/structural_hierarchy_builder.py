@@ -13,8 +13,10 @@ Key Features:
 """
 from __future__ import annotations
 
+from typing import Any
+
 import torch.nn as nn
-from typing import Dict, Any, List, Set
+
 from .base import should_include_in_hierarchy
 
 
@@ -26,7 +28,7 @@ class StructuralHierarchyBuilder:
     the model but may not be executed during forward pass tracing.
     """
     
-    def __init__(self, exceptions: List[str] | None = None):
+    def __init__(self, exceptions: list[str] | None = None):
         """
         Initialize the structural hierarchy builder.
         
@@ -46,7 +48,7 @@ class StructuralHierarchyBuilder:
         """
         return should_include_in_hierarchy(module, exceptions=self.exceptions)
     
-    def build_complete_hierarchy(self, model: nn.Module) -> Dict[str, Any]:
+    def build_complete_hierarchy(self, model: nn.Module) -> dict[str, Any]:
         """
         Build complete module hierarchy using named_modules().
         
@@ -172,7 +174,7 @@ class StructuralHierarchyBuilder:
         # Default to original name with proper casing
         return name.capitalize()
     
-    def _insert_module_in_hierarchy(self, module_path: str, module_info: Dict[str, Any]):
+    def _insert_module_in_hierarchy(self, module_path: str, module_info: dict[str, Any]):
         """Insert module into hierarchical structure."""
         if not module_path:  # Root module
             self.module_hierarchy = module_info
@@ -209,7 +211,7 @@ class StructuralHierarchyBuilder:
         final_key = self._find_child_key(current["children"], parts[-1], parts)
         current["children"][final_key] = module_info
     
-    def _find_child_key(self, children: Dict[str, Any], part: str, full_path: List[str]) -> str:
+    def _find_child_key(self, children: dict[str, Any], part: str, full_path: list[str]) -> str:
         """Find appropriate key for child in hierarchy."""
         # For indexed items like layer.0, use Class.index format
         if part.isdigit() and len(full_path) > 1:
@@ -225,7 +227,7 @@ class StructuralHierarchyBuilder:
         # Default to inferred class name
         return self._infer_class_from_name(part)
     
-    def get_missing_modules(self, traced_modules: Set[str]) -> Set[str]:
+    def get_missing_modules(self, traced_modules: set[str]) -> set[str]:
         """
         Get modules that exist in structure but weren't traced during execution.
         
@@ -237,7 +239,7 @@ class StructuralHierarchyBuilder:
         """
         return self.all_modules - traced_modules
     
-    def merge_with_traced_hierarchy(self, traced_hierarchy: Dict[str, Any]) -> Dict[str, Any]:
+    def merge_with_traced_hierarchy(self, traced_hierarchy: dict[str, Any]) -> dict[str, Any]:
         """
         Merge structural hierarchy with traced hierarchy.
         

@@ -7,17 +7,12 @@ hierarchy tags and other metadata directly from ONNX models.
 
 import json
 import xml.etree.ElementTree as ET
-from pathlib import Path
-from typing import Any
 
-import numpy as np
 import onnx
-import pytest
 import torch
 import torch.nn as nn
 
-from modelexport.graphml.converter import ONNXToGraphMLConverter
-from modelexport.graphml.hierarchical_converter import HierarchicalGraphMLConverter
+from modelexport.graphml import ONNXToGraphMLConverter
 from modelexport.graphml.onnx_parser import ONNXGraphParser
 
 
@@ -130,8 +125,8 @@ class TestHierarchyExtraction:
         onnx_path = tmp_path / "test_hierarchy.onnx"
         create_onnx_with_hierarchy_tags(str(onnx_path))
         
-        # Convert to GraphML
-        converter = ONNXToGraphMLConverter()
+        # Convert to GraphML (use flat mode to read existing hierarchy tags from ONNX)
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         
         # Parse GraphML and check for hierarchy tags
@@ -153,8 +148,8 @@ class TestHierarchyExtraction:
         onnx_path = tmp_path / "test_model.onnx"
         create_onnx_with_hierarchy_tags(str(onnx_path))
         
-        # Convert to GraphML
-        converter = ONNXToGraphMLConverter()
+        # Convert to GraphML (use flat mode to read existing tags)
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         root = ET.fromstring(graphml_str)
         
@@ -259,11 +254,15 @@ class TestCompoundNodeGeneration:
         htp_path.write_text(json.dumps(htp_metadata))
         
         # Convert with hierarchical converter
-        converter = HierarchicalGraphMLConverter(str(htp_path))
-        graphml_str = converter.convert(str(onnx_path))
+        converter = ONNXToGraphMLConverter(hierarchical=True, htp_metadata_path=str(htp_path))
+        result = converter.convert(str(onnx_path))
         
-        # Parse and verify compound structure
-        root = ET.fromstring(graphml_str)
+        # Parse and verify compound structure (hierarchical mode returns dict)
+        if isinstance(result, dict):
+            graphml_path = result["graphml"]
+            root = ET.parse(graphml_path).getroot()
+        else:
+            root = ET.fromstring(result)
         ns = {'': 'http://graphml.graphdrawing.org/xmlns'}
         
         # Check for nested graph elements (compound nodes)
@@ -292,8 +291,8 @@ class TestEdgeCases:
         
         torch.onnx.export(model, dummy_input, str(onnx_path))
         
-        # Should convert without errors
-        converter = ONNXToGraphMLConverter()
+        # Should convert without errors (use flat mode)
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         
         # Verify basic structure
@@ -320,8 +319,8 @@ class TestEdgeCases:
         
         onnx.save(onnx_model, str(onnx_path))
         
-        # Should handle gracefully
-        converter = ONNXToGraphMLConverter()
+        # Should handle gracefully (use flat mode)
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         assert graphml_str is not None
     
@@ -347,10 +346,10 @@ class TestEdgeCases:
         
         torch.onnx.export(model, dummy_input, str(onnx_path))
         
-        # Should complete in reasonable time
+        # Should complete in reasonable time (use flat mode)
         import time
         start = time.time()
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         duration = time.time() - start
         
@@ -408,8 +407,8 @@ class TestRealWorldScenarios:
             output_names=['output']
         )
         
-        # Convert and verify structure
-        converter = ONNXToGraphMLConverter()
+        # Convert and verify structure (use flat mode)
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         
         # Check for expected patterns
@@ -436,8 +435,8 @@ class TestRealWorldScenarios:
             )
             models.append(onnx_path)
         
-        # Convert concurrently
-        converter = ONNXToGraphMLConverter()
+        # Convert concurrently (use flat mode)
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         with concurrent.futures.ThreadPoolExecutor(max_workers=3) as executor:
             futures = [
                 executor.submit(converter.convert, str(model_path))

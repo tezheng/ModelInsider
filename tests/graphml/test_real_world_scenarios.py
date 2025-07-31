@@ -8,22 +8,14 @@ and user experience considerations for GraphML conversion.
 import concurrent.futures
 import json
 import os
-import tempfile
 import time
 import xml.etree.ElementTree as ET
-from pathlib import Path
-from typing import Any, Dict, List
 
-import numpy as np
 import onnx
-import pytest
 import torch
 import torch.nn as nn
-import transformers
 
-from modelexport.graphml.converter import ONNXToGraphMLConverter
-from modelexport.graphml.hierarchical_converter import HierarchicalGraphMLConverter
-from modelexport.graphml.onnx_parser import ONNXGraphParser
+from modelexport.graphml import ONNXToGraphMLConverter
 
 
 class TestProductionScenarios:
@@ -68,7 +60,7 @@ class TestProductionScenarios:
         )
         
         # Convert to GraphML
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         start_time = time.time()
         graphml_str = converter.convert(str(onnx_path))
         conversion_time = time.time() - start_time
@@ -161,7 +153,7 @@ class TestProductionScenarios:
         )
         
         # Convert and verify
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         
         # Check for CNN operations
@@ -190,7 +182,7 @@ class TestProductionScenarios:
             )
         }
         
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         results = {}
         total_start = time.time()
         
@@ -254,13 +246,13 @@ class TestProductionScenarios:
             attr = onnx.AttributeProto()
             attr.name = 'original_layer_name'
             attr.type = onnx.AttributeProto.STRING
-            attr.s = f'model.layer_{i}'.encode('utf-8')
+            attr.s = f'model.layer_{i}'.encode()
             node.attribute.append(attr)
         
         onnx.save(onnx_model, str(onnx_path))
         
         # Convert and verify metadata preserved
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         
         # Node-level custom attributes should be excluded by default
@@ -285,7 +277,7 @@ class TestStressAndScale:
         """Test conversion of very large models (memory and performance)."""
         # Create a large model with many layers
         layers = []
-        for i in range(50):  # 50 layer pairs = 100 layers total
+        for _i in range(50):  # 50 layer pairs = 100 layers total
             layers.extend([
                 nn.Linear(256, 256),
                 nn.ReLU()
@@ -304,7 +296,7 @@ class TestStressAndScale:
         )
         
         # Monitor conversion
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         start_time = time.time()
         start_memory = torch.cuda.memory_allocated() if torch.cuda.is_available() else 0
         
@@ -344,7 +336,7 @@ class TestStressAndScale:
         torch.onnx.export(model, dummy_input, str(onnx_path))
         
         # Convert with initializer exclusion (default)
-        converter = ONNXToGraphMLConverter(exclude_initializers=True)
+        converter = ONNXToGraphMLConverter(hierarchical=False, exclude_initializers=True)
         graphml_str = converter.convert(str(onnx_path))
         
         # Should handle wide models efficiently
@@ -391,7 +383,7 @@ class TestStressAndScale:
         htp_path.write_text(json.dumps(htp_metadata))
         
         # Convert with hierarchical converter
-        converter = HierarchicalGraphMLConverter(str(htp_path))
+        converter = ONNXToGraphMLConverter(hierarchical=True, htp_metadata_path=str(htp_path))
         start_time = time.time()
         graphml_str = converter.convert(str(onnx_path))
         duration = time.time() - start_time
@@ -421,7 +413,7 @@ class TestStressAndScale:
             onnx_paths.append((name, str(onnx_path)))
         
         # Convert concurrently
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         
         def convert_model(args):
             name, onnx_path = args
@@ -460,7 +452,7 @@ class TestCornerCases:
         torch.onnx.export(model, dummy_input, str(onnx_path))
         
         # Should handle models with minimal operations
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         assert graphml_str is not None
         
@@ -498,7 +490,7 @@ class TestCornerCases:
         )
         
         # Should handle loop structures
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         assert graphml_str is not None
         
@@ -529,7 +521,7 @@ class TestCornerCases:
         torch.onnx.export(model, dummy_input, str(onnx_path))
         
         # Should handle conditional operations
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         assert graphml_str is not None
         
@@ -568,7 +560,7 @@ class TestCornerCases:
         )
         
         # Should handle LSTM and dynamic shapes
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         assert graphml_str is not None
         
@@ -607,7 +599,7 @@ class TestCornerCases:
         onnx.save(onnx_model, str(onnx_path))
         
         # Should handle corrupted data gracefully
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         try:
             graphml_str = converter.convert(str(onnx_path))
             # If it succeeds, verify output is valid
@@ -623,7 +615,7 @@ class TestUserExperience:
     
     def test_helpful_error_messages(self, tmp_path):
         """Test that error messages are helpful for users."""
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         
         # Test various error scenarios
         error_cases = [
@@ -638,7 +630,7 @@ class TestUserExperience:
         for path, expected_error, expected_message in error_cases:
             try:
                 converter.convert(path)
-                assert False, f"Expected error for {path}"
+                raise AssertionError(f"Expected error for {path}")
             except expected_error as e:
                 error_msg = str(e)
                 assert error_msg, "Empty error message"
@@ -650,7 +642,7 @@ class TestUserExperience:
         """Test that large model conversion provides progress feedback."""
         # Create a large model
         layers = []
-        for i in range(30):
+        for _i in range(30):
             layers.extend([nn.Linear(128, 128), nn.ReLU()])
         
         large_model = nn.Sequential(*layers)
@@ -660,7 +652,7 @@ class TestUserExperience:
         torch.onnx.export(large_model, dummy_input, str(onnx_path))
         
         # Convert and check statistics
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         
         # Check that statistics are available
@@ -676,7 +668,7 @@ class TestUserExperience:
         onnx_path = tmp_path / "test.onnx"
         torch.onnx.export(model, dummy_input, str(onnx_path))
         
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         
         # Test overwriting existing file
         output_path = tmp_path / "output.graphml"
@@ -699,7 +691,7 @@ class TestUserExperience:
             
             try:
                 converter.save(str(onnx_path), str(readonly_dir / "output.graphml"))
-                assert False, "Expected permission error"
+                raise AssertionError("Expected permission error")
             except (PermissionError, OSError):
                 pass  # Expected
             finally:
@@ -732,13 +724,13 @@ class TestUserExperience:
             attr = onnx.AttributeProto()
             attr.name = 'layer_name_中文'
             attr.type = onnx.AttributeProto.STRING
-            attr.s = '第一层_พระชั้น_レイヤー'.encode('utf-8')
+            attr.s = '第一层_พระชั้น_レイヤー'.encode()
             node.attribute.append(attr)
         
         onnx.save(onnx_model, str(onnx_path))
         
         # Convert with unicode handling
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         output_path = tmp_path / "输出_output_出力.graphml"
         converter.save(str(onnx_path), str(output_path))
         

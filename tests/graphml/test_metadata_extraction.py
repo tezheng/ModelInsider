@@ -6,14 +6,12 @@ and other metadata attributes from ONNX nodes.
 """
 
 import xml.etree.ElementTree as ET
-from pathlib import Path
 
 import onnx
-import pytest
 import torch
 import torch.nn as nn
 
-from modelexport.graphml.converter import ONNXToGraphMLConverter
+from modelexport.graphml import ONNXToGraphMLConverter
 from modelexport.graphml.onnx_parser import ONNXGraphParser
 
 
@@ -218,8 +216,8 @@ class TestMetadataExtraction:
         
         onnx.save(onnx_model, str(onnx_path))
         
-        # Convert to GraphML
-        converter = ONNXToGraphMLConverter()
+        # Convert to GraphML (use flat mode to read existing metadata from ONNX)
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         
         # Parse GraphML and verify metadata
@@ -282,13 +280,13 @@ class TestMetadataExtraction:
             attr3 = onnx.AttributeProto()
             attr3.name = 'hierarchy_tag'
             attr3.type = onnx.AttributeProto.STRING
-            attr3.s = '/Model/层级/模块'.encode('utf-8')
+            attr3.s = '/Model/层级/模块'.encode()
             node.attribute.append(attr3)
         
         onnx.save(onnx_model, str(onnx_path))
         
-        # Should handle special values gracefully
-        converter = ONNXToGraphMLConverter()
+        # Should handle special values gracefully (use flat mode)
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         
         # Verify XML is valid

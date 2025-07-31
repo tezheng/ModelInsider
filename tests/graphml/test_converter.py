@@ -8,11 +8,11 @@ Tests the base converter functionality including:
 - Error cases
 """
 
-import pytest
-from pathlib import Path
 import xml.etree.ElementTree as ET
 
-from modelexport.graphml.converter import ONNXToGraphMLConverter
+import pytest
+
+from modelexport.graphml import ONNXToGraphMLConverter
 
 
 class TestONNXToGraphMLConverter:
@@ -20,13 +20,14 @@ class TestONNXToGraphMLConverter:
     
     def test_converter_initialization(self):
         """Test converter can be initialized with default settings."""
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         assert converter.exclude_initializers is True
         assert converter.exclude_attributes == set()
     
     def test_converter_with_options(self):
         """Test converter initialization with custom options."""
         converter = ONNXToGraphMLConverter(
+            hierarchical=False,
             exclude_initializers=False,
             exclude_attributes={"custom_attr"}
         )
@@ -35,7 +36,7 @@ class TestONNXToGraphMLConverter:
     
     def test_convert_simple_model(self, simple_onnx_model):
         """Test conversion of a simple ONNX model."""
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml = converter.convert(simple_onnx_model)
         
         # Parse result
@@ -48,14 +49,14 @@ class TestONNXToGraphMLConverter:
     
     def test_missing_file_error(self):
         """Test error handling for missing ONNX file."""
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         
         with pytest.raises(FileNotFoundError):
             converter.convert("nonexistent_model.onnx")
     
     def test_save_to_file(self, simple_onnx_model, tmp_path):
         """Test saving GraphML to file."""
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         output_path = tmp_path / "output.graphml"
         
         # Convert and save
@@ -73,7 +74,7 @@ class TestONNXToGraphMLConverter:
     
     def test_statistics_tracking(self, simple_onnx_model):
         """Test that conversion statistics are tracked correctly."""
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         
         # Convert model
         graphml_str = converter.convert(simple_onnx_model)

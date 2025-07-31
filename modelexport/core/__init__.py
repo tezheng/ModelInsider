@@ -17,7 +17,7 @@ from .operation_config import OperationConfig
 
 __all__ = [
     "BaseHierarchyExporter",
+    "ONNXUtils",
     "OperationConfig", 
     "tag_utils",
-    "ONNXUtils",
 ]
