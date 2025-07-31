@@ -36,7 +36,7 @@ class TestGraphMLIntegration:
     
     def test_basic_conversion_with_bert_tiny(self, bert_tiny_model):
         """Test basic GraphML conversion with bert-tiny model."""
-        converter = ONNXToGraphMLConverter(exclude_initializers=True)
+        converter = ONNXToGraphMLConverter(hierarchical=False, exclude_initializers=True)
         
         # Convert to GraphML
         graphml_str = converter.convert(str(bert_tiny_model))
@@ -73,10 +73,18 @@ class TestGraphMLIntegration:
         )
         
         # Convert to hierarchical GraphML
-        graphml_str = converter.convert(str(bert_tiny_model))
+        result = converter.convert(str(bert_tiny_model))
         
-        # Verify output
-        assert isinstance(graphml_str, str)
+        # Verify output is a dictionary
+        assert isinstance(result, dict)
+        assert "graphml" in result
+        assert "format_version" in result
+        
+        # Read the generated GraphML file
+        graphml_path = result["graphml"]
+        with open(graphml_path, 'r') as f:
+            graphml_str = f.read()
+        
         assert len(graphml_str) > 2000  # Should be larger with hierarchy
         
         # Parse and validate structure
@@ -143,7 +151,13 @@ class TestGraphMLIntegration:
             exclude_initializers=True
         )
         
-        graphml_str = converter.convert(str(bert_tiny_model))
+        result = converter.convert(str(bert_tiny_model))
+        
+        # Read the generated GraphML file
+        graphml_path = result["graphml"]
+        with open(graphml_path, 'r') as f:
+            graphml_str = f.read()
+            
         root = ET.fromstring(graphml_str)
         
         # Extract compound nodes (XPath starts-with not supported, use list comprehension)
@@ -169,7 +183,13 @@ class TestGraphMLIntegration:
             exclude_initializers=True
         )
         
-        graphml_str = converter.convert(str(bert_tiny_model))
+        result = converter.convert(str(bert_tiny_model))
+        
+        # Read the generated GraphML file
+        graphml_path = result["graphml"]
+        with open(graphml_path, 'r') as f:
+            graphml_str = f.read()
+            
         root = ET.fromstring(graphml_str)
         
         # Find operation nodes (not compound nodes)
@@ -201,7 +221,7 @@ class TestGraphMLIntegration:
     
     def test_graphml_visualization_compatibility(self, bert_tiny_model):
         """Test that generated GraphML follows visualization tool standards."""
-        converter = ONNXToGraphMLConverter(exclude_initializers=True)
+        converter = ONNXToGraphMLConverter(hierarchical=False, exclude_initializers=True)
         graphml_str = converter.convert(str(bert_tiny_model))
         
         root = ET.fromstring(graphml_str)
