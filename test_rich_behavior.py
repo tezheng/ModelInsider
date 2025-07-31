@@ -1,6 +1,7 @@
 """Test Rich console behavior with paths"""
-from rich.console import Console
 from io import StringIO
+
+from rich.console import Console
 
 # Test 1: Simple format
 buffer1 = StringIO()

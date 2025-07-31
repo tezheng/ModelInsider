@@ -3,9 +3,10 @@ Optimized Export Monitor - Iteration 18
 Performance improvements and memory optimizations.
 """
 
-from functools import lru_cache
-from typing import List, Dict, Any
 import json
+from functools import lru_cache
+from typing import Any
+
 
 class OptimizedHTPExportMonitor:
     """Performance-optimized export monitor."""
@@ -25,7 +26,7 @@ class OptimizedHTPExportMonitor:
         """Cached bold styling."""
         return f"[bold]{text}[/bold]"
     
-    def _build_tree_optimized(self, hierarchy: Dict[str, Any], max_depth: int = 10) -> List[str]:
+    def _build_tree_optimized(self, hierarchy: dict[str, Any], max_depth: int = 10) -> list[str]:
         """Build tree with depth limit and caching."""
         if not hierarchy:
             return ["  (empty)"]
@@ -62,7 +63,7 @@ class OptimizedHTPExportMonitor:
         self._tree_cache[cache_key] = lines
         return lines
     
-    def write_json_streaming(self, data: Dict[str, Any], filepath: Path) -> None:
+    def write_json_streaming(self, data: dict[str, Any], filepath: Path) -> None:
         """Stream JSON writing for large data."""
         with open(filepath, 'w') as f:
             f.write('{\n')
@@ -73,7 +74,7 @@ class OptimizedHTPExportMonitor:
                     f.write(',\n')
                 
                 # Stream write based on value type
-                if isinstance(value, (list, dict)) and len(str(value)) > 10000:
+                if isinstance(value, list | dict) and len(str(value)) > 10000:
                     # Large value - stream write
                     f.write(f'  "{key}": ')
                     json.dump(value, f, separators=(',', ':'))

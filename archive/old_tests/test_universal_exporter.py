@@ -7,10 +7,14 @@ This script tests the new universal hierarchy exporter against the ground truth
 established in docs/BERT_TINY_GROUND_TRUTH.md
 """
 
-import json
 from pathlib import Path
-from modelexport.core.universal_hierarchy_exporter import UniversalHierarchyExporter, export_bert_tiny_with_validation
-from transformers import AutoModel, AutoTokenizer
+
+from transformers import AutoModel
+
+from modelexport.core.universal_hierarchy_exporter import (
+    UniversalHierarchyExporter,
+    export_bert_tiny_with_validation,
+)
 
 
 def load_ground_truth() -> dict:

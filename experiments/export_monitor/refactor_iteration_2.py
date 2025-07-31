@@ -6,6 +6,7 @@ Refactoring iteration 2: Extract hardcoded values and magic numbers
 import re
 from pathlib import Path
 
+
 def analyze_hardcoded_values():
     """Analyze export_monitor.py for hardcoded values."""
     

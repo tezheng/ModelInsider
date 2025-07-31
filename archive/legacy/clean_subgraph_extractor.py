@@ -4,19 +4,15 @@ Clean Subgraph Extractor - No Topological Sorting Needed
 Extract subgraphs by making dependencies external inputs instead of including them
 """
 
+import json
+from pathlib import Path
+
+import onnx
 import torch
 import torch.nn as nn
-import onnx
-from onnx import helper, TensorProto, ValueInfoProto
-import json
-import os
-from pathlib import Path
-from typing import Dict, List, Set, Optional, Tuple
-from collections import defaultdict
-import numpy as np
-
 from enhanced_dag_extractor import EnhancedDAGExtractor
 from input_generator import UniversalInputGenerator
+from onnx import TensorProto, ValueInfoProto, helper
 
 
 class CleanSubgraphExtractor:
@@ -73,7 +69,7 @@ class CleanSubgraphExtractor:
         print(f"Indexed {len(self.node_by_name)} nodes")
         print(f"Found hierarchy info for {len(self.hierarchy_mapping)} nodes")
     
-    def extract_clean_subgraph(self, target_tag: str, output_path: Optional[str] = None) -> onnx.ModelProto:
+    def extract_clean_subgraph(self, target_tag: str, output_path: str | None = None) -> onnx.ModelProto:
         """Extract clean subgraph using the no-sorting approach"""
         print(f"\n{'='*60}")
         print(f"EXTRACTING CLEAN SUBGRAPH: {target_tag}")
@@ -155,11 +151,10 @@ class CleanSubgraphExtractor:
                     print(f"  External output: {output_tensor}")
         
         # If no external outputs found, use all outputs from the last node
-        if not external_outputs:
-            if module_nodes:
-                last_node = module_nodes[-1]
-                external_outputs.update(last_node.output)
-                print(f"  Using outputs from last node: {list(last_node.output)}")
+        if not external_outputs and module_nodes:
+            last_node = module_nodes[-1]
+            external_outputs.update(last_node.output)
+            print(f"  Using outputs from last node: {list(last_node.output)}")
         
         # Step 4: Create graph inputs and outputs
         graph_inputs = []
@@ -204,7 +199,7 @@ class CleanSubgraphExtractor:
         )
         
         # Remove custom attributes to ensure ONNX compliance
-        for i, node in enumerate(clean_model.graph.node):
+        for _i, node in enumerate(clean_model.graph.node):
             # Create new node without custom attributes
             new_attributes = [attr for attr in node.attribute 
                             if attr.name not in ['source_module', 'hierarchy_tags']]
@@ -234,7 +229,7 @@ class CleanSubgraphExtractor:
         
         return clean_model
     
-    def generate_extracted_tag_mapping(self, target_tag: str, extracted_nodes: List, output_path: str):
+    def generate_extracted_tag_mapping(self, target_tag: str, extracted_nodes: list, output_path: str):
         """Generate tag mapping JSON for the extracted subgraph"""
         mapping = {
             "metadata": {
@@ -301,7 +296,7 @@ class CleanSubgraphExtractor:
         
         return mapping
     
-    def _create_tensor_info(self, tensor_name: str) -> Optional[ValueInfoProto]:
+    def _create_tensor_info(self, tensor_name: str) -> ValueInfoProto | None:
         """Create tensor info for graph inputs/outputs"""
         
         # Check original model inputs
@@ -327,7 +322,7 @@ class CleanSubgraphExtractor:
         )
 
 
-def convert_single_module_to_onnx(model: nn.Module, module_path: str, inputs: Dict, output_path: str):
+def convert_single_module_to_onnx(model: nn.Module, module_path: str, inputs: dict, output_path: str):
     """Convert a single nn.Module to ONNX for comparison"""
     print(f"\n{'='*60}")
     print(f"CONVERTING SINGLE MODULE: {module_path}")

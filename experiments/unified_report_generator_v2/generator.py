@@ -4,15 +4,20 @@ Main report generator implementation.
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from interfaces import (
-    IReportGenerator, IReportSection, IDataProvider,
-    ReportFormat, StepInfo, StatisticsInfo
+    IDataProvider,
+    IReportGenerator,
+    IReportSection,
+    ReportFormat,
 )
 from sections import (
-    ModelInfoSection, StepSection, StatisticsSection,
-    HierarchyTreeSection, SummarySection
+    HierarchyTreeSection,
+    ModelInfoSection,
+    StatisticsSection,
+    StepSection,
+    SummarySection,
 )
 
 
@@ -21,7 +26,7 @@ class UnifiedReportGenerator(IReportGenerator):
     
     def __init__(self, data_provider: IDataProvider):
         self.data_provider = data_provider
-        self.sections: List[IReportSection] = []
+        self.sections: list[IReportSection] = []
         self._setup_default_sections()
     
     def _setup_default_sections(self):
@@ -40,7 +45,7 @@ class UnifiedReportGenerator(IReportGenerator):
             ("metadata_generation", 8, "METADATA GENERATION", "📄"),
         ]
         
-        for step_name, num, title, icon in steps:
+        for step_name, _num, _title, _icon in steps:
             # Create step info if needed
             if self.data_provider.get_step_info(step_name) is None:
                 # This would be handled by the data provider
@@ -67,7 +72,7 @@ class UnifiedReportGenerator(IReportGenerator):
         else:
             raise ValueError(f"Unsupported format: {format}")
     
-    def _generate_console(self, context: Dict[str, Any]) -> str:
+    def _generate_console(self, context: dict[str, Any]) -> str:
         """Generate console output."""
         # Set console-specific context
         context.setdefault('width', 80)
@@ -82,7 +87,7 @@ class UnifiedReportGenerator(IReportGenerator):
         
         return "".join(parts)
     
-    def _generate_text(self, context: Dict[str, Any]) -> str:
+    def _generate_text(self, context: dict[str, Any]) -> str:
         """Generate text report."""
         # Set text-specific context
         context.setdefault('width', 80)
@@ -136,7 +141,7 @@ class UnifiedReportGenerator(IReportGenerator):
         
         return "".join(parts)
     
-    def _generate_metadata(self, context: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_metadata(self, context: dict[str, Any]) -> dict[str, Any]:
         """Generate metadata dictionary."""
         metadata = {}
         
@@ -157,7 +162,7 @@ class UnifiedReportGenerator(IReportGenerator):
         
         return metadata
     
-    def _structure_metadata(self, metadata: Dict[str, Any]):
+    def _structure_metadata(self, metadata: dict[str, Any]):
         """Structure metadata according to expected format."""
         # Ensure required top-level keys exist
         if "export_context" not in metadata:

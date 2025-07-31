@@ -4,11 +4,11 @@ Simple test script to analyze export_modules_as_functions behavior.
 This version avoids the selective export that caused the PyTorch internal error.
 """
 
+from pathlib import Path
+
+import onnx
 import torch
 import torch.nn as nn
-import onnx
-import json
-from pathlib import Path
 
 
 class SimpleModel(nn.Module):

@@ -3,8 +3,9 @@
 Examine the detailed ONNX structure differences between function=True/False exports.
 """
 
-import onnx
 from pathlib import Path
+
+import onnx
 
 
 def examine_onnx_model(path: str, title: str):

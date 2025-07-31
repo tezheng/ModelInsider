@@ -3,10 +3,9 @@
 Simple test of the semantic mapping approach.
 """
 
-import torch
-from transformers import AutoModel, AutoTokenizer
-import onnx
 from pathlib import Path
+
+from transformers import AutoModel, AutoTokenizer
 
 from modelexport.semantic import SemanticONNXExporter, SemanticQueryInterface
 

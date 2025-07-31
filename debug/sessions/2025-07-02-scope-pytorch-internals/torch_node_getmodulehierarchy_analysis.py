@@ -6,11 +6,10 @@ This investigates what hierarchy information this method provides and how it
 could potentially enhance semantic mapping approaches.
 """
 
+
 import torch
 import torch.jit
 from transformers import AutoModel
-import json
-from typing import List, Dict, Any, Optional
 
 
 def test_getmodulehierarchy_method():

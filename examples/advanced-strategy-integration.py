@@ -6,11 +6,12 @@ This example demonstrates how enhanced auxiliary operations integrate
 with the unified export interface and strategy selection system.
 """
 
-import torch
-import torch.nn as nn
-from pathlib import Path
 import sys
 import time
+from pathlib import Path
+
+import torch
+import torch.nn as nn
 
 # Add ModelExport to path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -19,14 +20,14 @@ from modelexport.strategies.htp.htp_hierarchy_exporter import HierarchyExporter
 
 # Try importing unified interface (may not be fully available)
 try:
-    from modelexport.unified_export import export_model, UnifiedExporter
+    from modelexport.unified_export import UnifiedExporter, export_model
     unified_available = True
 except ImportError:
     print("⚠️ Unified export interface not fully available, using direct exporters")
     unified_available = False
 
 try:
-    from modelexport.core.strategy_selector import select_best_strategy, ExportStrategy
+    from modelexport.core.strategy_selector import ExportStrategy, select_best_strategy
     strategy_selector_available = True
 except ImportError:
     print("⚠️ Strategy selector not available, using manual strategy selection")
@@ -318,7 +319,9 @@ def demonstrate_fallback_integration():
         
         # Try FX strategy first (might fail on dynamic control flow)
         try:
-            from modelexport.strategies.fx.fx_hierarchy_exporter import FXHierarchyExporter
+            from modelexport.strategies.fx.fx_hierarchy_exporter import (
+                FXHierarchyExporter,
+            )
             print("   🔄 Trying FX strategy first...")
             
             fx_exporter = FXHierarchyExporter()
@@ -417,9 +420,9 @@ def demonstrate_performance_monitoring():
         print(f"\n⏱️ Detailed Performance Profile:")
         
         for metric, value in profile.items():
-            if 'time' in metric and isinstance(value, (int, float)):
+            if 'time' in metric and isinstance(value, int | float):
                 print(f"   {metric.replace('_', ' ').title()}: {value:.3f}s")
-            elif 'memory' in metric and isinstance(value, (int, float)):
+            elif 'memory' in metric and isinstance(value, int | float):
                 print(f"   {metric.replace('_', ' ').title()}: {value:.1f}MB")
     
     # Performance per operation

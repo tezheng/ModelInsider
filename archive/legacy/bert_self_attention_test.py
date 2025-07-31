@@ -4,18 +4,17 @@ BERT Self-Attention Test
 Create both standalone module conversion AND extracted subgraph for proper comparison
 """
 
-import torch
-import torch.nn as nn
-import onnx
-import json
 import argparse
+import json
 from pathlib import Path
-from transformers import AutoModel
 
-from enhanced_dag_extractor import EnhancedDAGExtractor
+import onnx
+import torch
 from clean_subgraph_extractor import CleanSubgraphExtractor
-from input_generator import UniversalInputGenerator
+from enhanced_dag_extractor import EnhancedDAGExtractor
 from extract_onnx_tags import ONNXTagExtractor
+from input_generator import UniversalInputGenerator
+from transformers import AutoModel
 
 
 def find_bert_self_attention_module(model):

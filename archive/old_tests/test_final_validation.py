@@ -3,10 +3,13 @@
 Final validation of the new built-in tracking as default behavior.
 """
 
+import json
+
 import torch
 import torch.nn as nn
+
 from modelexport.hierarchy_exporter import HierarchyExporter
-import json
+
 
 def test_default_behavior():
     """Test that built-in tracking is now the default and working."""
@@ -37,7 +40,7 @@ def test_default_behavior():
     result = exporter.export(model, inputs, 'temp/final_validation.onnx')
     
     # Load and check results
-    with open('temp/final_validation_hierarchy.json', 'r') as f:
+    with open('temp/final_validation_hierarchy.json') as f:
         hierarchy = json.load(f)
     
     print(f"\nExport Results:")
@@ -105,7 +108,7 @@ def test_performance_comparison():
     print(f"  Trace length: {result['operation_trace_length']}")
     
     # Load hierarchy to check strategy
-    with open('temp/benchmark_new_hierarchy.json', 'r') as f:
+    with open('temp/benchmark_new_hierarchy.json') as f:
         hierarchy = json.load(f)
     
     print(f"  Strategy confirmed: {hierarchy['exporter']['strategy']}")

@@ -2,10 +2,12 @@
 Test slice operation tagging to verify if we actually fixed the issue or just bypassed it.
 """
 
+import json
+import tempfile
+
 import torch
 import torch.nn as nn
-import tempfile
-import json
+
 from modelexport.hierarchy_exporter import HierarchyExporter
 
 
@@ -101,7 +103,7 @@ def test_slice_tagging():
             # Load hierarchy JSON if it exists
             hierarchy_file = tmp.name.replace('.onnx', '_hierarchy.json')
             try:
-                with open(hierarchy_file, 'r') as f:
+                with open(hierarchy_file) as f:
                     hierarchy_data = json.load(f)
                     
                 print(f"Hierarchy file loaded: {hierarchy_file}")

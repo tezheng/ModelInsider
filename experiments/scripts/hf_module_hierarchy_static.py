@@ -96,12 +96,12 @@ for name, module in model.named_modules():
 
 print(f"HuggingFace modules ({len(hf_modules)}):")
 print("=" * 70)
-for name, class_name, module_path in hf_modules:
+for name, class_name, _module_path in hf_modules:
     print(f"{name:30} -> {class_name:20}")
 
 print(f"\nPyTorch modules ({len(pytorch_modules)}):")
 print("=" * 70)
-for name, class_name, module_path in pytorch_modules[:10]:  # Show first 10
+for name, class_name, _module_path in pytorch_modules[:10]:  # Show first 10
     print(f"{name:30} -> {class_name:20}")
 
 if len(pytorch_modules) > 10:

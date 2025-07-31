@@ -4,6 +4,7 @@ Debug test to understand hook registration for different modules.
 
 import torch
 import torch.nn as nn
+
 from modelexport.hierarchy_exporter import HierarchyExporter
 
 

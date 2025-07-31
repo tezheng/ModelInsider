@@ -4,13 +4,15 @@ Debug the hanging issue with universal hierarchy exporter hooks
 """
 
 import sys
+
 sys.path.append('/mnt/d/BYOM/modelexport')
 
-from transformers import AutoModel, AutoTokenizer
-import torch
-import torch.nn as nn
-from pathlib import Path
 import time
+from pathlib import Path
+
+import torch
+from transformers import AutoModel, AutoTokenizer
+
 
 def test_problematic_pattern():
     """Test the specific pattern that might be causing issues"""
@@ -70,7 +72,7 @@ def test_problematic_pattern():
             return outputs
         return hook
     
-    for path, data in module_hierarchy.items():
+    for path, _data in module_hierarchy.items():
         # Try to get module by path (this might be the issue)
         module = get_module_by_path(model, path)
         if module is not None:

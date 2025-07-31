@@ -8,15 +8,15 @@ This demonstrates the complete workflow:
 3. NO EMPTY TAGS guaranteed, NO HARDCODED LOGIC
 """
 
-import torch
-import torch.nn as nn
-import onnx
-from pathlib import Path
 import tempfile
+from pathlib import Path
+
+import onnx
+import torch
 from transformers import AutoModel, AutoTokenizer
 
-from modelexport.core.tracing_hierarchy_builder import TracingHierarchyBuilder
 from modelexport.core.onnx_node_tagger import create_node_tagger_from_hierarchy
+from modelexport.core.tracing_hierarchy_builder import TracingHierarchyBuilder
 
 
 def demonstrate_complete_workflow():

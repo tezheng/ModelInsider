@@ -4,14 +4,13 @@ ONNX Subgraph Extractor
 Extract subgraphs from ONNX models by hierarchy tags to create standalone ONNX models
 """
 
-import onnx
-from onnx import helper, TensorProto, ValueInfoProto
-import json
-import os
-from pathlib import Path
-from typing import Dict, List, Set, Optional, Tuple
-from collections import defaultdict, deque
 import argparse
+import json
+from collections import defaultdict, deque
+from pathlib import Path
+
+import onnx
+from onnx import TensorProto, ValueInfoProto, helper
 
 
 class ONNXSubgraphExtractor:
@@ -58,7 +57,7 @@ class ONNXSubgraphExtractor:
         print(f"Indexed {len(self.node_by_name)} nodes")
         print(f"Found {len(self.nodes_by_tag)} unique tags")
     
-    def _extract_node_tags(self, node) -> List[str]:
+    def _extract_node_tags(self, node) -> list[str]:
         """Extract hierarchy tags from a node"""
         tags = []
         
@@ -70,7 +69,7 @@ class ONNXSubgraphExtractor:
         
         return tags
     
-    def list_available_modules(self) -> Dict[str, int]:
+    def list_available_modules(self) -> dict[str, int]:
         """List all available modules and their operation counts"""
         module_counts = {}
         for tag, nodes in self.nodes_by_tag.items():
@@ -78,7 +77,7 @@ class ONNXSubgraphExtractor:
         
         return dict(sorted(module_counts.items(), key=lambda x: x[1], reverse=True))
     
-    def extract_subgraph(self, target_tag: str, output_path: Optional[str] = None, 
+    def extract_subgraph(self, target_tag: str, output_path: str | None = None, 
                         include_dependencies: bool = True) -> onnx.ModelProto:
         """
         Extract a subgraph containing all operations with the specified tag
@@ -171,7 +170,7 @@ class ONNXSubgraphExtractor:
         
         return extracted_model
     
-    def _find_dependencies(self, target_nodes: Set[str], required_tensors: Set[str]) -> Set[str]:
+    def _find_dependencies(self, target_nodes: set[str], required_tensors: set[str]) -> set[str]:
         """Find all nodes that need to be included for dependencies"""
         all_required_nodes = set(target_nodes)
         
@@ -202,8 +201,8 @@ class ONNXSubgraphExtractor:
         
         return all_required_nodes
     
-    def _create_extracted_graph(self, required_nodes: Set[str], required_tensors: Set[str], 
-                              required_initializers: Set[str], target_tag: str) -> onnx.GraphProto:
+    def _create_extracted_graph(self, required_nodes: set[str], required_tensors: set[str], 
+                              required_initializers: set[str], target_tag: str) -> onnx.GraphProto:
         """Create the extracted graph"""
         
         # Collect nodes
@@ -288,7 +287,7 @@ class ONNXSubgraphExtractor:
                 return True
         return False
     
-    def _find_tensor_info(self, tensor_name: str) -> Optional[ValueInfoProto]:
+    def _find_tensor_info(self, tensor_name: str) -> ValueInfoProto | None:
         """Find tensor info from original graph"""
         # Check inputs
         for input_info in self.original_model.graph.input:
@@ -312,7 +311,7 @@ class ONNXSubgraphExtractor:
             []  # Unknown shape
         )
     
-    def extract_multiple_modules(self, module_tags: List[str], output_dir: str):
+    def extract_multiple_modules(self, module_tags: list[str], output_dir: str):
         """Extract multiple modules and save them"""
         output_dir = Path(output_dir)
         output_dir.mkdir(parents=True, exist_ok=True)

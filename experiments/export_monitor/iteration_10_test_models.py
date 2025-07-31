@@ -7,7 +7,6 @@ Ensure robustness across various architectures.
 import sys
 import time
 from pathlib import Path
-from typing import Dict, List, Tuple
 
 # Add paths
 sys.path.insert(0, str(Path(__file__).parent))
@@ -15,13 +14,13 @@ project_root = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(project_root))
 
 import torch
-from transformers import AutoModel, AutoModelForImageClassification
 
 # Import our rich export monitor
 from export_monitor_rich import HTPExportMonitor
+from transformers import AutoModel, AutoModelForImageClassification
 
 
-def test_model(model_name: str, model_type: str) -> Tuple[bool, Dict[str, any]]:
+def test_model(model_name: str, model_type: str) -> tuple[bool, dict[str, any]]:
     """Test a single model with export monitor.
     
     Returns:

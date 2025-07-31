@@ -3,14 +3,13 @@
 Advanced hierarchy-preserving ONNX export using PyTorch hooks
 """
 
+import json
+from typing import Any
+
+import onnx
 import torch
 import torch.nn as nn
-import onnx
-from onnx import helper, numpy_helper
-import json
-from typing import Dict, List, Any, Optional, Tuple
-from pathlib import Path
-import weakref
+
 
 class HierarchyTracker:
     """Track module execution during forward pass"""
@@ -63,7 +62,7 @@ class HierarchyPreservingExporter:
     def __init__(self):
         self.tracker = HierarchyTracker()
     
-    def extract_module_hierarchy(self, model: nn.Module) -> Dict[str, Dict[str, Any]]:
+    def extract_module_hierarchy(self, model: nn.Module) -> dict[str, dict[str, Any]]:
         """Extract complete module hierarchy information"""
         hierarchy = {}
         
@@ -86,7 +85,7 @@ class HierarchyPreservingExporter:
                             model: nn.Module, 
                             dummy_input: torch.Tensor,
                             output_path: str,
-                            opset_version: int = 11) -> Tuple[onnx.ModelProto, Dict[str, Any]]:
+                            opset_version: int = 11) -> tuple[onnx.ModelProto, dict[str, Any]]:
         """Export model to ONNX with hierarchy information preserved"""
         
         print(f"=== Hierarchy-Preserving ONNX Export ===")
@@ -139,7 +138,7 @@ class HierarchyPreservingExporter:
             for hook in hooks:
                 hook.remove()
     
-    def _enhance_with_hierarchy(self, onnx_model: onnx.ModelProto, hierarchy: Dict[str, Any]) -> onnx.ModelProto:
+    def _enhance_with_hierarchy(self, onnx_model: onnx.ModelProto, hierarchy: dict[str, Any]) -> onnx.ModelProto:
         """Enhance ONNX model with hierarchy information"""
         
         # Add hierarchy metadata
@@ -159,7 +158,7 @@ class HierarchyPreservingExporter:
         
         return onnx_model
     
-    def _enhance_node_names(self, onnx_model: onnx.ModelProto, hierarchy: Dict[str, Any]):
+    def _enhance_node_names(self, onnx_model: onnx.ModelProto, hierarchy: dict[str, Any]):
         """Enhance node names with hierarchy information"""
         
         # Create mapping from parameter names to modules
@@ -202,7 +201,7 @@ class HierarchyPreservingExporter:
         
         print(f"Enhanced {enhanced_count}/{len(onnx_model.graph.node)} nodes with hierarchy info")
     
-    def _infer_node_module(self, node: onnx.NodeProto, param_to_module: Dict[str, str], hierarchy: Dict[str, Any]) -> Optional[str]:
+    def _infer_node_module(self, node: onnx.NodeProto, param_to_module: dict[str, str], hierarchy: dict[str, Any]) -> str | None:
         """Infer which module a node belongs to based on its inputs"""
         
         # Strategy 1: Check if any input is a parameter from a specific module
@@ -224,21 +223,21 @@ class HierarchyRetriever:
         self.hierarchy = self._extract_hierarchy()
         self.execution_order = self._extract_execution_order()
     
-    def _extract_hierarchy(self) -> Optional[Dict[str, Any]]:
+    def _extract_hierarchy(self) -> dict[str, Any] | None:
         """Extract hierarchy from metadata"""
         for prop in self.onnx_model.metadata_props:
             if prop.key == "module_hierarchy":
                 return json.loads(prop.value)
         return None
     
-    def _extract_execution_order(self) -> Optional[Dict[str, Any]]:
+    def _extract_execution_order(self) -> dict[str, Any] | None:
         """Extract execution order from metadata"""
         for prop in self.onnx_model.metadata_props:
             if prop.key == "module_execution_order":
                 return json.loads(prop.value)
         return None
     
-    def get_nodes_by_module(self, module_path: str) -> List[Dict[str, Any]]:
+    def get_nodes_by_module(self, module_path: str) -> list[dict[str, Any]]:
         """Get all nodes belonging to a specific module"""
         nodes = []
         
@@ -256,14 +255,14 @@ class HierarchyRetriever:
         
         return nodes
     
-    def get_modules_by_depth(self, depth: int) -> List[str]:
+    def get_modules_by_depth(self, depth: int) -> list[str]:
         """Get all modules at a specific hierarchy depth"""
         if not self.hierarchy:
             return []
         
         return [name for name, info in self.hierarchy.items() if info['depth'] == depth]
     
-    def get_module_subtree(self, root_module: str) -> Dict[str, Any]:
+    def get_module_subtree(self, root_module: str) -> dict[str, Any]:
         """Get all modules in the subtree rooted at root_module"""
         if not self.hierarchy:
             return {}
@@ -275,7 +274,7 @@ class HierarchyRetriever:
         
         return subtree
     
-    def group_operations_by_hierarchy(self) -> Dict[str, List[Dict[str, Any]]]:
+    def group_operations_by_hierarchy(self) -> dict[str, list[dict[str, Any]]]:
         """Group all operations by their source modules"""
         module_to_ops = {}
         

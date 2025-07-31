@@ -4,12 +4,13 @@ Universal Input Generator for Different Model Architectures
 Generate appropriate dummy inputs for any Hugging Face or torchvision model
 """
 
+import inspect
+from typing import Any
+
 import torch
 import torch.nn as nn
-import inspect
-from typing import Dict, Any, Union, Tuple
-from transformers import AutoModel, AutoTokenizer
 import torchvision.models as models
+from transformers import AutoModel
 
 
 class UniversalInputGenerator:
@@ -21,7 +22,7 @@ class UniversalInputGenerator:
         self.default_vocab_size = 30000
         self.default_image_size = 224
     
-    def generate_inputs(self, model: nn.Module, model_name: str = None) -> Dict[str, torch.Tensor]:
+    def generate_inputs(self, model: nn.Module, model_name: str = None) -> dict[str, torch.Tensor]:
         """
         Generate appropriate inputs for any model based on its architecture
         
@@ -88,7 +89,7 @@ class UniversalInputGenerator:
         
         return "generic"
     
-    def _generate_transformer_inputs(self, model: nn.Module, model_name: str = None) -> Dict[str, torch.Tensor]:
+    def _generate_transformer_inputs(self, model: nn.Module, model_name: str = None) -> dict[str, torch.Tensor]:
         """Generate inputs for transformer models (BERT, GPT, T5, etc.)"""
         # Get vocab size from model config if available
         vocab_size = getattr(model.config, 'vocab_size', self.default_vocab_size)
@@ -110,7 +111,7 @@ class UniversalInputGenerator:
         
         return inputs
     
-    def _generate_vision_inputs(self, model: nn.Module, model_name: str = None) -> Dict[str, torch.Tensor]:
+    def _generate_vision_inputs(self, model: nn.Module, model_name: str = None) -> dict[str, torch.Tensor]:
         """Generate inputs for vision models (ResNet, EfficientNet, etc.)"""
         # Standard ImageNet input format
         inputs = {
@@ -122,7 +123,7 @@ class UniversalInputGenerator:
         
         # Check if model expects different input name
         sig = inspect.signature(model.forward)
-        param_names = [p for p in sig.parameters.keys() if p != 'self']
+        param_names = [p for p in sig.parameters if p != 'self']
         
         if param_names:
             first_param = param_names[0]
@@ -131,7 +132,7 @@ class UniversalInputGenerator:
         
         return inputs
     
-    def _generate_vision_transformer_inputs(self, model: nn.Module, model_name: str = None) -> Dict[str, torch.Tensor]:
+    def _generate_vision_transformer_inputs(self, model: nn.Module, model_name: str = None) -> dict[str, torch.Tensor]:
         """Generate inputs for Vision Transformer models"""
         # ViT typically expects pixel_values
         image_size = getattr(model.config, 'image_size', self.default_image_size)
@@ -145,7 +146,7 @@ class UniversalInputGenerator:
         
         return inputs
     
-    def _generate_generic_inputs(self, model: nn.Module) -> Dict[str, torch.Tensor]:
+    def _generate_generic_inputs(self, model: nn.Module) -> dict[str, torch.Tensor]:
         """Fallback: generate generic inputs based on forward signature"""
         sig = inspect.signature(model.forward)
         inputs = {}
@@ -182,7 +183,7 @@ class UniversalInputGenerator:
         
         return inputs
     
-    def get_test_models(self) -> Dict[str, Dict[str, Any]]:
+    def get_test_models(self) -> dict[str, dict[str, Any]]:
         """Get test models for different architectures"""
         return {
             'bert': {

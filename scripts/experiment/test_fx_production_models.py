@@ -6,22 +6,22 @@ This script tests the FX exporter on production-scale models that are within
 FX constraints and focuses on performance optimization for supported architectures.
 """
 
-import sys
 import os
+import statistics
+import sys
+import tempfile
+import time
+from pathlib import Path
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from pathlib import Path
-import json
-import tempfile
-import time
-import statistics
-from typing import Dict, List, Any, Tuple
 
 # Add modelexport to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from modelexport.fx_hierarchy_exporter import FXHierarchyExporter
+
 
 def test_production_vision_models():
     """Test production-scale vision models that should work well with FX."""

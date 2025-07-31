@@ -11,8 +11,8 @@ from pathlib import Path
 # Add parent paths to import the actual modules
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from modelexport.strategies.htp.metadata_builder import HTPMetadataBuilder
 from experiments.metadata.pydantic_builder import HTPMetadataBuilder as PydanticBuilder
+from modelexport.strategies.htp.metadata_builder import HTPMetadataBuilder
 
 
 def test_dataclass_builder():
@@ -140,7 +140,7 @@ def compare_outputs(dataclass_meta, pydantic_meta):
         # Find differences
         dc_lines = dc_json.split('\n')
         pd_lines = pd_json.split('\n')
-        for i, (dc, pd) in enumerate(zip(dc_lines, pd_lines)):
+        for i, (dc, pd) in enumerate(zip(dc_lines, pd_lines, strict=False)):
             if dc != pd:
                 print(f"Line {i}: {dc} != {pd}")
                 break

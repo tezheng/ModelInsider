@@ -10,11 +10,11 @@ This test validates the complete Enhanced Semantic Exporter implementation:
 5. No empty tags guarantee
 """
 
-import pytest
-import torch
 import json
-import onnx
 from pathlib import Path
+
+import onnx
+import torch
 from transformers import AutoModel, AutoTokenizer
 
 from modelexport.core.enhanced_semantic_exporter import EnhancedSemanticExporter
@@ -93,7 +93,7 @@ def test_enhanced_semantic_exporter_bert_tiny():
     assert Path(metadata_path).exists(), "Metadata file should be created"
     
     # Validate metadata content
-    with open(metadata_path, 'r') as f:
+    with open(metadata_path) as f:
         metadata = json.load(f)
     
     assert 'export_info' in metadata
@@ -307,7 +307,7 @@ def test_comparative_results():
     # 5. Validate semantic tag quality
     semantic_mappings = metadata['semantic_mappings']
     hf_semantic_tags = 0
-    for node_name, mapping in semantic_mappings.items():
+    for _node_name, mapping in semantic_mappings.items():
         if mapping.get('hf_module_name') and mapping.get('semantic_type') != 'unknown':
             hf_semantic_tags += 1
     

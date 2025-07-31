@@ -5,18 +5,19 @@ Iteration 9: Test FX exporter with specific HuggingFace models.
 Testing microsoft/resnet-50 and facebook/sam-vit-base for coverage analysis.
 """
 
-import sys
-import os
-import torch
-import torch.nn as nn
-from pathlib import Path
 import json
+import os
+import sys
 import tempfile
+from pathlib import Path
+
+import torch
 
 # Add modelexport to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from modelexport.fx_hierarchy_exporter import FXHierarchyExporter
+
 
 def test_microsoft_resnet50():
     """Test with microsoft/resnet-50 from HuggingFace."""
@@ -62,11 +63,11 @@ def test_microsoft_resnet50():
                 print(f"   Categories: {fx_stats['hierarchy_categories']}")
                 
                 # Load sidecar for detailed analysis
-                with open(result['sidecar_path'], 'r') as f:
+                with open(result['sidecar_path']) as f:
                     sidecar = json.load(f)
                 
                 print(f"   Sample hierarchy paths:")
-                for i, (node, path) in enumerate(list(sidecar['hierarchy_mapping'].items())[:5]):
+                for _i, (node, path) in enumerate(list(sidecar['hierarchy_mapping'].items())[:5]):
                     print(f"     {node} -> {path}")
                 
                 # Cleanup
@@ -138,11 +139,11 @@ def test_facebook_sam_vit():
                 print(f"   Categories: {fx_stats['hierarchy_categories']}")
                 
                 # Load sidecar for detailed analysis
-                with open(result['sidecar_path'], 'r') as f:
+                with open(result['sidecar_path']) as f:
                     sidecar = json.load(f)
                 
                 print(f"   Sample hierarchy paths:")
-                for i, (node, path) in enumerate(list(sidecar['hierarchy_mapping'].items())[:5]):
+                for _i, (node, path) in enumerate(list(sidecar['hierarchy_mapping'].items())[:5]):
                     print(f"     {node} -> {path}")
                 
                 # Cleanup

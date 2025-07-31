@@ -4,7 +4,6 @@ Iteration 13: Fix text styling in console output.
 Replace print() with console.print() and add proper Rich styling.
 """
 
-import re
 from pathlib import Path
 
 

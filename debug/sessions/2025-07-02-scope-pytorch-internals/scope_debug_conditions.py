@@ -8,10 +8,11 @@ The user is getting rich scope info like:
 But my analysis shows empty scopes. Let's investigate potential differences.
 """
 
+import os
+
 import torch
 import torch.jit
 from transformers import AutoModel
-import os
 
 
 def test_pytorch_version_effects():
@@ -58,7 +59,7 @@ def test_manual_forward_hooks():
     
     # Register hooks on all modules
     handles = []
-    for name, module in model.named_modules():
+    for _name, module in model.named_modules():
         handle = module.register_forward_hook(forward_hook)
         handles.append(handle)
     

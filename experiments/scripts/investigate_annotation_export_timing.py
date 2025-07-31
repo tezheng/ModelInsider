@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Investigate exactly when and how annotations are used in ONNX export."""
 
+import tempfile
+
 import torch
 import torch.nn as nn
 from transformers import AutoModel, AutoTokenizer
-import tempfile
+
 
 def create_annotation_inconsistent_model():
     """Create a model that will definitely trigger annotation inconsistency."""

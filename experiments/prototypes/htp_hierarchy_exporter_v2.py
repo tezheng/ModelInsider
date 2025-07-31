@@ -7,14 +7,14 @@ This is a complete rewrite focused on:
 3. No over-engineering or complex workarounds
 """
 
+import json
+from collections import defaultdict
+from datetime import datetime
+from typing import Any
+
+import onnx
 import torch
 import torch.nn as nn
-import onnx
-import json
-from datetime import datetime
-from pathlib import Path
-from typing import Dict, List, Any, Optional
-from collections import defaultdict
 
 
 class HierarchyExporterV2:
@@ -26,7 +26,7 @@ class HierarchyExporterV2:
         self.original_functions = {}  # Store original functions for cleanup
         self.module_hierarchy = {}  # module instance -> hierarchy path mapping
         
-    def export(self, model: nn.Module, example_inputs, output_path: str, **kwargs) -> Dict[str, Any]:
+    def export(self, model: nn.Module, example_inputs, output_path: str, **kwargs) -> dict[str, Any]:
         """
         Export PyTorch model to ONNX with hierarchy preservation.
         
@@ -126,7 +126,7 @@ class HierarchyExporterV2:
             class_name = module.__class__.__name__
             
             # Build path with instance numbers preserved
-            for i, part in enumerate(parts):
+            for _i, part in enumerate(parts):
                 if part.isdigit():
                     # Instance number - append to previous part
                     if path_parts:
@@ -210,7 +210,7 @@ class HierarchyExporterV2:
             return result
         return traced_function
     
-    def _get_current_executing_module(self) -> Optional[str]:
+    def _get_current_executing_module(self) -> str | None:
         """Get the current executing module from the call stack using hierarchy mapping."""
         # Inspect call stack for module context
         import inspect
@@ -347,7 +347,7 @@ class HierarchyExporterV2:
         tagged_count = len([tags for tags in self.node_tags.values() if tags])
         print(f"✅ Tagged {tagged_count}/{len(self.node_tags)} operations")
     
-    def _find_best_spatial_tag(self, node_name: str, node, producer_map: Dict, consumer_map: Dict) -> Optional[str]:
+    def _find_best_spatial_tag(self, node_name: str, node, producer_map: dict, consumer_map: dict) -> str | None:
         """Find the best tag for an auxiliary operation using spatial locality."""
         candidate_tags = []
         
@@ -395,7 +395,7 @@ class HierarchyExporterV2:
         # They're close if they share at least 3 path components
         return common_parts >= 3
     
-    def _generate_metadata(self, onnx_model, output_path: str) -> Dict[str, Any]:
+    def _generate_metadata(self, onnx_model, output_path: str) -> dict[str, Any]:
         """Generate hierarchy metadata."""
         # Compute tag statistics
         tag_stats = defaultdict(int)

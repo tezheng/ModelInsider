@@ -4,13 +4,12 @@ Simple test to verify ExportMonitor works with fixtures.
 
 import json
 import tempfile
-from pathlib import Path
 from io import StringIO
+from pathlib import Path
 
+from export_monitor import ConsoleWriter, ExportMonitor, ExportStep
+from fixtures import create_bert_tiny_fixture
 from rich.console import Console
-
-from export_monitor import ExportMonitor, ExportStep, ConsoleWriter
-from fixtures import create_bert_tiny_fixture, create_step_timeline
 
 
 def test_console_output_capture():

@@ -352,7 +352,7 @@ class TestTransformerModelCompatibility:
             
             # Should capture various custom components
             custom_components = []
-            for module_path, module_info in hierarchy_data.items():
+            for _module_path, module_info in hierarchy_data.items():
                 module_type = module_info.get("module_type", "")
                 if any(term in module_type for term in ["Custom", "MultiheadAttention", "Embedding", "LayerNorm"]):
                     custom_components.append(module_type)
@@ -523,7 +523,7 @@ class TestVisionModelCompatibility:
             hierarchy_data = result.get("hierarchy_data", {})
             cnn_components = []
             
-            for module_path, module_info in hierarchy_data.items():
+            for _module_path, module_info in hierarchy_data.items():
                 module_type = module_info.get("module_type", "")
                 if any(term in module_type for term in ["Conv2d", "BatchNorm2d", "MaxPool2d", "AdaptiveAvgPool2d"]):
                     cnn_components.append(module_type)
@@ -757,7 +757,7 @@ class TestMultimodalModelCompatibility:
             hierarchy_data = result.get("hierarchy_data", {})
             multimodal_components = []
             
-            for module_path, module_info in hierarchy_data.items():
+            for _module_path, module_info in hierarchy_data.items():
                 module_type = module_info.get("module_type", "")
                 if any(term in module_type for term in ["TransformerEncoder", "Conv2d", "MultiheadAttention", "Embedding"]):
                     multimodal_components.append(module_type)
@@ -873,7 +873,7 @@ class TestSpecializedArchitectures:
             hierarchy_data = result.get("hierarchy_data", {})
             rnn_components = []
             
-            for module_path, module_info in hierarchy_data.items():
+            for _module_path, module_info in hierarchy_data.items():
                 module_type = module_info.get("module_type", "")
                 if any(term in module_type for term in ["LSTM", "GRU", "Embedding"]):
                     rnn_components.append(module_type)
@@ -1001,7 +1001,7 @@ class TestSpecializedArchitectures:
                 if not nested_dict:
                     return x
                 
-                for level_name, level_modules in nested_dict.items():
+                for _level_name, level_modules in nested_dict.items():
                     if isinstance(level_modules, nn.ModuleDict):
                         transformed = level_modules["transform"](x)
                         nested_out = self._forward_nested(transformed, level_modules.get("nested", {}))
@@ -1047,9 +1047,9 @@ class TestSpecializedArchitectures:
             hierarchy_data = result.get("hierarchy_data", {})
             
             # Should capture nested structure
-            nested_modules = [path for path in hierarchy_data.keys() if "level_" in path]
+            nested_modules = [path for path in hierarchy_data if "level_" in path]
             assert len(nested_modules) > 0, f"Should capture nested structure. Found: {list(hierarchy_data.keys())}"
             
             # Should handle deep nesting
-            max_depth = max(path.count('/') for path in hierarchy_data.keys())
+            max_depth = max(path.count('/') for path in hierarchy_data)
             assert max_depth >= 3, f"Should capture deep nesting. Max depth: {max_depth}"

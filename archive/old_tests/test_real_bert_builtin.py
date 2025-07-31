@@ -3,12 +3,14 @@
 Test the new built-in tracking approach with real BERT model.
 """
 
-import torch
-import torch.nn as nn
-from modelexport.hierarchy_exporter import HierarchyExporter
 import json
 import time
-import os
+
+import torch
+import torch.nn as nn
+
+from modelexport.hierarchy_exporter import HierarchyExporter
+
 
 def test_with_cached_model():
     """Test using a pre-cached model to avoid loading timeouts."""
@@ -165,7 +167,7 @@ def run_comparison_test():
         result_old = exporter_old.export(model, input_ids, 'temp/real_bert_old.onnx')
         old_time = time.time() - start_time
         
-        with open('temp/real_bert_old_hierarchy.json', 'r') as f:
+        with open('temp/real_bert_old_hierarchy.json') as f:
             hierarchy_old = json.load(f)
         
         results['old'] = {
@@ -192,7 +194,7 @@ def run_comparison_test():
         result_new = exporter_new.export(model, input_ids, 'temp/real_bert_new.onnx')
         new_time = time.time() - start_time
         
-        with open('temp/real_bert_new_hierarchy.json', 'r') as f:
+        with open('temp/real_bert_new_hierarchy.json') as f:
             hierarchy_new = json.load(f)
         
         results['new'] = {

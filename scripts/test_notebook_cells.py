@@ -3,20 +3,17 @@
 Test script to verify the notebook cells work correctly.
 """
 
+import warnings
+from collections import defaultdict
+from pathlib import Path
+from typing import Any
+
+import matplotlib.pyplot as plt
+import numpy as np
+import onnx
 import torch
 import torch.nn as nn
 import torch.onnx
-import onnx
-import onnxruntime as ort
-import numpy as np
-from pathlib import Path
-import json
-from typing import Dict, List, Any, Optional
-import warnings
-from collections import defaultdict
-import matplotlib.pyplot as plt
-import seaborn as sns
-import pandas as pd
 
 # Suppress warnings for clarity
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -144,7 +141,7 @@ def test_export_with_options(output_dir, model, sample_input):
 def test_analysis(paths):
     """Test analysis functions."""
     
-    def analyze_onnx_structure(onnx_path: Path) -> Dict[str, Any]:
+    def analyze_onnx_structure(onnx_path: Path) -> dict[str, Any]:
         """Perform comprehensive analysis of ONNX model structure."""
         
         model = onnx.load(str(onnx_path))
@@ -203,7 +200,7 @@ def test_analysis(paths):
         
         # Count parameters
         for init in graph.initializer:
-            shape = [dim for dim in init.dims]
+            shape = list(init.dims)
             analysis['parameter_count'] += np.prod(shape) if shape else 1
             analysis['tensor_shapes'][init.name] = shape
         
@@ -329,7 +326,7 @@ def test_visualizations(analyses):
     ax.grid(True, alpha=0.3, axis='y')
     
     # Add value labels on bars
-    for bar, size in zip(bars, file_sizes):
+    for bar, size in zip(bars, file_sizes, strict=False):
         height = bar.get_height()
         ax.text(bar.get_x() + bar.get_width()/2., height,
                 f'{size:.3f} MB', ha='center', va='bottom')
@@ -343,7 +340,7 @@ def test_visualizations(analyses):
 def test_metadata_analysis(paths):
     """Test metadata analysis."""
     
-    def examine_metadata_and_attributes(onnx_path: Path) -> Dict[str, Any]:
+    def examine_metadata_and_attributes(onnx_path: Path) -> dict[str, Any]:
         """Examine metadata and attributes in ONNX model."""
         
         model = onnx.load(str(onnx_path))

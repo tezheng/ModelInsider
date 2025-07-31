@@ -4,14 +4,17 @@ Test script for Universal Hierarchy Exporter with BERT-tiny
 """
 
 import sys
+
 sys.path.append('/mnt/d/BYOM/modelexport')
 
-from modelexport.core.universal_hierarchy_exporter import UniversalHierarchyExporter
-from transformers import AutoModel, AutoTokenizer
-import torch
 import json
-from pathlib import Path
 import time
+from pathlib import Path
+
+from transformers import AutoModel, AutoTokenizer
+
+from modelexport.core.universal_hierarchy_exporter import UniversalHierarchyExporter
+
 
 def test_bert_tiny_export():
     """Test universal hierarchy export with BERT-tiny"""
@@ -81,7 +84,7 @@ def test_bert_tiny_export():
         # Check hierarchy metadata
         metadata_path = output_path.replace('.onnx', '_hierarchy_metadata.json')
         if Path(metadata_path).exists():
-            with open(metadata_path, 'r') as f:
+            with open(metadata_path) as f:
                 metadata = json.load(f)
             
             # The metadata structure has changed - look for module_hierarchy

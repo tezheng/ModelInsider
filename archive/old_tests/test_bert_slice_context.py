@@ -5,10 +5,12 @@ to understand why slice operations get root-level tags instead of
 specific submodule context tags.
 """
 
+import json
+import tempfile
+
 import torch
 import torch.nn as nn
-import tempfile
-import json
+
 from modelexport.hierarchy_exporter import HierarchyExporter
 
 
@@ -202,7 +204,7 @@ def test_bert_slice_context_issue():
                     'node_name': node_name,
                     'tags': tags,
                     'expected_context': 'BertSdpaSelfAttention',
-                    'actual_context': 'root-level' if any('BertModel' == tag.strip('/') for tag in tags) else 'submodule'
+                    'actual_context': 'root-level' if any(tag.strip('/') == 'BertModel' for tag in tags) else 'submodule'
                 })
         
         print(f"\n=== SLICE OPERATION ANALYSIS ===")
@@ -211,7 +213,7 @@ def test_bert_slice_context_issue():
             print(f"  Tags: {result['tags']}")
             
             # Check if tagged with root level
-            is_root_level = any('/BertModel' == tag or '/BertModel/BertPooler' in tag for tag in result['tags'])
+            is_root_level = any(tag == '/BertModel' or '/BertModel/BertPooler' in tag for tag in result['tags'])
             is_attention_level = any('BertSdpaSelfAttention' in tag for tag in result['tags'])
             
             if is_root_level and not is_attention_level:
@@ -226,7 +228,7 @@ def test_bert_slice_context_issue():
         # Load hierarchy metadata
         hierarchy_file = tmp.name.replace('.onnx', '_hierarchy.json')
         try:
-            with open(hierarchy_file, 'r') as f:
+            with open(hierarchy_file) as f:
                 hierarchy_data = json.load(f)
             
             print(f"\n=== HIERARCHY METADATA ANALYSIS ===")

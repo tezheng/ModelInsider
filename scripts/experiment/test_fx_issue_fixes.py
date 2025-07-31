@@ -8,21 +8,21 @@ This script addresses specific issues found in diverse architecture testing:
 3. Enhance pattern matching for BatchNorm and Dropout operations
 """
 
-import sys
+import json
 import os
+import sys
+import tempfile
+from pathlib import Path
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from pathlib import Path
-import json
-import tempfile
-import time
-from typing import Dict, List, Any, Tuple
 
 # Add modelexport to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from modelexport.fx_hierarchy_exporter import FXHierarchyExporter
+
 
 def test_fixed_graph_mlp():
     """Test the fixed Graph MLP implementation."""
@@ -175,7 +175,7 @@ def test_fixed_mapping_accuracy():
             onnx_model = onnx.load(tmp.name)
             
             # Load sidecar for detailed analysis
-            with open(result['sidecar_path'], 'r') as f:
+            with open(result['sidecar_path']) as f:
                 sidecar = json.load(f)
             
             fx_stats = result['fx_graph_stats']
@@ -188,7 +188,7 @@ def test_fixed_mapping_accuracy():
             
             # Analyze mapping quality
             fx_operations = set(fx_stats['node_type_distribution'].keys())
-            onnx_operations = set(node.op_type for node in onnx_model.graph.node)
+            onnx_operations = {node.op_type for node in onnx_model.graph.node}
             
             print(f"\n📊 Operation Analysis:")
             print(f"   FX operation types: {fx_operations}")
@@ -214,7 +214,7 @@ def test_fixed_mapping_accuracy():
             
             # Sample hierarchy mappings
             print(f"\n📋 Sample Hierarchy Mappings:")
-            for i, (node, path) in enumerate(list(sidecar['hierarchy_mapping'].items())[:8]):
+            for _i, (node, path) in enumerate(list(sidecar['hierarchy_mapping'].items())[:8]):
                 print(f"   {node} -> {path}")
             
             # Cleanup
@@ -285,13 +285,13 @@ def test_enhanced_pattern_matching():
                 coverage = fx_stats['coverage_ratio']
                 
                 # Load sidecar to analyze specific patterns
-                with open(result['sidecar_path'], 'r') as f:
+                with open(result['sidecar_path']) as f:
                     sidecar = json.load(f)
                 
                 # Count specific operation types
                 fx_node_info = sidecar.get('fx_node_info', {})
                 operation_counts = {}
-                for node_name, node_info in fx_node_info.items():
+                for _node_name, node_info in fx_node_info.items():
                     op_type = str(node_info.get('operation', ''))
                     if 'BatchNorm' in op_type:
                         operation_counts['BatchNorm'] = operation_counts.get('BatchNorm', 0) + 1

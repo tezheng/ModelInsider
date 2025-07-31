@@ -5,8 +5,8 @@ Record progress and identify remaining work.
 """
 
 import json
-from pathlib import Path
 from datetime import datetime
+from pathlib import Path
 
 
 def create_iteration_summary():

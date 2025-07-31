@@ -2,13 +2,12 @@
 
 import io
 from pathlib import Path
-from unittest.mock import MagicMock, patch
 
 import pytest
 from rich.console import Console
 
-from modelexport.strategies.htp.export_monitor import HTPExportMonitor, HTPExportMonitor
 from modelexport.strategies.htp.base_writer import ExportStep as HTPExportStep
+from modelexport.strategies.htp.export_monitor import HTPExportMonitor
 
 
 def test_module_hierarchy_format():

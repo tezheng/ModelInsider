@@ -4,6 +4,7 @@ Test the advanced context resolver with real BERT contamination data.
 """
 
 import json
+
 from advanced_context_resolver import AdvancedContextResolver, ContaminationCase
 
 
@@ -11,7 +12,7 @@ def extract_real_contamination_cases(hierarchy_file: str) -> list:
     """Extract real contamination cases from hierarchy data."""
     
     try:
-        with open(hierarchy_file, 'r') as f:
+        with open(hierarchy_file) as f:
             hierarchy = json.load(f)
     except FileNotFoundError:
         print(f"Hierarchy file {hierarchy_file} not found. Run test_real_bert_builtin.py first.")

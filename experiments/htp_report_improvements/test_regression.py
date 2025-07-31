@@ -3,9 +3,9 @@ Test that our changes don't break existing HTP functionality.
 """
 
 import json
+import sys
 import tempfile
 from pathlib import Path
-import sys
 
 # Add parent directory to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -62,7 +62,7 @@ def test_existing_functionality():
         json.dump(metadata, f)
         temp_path = f.name
     
-    with open(temp_path, 'r') as f:
+    with open(temp_path) as f:
         loaded = json.load(f)
     
     assert loaded["tagging"]["tagged_nodes"]["node1"] == "/tag1"

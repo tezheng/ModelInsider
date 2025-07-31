@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Generate current evidence with enhanced converter."""
 
-import json
-from pathlib import Path
-from modelexport.strategies.htp.htp_exporter import HTPExporter
-from modelexport.graphml.hierarchical_converter_v2 import EnhancedHierarchicalConverter
 import xml.etree.ElementTree as ET
+from pathlib import Path
+
+from modelexport.graphml.hierarchical_converter import EnhancedHierarchicalConverter
+from modelexport.strategies.htp.htp_exporter import HTPExporter
+
 
 def generate_enhanced_graphml():
     """Generate GraphML using our enhanced converter with all fixes."""
@@ -131,7 +132,7 @@ def compare_with_baseline(current_result):
     ET.register_namespace('', 'http://graphml.graphdrawing.org/xmlns')
     ns = {'g': 'http://graphml.graphdrawing.org/xmlns'}
     
-    with open(baseline_path, 'r') as f:
+    with open(baseline_path) as f:
         baseline_content = f.read()
     
     baseline_root = ET.fromstring(baseline_content)

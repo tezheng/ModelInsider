@@ -6,11 +6,12 @@ This module implements functionality to access TorchScript graph information
 before ONNX conversion, where module hierarchy is still available.
 """
 
-import torch
 import json
 import re
-from typing import Dict, List, Any, Optional, Tuple
 from pathlib import Path
+from typing import Any
+
+import torch
 
 
 class JITGraphDumper:
@@ -29,8 +30,8 @@ class JITGraphDumper:
     def extract_jit_graph_info(
         self, 
         traced_model: torch.jit.ScriptModule,
-        output_path: Optional[str] = None
-    ) -> Dict[str, Any]:
+        output_path: str | None = None
+    ) -> dict[str, Any]:
         """
         Extract comprehensive information from TorchScript graph.
         
@@ -88,7 +89,7 @@ class JITGraphDumper:
         
         return result
     
-    def _extract_node_scopes(self, nodes: List) -> Dict[str, Any]:
+    def _extract_node_scopes(self, nodes: list) -> dict[str, Any]:
         """Extract scope information from individual nodes."""
         
         node_scopes = {}
@@ -126,7 +127,7 @@ class JITGraphDumper:
             "node_details": node_scopes
         }
     
-    def _parse_graph_string_scopes(self, graph_str: str) -> Dict[str, Any]:
+    def _parse_graph_string_scopes(self, graph_str: str) -> dict[str, Any]:
         """Parse scope information from graph string representation."""
         
         # Look for scope patterns in the graph string
@@ -148,13 +149,13 @@ class JITGraphDumper:
         return {
             "graph_contains_scope_info": "scope:" in graph_str,
             "total_scope_matches": len(scope_matches),
-            "unique_scopes": sorted(list(unique_scopes)),
+            "unique_scopes": sorted(unique_scopes),
             "unique_scope_count": len(unique_scopes),
             "module_pattern_matches": len(module_matches),
-            "sample_scopes": sorted(list(unique_scopes))[:10]  # First 10 for preview
+            "sample_scopes": sorted(unique_scopes)[:10]  # First 10 for preview
         }
     
-    def _extract_inlined_graph_scopes(self, traced_model: torch.jit.ScriptModule) -> Dict[str, Any]:
+    def _extract_inlined_graph_scopes(self, traced_model: torch.jit.ScriptModule) -> dict[str, Any]:
         """Try to extract scope information from inlined graph."""
         
         inlined_info = {
@@ -184,7 +185,7 @@ class JITGraphDumper:
         
         return inlined_info
     
-    def _create_unified_scope_mapping(self, all_scopes: Dict[str, Any]) -> Dict[str, Any]:
+    def _create_unified_scope_mapping(self, all_scopes: dict[str, Any]) -> dict[str, Any]:
         """Create a unified scope hierarchy from all extraction methods."""
         
         # Collect all unique scopes
@@ -206,11 +207,11 @@ class JITGraphDumper:
         
         return {
             "total_unique_scopes": len(all_unique_scopes),
-            "scope_list": sorted(list(all_unique_scopes)),
+            "scope_list": sorted(all_unique_scopes),
             "scope_analysis": scope_analysis
         }
     
-    def _analyze_scope_structure(self, scopes: set) -> Dict[str, Any]:
+    def _analyze_scope_structure(self, scopes: set) -> dict[str, Any]:
         """Analyze the structure of extracted scopes."""
         
         analysis = {
@@ -251,11 +252,11 @@ class JITGraphDumper:
                 analysis["transformers_specific"]["layer_modules"].append(scope)
         
         # Convert sets to lists for JSON serialization
-        analysis["module_types"] = sorted(list(analysis["module_types"]))
+        analysis["module_types"] = sorted(analysis["module_types"])
         
         return analysis
     
-    def _compute_scope_statistics(self, unified_scopes: Dict[str, Any]) -> Dict[str, Any]:
+    def _compute_scope_statistics(self, unified_scopes: dict[str, Any]) -> dict[str, Any]:
         """Compute statistics about the extracted scope information."""
         
         stats = {
@@ -293,7 +294,7 @@ def dump_jit_graph_before_onnx_export(
     model: torch.nn.Module,
     example_inputs: Any,
     output_dir: str = "temp"
-) -> Tuple[torch.jit.ScriptModule, Dict[str, Any]]:
+) -> tuple[torch.jit.ScriptModule, dict[str, Any]]:
     """
     Convenience function to trace model and dump graph info before ONNX export.
     

@@ -2,9 +2,11 @@
 Test slice operation tagging when slice happens within a module context.
 """
 
+import tempfile
+
 import torch
 import torch.nn as nn
-import tempfile
+
 from modelexport.hierarchy_exporter import HierarchyExporter
 
 
@@ -98,7 +100,7 @@ def test_contextual_slice_tagging():
         hierarchy_file = tmp.name.replace('.onnx', '_hierarchy.json')
         try:
             import json
-            with open(hierarchy_file, 'r') as f:
+            with open(hierarchy_file) as f:
                 hierarchy_data = json.load(f)
             
             print(f"\nHierarchy metadata:")

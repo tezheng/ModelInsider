@@ -4,19 +4,16 @@ Fixed in iteration 13 to use Rich console correctly.
 """
 
 import io
-import json
 import time
 from abc import abstractmethod
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from enum import Enum
 from functools import wraps
-from pathlib import Path
 from typing import Any
 
 from rich.console import Console
 from rich.text import Text
-from rich.tree import Tree
 
 
 class HTPExportStep(Enum):

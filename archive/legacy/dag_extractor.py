@@ -4,17 +4,13 @@ DAG Extractor for BERT Hierarchy
 Extract DAG for each nn.Module with detailed operation metadata
 """
 
-import torch
-import torch.nn as nn
-import onnx
-from onnx import helper, TensorProto
 import json
-from typing import Dict, List, Any, Set
-from transformers import AutoModel
-import numpy as np
-from pathlib import Path
-import inspect
 from collections import defaultdict
+
+import onnx
+import torch
+from transformers import AutoModel
+
 
 class DAGExtractor:
     """Extract DAG for each nn.Module in hierarchy"""
@@ -264,7 +260,7 @@ class DAGExtractor:
             else:
                 # Try to find by matching operation characteristics
                 found_match = False
-                for op_name, op_data in self.operation_metadata.items():
+                for _op_name, op_data in self.operation_metadata.items():
                     # Match by op_type and inputs
                     if (op_data.get('op_type') == node.op_type and
                         len(op_data.get('inputs', [])) == len(node.input)):
@@ -332,11 +328,8 @@ class DAGExtractor:
         # Check all parameter mappings to find matches
         for mapped_param, info in self.parameter_mapping.items():
             # Try both directions of name conversion
-            if (mapped_param == pytorch_param_name or 
-                mapped_param.replace('_', '.') == param_name or
-                mapped_param == param_name):
-                if info['hierarchy_path'] not in tags:
-                    tags.append(info['hierarchy_path'])
+            if (mapped_param in (pytorch_param_name, param_name) or mapped_param.replace('_', '.') == param_name) and info['hierarchy_path'] not in tags:
+                tags.append(info['hierarchy_path'])
         
         return tags
     

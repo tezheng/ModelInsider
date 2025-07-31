@@ -9,9 +9,8 @@ This script demonstrates that all issues have been fixed:
 4. Metadata contains all console data
 """
 
-import subprocess
 import json
-import re
+import subprocess
 from pathlib import Path
 
 
@@ -33,14 +32,14 @@ def verify_ansi_codes(console_output: str) -> bool:
 
 def verify_no_ansi_in_report(report_path: str) -> bool:
     """Verify text report has no ANSI codes."""
-    with open(report_path, 'r') as f:
+    with open(report_path) as f:
         content = f.read()
     return "\033[" not in content
 
 
 def verify_metadata_complete(metadata_path: str) -> bool:
     """Verify metadata contains all required data."""
-    with open(metadata_path, 'r') as f:
+    with open(metadata_path) as f:
         metadata = json.load(f)
     
     # Check required sections
@@ -55,11 +54,7 @@ def verify_metadata_complete(metadata_path: str) -> bool:
         "model_preparation", "input_generation", "hierarchy_building",
         "onnx_export", "node_tagger_creation", "node_tagging", "model_save"
     ]
-    for step in required_steps:
-        if step not in steps:
-            return False
-    
-    return True
+    return all(step in steps for step in required_steps)
 
 
 def main():

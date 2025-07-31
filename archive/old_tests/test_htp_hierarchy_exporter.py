@@ -33,7 +33,7 @@ class TestHTPHierarchyExporter(BaseStrategyTest, StrategyCompatibilityTest):
         
         # Should have operation trace information
         if 'operation_trace' in result:
-            assert isinstance(result['operation_trace'], (list, int))
+            assert isinstance(result['operation_trace'], list | int)
     
     def test_htp_basic_export(self):
         """Test basic HTP export functionality."""

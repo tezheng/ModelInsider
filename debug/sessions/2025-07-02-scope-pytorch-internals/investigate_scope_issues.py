@@ -5,10 +5,11 @@ Investigate scope mapping issues:
 2. Why some nodes have empty/minimal scope names
 """
 
+from pathlib import Path
+
+import onnx
 import torch
 from transformers import AutoModel, AutoTokenizer
-import onnx
-from pathlib import Path
 
 
 def investigate_hf_vs_torch_modules():
@@ -150,7 +151,7 @@ def analyze_scope_name_patterns():
     for scope_path, operations in list(scope_patterns.items())[:10]:
         print(f"\n  Scope: {scope_path}")
         op_summary = {}
-        for op_name, op_type in operations:
+        for _op_name, op_type in operations:
             op_summary[op_type] = op_summary.get(op_type, 0) + 1
         print(f"    Operations: {dict(op_summary)}")
     

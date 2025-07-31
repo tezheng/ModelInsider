@@ -6,17 +6,15 @@ Test the fixed export monitor to verify:
 3. Metadata report section has complete data
 """
 
-import sys
 import json
 import re
+import sys
 from pathlib import Path
 
 # Add parent paths for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
-from export_monitor_fixed import (
-    HTPExportMonitor, HTPExportData, HTPExportStep, TextStyler
-)
+from export_monitor_fixed import HTPExportData, HTPExportMonitor, HTPExportStep
 
 
 def create_test_data():
@@ -147,7 +145,7 @@ def test_text_report(monitor: HTPExportMonitor):
     paths = monitor.finalize()
     
     # Read text report
-    with open(paths["report_path"], 'r') as f:
+    with open(paths["report_path"]) as f:
         report_content = f.read()
     
     # Check no ANSI codes

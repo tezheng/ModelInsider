@@ -3,13 +3,13 @@
 Research ONNX metadata and node naming capabilities for hierarchy preservation
 """
 
+import json
+from typing import Any
+
+import onnx
 import torch
 import torch.nn as nn
-import onnx
-from onnx import helper, numpy_helper
-import json
-from typing import Dict, List, Any, Optional
-from pathlib import Path
+
 
 class HierarchicalModel(nn.Module):
     """A simple hierarchical model to test metadata capabilities"""
@@ -65,7 +65,7 @@ class HierarchicalModel(nn.Module):
         x = x.mean(dim=1)  # (batch, features)
         return self.classifier(x)
 
-def extract_module_hierarchy(model: nn.Module) -> Dict[str, Dict[str, Any]]:
+def extract_module_hierarchy(model: nn.Module) -> dict[str, dict[str, Any]]:
     """Extract module hierarchy information"""
     hierarchy = {}
     
@@ -84,7 +84,7 @@ def extract_module_hierarchy(model: nn.Module) -> Dict[str, Dict[str, Any]]:
     return hierarchy
 
 def export_with_hierarchy_info(model: nn.Module, dummy_input: torch.Tensor, 
-                              output_path: str, hierarchy: Dict[str, Dict[str, Any]]):
+                              output_path: str, hierarchy: dict[str, dict[str, Any]]):
     """Export model to ONNX with hierarchy information preserved"""
     
     # Standard ONNX export
@@ -211,7 +211,7 @@ def analyze_onnx_metadata(onnx_path: str):
             print(f"  {node.name}: {node.op_type} -> module: {module_path}")
             count += 1
 
-def test_hierarchy_retrieval(onnx_path: str) -> Dict[str, List[str]]:
+def test_hierarchy_retrieval(onnx_path: str) -> dict[str, list[str]]:
     """Test retrieving hierarchy information from ONNX model"""
     print(f"\n=== Testing Hierarchy Retrieval ===")
     

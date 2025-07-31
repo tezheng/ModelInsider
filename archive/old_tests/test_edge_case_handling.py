@@ -242,7 +242,7 @@ class TestEdgeCaseHandling:
         
         # Validate that all operations are tagged meaningfully
         if 'node_tags' in result:
-            for node_name, node_info in result['node_tags'].items():
+            for _node_name, node_info in result['node_tags'].items():
                 tag = node_info['tags'][0]
                 op_type = node_info.get('op_type', '')
                 
@@ -367,7 +367,7 @@ class TestFallbackStrategyEffectiveness:
             
             # Check semantic quality of tags
             if 'node_tags' in result:
-                for node_name, node_info in result['node_tags'].items():
+                for _node_name, node_info in result['node_tags'].items():
                     tag = node_info['tags'][0]
                     op_type = node_info.get('op_type', '')
                     

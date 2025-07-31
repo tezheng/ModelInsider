@@ -4,19 +4,18 @@ Universal Hierarchy Testing Script
 Test DAG extraction and ONNX export for multiple model architectures
 """
 
-import torch
-import torch.nn as nn
-import onnx
 import json
 import os
-from pathlib import Path
-from typing import Dict, List, Any, Tuple
-from transformers import AutoModel
-import torchvision.models as models
 import traceback
+from pathlib import Path
+from typing import Any
 
+import onnx
+import torch
+import torchvision.models as models
 from dag_extractor import DAGExtractor
 from input_generator import UniversalInputGenerator
+from transformers import AutoModel
 
 
 class UniversalHierarchyTester:
@@ -35,7 +34,7 @@ class UniversalHierarchyTester:
         self.input_generator = UniversalInputGenerator()
         self.test_results = {}
     
-    def test_model(self, model_name: str, model_loader, model_type: str) -> Dict[str, Any]:
+    def test_model(self, model_name: str, model_loader, model_type: str) -> dict[str, Any]:
         """Test a single model with the universal hierarchy extractor"""
         print(f"\n{'='*60}")
         print(f"TESTING {model_name.upper()} ({model_type})")
@@ -174,7 +173,7 @@ class UniversalHierarchyTester:
                 'tag_verification': {}
             }
     
-    def verify_onnx_tags(self, onnx_path: Path, operation_metadata: Dict) -> Dict[str, Any]:
+    def verify_onnx_tags(self, onnx_path: Path, operation_metadata: dict) -> dict[str, Any]:
         """Verify that ONNX model contains hierarchy tags"""
         try:
             # Load both models (original and enhanced)
@@ -256,7 +255,7 @@ class UniversalHierarchyTester:
                 'summary': f'Verification failed: {str(e)}'
             }
     
-    def run_all_tests(self) -> Dict[str, Any]:
+    def run_all_tests(self) -> dict[str, Any]:
         """Run tests for all supported model architectures"""
         print("Starting Universal Hierarchy Testing...")
         print(f"Output directory: {self.output_dir}")
@@ -339,7 +338,7 @@ class UniversalHierarchyTester:
         
         return summary
     
-    def compare_static_data_with_onnx(self, model_name: str) -> Dict[str, Any]:
+    def compare_static_data_with_onnx(self, model_name: str) -> dict[str, Any]:
         """Compare static JSON data with ONNX model tags"""
         model_safe_name = model_name.replace('/', '_')
         

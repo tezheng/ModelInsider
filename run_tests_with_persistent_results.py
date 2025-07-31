@@ -6,13 +6,10 @@ This script creates organized test results that persist after test completion,
 following CARDINAL RULE #2 (pytest-only testing) while preserving results.
 """
 
-import pytest
-import sys
-import tempfile
-import shutil
-from pathlib import Path
 import json
 import subprocess
+import sys
+from pathlib import Path
 
 
 def setup_persistent_test_workspace():
@@ -40,8 +37,9 @@ def run_individual_cli_tests(workspace, subdirs):
     print("🧪 Running CLI Tests with Persistent Results")
     print("=" * 60)
     
-    from modelexport.cli import cli
     from click.testing import CliRunner
+
+    from modelexport.cli import cli
     
     cli_runner = CliRunner()
     
@@ -150,8 +148,9 @@ def run_core_functionality_tests(workspace, subdirs):
     print("\n🔧 Testing Core Functionality...")
     print("=" * 60)
     
-    from modelexport import HierarchyExporter
     from transformers import AutoModel, AutoTokenizer
+
+    from modelexport import HierarchyExporter
     
     # Test bounded propagation
     print("\n4️⃣ Testing Bounded Propagation...")

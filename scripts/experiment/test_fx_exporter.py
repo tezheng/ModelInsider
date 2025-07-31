@@ -6,18 +6,20 @@ This script validates the FX implementation with various models
 to ensure it meets all requirements from REQUIREMENTS.md.
 """
 
-import sys
+import json
 import os
+import sys
+import tempfile
+from pathlib import Path
+
 import torch
 import torch.nn as nn
-from pathlib import Path
-import json
-import tempfile
 
 # Add modelexport to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from modelexport.fx_hierarchy_exporter import FXHierarchyExporter
+
 
 def test_simple_model():
     """Test with simple PyTorch model (MUST-003: Universal design)."""
@@ -111,7 +113,7 @@ def test_bert_model():
                 print(f"   Export time: {result['export_time']:.2f}s")
                 
                 # Load and analyze sidecar data
-                with open(result['sidecar_path'], 'r') as f:
+                with open(result['sidecar_path']) as f:
                     sidecar = json.load(f)
                 
                 print(f"   Hierarchy paths found: {len(sidecar['hierarchy_mapping'])}")
@@ -124,7 +126,7 @@ def test_bert_model():
                     print(f"   Example: {instance_paths[0]}")
                 
                 # Load module info (R9)
-                with open(result['module_info_path'], 'r') as f:
+                with open(result['module_info_path']) as f:
                     module_info = json.load(f)
                     
                 print(f"   Modules analyzed: {len(module_info['modules'])}")
@@ -189,7 +191,7 @@ def test_torch_nn_filtering():
             result = exporter.export(model, inputs, tmp.name)
             
             # Load sidecar to check actual hierarchy paths
-            with open(result['sidecar_path'], 'r') as f:
+            with open(result['sidecar_path']) as f:
                 sidecar = json.load(f)
             
             fx_stats = result['fx_graph_stats']

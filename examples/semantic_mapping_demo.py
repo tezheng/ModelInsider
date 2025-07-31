@@ -6,10 +6,10 @@ Demonstrates the new scope-based semantic mapping approach for
 HuggingFace to ONNX conversion with perfect module traceability.
 """
 
-import torch
-from transformers import AutoModel, AutoTokenizer
-from pathlib import Path
 import sys
+from pathlib import Path
+
+from transformers import AutoModel, AutoTokenizer
 
 # Add project root to path
 sys.path.insert(0, str(Path(__file__).parent.parent))

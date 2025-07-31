@@ -9,13 +9,13 @@ This script provides:
 3. Reference implementation for verification
 """
 
-import torch
-from transformers import AutoModel, AutoTokenizer
-import onnx
+import json
 import tempfile
 from pathlib import Path
-import json
-from typing import Dict, List, Any
+
+import onnx
+import torch
+from transformers import AutoModel, AutoTokenizer
 
 
 def analyze_complete_hierarchy():
@@ -204,7 +204,7 @@ def analyze_onnx_nodes_with_tagging():
     return nodes_by_type, tagging_analysis
 
 
-def analyze_node_tagging_requirements(nodes_by_type: Dict[str, List]) -> Dict[str, Dict[str, str]]:
+def analyze_node_tagging_requirements(nodes_by_type: dict[str, list]) -> dict[str, dict[str, str]]:
     """Analyze tagging requirements for different operation types."""
     
     return {
@@ -240,7 +240,7 @@ def analyze_node_tagging_requirements(nodes_by_type: Dict[str, List]) -> Dict[st
     }
 
 
-def show_node_tagging_examples(nodes_by_type: Dict[str, List]):
+def show_node_tagging_examples(nodes_by_type: dict[str, list]):
     """Show specific examples of how nodes should be tagged."""
     
     print("🎯 SPECIFIC NODE TAGGING EXAMPLES:")

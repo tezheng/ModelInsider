@@ -15,23 +15,24 @@ Features:
 - Debug mode for troubleshooting
 """
 
-import json
-import torch
-import onnx
-import numpy as np
-from pathlib import Path
-from transformers import AutoModel, AutoTokenizer
 import argparse
+import json
 import sys
 import time
-from typing import Dict, Any, Optional
+from pathlib import Path
+from typing import Any
+
+import onnx
+import torch
+from transformers import AutoModel, AutoTokenizer
+
+from modelexport.core import tag_utils
 
 # Import our exporters
 from modelexport.core.enhanced_semantic_exporter import EnhancedSemanticExporter
+from modelexport.strategies.fx.fx_hierarchy_exporter import FXHierarchyExporter
 from modelexport.strategies.htp.htp_hierarchy_exporter import HierarchyExporter
 from modelexport.strategies.usage_based.usage_based_exporter import UsageBasedExporter
-from modelexport.strategies.fx.fx_hierarchy_exporter import FXHierarchyExporter
-from modelexport.core import tag_utils
 
 
 class BertTinyDebugger:
@@ -62,7 +63,7 @@ class BertTinyDebugger:
         # Results storage
         self.results = {}
         
-    def _load_config(self) -> Dict[str, Any]:
+    def _load_config(self) -> dict[str, Any]:
         """Load export configuration."""
         if not self.config_path.exists():
             print(f"❌ Config file not found: {self.config_path}")
@@ -71,7 +72,7 @@ class BertTinyDebugger:
                 print(f"   {config_file}")
             sys.exit(1)
             
-        with open(self.config_path, 'r') as f:
+        with open(self.config_path) as f:
             config = json.load(f)
             
         if self.verbose:
@@ -101,7 +102,7 @@ class BertTinyDebugger:
             print(f"❌ Failed to load model: {e}")
             sys.exit(1)
     
-    def _generate_input_data(self) -> Dict[str, torch.Tensor]:
+    def _generate_input_data(self) -> dict[str, torch.Tensor]:
         """Generate random input data based on config specs."""
         if self.verbose:
             print("🎲 Generating input data...")
@@ -184,7 +185,7 @@ class BertTinyDebugger:
             print(f"   ❌ Forward pass failed: {e}")
             return False
     
-    def _export_with_strategy(self, strategy: str) -> Dict[str, Any]:
+    def _export_with_strategy(self, strategy: str) -> dict[str, Any]:
         """Export model using specified strategy."""
         if self.verbose:
             print(f"\n🚀 Testing {strategy} export strategy...")
@@ -297,7 +298,7 @@ class BertTinyDebugger:
             
         return result
     
-    def _calculate_coverage(self, result: Dict[str, Any]) -> float:
+    def _calculate_coverage(self, result: dict[str, Any]) -> float:
         """Calculate coverage percentage for enhanced semantic results."""
         total = result.get('total_onnx_nodes', 0)
         if total == 0:
@@ -309,7 +310,7 @@ class BertTinyDebugger:
         
         return (mapped + inferred + fallback) / total * 100
     
-    def _analyze_tags(self, strategy: str) -> Dict[str, Any]:
+    def _analyze_tags(self, strategy: str) -> dict[str, Any]:
         """Analyze hierarchy tags in exported model."""
         if self.verbose:
             print(f"📊 Analyzing {strategy} tags...")
@@ -409,7 +410,7 @@ class BertTinyDebugger:
         if self.verbose:
             print(f"\n📋 Summary report saved: {report_path}")
     
-    def run_full_debug(self, strategies: Optional[list] = None) -> bool:
+    def run_full_debug(self, strategies: list | None = None) -> bool:
         """Run complete debugging workflow."""
         if strategies is None:
             strategies = ['enhanced_semantic', 'htp', 'usage_based', 'fx_graph']

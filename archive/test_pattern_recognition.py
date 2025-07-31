@@ -38,7 +38,7 @@ class TestGraphPatternRecognizer:
     
     def test_pattern_definitions(self):
         """Test that pattern definitions are valid."""
-        for pattern_name, pattern_def in self.recognizer._patterns.items():
+        for _pattern_name, pattern_def in self.recognizer._patterns.items():
             # Check required fields
             assert 'description' in pattern_def
             assert 'node_sequence' in pattern_def

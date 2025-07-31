@@ -4,6 +4,7 @@
 import xml.etree.ElementTree as ET
 from pathlib import Path
 
+
 def validate_graphml_structure(graphml_path: str) -> dict:
     """Validate GraphML structure and return detailed analysis."""
     
@@ -11,7 +12,7 @@ def validate_graphml_structure(graphml_path: str) -> dict:
     ET.register_namespace('', 'http://graphml.graphdrawing.org/xmlns')
     ns = {'g': 'http://graphml.graphdrawing.org/xmlns'}
     
-    with open(graphml_path, 'r') as f:
+    with open(graphml_path) as f:
         content = f.read()
     
     root = ET.fromstring(content)

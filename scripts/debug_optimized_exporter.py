@@ -5,8 +5,11 @@ Debug the optimized enhanced semantic exporter.
 
 import torch
 from transformers import AutoModel
+
 from modelexport.core.enhanced_semantic_exporter import EnhancedSemanticExporter
-from modelexport.core.tracing_hierarchy_builder_optimized import OptimizedTracingHierarchyBuilder
+from modelexport.core.tracing_hierarchy_builder_optimized import (
+    OptimizedTracingHierarchyBuilder,
+)
 
 
 def debug_optimized_exporter():

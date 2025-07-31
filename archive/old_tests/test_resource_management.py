@@ -807,7 +807,7 @@ class ResourceMonitor:
         current = self._get_current_state()
         return {
             key: current[key] - self.initial_state[key]
-            for key in current.keys()
+            for key in current
         }
     
     def assert_reasonable_usage(self, max_memory_mb=500, max_files=10, max_threads=5):

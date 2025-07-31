@@ -22,17 +22,18 @@ Based on Enhanced Semantic Mapper and Universal Hierarchy Exporter patterns.
 """
 from __future__ import annotations
 
+import json
+import logging
+import time
+from collections import defaultdict
+from pathlib import Path
+from typing import Any
+
+import onnx
 import torch
 import torch.nn as nn
-from typing import Any, Optional
-import json
-from pathlib import Path
-import onnx
-import time
-import logging
-from collections import defaultdict
-# No imports with hardcoded dependencies
 
+# No imports with hardcoded dependencies
 from ..semantic.enhanced_semantic_mapper import EnhancedSemanticMapper
 from .tracing_hierarchy_builder import TracingHierarchyBuilder
 
@@ -53,7 +54,7 @@ class EnhancedSemanticExporter:
     """
 
     def __init__(
-        self, torch_nn_exceptions: Optional[list[str]] = None, verbose: bool = False
+        self, torch_nn_exceptions: list[str] | None = None, verbose: bool = False
     ):
         """
         Initialize the enhanced semantic exporter.
@@ -98,9 +99,9 @@ class EnhancedSemanticExporter:
         model: nn.Module,
         args: tuple[torch.Tensor, ...],
         output_path: str,
-        input_names: Optional[list[str]] = None,
-        output_names: Optional[list[str]] = None,
-        dynamic_axes: Optional[dict[str, dict[int, str]]] = None,
+        input_names: list[str] | None = None,
+        output_names: list[str] | None = None,
+        dynamic_axes: dict[str, dict[int, str]] | None = None,
         opset_version: int = 17,
         do_constant_folding: bool = True,
         **export_kwargs,
@@ -461,7 +462,7 @@ class EnhancedSemanticExporter:
             return f"/{'/'.join(tag_parts)}"
 
         # Build static mapping for all modules
-        for module_path in self._module_hierarchy.keys():
+        for module_path in self._module_hierarchy:
             if module_path:  # Skip root
                 static_mapping[module_path] = build_hierarchy_tag(module_path)
 
@@ -476,7 +477,7 @@ class EnhancedSemanticExporter:
 
     def _perform_onnx_export(
         self,
-        model: "PreTrainedModel",
+        model: PreTrainedModel,
         args: tuple[torch.Tensor, ...],
         output_path: str,
         **export_kwargs,
@@ -674,9 +675,7 @@ class EnhancedSemanticExporter:
         empty_tags = []
 
         for node in onnx_model.graph.node:
-            if node.name not in self._semantic_tags:
-                empty_tags.append(node.name)
-            elif not self._semantic_tags[node.name].get("semantic_tag"):
+            if node.name not in self._semantic_tags or not self._semantic_tags[node.name].get("semantic_tag"):
                 empty_tags.append(node.name)
 
         if empty_tags:

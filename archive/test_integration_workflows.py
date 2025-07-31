@@ -307,7 +307,7 @@ class TestCompleteExportWorkflows:
             
             # Validate vision-specific hierarchy structure
             hierarchy_data = result.get("hierarchy_data", {})
-            vision_modules = [path for path in hierarchy_data.keys() if 
+            vision_modules = [path for path in hierarchy_data if 
                             any(term in path.lower() for term in ["conv", "batchnorm", "relu", "linear"])]
             
             assert len(vision_modules) > 0, f"Should discover vision-specific modules. Found: {list(hierarchy_data.keys())}"

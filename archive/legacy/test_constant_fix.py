@@ -7,6 +7,7 @@ Simulates the constant extraction issue and fix
 import json
 from pathlib import Path
 
+
 def analyze_onnx_constants():
     """Analyze constant handling in latest test results"""
     
@@ -18,7 +19,7 @@ def analyze_onnx_constants():
     
     # Load comparison results
     try:
-        with open(test_dir / "detailed_comparison/detailed_comparison_report.json", 'r') as f:
+        with open(test_dir / "detailed_comparison/detailed_comparison_report.json") as f:
             comparison = json.load(f)
         
         print("=== CONSTANT ANALYSIS ===")

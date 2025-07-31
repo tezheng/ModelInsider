@@ -4,13 +4,15 @@ Test selective hook registration to avoid hanging during ONNX export
 """
 
 import sys
+
 sys.path.append('/mnt/d/BYOM/modelexport')
 
-from transformers import AutoModel, AutoTokenizer
-import torch
-import torch.nn as nn
-from pathlib import Path
 import time
+from pathlib import Path
+
+import torch
+from transformers import AutoModel, AutoTokenizer
+
 
 def test_selective_hooks():
     """Test different hook registration strategies"""

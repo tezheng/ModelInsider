@@ -5,14 +5,18 @@ HTP Optimization Benchmarking Script for Iteration 17
 Tests the optimized HTP methods against baseline to measure improvements.
 """
 
-import time
-import torch
-from pathlib import Path
-from transformers import AutoModel
 import json
+import time
+from pathlib import Path
+
+import torch
+from transformers import AutoModel
 
 from modelexport.strategies.htp import HTPHierarchyExporter
-from modelexport.strategies.htp.optimizations import apply_htp_optimizations, HuggingFaceSpecificOptimizations
+from modelexport.strategies.htp.optimizations import (
+    HuggingFaceSpecificOptimizations,
+    apply_htp_optimizations,
+)
 
 
 class HTPOptimizationBenchmark:

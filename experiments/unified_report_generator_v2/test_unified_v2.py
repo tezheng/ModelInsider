@@ -2,15 +2,13 @@
 Test the interface-based unified report generator.
 """
 
-import json
 import re
 import time
-from pathlib import Path
-from typing import Any, Dict
+from typing import Any
 
-from interfaces import ReportFormat, StepInfo
 from data_provider import ExportSessionData, SessionDataProvider
 from generator import UnifiedReportGenerator
+from interfaces import ReportFormat, StepInfo
 
 
 def create_test_session() -> ExportSessionData:
@@ -247,10 +245,10 @@ def test_extensibility():
     class CustomSection(IReportSection):
         """Custom test section."""
         
-        def get_data(self) -> Dict[str, Any]:
+        def get_data(self) -> dict[str, Any]:
             return {"custom": "data"}
         
-        def render(self, format: ReportFormat, context: Dict[str, Any]) -> Any:
+        def render(self, format: ReportFormat, context: dict[str, Any]) -> Any:
             if format == ReportFormat.CONSOLE:
                 return "\n🎯 CUSTOM SECTION\nThis is custom content!\n"
             elif format == ReportFormat.TEXT:

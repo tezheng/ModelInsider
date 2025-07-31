@@ -5,6 +5,7 @@ Quick test to load BERT and verify export works.
 
 import torch
 import torch.nn as nn
+
 from modelexport.hierarchy_exporter import HierarchyExporter
 
 print("Testing with a simple model that mimics BERT structure...")
@@ -55,7 +56,8 @@ print("Export completed!")
 # Check for layer tagging issues
 hierarchy_file = 'temp/simple_bert_test_hierarchy.json'
 import json
-with open(hierarchy_file, 'r') as f:
+
+with open(hierarchy_file) as f:
     hierarchy = json.load(f)
 
 print("\nTag statistics:")

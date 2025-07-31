@@ -7,13 +7,14 @@ This script analyzes what ONNX operations we actually get when using proper
 export configuration with optimizations enabled (should fuse GELU to avoid Erf ops).
 """
 
-import torch
-from transformers import AutoModel, AutoTokenizer
-import onnx
+import json
 import tempfile
 from pathlib import Path
-import json
-from typing import Dict, List, Any
+from typing import Any
+
+import onnx
+import torch
+from transformers import AutoModel, AutoTokenizer
 
 
 def export_with_optimization():
@@ -106,7 +107,7 @@ def export_with_optimization():
     return results
 
 
-def analyze_operations(onnx_model) -> Dict[str, Any]:
+def analyze_operations(onnx_model) -> dict[str, Any]:
     """Analyze ONNX operations and categorize them."""
     
     operations = {

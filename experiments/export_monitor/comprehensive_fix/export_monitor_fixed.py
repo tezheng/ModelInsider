@@ -17,12 +17,9 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from enum import Enum
 from pathlib import Path
-from typing import Any, Dict, List, Optional, Set, Tuple, Union
+from typing import Any
 
 from rich.console import Console
-from rich.text import Text
-from rich.tree import Tree
-
 
 # ============================================================================
 # CONFIGURATION
@@ -84,17 +81,17 @@ class HTPExportData:
     embed_hierarchy_attributes: bool = True
     
     # Hierarchy data
-    hierarchy: Dict[str, Dict[str, Any]] = None
+    hierarchy: dict[str, dict[str, Any]] = None
     execution_steps: int = 0
     
     # ONNX data
-    output_names: List[str] = None
+    output_names: list[str] = None
     onnx_size_mb: float = 0.0
     
     # Tagging results
     total_nodes: int = 0
-    tagged_nodes: Dict[str, str] = None
-    tagging_stats: Dict[str, int] = None
+    tagged_nodes: dict[str, str] = None
+    tagging_stats: dict[str, int] = None
     coverage: float = 0.0
     
     # Timing
@@ -103,11 +100,11 @@ class HTPExportData:
     export_time: float = 0.0
     
     # Step-specific data
-    steps: Dict[str, Any] = None
+    steps: dict[str, Any] = None
     
     # Output paths
-    report_path: Optional[str] = None
-    console_log_path: Optional[str] = None
+    report_path: str | None = None
+    console_log_path: str | None = None
     
     def __post_init__(self):
         """Initialize mutable defaults."""
@@ -138,7 +135,7 @@ class TextStyler:
         return f"\033[1m{text}\033[0m"
     
     @staticmethod
-    def bold_cyan(text: Union[str, int, float]) -> str:
+    def bold_cyan(text: str | int | float) -> str:
         """Format number as bold cyan."""
         return f"\033[1;36m{text}\033[0m"
     
@@ -368,7 +365,7 @@ class HTPConsoleWriter(StepAwareWriter):
         
         return 1
     
-    def _print_hierarchy_tree(self, hierarchy: Dict[str, Dict[str, Any]]) -> None:
+    def _print_hierarchy_tree(self, hierarchy: dict[str, dict[str, Any]]) -> None:
         """Print the complete module hierarchy tree."""
         # Find root
         root_info = hierarchy.get("", {})
@@ -503,7 +500,7 @@ class HTPConsoleWriter(StepAwareWriter):
         
         return 1
     
-    def _print_top_nodes(self, tagged_nodes: Dict[str, str]) -> None:
+    def _print_top_nodes(self, tagged_nodes: dict[str, str]) -> None:
         """Print top nodes by hierarchy."""
         tag_counts = Counter(tagged_nodes.values())
         top_tags = tag_counts.most_common(Config.TOP_NODES_COUNT)
@@ -526,8 +523,8 @@ class HTPConsoleWriter(StepAwareWriter):
                 rank_str = f"{i:>2}"
                 self._print(f"{TextStyler.bold_cyan(rank_str)}. {styled_tag}: {TextStyler.bold_cyan(count)} nodes")
     
-    def _print_hierarchy_with_nodes(self, hierarchy: Dict[str, Dict[str, Any]], 
-                                   tagged_nodes: Dict[str, str]) -> None:
+    def _print_hierarchy_with_nodes(self, hierarchy: dict[str, dict[str, Any]], 
+                                   tagged_nodes: dict[str, str]) -> None:
         """Print complete hierarchy with ONNX node details."""
         self._print("\n🌳 Complete HF Hierarchy with ONNX Nodes:")
         self._print("-" * 60)
@@ -764,7 +761,7 @@ class HTPMetadataWriter(StepAwareWriter):
         
         return 1
     
-    def _build_tree_structure(self, hierarchy: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
+    def _build_tree_structure(self, hierarchy: dict[str, dict[str, Any]]) -> dict[str, Any]:
         """Build tree structure for metadata."""
         root_info = hierarchy.get("", {})
         root_name = root_info.get("class_name", "Model")
@@ -776,7 +773,7 @@ class HTPMetadataWriter(StepAwareWriter):
         }
         
         # Build nested structure
-        for path, info in hierarchy.items():
+        for path, _info in hierarchy.items():
             if not path:
                 continue
             
@@ -1011,11 +1008,11 @@ class HTPExportMonitor:
         """Get captured console output."""
         return self.console_buffer.getvalue()
     
-    def get_metadata(self) -> Dict[str, Any]:
+    def get_metadata(self) -> dict[str, Any]:
         """Get current metadata."""
         return self.metadata_writer.metadata.copy()
     
-    def finalize(self) -> Dict[str, str]:
+    def finalize(self) -> dict[str, str]:
         """Finalize all outputs and return paths."""
         # Flush all writers
         self.console_writer.flush()

@@ -12,18 +12,18 @@ Use Case: Model Analysis and Optimization Pipeline
 - Optimize specific model components
 """
 
+import json
+import sys
+from pathlib import Path
+
 import torch
 import torch.nn as nn
-from pathlib import Path
-import sys
-import json
-from typing import Dict, List, Any, Optional
 
 # Add ModelExport to path
 sys.path.append(str(Path(__file__).parent.parent.parent))
 
-from modelexport.strategies.htp.htp_hierarchy_exporter import HierarchyExporter
 from modelexport.core import tag_utils
+from modelexport.strategies.htp.htp_hierarchy_exporter import HierarchyExporter
 
 
 class BertLikeModel(nn.Module):
@@ -266,7 +266,7 @@ class GraphFilteringWorkflow:
         
         return str(output_path)
     
-    def step_2_analyze_hierarchy_structure(self, onnx_path: str) -> Dict[str, List[str]]:
+    def step_2_analyze_hierarchy_structure(self, onnx_path: str) -> dict[str, list[str]]:
         """Step 2: Analyze hierarchy structure and identify components."""
         
         print(f"\n📊 Step 2: Hierarchy Structure Analysis")
@@ -328,7 +328,7 @@ class GraphFilteringWorkflow:
         
         return components
     
-    def step_3_extract_attention_subgraph(self, onnx_path: str, components: Dict[str, List[str]]) -> str:
+    def step_3_extract_attention_subgraph(self, onnx_path: str, components: dict[str, list[str]]) -> str:
         """Step 3: Extract attention mechanism subgraph safely."""
         
         print(f"\n🔍 Step 3: Attention Subgraph Extraction")

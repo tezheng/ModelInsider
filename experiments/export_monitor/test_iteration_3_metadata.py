@@ -3,16 +3,16 @@
 Test iteration 3 - Compare metadata and report outputs with baseline
 """
 
-import sys
-import json
 import difflib
+import json
+import sys
 from pathlib import Path
-from datetime import datetime
 
 # Add the project root to sys.path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from experiments.export_monitor.export_monitor_v2 import HTPExportMonitor, HTPExportStep
+
 
 def test_metadata_generation():
     """Test metadata generation with v2 monitor."""
@@ -313,7 +313,7 @@ def compare_metadata():
     # Check each section
     differences = []
     
-    for key in baseline.keys():
+    for key in baseline:
         if key not in v2:
             differences.append(f"Missing key: {key}")
         elif key == "export_info":

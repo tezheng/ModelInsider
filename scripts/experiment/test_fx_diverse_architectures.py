@@ -6,22 +6,22 @@ This script tests the Iteration 9 coverage improvements on a broader range of
 architectures to validate universal applicability and identify optimization opportunities.
 """
 
-import sys
+import json
 import os
+import sys
+import tempfile
+import time
+from pathlib import Path
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-from pathlib import Path
-import json
-import tempfile
-import time
-import math
-from typing import Dict, List, Any, Tuple
 
 # Add modelexport to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from modelexport.fx_hierarchy_exporter import FXHierarchyExporter
+
 
 def test_diverse_architectures():
     """Test coverage across diverse model architectures."""
@@ -202,7 +202,7 @@ def test_fx_onnx_mapping_accuracy():
             
             # Load both ONNX model and sidecar for detailed analysis
             onnx_model = result['onnx_model']
-            with open(result['sidecar_path'], 'r') as f:
+            with open(result['sidecar_path']) as f:
                 sidecar = json.load(f)
             
             fx_stats = result['fx_graph_stats']
@@ -215,7 +215,7 @@ def test_fx_onnx_mapping_accuracy():
             
             # Analyze mapping quality
             fx_operations = set(fx_stats['node_type_distribution'].keys())
-            onnx_operations = set(node.op_type for node in onnx_model.graph.node)
+            onnx_operations = {node.op_type for node in onnx_model.graph.node}
             
             print(f"\n📊 Operation Analysis:")
             print(f"   FX operation types: {fx_operations}")
@@ -233,7 +233,7 @@ def test_fx_onnx_mapping_accuracy():
             
             # Sample hierarchy mappings
             print(f"\n📋 Sample Hierarchy Mappings:")
-            for i, (node, path) in enumerate(list(sidecar['hierarchy_mapping'].items())[:8]):
+            for _i, (node, path) in enumerate(list(sidecar['hierarchy_mapping'].items())[:8]):
                 print(f"   {node} -> {path}")
             
             # Cleanup

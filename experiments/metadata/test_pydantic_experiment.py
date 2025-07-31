@@ -3,7 +3,6 @@ Experiment to test if Pydantic can work and how it compares to dataclasses.
 """
 
 import json
-from pathlib import Path
 
 # First, let's check if Pydantic is available
 try:
@@ -16,8 +15,7 @@ except ImportError:
     print("To install: pip install pydantic")
 
 # Let's also test with dataclasses for comparison
-from dataclasses import dataclass, asdict, field
-from typing import Any
+from dataclasses import asdict, dataclass
 
 
 # --- DATACLASS APPROACH (Current) ---

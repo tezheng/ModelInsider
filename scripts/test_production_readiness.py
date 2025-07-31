@@ -5,11 +5,12 @@ Production Readiness Testing for Iteration 19
 Tests the complete modelexport package for production deployment.
 """
 
-import time
-import torch
-from pathlib import Path
-from transformers import AutoModel
 import json
+import time
+from pathlib import Path
+
+import torch
+from transformers import AutoModel
 
 # Test the main package interface
 import modelexport

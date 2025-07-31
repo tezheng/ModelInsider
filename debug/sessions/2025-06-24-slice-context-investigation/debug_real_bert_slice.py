@@ -2,8 +2,10 @@
 Debug the real BERT model slice tagging issue with detailed tracing.
 """
 
-import torch
 import tempfile
+
+import torch
+
 from modelexport.hierarchy_exporter import HierarchyExporter
 
 

@@ -5,16 +5,16 @@ Unified Framework Testing for Iteration 19
 Tests the complete unified optimization framework with automatic strategy selection.
 """
 
-import time
-import torch
-from pathlib import Path
-from transformers import AutoModel
 import json
-from typing import Dict, Any
+import time
+from pathlib import Path
+from typing import Any
 
+import torch
+from transformers import AutoModel
+
+from modelexport.core.strategy_selector import StrategySelector
 from modelexport.unified_export import UnifiedExporter, export_model
-from modelexport.core.strategy_selector import ExportStrategy, StrategySelector
-from modelexport.core.unified_optimizer import UnifiedOptimizer
 
 
 class UnifiedFrameworkTester:
@@ -350,7 +350,7 @@ class UnifiedFrameworkTester:
         
         return test_results
     
-    def _generate_test_summary(self, tests: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_test_summary(self, tests: dict[str, Any]) -> dict[str, Any]:
         """Generate summary of all test results."""
         
         summary = {
@@ -406,7 +406,7 @@ class UnifiedFrameworkTester:
         
         return summary
     
-    def _print_test_summary(self, test_results: Dict[str, Any]):
+    def _print_test_summary(self, test_results: dict[str, Any]):
         """Print comprehensive test summary."""
         
         summary = test_results["summary"]

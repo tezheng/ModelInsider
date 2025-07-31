@@ -3,8 +3,9 @@
 Test the fixed hierarchy tree logic
 """
 
-from rich.tree import Tree
 from rich.console import Console
+from rich.tree import Tree
+
 
 def test_original_logic():
     """Test the original logic that's not working."""

@@ -3,14 +3,13 @@
 Research ONNX Functions capability and implementation
 """
 
+
+import onnx
 import torch
 import torch.nn as nn
-import onnx
-from onnx import helper, TensorProto, FunctionProto
-import json
-from typing import Dict, List, Any, Tuple
-from transformers import AutoModel, AutoTokenizer
-import numpy as np
+from onnx import helper
+from transformers import AutoModel
+
 
 def research_onnx_functions():
     """Research ONNX Functions capabilities"""
@@ -43,8 +42,8 @@ def research_onnx_functions():
         func = create_simple_function()
         print("✓ ONNX Function creation successful")
         print(f"  Function name: {func.name}")
-        print(f"  Inputs: {[inp for inp in func.input]}")
-        print(f"  Outputs: {[out for out in func.output]}")
+        print(f"  Inputs: {list(func.input)}")
+        print(f"  Outputs: {list(func.output)}")
         print(f"  Nodes: {len(func.node)}")
     except Exception as e:
         print(f"✗ ONNX Function creation failed: {e}")

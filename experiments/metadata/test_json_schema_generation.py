@@ -3,6 +3,7 @@ Test JSON Schema generation with Pydantic models.
 """
 
 import json
+
 from pydantic import BaseModel, Field
 
 

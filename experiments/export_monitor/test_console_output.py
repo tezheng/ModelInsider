@@ -7,16 +7,15 @@ This tests the specific issue with duplicate console messages and ANSI formattin
 
 import io
 import re
-from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
 
 from modelexport.strategies.htp.export_monitor import (
+    HTPConsoleWriter,
+    HTPExportData,
     HTPExportMonitor,
     HTPExportStep,
-    HTPExportData,
-    HTPConsoleWriter,
     TextStyler,
 )
 

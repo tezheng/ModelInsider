@@ -41,7 +41,7 @@ class TestMustRuleCompliance:
         ]
         
         violations = []
-        for node_name, node_info in tag_mapping.items():
+        for _node_name, node_info in tag_mapping.items():
             for tag in node_info.get('tags', []):
                 tag_lower = tag.lower()
                 for pattern in hardcoded_patterns:
@@ -85,7 +85,7 @@ class TestMustRuleCompliance:
         ]
         
         violations = []
-        for node_name, node_info in tag_mapping.items():
+        for _node_name, node_info in tag_mapping.items():
             for tag in node_info.get('tags', []):
                 # Split tag into components and check each
                 tag_components = tag.strip('/').split('/')
@@ -154,8 +154,8 @@ class TestMustRuleCompliance:
                     'success': True,
                     'total_operations': result['total_operations'],
                     'tagged_operations': result['tagged_operations'],
-                    'unique_tags': len(set(tag for node in tag_mapping.values() 
-                                         for tag in node.get('tags', [])))
+                    'unique_tags': len({tag for node in tag_mapping.values() 
+                                         for tag in node.get('tags', [])})
                 }
                 
                 # Universal validation: same exporter, consistent results
@@ -362,7 +362,7 @@ class TestDataComparisonValidation:
         pattern_matches = 0
         pattern_misses = []
         
-        for expected_pattern in expected_hierarchy.keys():
+        for expected_pattern in expected_hierarchy:
             # Check if any of our tags match this pattern
             found_match = False
             for our_tag in our_tag_stats:

@@ -6,19 +6,19 @@ Implements the validation framework from ADR-010 to ensure GraphML files
 comply with the ONNX to GraphML format specification.
 """
 
-import xml.etree.ElementTree as ET
+import argparse
 import json
 import sys
-from pathlib import Path
+import xml.etree.ElementTree as ET
 from datetime import datetime
-from typing import Dict, Any, List, Optional
-import argparse
+from pathlib import Path
+from typing import Any
 
 
 class GraphMLValidator:
     """Comprehensive GraphML validation framework."""
     
-    def __init__(self, graphml_file: str, onnx_file: Optional[str] = None, metadata_file: Optional[str] = None):
+    def __init__(self, graphml_file: str, onnx_file: str | None = None, metadata_file: str | None = None):
         self.graphml_file = graphml_file
         self.onnx_file = onnx_file
         self.metadata_file = metadata_file
@@ -26,7 +26,7 @@ class GraphMLValidator:
         self.root = self.tree.getroot()
         self.results = {}
         
-    def validate_schema(self) -> Dict[str, Any]:
+    def validate_schema(self) -> dict[str, Any]:
         """Validate GraphML against official schema."""
         try:
             # Check namespace
@@ -52,7 +52,7 @@ class GraphMLValidator:
         except Exception as e:
             return {"status": "fail", "error": f"Schema validation failed: {e}"}
     
-    def validate_keys(self) -> Dict[str, Any]:
+    def validate_keys(self) -> dict[str, Any]:
         """Validate required GraphML key definitions."""
         try:
             ns = "http://graphml.graphdrawing.org/xmlns"
@@ -111,7 +111,7 @@ class GraphMLValidator:
         except Exception as e:
             return {"status": "fail", "error": f"Key validation failed: {e}"}
     
-    def validate_nodes(self) -> Dict[str, Any]:
+    def validate_nodes(self) -> dict[str, Any]:
         """Validate node structure and attributes."""
         try:
             ns = "http://graphml.graphdrawing.org/xmlns"
@@ -159,7 +159,7 @@ class GraphMLValidator:
         except Exception as e:
             return {"status": "fail", "error": f"Node validation failed: {e}"}
     
-    def validate_edges(self) -> Dict[str, Any]:
+    def validate_edges(self) -> dict[str, Any]:
         """Validate edge connectivity and attributes."""
         try:
             ns = "http://graphml.graphdrawing.org/xmlns"
@@ -199,7 +199,7 @@ class GraphMLValidator:
         except Exception as e:
             return {"status": "fail", "error": f"Edge validation failed: {e}"}
     
-    def validate_hierarchy(self) -> Dict[str, Any]:
+    def validate_hierarchy(self) -> dict[str, Any]:
         """Validate hierarchical compound node structure."""
         try:
             ns = "http://graphml.graphdrawing.org/xmlns"
@@ -242,7 +242,7 @@ class GraphMLValidator:
         except Exception as e:
             return {"status": "fail", "error": f"Hierarchy validation failed: {e}"}
     
-    def validate_completeness(self) -> Dict[str, Any]:
+    def validate_completeness(self) -> dict[str, Any]:
         """Validate GraphML completeness against original ONNX."""
         if not self.onnx_file:
             return {"status": "skip", "message": "No ONNX file provided for completeness check"}
@@ -290,7 +290,7 @@ class GraphMLValidator:
         except Exception as e:
             return {"status": "fail", "error": f"Completeness validation failed: {e}"}
     
-    def validate_networkx(self) -> Dict[str, Any]:
+    def validate_networkx(self) -> dict[str, Any]:
         """Test NetworkX compatibility."""
         try:
             import networkx as nx
@@ -325,7 +325,7 @@ class GraphMLValidator:
         except Exception as e:
             return {"status": "fail", "error": f"NetworkX validation failed: {e}"}
     
-    def run_all_validations(self) -> Dict[str, Any]:
+    def run_all_validations(self) -> dict[str, Any]:
         """Run complete validation suite."""
         print(f"🔍 Validating GraphML: {self.graphml_file}")
         
@@ -340,13 +340,13 @@ class GraphMLValidator:
         
         return self.results
     
-    def generate_validation_report(self) -> Dict[str, Any]:
+    def generate_validation_report(self) -> dict[str, Any]:
         """Generate comprehensive validation report."""
         results = self.run_all_validations()
         
         # Count statuses
         status_counts = {}
-        for validation_name, result in results.items():
+        for _validation_name, result in results.items():
             status = result.get('status', 'unknown')
             status_counts[status] = status_counts.get(status, 0) + 1
         
@@ -367,7 +367,7 @@ class GraphMLValidator:
         return report
 
 
-def print_report(report: Dict[str, Any]) -> None:
+def print_report(report: dict[str, Any]) -> None:
     """Print validation report in a readable format."""
     print(f"\n📊 GraphML Validation Report")
     print(f"File: {report['file']}")

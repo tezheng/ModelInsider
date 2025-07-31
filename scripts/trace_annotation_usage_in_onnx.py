@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 """Trace how __annotations__ are accessed during ONNX export."""
 
+import sys
+
 import torch
 import torch.nn as nn
-import functools
-import sys
-from types import SimpleNamespace
+
 
 def trace_annotation_access():
     """Monkey patch to trace when annotations are accessed."""
@@ -26,7 +26,7 @@ def trace_annotation_access():
             access_info = {
                 'module': module_name,
                 'class': self.__class__.__name__,
-                'stack_depth': len([frame for frame in sys._current_frames().values()]),
+                'stack_depth': len(list(sys._current_frames().values())),
                 'annotations': dict(self.__dict__.get('__annotations__', {}))
             }
             access_log.append(access_info)

@@ -10,12 +10,13 @@ import json
 import time
 import traceback
 from pathlib import Path
-from typing import Dict, List, Any, Optional
+from typing import Any
+
 import torch
-from transformers import AutoModel, AutoImageProcessor, AutoTokenizer
+from transformers import AutoModel
 
 from modelexport.strategies.fx import FXHierarchyExporter
-from modelexport.strategies.htp import HTPHierarchyExporter  
+from modelexport.strategies.htp import HTPHierarchyExporter
 from modelexport.strategies.usage_based import UsageBasedExporter
 
 
@@ -63,7 +64,7 @@ class HuggingFaceModelTester:
         else:
             raise ValueError(f"Unknown model type: {config['type']}")
     
-    def test_model_with_strategy(self, model_name: str, strategy_name: str) -> Dict[str, Any]:
+    def test_model_with_strategy(self, model_name: str, strategy_name: str) -> dict[str, Any]:
         """Test a single model with a single strategy."""
         print(f"\\n🧪 Testing {model_name} with {strategy_name} strategy...")
         
@@ -140,7 +141,7 @@ class HuggingFaceModelTester:
         
         return result
     
-    def test_all_models(self) -> Dict[str, List[Dict[str, Any]]]:
+    def test_all_models(self) -> dict[str, list[dict[str, Any]]]:
         """Test all models with all strategies."""
         print(f"🚀 Starting HuggingFace model baseline testing...")
         print(f"📂 Output directory: {self.output_dir}")
@@ -160,7 +161,7 @@ class HuggingFaceModelTester:
         
         return self.results
     
-    def analyze_results(self) -> Dict[str, Any]:
+    def analyze_results(self) -> dict[str, Any]:
         """Analyze test results and create summary."""
         analysis = {
             'timestamp': time.strftime('%Y-%m-%d %H:%M:%S'),

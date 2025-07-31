@@ -2,9 +2,9 @@
 Test with an actual BERT model to reproduce the slice tagging issue.
 """
 
-import torch
-import tempfile
 import json
+import tempfile
+
 from modelexport.hierarchy_exporter import HierarchyExporter
 
 
@@ -113,7 +113,7 @@ def test_real_bert_slice_issue():
         # Load hierarchy metadata
         hierarchy_file = tmp.name.replace('.onnx', '_hierarchy.json')
         try:
-            with open(hierarchy_file, 'r') as f:
+            with open(hierarchy_file) as f:
                 hierarchy_data = json.load(f)
             
             print(f"\n=== HIERARCHY METADATA ANALYSIS ===")

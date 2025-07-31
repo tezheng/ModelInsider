@@ -5,7 +5,6 @@ Ensure the fix works correctly with actual exports.
 """
 
 import shutil
-import subprocess
 from pathlib import Path
 
 

@@ -4,7 +4,7 @@ Single Model Tester - Test one model at a time to avoid timeouts
 """
 
 import sys
-import torch
+
 from test_universal_hierarchy import UniversalHierarchyTester
 
 

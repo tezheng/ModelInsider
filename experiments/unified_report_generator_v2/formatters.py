@@ -2,16 +2,14 @@
 Concrete formatter implementations for different report formats.
 """
 
-from typing import Any, Dict, List, Optional
-import json
 from io import StringIO
-
-from rich.console import Console
-from rich.tree import Tree
-from rich.text import Text
-from rich.table import Table
+from typing import Any
 
 from interfaces import IReportFormatter, ReportFormat, StatisticsInfo
+from rich.console import Console
+from rich.table import Table
+from rich.text import Text
+from rich.tree import Tree
 
 
 class ConsoleFormatter(IReportFormatter):
@@ -34,7 +32,7 @@ class ConsoleFormatter(IReportFormatter):
         
         return buffer.getvalue()
     
-    def format_list(self, items: List[str], ordered: bool = False) -> str:
+    def format_list(self, items: list[str], ordered: bool = False) -> str:
         """Format a list with bullets or numbers."""
         buffer = StringIO()
         console = Console(file=buffer, width=self.width, force_terminal=self.color)
@@ -56,7 +54,7 @@ class ConsoleFormatter(IReportFormatter):
         
         return buffer.getvalue()
     
-    def format_table(self, headers: List[str], rows: List[List[Any]]) -> str:
+    def format_table(self, headers: list[str], rows: list[list[Any]]) -> str:
         """Format as Rich table."""
         buffer = StringIO()
         console = Console(file=buffer, width=self.width, force_terminal=self.color)
@@ -71,7 +69,7 @@ class ConsoleFormatter(IReportFormatter):
         console.print(table)
         return buffer.getvalue()
     
-    def format_tree(self, root: str, children: Dict[str, Any], max_depth: Optional[int] = None) -> str:
+    def format_tree(self, root: str, children: dict[str, Any], max_depth: int | None = None) -> str:
         """Format as Rich tree."""
         buffer = StringIO()
         console = Console(file=buffer, width=self.width, force_terminal=self.color)
@@ -82,7 +80,7 @@ class ConsoleFormatter(IReportFormatter):
         console.print(tree)
         return buffer.getvalue()
     
-    def _build_tree(self, parent: Tree, data: Dict[str, Any], depth: int, max_depth: Optional[int]):
+    def _build_tree(self, parent: Tree, data: dict[str, Any], depth: int, max_depth: int | None):
         """Recursively build tree."""
         if max_depth and depth >= max_depth:
             return
@@ -112,7 +110,7 @@ class ConsoleFormatter(IReportFormatter):
         
         return buffer.getvalue()
     
-    def join_elements(self, elements: List[Any]) -> str:
+    def join_elements(self, elements: list[Any]) -> str:
         """Join formatted elements."""
         return "".join(str(e) for e in elements)
 
@@ -133,7 +131,7 @@ class TextFormatter(IReportFormatter):
         else:
             return f"\n{text}\n"
     
-    def format_list(self, items: List[str], ordered: bool = False) -> str:
+    def format_list(self, items: list[str], ordered: bool = False) -> str:
         """Format simple text list."""
         lines = []
         for i, item in enumerate(items):
@@ -147,7 +145,7 @@ class TextFormatter(IReportFormatter):
         """Format simple key-value."""
         return f"{key}: {value}\n"
     
-    def format_table(self, headers: List[str], rows: List[List[Any]]) -> str:
+    def format_table(self, headers: list[str], rows: list[list[Any]]) -> str:
         """Format ASCII table."""
         # Calculate column widths
         widths = [len(h) for h in headers]
@@ -170,14 +168,14 @@ class TextFormatter(IReportFormatter):
         
         return "\n".join(lines) + "\n"
     
-    def format_tree(self, root: str, children: Dict[str, Any], max_depth: Optional[int] = None) -> str:
+    def format_tree(self, root: str, children: dict[str, Any], max_depth: int | None = None) -> str:
         """Format ASCII tree."""
         lines = [root]
         self._format_tree_lines(children, "", True, lines, 0, max_depth)
         return "\n".join(lines) + "\n"
     
-    def _format_tree_lines(self, data: Dict[str, Any], prefix: str, is_last: bool, 
-                          lines: List[str], depth: int, max_depth: Optional[int]):
+    def _format_tree_lines(self, data: dict[str, Any], prefix: str, is_last: bool, 
+                          lines: list[str], depth: int, max_depth: int | None):
         """Recursively format tree lines."""
         if max_depth and depth >= max_depth:
             return
@@ -218,7 +216,7 @@ class TextFormatter(IReportFormatter):
         ]
         return "\n".join(lines) + "\n"
     
-    def join_elements(self, elements: List[Any]) -> str:
+    def join_elements(self, elements: list[Any]) -> str:
         """Join text elements."""
         return "".join(str(e) for e in elements)
 
@@ -226,26 +224,26 @@ class TextFormatter(IReportFormatter):
 class MetadataFormatter(IReportFormatter):
     """Formatter for JSON metadata output."""
     
-    def format_header(self, text: str, level: int = 1) -> Dict[str, str]:
+    def format_header(self, text: str, level: int = 1) -> dict[str, str]:
         """Headers become dictionary keys in metadata."""
         return {"_section": text}
     
-    def format_list(self, items: List[str], ordered: bool = False) -> List[str]:
+    def format_list(self, items: list[str], ordered: bool = False) -> list[str]:
         """Lists remain as lists."""
         return items
     
-    def format_key_value(self, key: str, value: Any) -> Dict[str, Any]:
+    def format_key_value(self, key: str, value: Any) -> dict[str, Any]:
         """Key-value becomes dict entry."""
         return {key: value}
     
-    def format_table(self, headers: List[str], rows: List[List[Any]]) -> List[Dict[str, Any]]:
+    def format_table(self, headers: list[str], rows: list[list[Any]]) -> list[dict[str, Any]]:
         """Table becomes list of dicts."""
         return [
-            dict(zip(headers, row))
+            dict(zip(headers, row, strict=False))
             for row in rows
         ]
     
-    def format_tree(self, root: str, children: Dict[str, Any], max_depth: Optional[int] = None) -> Dict[str, Any]:
+    def format_tree(self, root: str, children: dict[str, Any], max_depth: int | None = None) -> dict[str, Any]:
         """Tree structure remains as nested dict."""
         return {root: children}
     
@@ -253,7 +251,7 @@ class MetadataFormatter(IReportFormatter):
         """No separators in metadata."""
         return None
     
-    def format_statistics(self, stats: StatisticsInfo) -> Dict[str, Any]:
+    def format_statistics(self, stats: StatisticsInfo) -> dict[str, Any]:
         """Statistics as structured data."""
         return {
             "coverage_percentage": stats.coverage_percentage,
@@ -271,7 +269,7 @@ class MetadataFormatter(IReportFormatter):
             }
         }
     
-    def join_elements(self, elements: List[Any]) -> Dict[str, Any]:
+    def join_elements(self, elements: list[Any]) -> dict[str, Any]:
         """Join metadata elements into single dict."""
         result = {}
         for element in elements:

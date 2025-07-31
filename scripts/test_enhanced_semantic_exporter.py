@@ -2,6 +2,7 @@
 """Test Enhanced Semantic Exporter with BERT-tiny."""
 
 import json
+
 import torch
 from transformers import AutoModel
 
@@ -10,7 +11,7 @@ from modelexport.core.enhanced_semantic_exporter import EnhancedSemanticExporter
 
 def load_config(config_path="export_config_bertmodel.json"):
     """Load export configuration."""
-    with open(config_path, 'r') as f:
+    with open(config_path) as f:
         return json.load(f)
 
 
@@ -89,7 +90,7 @@ def test_bert_tiny():
     metadata = exporter.get_semantic_metadata()
     print("\n📊 Sample semantic mappings:")
     count = 0
-    for node_name, tag_info in metadata['semantic_mappings'].items():
+    for _node_name, tag_info in metadata['semantic_mappings'].items():
         if tag_info['hf_module_name'] and count < 10:
             print(f"   {tag_info['onnx_op_type']:12} -> {tag_info['semantic_tag']:50} (module: {tag_info['hf_module_name']})")
             count += 1

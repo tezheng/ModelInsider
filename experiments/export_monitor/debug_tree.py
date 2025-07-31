@@ -3,10 +3,12 @@
 Debug the tree rendering to understand why it's only showing 4 lines
 """
 
-from rich.tree import Tree
-from rich.console import Console
 import io
 import json
+
+from rich.console import Console
+from rich.tree import Tree
+
 
 def debug_tree_rendering():
     """Debug why the tree is only showing 4 lines."""

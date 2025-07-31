@@ -4,14 +4,16 @@ Final implementation showing how Enhanced Trace Module Map works in practice.
 This demonstrates the ACTUAL output format and how to use it for hierarchy preservation.
 """
 
+import json
+import tempfile
+from collections import defaultdict
+from pathlib import Path
+from typing import Any
+
 import torch
 import torch.nn as nn
 from transformers import AutoModel, AutoTokenizer
-import json
-from pathlib import Path
-import tempfile
-from typing import Dict, Any, List, Tuple, Optional
-from collections import defaultdict
+
 
 class EnhancedTraceMapCapture:
     """Captures and processes PyTorch's _trace_module_map during ONNX export."""
@@ -38,7 +40,7 @@ class EnhancedTraceMapCapture:
                 'level': name.count('.') if name else 0
             }
     
-    def capture_trace_map(self, input_ids, attention_mask) -> Dict[str, Any]:
+    def capture_trace_map(self, input_ids, attention_mask) -> dict[str, Any]:
         """Capture the trace module map during ONNX export."""
         
         # Store original function
@@ -86,7 +88,7 @@ class EnhancedTraceMapCapture:
         self.trace_map_data = captured_data
         return captured_data
     
-    def _process_trace_map(self, raw_map: Dict) -> Dict[str, Any]:
+    def _process_trace_map(self, raw_map: dict) -> dict[str, Any]:
         """Process the raw trace map to extract hierarchy information."""
         
         processed = {

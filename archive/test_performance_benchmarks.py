@@ -308,7 +308,7 @@ class TestExportTimingBenchmarks:
             
             # Target performance (stricter requirement)
             if export_time > 10.0:
-                warnings.warn(f"Small model export took {export_time:.2f}s (target: <10s)", UserWarning)
+                warnings.warn(f"Small model export took {export_time:.2f}s (target: <10s)", UserWarning, stacklevel=2)
             
             # Validate export success
             assert output_path.exists(), "Export should create ONNX file"
@@ -371,7 +371,7 @@ class TestExportTimingBenchmarks:
                 
                 # Target performance
                 if export_time > 60.0:
-                    warnings.warn(f"Medium model export took {export_time:.2f}s (target: <60s)", UserWarning)
+                    warnings.warn(f"Medium model export took {export_time:.2f}s (target: <60s)", UserWarning, stacklevel=2)
                 
                 # Validate export success
                 assert output_path.exists(), "Export should create ONNX file"
@@ -580,7 +580,7 @@ class TestMemoryUsageAnalysis:
             # Add more models if available and fast enough
         ]
         
-        for model_name, expected_peak_mb in test_models:
+        for model_name, _expected_peak_mb in test_models:
             monitor = PerformanceMonitor()
             monitor.start_monitoring()
             
@@ -918,7 +918,7 @@ class TestStrategyPerformanceComparison:
             
             # Unified HTP should generally be faster
             if speed_ratio < 0.5:
-                warnings.warn(f"Enhanced Semantic unexpectedly faster than HTP: {speed_ratio:.2f}x", UserWarning)
+                warnings.warn(f"Enhanced Semantic unexpectedly faster than HTP: {speed_ratio:.2f}x", UserWarning, stacklevel=2)
         
         else:
             print(f"Enhanced Semantic failed: {performance_results['enhanced_semantic']['error']}")
@@ -1293,12 +1293,12 @@ class TestPerformanceRegressionDetection:
             
             # Alert on significant changes (more than 50% change)
             if time_ratio > 1.5:
-                warnings.warn(f"Performance regression detected: {time_ratio:.2f}x slower export time", UserWarning)
+                warnings.warn(f"Performance regression detected: {time_ratio:.2f}x slower export time", UserWarning, stacklevel=2)
             elif time_ratio < 0.67:
                 print(f"Performance improvement detected: {time_ratio:.2f}x faster export time")
             
             if memory_ratio > 1.5:
-                warnings.warn(f"Memory regression detected: {memory_ratio:.2f}x more memory usage", UserWarning)
+                warnings.warn(f"Memory regression detected: {memory_ratio:.2f}x more memory usage", UserWarning, stacklevel=2)
             elif memory_ratio < 0.67:
                 print(f"Memory improvement detected: {memory_ratio:.2f}x less memory usage")
         
@@ -1406,7 +1406,7 @@ class TestPerformanceRegressionDetection:
             print("PERFORMANCE REGRESSIONS DETECTED:")
             for regression in regressions:
                 print(f"  - {regression}")
-                warnings.warn(regression, UserWarning)
+                warnings.warn(regression, UserWarning, stacklevel=2)
         
         if improvements:
             print("Performance improvements detected:")

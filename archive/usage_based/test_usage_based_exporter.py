@@ -59,7 +59,7 @@ class TestUsageBasedExporter(BaseStrategyTest, StrategyCompatibilityTest):
         assert len(usage_stats) > 0
         
         # All usage counts should be positive
-        for module_name, count in usage_stats.items():
+        for _module_name, count in usage_stats.items():
             assert count > 0
     
     def test_usage_custom_exceptions(self):
@@ -210,7 +210,7 @@ class TestUsageBasedModuleFiltering:
         # Test filtering logic directly
         from modelexport.core.base import should_tag_module
         
-        for name, module in model.named_modules():
+        for _name, module in model.named_modules():
             should_include = should_tag_module(module, self.exporter._torch_nn_exceptions)
             
             module_class = module.__class__.__name__

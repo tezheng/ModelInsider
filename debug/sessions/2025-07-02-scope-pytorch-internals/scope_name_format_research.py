@@ -10,11 +10,8 @@ Components:
 3. Final part - Module instance name
 """
 
-import torch
-import torch.jit
+
 from transformers import AutoModel
-import inspect
-from typing import Dict, List, Any
 
 
 def analyze_scope_format():
@@ -179,7 +176,7 @@ def analyze_torch_scope_naming_convention():
         
         # Character by character comparison
         print(f"\nCharacter comparison:")
-        for i, (c1, c2) in enumerate(zip(constructed_scope, user_scope)):
+        for i, (c1, c2) in enumerate(zip(constructed_scope, user_scope, strict=False)):
             if c1 != c2:
                 print(f"    Diff at position {i}: '{c1}' vs '{c2}'")
                 break

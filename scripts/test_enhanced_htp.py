@@ -8,16 +8,18 @@ This script:
 3. Analyzes cross-layer contamination reduction
 """
 
-import torch
-from transformers import AutoModel, AutoTokenizer
-from pathlib import Path
 import json
+from collections import Counter, defaultdict
+from pathlib import Path
+
 import onnx
-from collections import defaultdict, Counter
+from transformers import AutoModel, AutoTokenizer
 
 # Import both exporters
 from modelexport.strategies.htp.htp_hierarchy_exporter import HierarchyExporter
-from modelexport.strategies.htp.htp_hierarchy_exporter_enhanced import EnhancedHTPExporter
+from modelexport.strategies.htp.htp_hierarchy_exporter_enhanced import (
+    EnhancedHTPExporter,
+)
 
 
 def analyze_tag_distribution(onnx_path: str) -> dict:

@@ -3,10 +3,9 @@
 Fix Module Tagging - Ensure operations are tagged at the correct module level
 """
 
-import torch
-from transformers import AutoModel
 from enhanced_dag_extractor import EnhancedDAGExtractor
 from input_generator import UniversalInputGenerator
+from transformers import AutoModel
 
 
 def analyze_tagging_issue():
@@ -87,8 +86,8 @@ def test_correct_extraction():
     extractor.trace_execution_with_hooks(model, inputs)
     extractor.create_parameter_mapping(model)
     
-    import tempfile
     import os
+    import tempfile
     with tempfile.NamedTemporaryFile(suffix='.onnx', delete=False) as tmp:
         temp_path = tmp.name
     

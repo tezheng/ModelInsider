@@ -3,10 +3,11 @@
 Simple demonstration of the differences between approaches.
 """
 
+from pathlib import Path
+
+import onnx
 import torch
 from transformers import AutoModel, AutoTokenizer
-import onnx
-from pathlib import Path
 
 from modelexport.semantic.enhanced_semantic_mapper import EnhancedSemanticMapper
 

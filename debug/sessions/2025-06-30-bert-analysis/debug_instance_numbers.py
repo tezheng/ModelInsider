@@ -71,7 +71,7 @@ def debug_tag_generation(full_path: str, module_hierarchy: dict):
 if __name__ == "__main__":
     # Load the actual hierarchy metadata
     import json
-    with open('/mnt/d/BYOM/modelexport/temp/bert_tiny_universal_export_hierarchy_metadata.json', 'r') as f:
+    with open('/mnt/d/BYOM/modelexport/temp/bert_tiny_universal_export_hierarchy_metadata.json') as f:
         metadata = json.load(f)
     
     module_hierarchy = metadata['module_hierarchy']

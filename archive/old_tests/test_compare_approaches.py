@@ -3,10 +3,12 @@
 Compare old and new approaches for layer tagging.
 """
 
+import json
+
 import torch
 import torch.nn as nn
+
 from modelexport.hierarchy_exporter import HierarchyExporter
-import json
 
 print("Comparing old vs new approach for layer tagging...")
 
@@ -31,7 +33,7 @@ exporter_old = HierarchyExporter(strategy='htp')
 exporter_old._use_builtin_module_tracking = False  # Force old approach
 result_old = exporter_old.export(model, inputs, 'temp/old_approach_test.onnx')
 
-with open('temp/old_approach_test_hierarchy.json', 'r') as f:
+with open('temp/old_approach_test_hierarchy.json') as f:
     hierarchy_old = json.load(f)
 
 print(f"Strategy: {hierarchy_old['exporter']['strategy']}")
@@ -50,7 +52,7 @@ exporter_new = HierarchyExporter(strategy='htp')
 exporter_new._use_builtin_module_tracking = True  # Force new approach
 result_new = exporter_new.export(model, inputs, 'temp/new_approach_test.onnx')
 
-with open('temp/new_approach_test_hierarchy.json', 'r') as f:
+with open('temp/new_approach_test_hierarchy.json') as f:
     hierarchy_new = json.load(f)
 
 print(f"Strategy: {hierarchy_new['exporter']['strategy']}")

@@ -2,6 +2,7 @@
 ExportMonitor system with step-aware writers using decorator pattern.
 """
 
+import contextlib
 import io
 import json
 import time
@@ -579,7 +580,5 @@ class ExportMonitor:
         else:
             # Even on error, try to close writers
             for writer in self.writers:
-                try:
+                with contextlib.suppress(Exception):
                     writer.close()
-                except Exception:
-                    pass

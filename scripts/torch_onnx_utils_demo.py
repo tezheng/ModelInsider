@@ -6,18 +6,19 @@ This script demonstrates the critical functions from torch.onnx.utils that are
 relevant to our hierarchy preservation work, particularly _setup_trace_module_map.
 """
 
+import inspect
+import tempfile
+from pathlib import Path
+
 import torch
 import torch.nn as nn
 import torch.onnx
 from torch.onnx.utils import (
-    is_in_onnx_export, 
+    is_in_onnx_export,
     model_signature,
     unconvertible_ops,
-    unpack_quantized_tensor
+    unpack_quantized_tensor,
 )
-from pathlib import Path
-import tempfile
-import inspect
 
 
 class HierarchicalBertLikeModel(nn.Module):
@@ -73,7 +74,7 @@ class HierarchicalBertLikeModel(nn.Module):
         
         # Encoder layers
         hidden_states = embeddings
-        for i, layer in enumerate(self.encoder):
+        for _i, layer in enumerate(self.encoder):
             # Self attention
             attn_output, _ = layer['attention']['self'](
                 hidden_states, hidden_states, hidden_states

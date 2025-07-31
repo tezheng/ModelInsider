@@ -4,11 +4,8 @@ Iteration 19: Final polish and comprehensive documentation.
 Complete API docs, add examples, final cleanup.
 """
 
-import sys
-from pathlib import Path
 import time
-import ast
-from typing import Dict, Any, List, Set
+from pathlib import Path
 
 
 def analyze_code_quality():

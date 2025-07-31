@@ -53,6 +53,7 @@ def validate_metadata_file(metadata_path: str) -> tuple[bool, list[str]]:
         Tuple of (is_valid, error_messages)
     """
     import json
+
     from pydantic import ValidationError
     
     try:

@@ -4,16 +4,14 @@ Iterative improvement script for HTP Export Monitor.
 This script runs the export monitor, compares with baseline, and tracks improvements.
 """
 
-import os
-import sys
-import json
-import time
-import subprocess
 import difflib
-from pathlib import Path
+import json
+import subprocess
 from datetime import datetime
+from pathlib import Path
+
 from rich.console import Console
-from io import StringIO
+
 
 class ExportMonitorIterator:
     """Manages iterative improvements to the export monitor."""

@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """Investigate the specific annotation differences causing the export failure."""
 
+import warnings
+
 import torch
 from transformers import AutoModel
-import warnings
+
 warnings.filterwarnings("ignore")
 
 def investigate_annotation_differences():

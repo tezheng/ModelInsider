@@ -7,7 +7,7 @@ into the main HierarchyExporter for production deployment.
 """
 
 import json
-from typing import Dict, List, Any, Optional
+
 from advanced_context_resolver import AdvancedContextResolver, ContaminationCase
 
 
@@ -46,7 +46,7 @@ class EnhancedHierarchyExporter:
             print(f"🔬 Step 2: Advanced context resolution...")
             
             # Load hierarchy data
-            with open(hierarchy_file, 'r') as f:
+            with open(hierarchy_file) as f:
                 hierarchy_data = json.load(f)
             
             # Detect contamination cases
@@ -144,7 +144,7 @@ class EnhancedHierarchyExporter:
             "hierarchy_file": hierarchy_file
         }
     
-    def _detect_contamination_cases(self, hierarchy_data: Dict) -> List[ContaminationCase]:
+    def _detect_contamination_cases(self, hierarchy_data: dict) -> list[ContaminationCase]:
         """Detect contamination cases from hierarchy data."""
         
         contamination_cases = []
@@ -189,7 +189,7 @@ class EnhancedHierarchyExporter:
         
         return contamination_cases
     
-    def _apply_resolutions(self, hierarchy_data: Dict, resolution_results: Dict) -> Dict:
+    def _apply_resolutions(self, hierarchy_data: dict, resolution_results: dict) -> dict:
         """Apply advanced resolutions to hierarchy data."""
         
         enhanced_hierarchy = hierarchy_data.copy()
@@ -200,7 +200,7 @@ class EnhancedHierarchyExporter:
             'total_contamination_cases': resolution_results['total_cases'],
             'resolved_cases': len(resolution_results['resolved_cases']),
             'resolution_rate': len(resolution_results['resolved_cases']) / resolution_results['total_cases'] if resolution_results['total_cases'] > 0 else 0,
-            'strategies_used': list(set(res['strategy'] for res in resolution_results['resolved_cases'])),
+            'strategies_used': list({res['strategy'] for res in resolution_results['resolved_cases']}),
             'confidence_average': sum(res['resolution'].confidence for res in resolution_results['resolved_cases']) / len(resolution_results['resolved_cases']) if resolution_results['resolved_cases'] else 0
         }
         
@@ -234,7 +234,7 @@ class EnhancedHierarchyExporter:
         
         return enhanced_hierarchy
     
-    def _update_resolution_stats(self, resolution_results: Dict):
+    def _update_resolution_stats(self, resolution_results: dict):
         """Update resolution statistics."""
         
         self.resolution_stats['contamination_detected'] = resolution_results['total_cases']
@@ -258,7 +258,7 @@ class EnhancedHierarchyExporter:
         print(f"\n🔍 ENHANCED EXPORT VALIDATION")
         print("="*40)
         
-        with open(enhanced_hierarchy_file, 'r') as f:
+        with open(enhanced_hierarchy_file) as f:
             enhanced_data = json.load(f)
         
         resolution_info = enhanced_data.get('advanced_resolution', {})

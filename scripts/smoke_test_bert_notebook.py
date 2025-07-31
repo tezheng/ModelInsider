@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Comprehensive smoke test for the BERT-tiny ONNX analysis notebook."""
 
+import json
 import subprocess
 import sys
 from pathlib import Path
-import json
+
 
 def test_notebook_execution():
     """Test executing the notebook programmatically."""
@@ -22,7 +23,7 @@ def test_notebook_execution():
     try:
         # First, let's check if we can read the notebook
         print("1️⃣ Checking notebook readability...")
-        with open(notebook_path, 'r') as f:
+        with open(notebook_path) as f:
             notebook_content = json.load(f)
         print("   ✅ Notebook is readable")
         

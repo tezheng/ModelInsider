@@ -8,8 +8,11 @@ Final comparison of all three TracingHierarchyBuilder approaches:
 
 import torch
 from transformers import AutoModel
+
 from modelexport.core.tracing_hierarchy_builder import TracingHierarchyBuilder
-from modelexport.core.tracing_hierarchy_builder_optimized import OptimizedTracingHierarchyBuilder
+from modelexport.core.tracing_hierarchy_builder_optimized import (
+    OptimizedTracingHierarchyBuilder,
+)
 
 
 def compare_all_approaches():
@@ -83,7 +86,7 @@ def compare_all_approaches():
     print(f"{'Approach':<35} {'Hierarchy Size':<15} {'Traced':<10} {'Unused':<10} {'Efficiency':<15}")
     print("-" * 80)
     
-    for key, result in results.items():
+    for _key, result in results.items():
         name = result['name']
         total = result['total_modules']
         traced = result['traced_modules']

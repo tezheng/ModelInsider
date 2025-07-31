@@ -2,10 +2,10 @@
 Data provider implementation for testing.
 """
 
-from typing import Any, Dict, Optional
 from dataclasses import dataclass, field
+from typing import Any
 
-from interfaces import IDataProvider, StepInfo, StatisticsInfo
+from interfaces import IDataProvider, StatisticsInfo, StepInfo
 
 
 @dataclass
@@ -25,14 +25,14 @@ class ExportSessionData:
     timestamp: str = ""
     
     # Steps
-    steps: Dict[str, StepInfo] = field(default_factory=dict)
+    steps: dict[str, StepInfo] = field(default_factory=dict)
     
     # Data collections
-    hierarchy_data: Dict[str, Dict[str, Any]] = field(default_factory=dict)
-    tagged_nodes: Dict[str, str] = field(default_factory=dict)
+    hierarchy_data: dict[str, dict[str, Any]] = field(default_factory=dict)
+    tagged_nodes: dict[str, str] = field(default_factory=dict)
     
     # Statistics
-    tagging_statistics: Dict[str, int] = field(default_factory=dict)
+    tagging_statistics: dict[str, int] = field(default_factory=dict)
     
     # File info
     onnx_path: str = ""
@@ -51,7 +51,7 @@ class SessionDataProvider(IDataProvider):
     def __init__(self, session_data: ExportSessionData):
         self.session = session_data
     
-    def get_model_info(self) -> Dict[str, Any]:
+    def get_model_info(self) -> dict[str, Any]:
         """Get model information."""
         return {
             "name_or_path": self.session.model_name_or_path,
@@ -62,15 +62,15 @@ class SessionDataProvider(IDataProvider):
             "eval_mode": True  # Assume always true for exports
         }
     
-    def get_step_info(self, step_name: str) -> Optional[StepInfo]:
+    def get_step_info(self, step_name: str) -> StepInfo | None:
         """Get information about a specific step."""
         return self.session.steps.get(step_name)
     
-    def get_hierarchy_data(self) -> Dict[str, Dict[str, Any]]:
+    def get_hierarchy_data(self) -> dict[str, dict[str, Any]]:
         """Get module hierarchy data."""
         return self.session.hierarchy_data
     
-    def get_tagged_nodes(self) -> Dict[str, str]:
+    def get_tagged_nodes(self) -> dict[str, str]:
         """Get ONNX node to tag mappings."""
         return self.session.tagged_nodes
     
@@ -91,7 +91,7 @@ class SessionDataProvider(IDataProvider):
             empty_tags=stats.get("empty_tags", 0)
         )
     
-    def get_export_config(self) -> Dict[str, Any]:
+    def get_export_config(self) -> dict[str, Any]:
         """Get export configuration."""
         return {
             "export_time": self.session.export_time,
@@ -100,7 +100,7 @@ class SessionDataProvider(IDataProvider):
             "timestamp": self.session.timestamp
         }
     
-    def get_file_info(self) -> Dict[str, Any]:
+    def get_file_info(self) -> dict[str, Any]:
         """Get output file information."""
         return {
             "onnx_path": self.session.onnx_path,

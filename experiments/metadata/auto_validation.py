@@ -7,7 +7,7 @@ using JSON Schema 2020-12's conditional validation features.
 
 from __future__ import annotations
 
-from typing import Any, Literal
+from typing import Any
 
 
 class ModelTypeDetector:
@@ -203,12 +203,11 @@ class AutoValidationReport:
         report["quality_score"] = (passed_checks / total_checks * 100) if total_checks > 0 else 0
         
         # Generate recommendations
-        if report["quality_score"] < 100:
-            if not coverage_valid:
-                report["recommendations"].append(
-                    f"Coverage is {coverage_info.get('coverage', 0):.1f}%. "
-                    "Consider investigating untagged nodes."
-                )
+        if report["quality_score"] < 100 and not coverage_valid:
+            report["recommendations"].append(
+                f"Coverage is {coverage_info.get('coverage', 0):.1f}%. "
+                "Consider investigating untagged nodes."
+            )
         
         return report
     

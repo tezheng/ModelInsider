@@ -5,16 +5,14 @@ Supports BERT, GPT, T5, and other transformer architectures
 Combining tracing hooks, ONNX functions, and comprehensive testing
 """
 
+import json
+
+import onnx
 import torch
 import torch.nn as nn
-import onnx
-from onnx import helper, TensorProto, FunctionProto, AttributeProto
-import json
-from typing import Dict, List, Any, Tuple, Optional
-from transformers import AutoModel, AutoTokenizer
-import numpy as np
-from pathlib import Path
-import copy
+from onnx import AttributeProto
+from transformers import AutoModel
+
 
 class UniversalHFHierarchyExporter:
     """Universal hierarchy-preserving ONNX exporter for Hugging Face models"""

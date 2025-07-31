@@ -4,12 +4,9 @@ Iteration 20: Final convergence validation and completion.
 Complete all convergence rounds and create final report.
 """
 
-import sys
-from pathlib import Path
-import time
-import json
-from typing import Dict, Any, List, Tuple
 import hashlib
+import time
+from pathlib import Path
 
 
 def convergence_round_3():

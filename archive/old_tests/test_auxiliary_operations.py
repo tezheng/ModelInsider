@@ -141,7 +141,7 @@ class TestAuxiliaryOperationsDetection:
             'Reshape', 'LayerNormalization'
         }
         
-        found_ops = set(node.op_type for node in onnx_model.graph.node)
+        found_ops = {node.op_type for node in onnx_model.graph.node}
         auxiliary_ops_found = found_ops & expected_aux_ops
         
         # Should find several auxiliary operations
@@ -343,7 +343,7 @@ class TestAuxiliaryOperationsEdgeCases:
         
         # Should have multiple operation types
         onnx_model = onnx.load(str(output_path))
-        op_types = set(node.op_type for node in onnx_model.graph.node)
+        op_types = {node.op_type for node in onnx_model.graph.node}
         assert len(op_types) >= 3, f"Expected multiple op types, got: {op_types}"
 
 

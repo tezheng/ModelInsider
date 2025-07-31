@@ -7,6 +7,7 @@ Goal: Fix the Module Hierarchy tree to show full nested structure like baseline
 import json
 from pathlib import Path
 
+
 def analyze_hierarchy_data():
     """Analyze the hierarchy data structure to understand the issue."""
     

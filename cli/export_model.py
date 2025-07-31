@@ -11,11 +11,12 @@ Usage:
 """
 
 import argparse
-import sys
 import json
-import torch
+import sys
 from pathlib import Path
-from typing import Dict, Any, List, Union, Optional
+from typing import Any
+
+import torch
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -136,11 +137,11 @@ def load_hf_model(model_name: str, verbose: bool = False):
     """Load HuggingFace model and tokenizer."""
     try:
         from transformers import AutoModel, AutoTokenizer
-    except ImportError:
+    except ImportError as err:
         raise ImportError(
             "transformers library required for HuggingFace models. "
             "Install with: pip install transformers"
-        )
+        ) from err
     
     if verbose:
         print(f"Loading HuggingFace model: {model_name}")
@@ -156,7 +157,7 @@ def load_hf_model(model_name: str, verbose: bool = False):
         
         return model, tokenizer
     except Exception as e:
-        raise RuntimeError(f"Failed to load HuggingFace model '{model_name}': {e}")
+        raise RuntimeError(f"Failed to load HuggingFace model '{model_name}': {e}") from e
 
 
 def load_pytorch_model(model_path: Path, verbose: bool = False):
@@ -177,7 +178,7 @@ def load_pytorch_model(model_path: Path, verbose: bool = False):
         
         return model
     except Exception as e:
-        raise RuntimeError(f"Failed to load PyTorch model: {e}")
+        raise RuntimeError(f"Failed to load PyTorch model: {e}") from e
 
 
 def create_hf_inputs(tokenizer, text: str, max_length: int, verbose: bool = False):
@@ -213,10 +214,10 @@ def create_tensor_inputs(shape_str: str, verbose: bool = False):
         
         return tensor
     except Exception as e:
-        raise ValueError(f"Invalid shape specification '{shape_str}': {e}")
+        raise ValueError(f"Invalid shape specification '{shape_str}': {e}") from e
 
 
-def save_tag_mapping(tag_mapping: Dict[str, Any], output_path: Path, verbose: bool = False):
+def save_tag_mapping(tag_mapping: dict[str, Any], output_path: Path, verbose: bool = False):
     """Save tag mapping to JSON file."""
     if verbose:
         print(f"Saving tag mapping to: {output_path}")
@@ -226,7 +227,7 @@ def save_tag_mapping(tag_mapping: Dict[str, Any], output_path: Path, verbose: bo
         "metadata": {
             "total_operations": len(tag_mapping),
             "tagged_operations": len([op for op in tag_mapping.values() if op.get('tags', [])]),
-            "unique_tags": len(set(tag for op in tag_mapping.values() for tag in op.get('tags', [])))
+            "unique_tags": len({tag for op in tag_mapping.values() for tag in op.get('tags', [])})
         },
         "operations": tag_mapping
     }
@@ -271,7 +272,7 @@ def main():
             # Load config file
             if args.verbose:
                 print(f"Loading export config: {args.config}")
-            with open(args.config, 'r') as f:
+            with open(args.config) as f:
                 export_kwargs = json.load(f)
             
             # Convert dynamic_axes string keys to integers (JSON limitation workaround)
@@ -290,11 +291,11 @@ def main():
                 try:
                     export_kwargs['dynamic_axes'] = json.loads(args.dynamic_axes)
                 except json.JSONDecodeError as e:
-                    raise ValueError(f"Invalid JSON for --dynamic-axes: {e}")
+                    raise ValueError(f"Invalid JSON for --dynamic-axes: {e}") from e
         
         # Step 3: Export with HierarchyExporter
         if args.verbose:
-            print(f"\n🚀 Starting universal hierarchy export...")
+            print("\n🚀 Starting universal hierarchy export...")
             print(f"Model: {model.__class__.__name__}")
             print(f"Strategy: {args.strategy}")
             print(f"Output: {args.output}")
@@ -313,7 +314,7 @@ def main():
             save_tag_mapping(tag_mapping, args.save_tags, args.verbose)
         
         # Step 5: Print summary
-        print(f"\n✅ Export completed successfully!")
+        print("\n✅ Export completed successfully!")
         print(f"📁 ONNX model: {args.output}")
         print(f"📊 Total operations: {result['total_operations']}")
         print(f"🏷️  Tagged operations: {result['tagged_operations']}")
@@ -323,8 +324,8 @@ def main():
         
         if args.verbose:
             tag_mapping = exporter.get_tag_mapping()
-            unique_tags = set(tag for op in tag_mapping.values() for tag in op.get('tags', []))
-            print(f"\n🏷️  Unique tags found:")
+            unique_tags = {tag for op in tag_mapping.values() for tag in op.get('tags', [])}
+            print("\n🏷️  Unique tags found:")
             for tag in sorted(unique_tags):
                 count = sum(1 for op in tag_mapping.values() if tag in op.get('tags', []))
                 print(f"   {tag} ({count} operations)")

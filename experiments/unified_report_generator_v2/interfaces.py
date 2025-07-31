@@ -7,8 +7,8 @@ creating different types of reports with shared logic.
 
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Any, Dict, List, Optional, Protocol
 from enum import Enum
+from typing import Any, Protocol
 
 
 class ReportFormat(Enum):
@@ -28,7 +28,7 @@ class StepInfo:
     title: str
     icon: str
     status: str = "pending"
-    details: Dict[str, Any] = None
+    details: dict[str, Any] = None
     
     def __post_init__(self):
         if self.details is None:
@@ -67,12 +67,12 @@ class IReportSection(ABC):
     """Interface for a report section that can be rendered in different formats."""
     
     @abstractmethod
-    def render(self, format: ReportFormat, context: Dict[str, Any]) -> Any:
+    def render(self, format: ReportFormat, context: dict[str, Any]) -> Any:
         """Render this section in the specified format."""
         pass
     
     @abstractmethod
-    def get_data(self) -> Dict[str, Any]:
+    def get_data(self) -> dict[str, Any]:
         """Get the raw data for this section."""
         pass
 
@@ -86,7 +86,7 @@ class IReportFormatter(ABC):
         pass
     
     @abstractmethod
-    def format_list(self, items: List[str], ordered: bool = False) -> Any:
+    def format_list(self, items: list[str], ordered: bool = False) -> Any:
         """Format a list of items."""
         pass
     
@@ -96,12 +96,12 @@ class IReportFormatter(ABC):
         pass
     
     @abstractmethod
-    def format_table(self, headers: List[str], rows: List[List[Any]]) -> Any:
+    def format_table(self, headers: list[str], rows: list[list[Any]]) -> Any:
         """Format a table."""
         pass
     
     @abstractmethod
-    def format_tree(self, root: str, children: Dict[str, Any], max_depth: Optional[int] = None) -> Any:
+    def format_tree(self, root: str, children: dict[str, Any], max_depth: int | None = None) -> Any:
         """Format a tree structure."""
         pass
     
@@ -116,7 +116,7 @@ class IReportFormatter(ABC):
         pass
     
     @abstractmethod
-    def join_elements(self, elements: List[Any]) -> Any:
+    def join_elements(self, elements: list[Any]) -> Any:
         """Join multiple formatted elements."""
         pass
 
@@ -124,19 +124,19 @@ class IReportFormatter(ABC):
 class IDataProvider(Protocol):
     """Protocol for providing data to report sections."""
     
-    def get_model_info(self) -> Dict[str, Any]:
+    def get_model_info(self) -> dict[str, Any]:
         """Get model information."""
         ...
     
-    def get_step_info(self, step_name: str) -> Optional[StepInfo]:
+    def get_step_info(self, step_name: str) -> StepInfo | None:
         """Get information about a specific step."""
         ...
     
-    def get_hierarchy_data(self) -> Dict[str, Dict[str, Any]]:
+    def get_hierarchy_data(self) -> dict[str, dict[str, Any]]:
         """Get module hierarchy data."""
         ...
     
-    def get_tagged_nodes(self) -> Dict[str, str]:
+    def get_tagged_nodes(self) -> dict[str, str]:
         """Get ONNX node to tag mappings."""
         ...
     
@@ -144,11 +144,11 @@ class IDataProvider(Protocol):
         """Get tagging statistics."""
         ...
     
-    def get_export_config(self) -> Dict[str, Any]:
+    def get_export_config(self) -> dict[str, Any]:
         """Get export configuration."""
         ...
     
-    def get_file_info(self) -> Dict[str, Any]:
+    def get_file_info(self) -> dict[str, Any]:
         """Get output file information."""
         ...
 

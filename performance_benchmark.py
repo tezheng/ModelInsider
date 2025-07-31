@@ -1,11 +1,14 @@
 #!/usr/bin/env python3
 """Performance benchmark for GraphML generation."""
 
-import time
-import psutil
 import os
+import time
 from pathlib import Path
+
+import psutil
+
 from modelexport.strategies.htp.htp_exporter import HTPExporter
+
 
 def benchmark_model_export(model_name: str, description: str) -> dict:
     """Benchmark a model export with performance metrics."""
@@ -51,7 +54,9 @@ def benchmark_model_export(model_name: str, description: str) -> dict:
         
         # Generate GraphML
         graphml_start = time.time()
-        from modelexport.graphml.hierarchical_converter_v2 import EnhancedHierarchicalConverter
+        from modelexport.graphml.hierarchical_converter import (
+            EnhancedHierarchicalConverter,
+        )
         
         converter = EnhancedHierarchicalConverter(htp_metadata_path=metadata_path)
         graphml_content = converter.convert(f"{output_dir}model.onnx")

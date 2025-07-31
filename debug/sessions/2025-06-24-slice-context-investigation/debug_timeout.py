@@ -3,11 +3,13 @@
 Debug script to isolate the timeout issue in HTP export.
 """
 
-import torch
-from transformers import AutoModel, AutoTokenizer
-from modelexport.hierarchy_exporter import HierarchyExporter
 import signal
 import sys
+
+from transformers import AutoModel, AutoTokenizer
+
+from modelexport.hierarchy_exporter import HierarchyExporter
+
 
 def timeout_handler(signum, frame):
     print("TIMEOUT: Script execution taking too long!")

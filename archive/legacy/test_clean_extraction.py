@@ -3,16 +3,15 @@
 Test Clean Subgraph Extraction - Simplified Version
 """
 
-import torch
-import torch.nn as nn
-import onnx
 import json
 from pathlib import Path
-from transformers import AutoModel
 
-from enhanced_dag_extractor import EnhancedDAGExtractor
+import onnx
+import torch
 from clean_subgraph_extractor import CleanSubgraphExtractor
+from enhanced_dag_extractor import EnhancedDAGExtractor
 from input_generator import UniversalInputGenerator
+from transformers import AutoModel
 
 
 def create_enhanced_bert_model():

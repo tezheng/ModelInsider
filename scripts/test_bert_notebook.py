@@ -1,15 +1,14 @@
 #!/usr/bin/env python3
 """Test the BERT-tiny notebook cells to ensure they work."""
 
+import warnings
+from pathlib import Path
+
+import onnx
+import onnxruntime as ort
 import torch
 import torch.nn as nn
 import torch.onnx
-import onnx
-import onnxruntime as ort
-import numpy as np
-from pathlib import Path
-import warnings
-from collections import defaultdict
 
 warnings.filterwarnings("ignore", category=UserWarning)
 

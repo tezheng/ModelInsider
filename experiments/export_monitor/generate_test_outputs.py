@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 from export_monitor import ExportMonitor, ExportStep
-from fixtures import create_bert_tiny_fixture, create_step_timeline
+from fixtures import create_bert_tiny_fixture
 
 
 def generate_bert_tiny_outputs():

@@ -4,11 +4,11 @@ Exploration script to dump TorchScript intermediate state before ONNX conversion
 This script explores what information is available at node.scopeName() level.
 """
 
+import json
+
 import torch
 import torch.nn as nn
 from transformers import AutoModel, AutoTokenizer
-import json
-from typing import Dict, List, Any
 
 
 def explore_torchscript_intermediate_state():
@@ -232,7 +232,7 @@ def explore_torchscript_intermediate_state():
         "scope_hierarchy": sorted_scopes,
         "scope_analysis": {
             "depth_distribution": scope_analysis["depth_distribution"],
-            "module_types": sorted(list(scope_analysis["module_types"])),
+            "module_types": sorted(scope_analysis["module_types"]),
             "top_prefixes": top_prefixes
         },
         "node_details": node_info

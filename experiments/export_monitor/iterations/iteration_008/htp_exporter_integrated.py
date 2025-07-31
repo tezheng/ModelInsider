@@ -4,14 +4,12 @@ All logging and metadata generation delegated to export monitor.
 """
 
 import time
-import torch
+from typing import Any
+
 import onnx
-from pathlib import Path
-from typing import Dict, Any, Optional
+import torch
 
 # Import from relative paths matching the original structure
-from ...core.onnx_node_tagger import create_node_tagger_from_hierarchy
-from ...core.onnx_utils import infer_output_names
 from ...core.tracing_hierarchy_builder import TracingHierarchyBuilder
 
 # Import the rich export monitor
@@ -33,8 +31,8 @@ class HTPExporter:
         self.monitor = None
         
     def export(self, model: torch.nn.Module, output_path: str, 
-               dummy_input: Optional[Dict[str, torch.Tensor]] = None,
-               export_params: Optional[Dict[str, Any]] = None) -> str:
+               dummy_input: dict[str, torch.Tensor] | None = None,
+               export_params: dict[str, Any] | None = None) -> str:
         """Export model using HTP strategy with export monitor.
         
         Args:
@@ -194,7 +192,7 @@ class HTPExporter:
         
         return output_path
     
-    def _generate_dummy_input(self, model: torch.nn.Module, model_name: str) -> Dict[str, torch.Tensor]:
+    def _generate_dummy_input(self, model: torch.nn.Module, model_name: str) -> dict[str, torch.Tensor]:
         """Generate dummy input for the model."""
         # Simple dummy input generation
         batch_size = 1

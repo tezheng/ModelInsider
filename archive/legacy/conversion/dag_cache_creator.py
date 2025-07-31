@@ -3,8 +3,10 @@
 Create DAG-enhanced static cache with connection information
 """
 
-import onnx
 import json
+
+import onnx
+
 
 def extract_dag_connections(onnx_file, module_name):
     """Extract DAG connections (input/output relationships) from ONNX model"""

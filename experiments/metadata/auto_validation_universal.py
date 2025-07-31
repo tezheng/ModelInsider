@@ -26,7 +26,7 @@ class UniversalModelValidator:
         
         # Analyze module hierarchy depth
         max_depth = 0
-        for module_name in modules.keys():
+        for module_name in modules:
             depth = module_name.count(".")
             max_depth = max(max_depth, depth)
         

@@ -2,9 +2,11 @@
 Debug test to understand why slice operations aren't being tracked.
 """
 
+import tempfile
+
 import torch
 import torch.nn as nn
-import tempfile
+
 from modelexport.hierarchy_exporter import HierarchyExporter
 
 

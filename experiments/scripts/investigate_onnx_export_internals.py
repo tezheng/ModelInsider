@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Investigate ONNX export internals for BERT-tiny."""
 
+import warnings
+
 import torch
 import torch.nn as nn
 from transformers import AutoModel, AutoTokenizer
-import warnings
+
 warnings.filterwarnings("ignore")
 
 def trace_module_annotations():

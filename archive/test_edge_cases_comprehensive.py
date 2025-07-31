@@ -187,10 +187,7 @@ class EdgeCaseTestFramework:
                 return True
         
         # Check semantic type match
-        if semantic_type in pattern_config['semantic_types']:
-            return True
-        
-        return False
+        return semantic_type in pattern_config['semantic_types']
     
     def _validate_edge_case_coverage(self, edge_case_analysis: dict[str, Any]) -> dict[str, Any]:
         """Validate that edge case coverage meets expectations."""
@@ -242,7 +239,7 @@ class EdgeCaseTestFramework:
         }
         
         # Aggregate results across all models
-        for model_name, model_results in all_results.items():
+        for _model_name, model_results in all_results.items():
             validation = model_results['validation_results']
             
             for pattern_name, pattern_validation in validation.items():

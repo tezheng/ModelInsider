@@ -8,7 +8,6 @@ with full JSON schema support and validation.
 from __future__ import annotations
 
 import json
-import time
 from pathlib import Path
 from typing import Any
 
@@ -17,8 +16,8 @@ from .metadata_models import (
     ExportReportModel,
     HTPMetadataModel,
     ModelInfoModel,
-    OutputFilesModel,
     OnnxModelOutputModel,
+    OutputFilesModel,
     QualityGuaranteesModel,
     StatisticsModel,
     TaggingCoverageModel,
@@ -197,7 +196,7 @@ class HTPMetadataBuilderPydantic:
         Raises:
             ValidationError: If metadata doesn't match schema
         """
-        if isinstance(metadata, (str, Path)):
+        if isinstance(metadata, str | Path):
             # Load from file
             with open(metadata) as f:
                 data = json.load(f)

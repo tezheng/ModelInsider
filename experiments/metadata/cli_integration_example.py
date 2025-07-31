@@ -4,15 +4,14 @@ Example integration of advanced metadata features into modelexport CLI.
 This shows how to add the most valuable features with minimal changes.
 """
 
-import click
 import json
 from pathlib import Path
-from typing import Any
+
+import click
 
 # These would be imported from the actual modules
 from .metadata_cli_utils import MetadataCLI
 from .metadata_patch_cli import MetadataPatchCLI
-from .auto_validation import AutoValidationReport
 
 
 def add_analyze_query_support(analyze_command):

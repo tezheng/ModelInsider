@@ -50,7 +50,7 @@ def test_bert_tiny():
     # Find some interesting mappings
     print("   Sample semantic mappings:")
     count = 0
-    for node_name, tag_info in metadata['semantic_mappings'].items():
+    for _node_name, tag_info in metadata['semantic_mappings'].items():
         if tag_info['hf_module_name'] and count < 5:
             print(f"     {tag_info['onnx_op_type']:12} -> {tag_info['semantic_tag']:40} (module: {tag_info['hf_module_name']})")
             count += 1

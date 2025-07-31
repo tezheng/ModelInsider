@@ -4,13 +4,12 @@ Capture baseline outputs from original HTP exporter implementation.
 This script captures console output WITH Rich formatting/colors preserved.
 """
 
-import os
-import subprocess
-import sys
-from pathlib import Path
-from rich.console import Console
-from io import StringIO
 import json
+import subprocess
+from pathlib import Path
+
+from rich.console import Console
+
 
 def capture_original_outputs():
     """Capture outputs from the original HTP implementation."""

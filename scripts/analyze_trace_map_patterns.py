@@ -4,8 +4,9 @@ Analyze the Enhanced Trace Module Map patterns to understand PyTorch's naming co
 """
 
 import json
-from pathlib import Path
 from collections import defaultdict
+from pathlib import Path
+
 
 def analyze_trace_map_patterns():
     """Analyze the captured trace map to understand PyTorch's naming patterns."""
@@ -16,7 +17,7 @@ def analyze_trace_map_patterns():
         print("❌ Results file not found. Run experimental_enhanced_trace_map.py first.")
         return
     
-    with open(results_path, 'r') as f:
+    with open(results_path) as f:
         data = json.load(f)
     
     entries = data['captures'][0]['entries']
@@ -32,7 +33,7 @@ def analyze_trace_map_patterns():
         'other_modules': []
     }
     
-    for key, info in entries.items():
+    for _key, info in entries.items():
         module_class = info['module_class']
         scope_name = info['scope_name']
         
@@ -130,7 +131,7 @@ def analyze_trace_map_patterns():
     print("   Mapping scope names to module hierarchy:")
     
     matches = []
-    for key, info in entries.items():
+    for _key, info in entries.items():
         scope_name = info['scope_name']
         if '::' in scope_name:
             _, instance_name = scope_name.split('::', 1)

@@ -3,9 +3,8 @@
 Iteration 3 v2 - Create proper export monitor v3 with all fixes
 """
 
-import io
-import json
 from pathlib import Path
+
 
 def create_export_monitor_v3():
     """Create a clean v3 version with all fixes."""

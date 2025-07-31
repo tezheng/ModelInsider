@@ -5,10 +5,11 @@ Verifies tags, empty tags, and tag hierarchy integrity.
 """
 
 import json
-import torch
-import onnx
-from transformers import AutoModel
 from pathlib import Path
+
+import onnx
+import torch
+from transformers import AutoModel
 
 from modelexport.core.enhanced_semantic_exporter import EnhancedSemanticExporter
 
@@ -23,7 +24,7 @@ def verify_enhanced_semantic_bert_tiny():
     model.eval()
     
     # Load config
-    with open("export_config_bertmodel.json", 'r') as f:
+    with open("export_config_bertmodel.json") as f:
         config = json.load(f)
     
     # Generate inputs

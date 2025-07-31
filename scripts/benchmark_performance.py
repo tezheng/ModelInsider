@@ -5,12 +5,13 @@ Performance Benchmarking Script
 Measures conversion times, memory usage, and file sizes for different model sizes.
 """
 
-import time
-import psutil
 import os
-import subprocess
 import re
+import subprocess
+import time
 from pathlib import Path
+
+import psutil
 
 
 def benchmark_model_conversion(model_name, description):

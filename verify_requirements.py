@@ -3,12 +3,13 @@
 Verify what we're chasing based on the requirements document.
 """
 
-import torch
-from transformers import AutoModel, AutoTokenizer
-from modelexport.strategies.htp.htp_hierarchy_exporter import HierarchyExporter
-import onnx
-import json
 from pathlib import Path
+
+import onnx
+from transformers import AutoModel, AutoTokenizer
+
+from modelexport.strategies.htp.htp_hierarchy_exporter import HierarchyExporter
+
 
 def analyze_requirements():
     """Analyze what the requirements are asking for."""

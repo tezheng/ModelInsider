@@ -10,9 +10,8 @@ sys.path.insert(0, str(Path(__file__).parent))
 project_root = Path(__file__).parent.parent.parent.parent.parent
 sys.path.insert(0, str(project_root))
 
-import torch
-from transformers import AutoModel
 from htp_exporter_standalone import HTPExporter
+from transformers import AutoModel
 
 
 def test_export():

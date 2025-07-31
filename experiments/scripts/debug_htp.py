@@ -1,9 +1,12 @@
 #!/usr/bin/env python3
 """Debug HTP implementation to understand what's happening."""
 
-import torch
 import tempfile
+
+import torch
+
 from modelexport.hierarchy_exporter import HierarchyExporter
+
 
 class SimpleModel(torch.nn.Module):
     def __init__(self):

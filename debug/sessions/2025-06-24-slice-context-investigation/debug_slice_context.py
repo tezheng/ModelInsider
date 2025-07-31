@@ -2,9 +2,11 @@
 Debug slice operation context capture to understand why slices get wrong tags.
 """
 
+import tempfile
+
 import torch
 import torch.nn as nn
-import tempfile
+
 from modelexport.hierarchy_exporter import HierarchyExporter
 
 

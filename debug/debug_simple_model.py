@@ -3,10 +3,13 @@
 Debug script to see what tags are generated for the simple model.
 """
 
+import tempfile
+
 import torch
 import torch.nn as nn
+
 from modelexport.hierarchy_exporter import HierarchyExporter
-import tempfile
+
 
 class SimpleModel(nn.Module):
     """Simple test model for parameter mapping tests."""

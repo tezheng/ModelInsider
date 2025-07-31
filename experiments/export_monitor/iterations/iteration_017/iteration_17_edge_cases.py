@@ -4,12 +4,10 @@ Iteration 17: Edge case handling and robustness testing.
 Test with various model architectures and edge conditions.
 """
 
-import sys
-from pathlib import Path
 import time
-import json
-from typing import Dict, Any, List, Optional
 import traceback
+from pathlib import Path
+from typing import Any
 
 
 def test_edge_cases():
@@ -240,7 +238,7 @@ def test_concurrent():
     return True  # Placeholder
 
 
-def validate_edge_case(test_data: Dict[str, Any], case_name: str) -> bool:
+def validate_edge_case(test_data: dict[str, Any], case_name: str) -> bool:
     """Validate edge case handling."""
     try:
         # Simulate export monitor processing
@@ -322,7 +320,7 @@ def create_edge_case_fixes():
     }
     
     print(f"\n✅ Created {len(fixes)} edge case fixes")
-    for name, fix in fixes.items():
+    for name, _fix in fixes.items():
         print(f"   • {name}")
     
     return fixes

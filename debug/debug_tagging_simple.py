@@ -3,10 +3,13 @@
 Simple debug script to test tagging logic without full model export.
 """
 
+import tempfile
+
 import torch
 from transformers import AutoModel, AutoTokenizer
+
 from modelexport.hierarchy_exporter import HierarchyExporter
-import tempfile
+
 
 def debug_tagging():
     print("🔍 Debug: Simple Tagging Test")

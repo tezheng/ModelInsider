@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Test custom symbolic functions for ONNX export with tagging."""
 
+
+import onnx
 import torch
 import torch.onnx
-import onnx
-import json
+
 
 class TaggingExporter:
     def __init__(self):

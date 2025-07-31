@@ -7,8 +7,11 @@ Verifies that execution order naturally builds correct hierarchy.
 
 import torch
 from transformers import AutoModel
+
 from modelexport.core.tracing_hierarchy_builder import TracingHierarchyBuilder
-from modelexport.core.tracing_hierarchy_builder_ultra_simple import UltraSimpleTracingHierarchyBuilder
+from modelexport.core.tracing_hierarchy_builder_ultra_simple import (
+    UltraSimpleTracingHierarchyBuilder,
+)
 
 
 def test_ultra_simple():

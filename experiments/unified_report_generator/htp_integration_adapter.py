@@ -5,7 +5,6 @@ This shows how to modify the HTP exporter to use the unified approach.
 """
 
 from pathlib import Path
-from typing import Any, Dict
 
 from unified_report_generator import ExportSession, UnifiedReportGenerator
 
@@ -58,7 +57,7 @@ class HTPExporterAdapter:
         """Add a step to the session."""
         return self.session.add_step(name, status, **details)
     
-    def generate_all_reports(self, output_path: str) -> Dict[str, str]:
+    def generate_all_reports(self, output_path: str) -> dict[str, str]:
         """Generate all report formats."""
         # Update session with latest data
         self.update_session_from_exporter()

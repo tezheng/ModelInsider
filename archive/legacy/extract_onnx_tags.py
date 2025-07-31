@@ -4,11 +4,11 @@ Universal ONNX Tag Extractor
 Extract all hierarchy tags from any ONNX model without hardcoded assumptions
 """
 
-import onnx
 import json
-from pathlib import Path
-from typing import Dict, List, Set, Optional
 from collections import defaultdict
+from pathlib import Path
+
+import onnx
 
 
 class ONNXTagExtractor:
@@ -31,7 +31,7 @@ class ONNXTagExtractor:
         except Exception as e:
             raise RuntimeError(f"Failed to load ONNX model: {e}")
     
-    def extract_all_tags(self) -> Dict:
+    def extract_all_tags(self) -> dict:
         """Extract all hierarchy tags from the ONNX model"""
         if not self.model:
             raise RuntimeError("Model not loaded")
@@ -84,12 +84,12 @@ class ONNXTagExtractor:
                 results["nodes_without_tags"].append(node_info)
         
         # Convert sets to lists for JSON serialization
-        results["unique_tags"] = sorted(list(results["unique_tags"]))
+        results["unique_tags"] = sorted(results["unique_tags"])
         results["tag_statistics"] = dict(results["tag_statistics"])
         
         return results
     
-    def _extract_tags_from_node(self, node) -> List[str]:
+    def _extract_tags_from_node(self, node) -> list[str]:
         """Extract hierarchy tags from a single node"""
         tags = []
         
@@ -113,7 +113,7 @@ class ONNXTagExtractor:
         
         return tags
     
-    def _build_tag_hierarchy(self, tag: str, hierarchy: Dict):
+    def _build_tag_hierarchy(self, tag: str, hierarchy: dict):
         """Build hierarchical structure from tag path"""
         parts = [part for part in tag.split('/') if part]
         current = hierarchy
@@ -129,7 +129,7 @@ class ONNXTagExtractor:
             current[part]["node_count"] += 1
             current = current[part]["children"]
     
-    def get_tags_by_pattern(self, pattern: str) -> List[str]:
+    def get_tags_by_pattern(self, pattern: str) -> list[str]:
         """Get all tags matching a pattern"""
         results = self.extract_all_tags()
         matching_tags = []
@@ -141,18 +141,18 @@ class ONNXTagExtractor:
         
         return matching_tags
     
-    def get_nodes_by_tag(self, target_tag: str) -> List[Dict]:
+    def get_nodes_by_tag(self, target_tag: str) -> list[dict]:
         """Get all nodes with a specific tag"""
         results = self.extract_all_tags()
         matching_nodes = []
         
-        for node_name, node_info in results["node_tags"].items():
+        for _node_name, node_info in results["node_tags"].items():
             if target_tag in node_info["tags"]:
                 matching_nodes.append(node_info)
         
         return matching_nodes
     
-    def analyze_tag_coverage(self) -> Dict:
+    def analyze_tag_coverage(self) -> dict:
         """Analyze how many nodes have tags vs no tags"""
         results = self.extract_all_tags()
         

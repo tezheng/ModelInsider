@@ -6,18 +6,19 @@ This script tests the FX implementation with various model types to identify
 which architectures work well with FX symbolic tracing and which don't.
 """
 
-import sys
 import os
+import sys
+import tempfile
+from pathlib import Path
+
 import torch
 import torch.nn as nn
-from pathlib import Path
-import json
-import tempfile
 
 # Add modelexport to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from modelexport.fx_hierarchy_exporter import FXHierarchyExporter
+
 
 def test_vision_models():
     """Test with computer vision models that might be FX-compatible."""

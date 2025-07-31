@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Test how native C++ operations like scaled_dot_product_attention behave in ONNX export."""
 
+import onnx
 import torch
 import torch.nn.functional as F
-import onnx
+
 
 class AttentionModel(torch.nn.Module):
     def __init__(self, hidden_size=64, num_heads=4):

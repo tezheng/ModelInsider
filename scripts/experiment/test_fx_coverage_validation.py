@@ -5,18 +5,20 @@ Iteration 9: Coverage validation test for enhanced FX exporter.
 This script validates the improved coverage rates and tests specific improvements.
 """
 
-import sys
+import json
 import os
+import sys
+import tempfile
+from pathlib import Path
+
 import torch
 import torch.nn as nn
-from pathlib import Path
-import json
-import tempfile
 
 # Add modelexport to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from modelexport.fx_hierarchy_exporter import FXHierarchyExporter
+
 
 def test_coverage_improvements():
     """Test the coverage improvements across different model types."""
@@ -171,7 +173,7 @@ def test_node_type_coverage():
             print(f"   Extra types: {found_node_types - expected_node_types}")
             
             coverage_by_type = {}
-            for node_type, count in fx_stats['node_type_distribution'].items():
+            for node_type, _count in fx_stats['node_type_distribution'].items():
                 # This is a rough estimate since we don't track per-type hierarchy
                 coverage_by_type[node_type] = "✅ Captured"
             
@@ -206,7 +208,7 @@ def test_hierarchy_quality():
             result = exporter.export(model, inputs, tmp.name)
             
             # Load sidecar for detailed hierarchy analysis
-            with open(result['sidecar_path'], 'r') as f:
+            with open(result['sidecar_path']) as f:
                 sidecar = json.load(f)
             
             hierarchy_mapping = sidecar['hierarchy_mapping']
@@ -224,7 +226,7 @@ def test_hierarchy_quality():
                 'output_paths': []
             }
             
-            for node_name, hierarchy_path in hierarchy_mapping.items():
+            for _node_name, hierarchy_path in hierarchy_mapping.items():
                 if hierarchy_path.startswith('/'):
                     if '/Functions/' in hierarchy_path:
                         path_categories['function_paths'].append(hierarchy_path)
@@ -253,7 +255,7 @@ def test_hierarchy_quality():
             
             # Sample hierarchy paths
             print(f"\n📋 Sample Hierarchy Mappings:")
-            for i, (node, path) in enumerate(list(hierarchy_mapping.items())[:8]):
+            for _i, (node, path) in enumerate(list(hierarchy_mapping.items())[:8]):
                 print(f"   {node} -> {path}")
             
             # Cleanup

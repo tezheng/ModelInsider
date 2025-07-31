@@ -2,14 +2,17 @@
 Concrete report section implementations with shared logic.
 """
 
-from typing import Any, Dict, List, Optional
-from dataclasses import asdict
+from typing import Any
 
-from interfaces import (
-    IReportSection, IReportFormatter, IDataProvider,
-    ReportFormat, StepInfo, StatisticsInfo
-)
 from formatters import get_formatter
+from interfaces import (
+    IDataProvider,
+    IReportFormatter,
+    IReportSection,
+    ReportFormat,
+    StatisticsInfo,
+    StepInfo,
+)
 
 
 class ModelInfoSection(IReportSection):
@@ -18,11 +21,11 @@ class ModelInfoSection(IReportSection):
     def __init__(self, data_provider: IDataProvider):
         self.data_provider = data_provider
     
-    def get_data(self) -> Dict[str, Any]:
+    def get_data(self) -> dict[str, Any]:
         """Get model info data."""
         return self.data_provider.get_model_info()
     
-    def render(self, format: ReportFormat, context: Dict[str, Any]) -> Any:
+    def render(self, format: ReportFormat, context: dict[str, Any]) -> Any:
         """Render model info in specified format."""
         formatter = get_formatter(format, **context)
         data = self.get_data()
@@ -69,11 +72,11 @@ class StepSection(IReportSection):
         self.step_name = step_name
         self.data_provider = data_provider
     
-    def get_data(self) -> Optional[StepInfo]:
+    def get_data(self) -> StepInfo | None:
         """Get step data."""
         return self.data_provider.get_step_info(self.step_name)
     
-    def render(self, format: ReportFormat, context: Dict[str, Any]) -> Any:
+    def render(self, format: ReportFormat, context: dict[str, Any]) -> Any:
         """Render step in specified format."""
         step_info = self.get_data()
         if not step_info:
@@ -113,7 +116,7 @@ class StepSection(IReportSection):
         
         return formatter.join_elements(elements)
     
-    def _render_input_generation_console(self, step_info: StepInfo, formatter: IReportFormatter, elements: List[Any]):
+    def _render_input_generation_console(self, step_info: StepInfo, formatter: IReportFormatter, elements: list[Any]):
         """Render input generation step for console."""
         details = step_info.details
         elements.append(formatter.format_key_value(
@@ -137,7 +140,7 @@ class StepSection(IReportSection):
         ]
         elements.append(formatter.format_list(input_items))
     
-    def _render_hierarchy_building_console(self, step_info: StepInfo, formatter: IReportFormatter, elements: List[Any]):
+    def _render_hierarchy_building_console(self, step_info: StepInfo, formatter: IReportFormatter, elements: list[Any]):
         """Render hierarchy building step for console."""
         details = step_info.details
         hierarchy_data = self.data_provider.get_hierarchy_data()
@@ -157,7 +160,7 @@ class StatisticsSection(IReportSection):
         """Get statistics data."""
         return self.data_provider.get_statistics()
     
-    def render(self, format: ReportFormat, context: Dict[str, Any]) -> Any:
+    def render(self, format: ReportFormat, context: dict[str, Any]) -> Any:
         """Render statistics in specified format."""
         stats = self.get_data()
         formatter = get_formatter(format, **context)
@@ -183,11 +186,11 @@ class HierarchyTreeSection(IReportSection):
         self.data_provider = data_provider
         self.include_nodes = include_nodes
     
-    def get_data(self) -> Dict[str, Dict[str, Any]]:
+    def get_data(self) -> dict[str, dict[str, Any]]:
         """Get hierarchy data."""
         return self.data_provider.get_hierarchy_data()
     
-    def render(self, format: ReportFormat, context: Dict[str, Any]) -> Any:
+    def render(self, format: ReportFormat, context: dict[str, Any]) -> Any:
         """Render hierarchy tree in specified format."""
         hierarchy_data = self.get_data()
         formatter = get_formatter(format, **context)
@@ -241,7 +244,7 @@ class HierarchyTreeSection(IReportSection):
                 "modules": hierarchy_data
             }
     
-    def _build_tree_structure(self, hierarchy_data: Dict[str, Dict[str, Any]]) -> Dict[str, Any]:
+    def _build_tree_structure(self, hierarchy_data: dict[str, dict[str, Any]]) -> dict[str, Any]:
         """Build nested tree structure from flat hierarchy data."""
         tree = {}
         
@@ -272,10 +275,10 @@ class HierarchyTreeSection(IReportSection):
         
         return tree
     
-    def _calculate_node_counts(self, tagged_nodes: Dict[str, str]) -> Dict[str, int]:
+    def _calculate_node_counts(self, tagged_nodes: dict[str, str]) -> dict[str, int]:
         """Calculate node counts per hierarchy tag."""
         counts = {}
-        for node, tag in tagged_nodes.items():
+        for _node, tag in tagged_nodes.items():
             counts[tag] = counts.get(tag, 0) + 1
         return counts
 
@@ -286,7 +289,7 @@ class SummarySection(IReportSection):
     def __init__(self, data_provider: IDataProvider):
         self.data_provider = data_provider
     
-    def get_data(self) -> Dict[str, Any]:
+    def get_data(self) -> dict[str, Any]:
         """Get summary data."""
         model_info = self.data_provider.get_model_info()
         stats = self.data_provider.get_statistics()
@@ -300,7 +303,7 @@ class SummarySection(IReportSection):
             "files": file_info
         }
     
-    def render(self, format: ReportFormat, context: Dict[str, Any]) -> Any:
+    def render(self, format: ReportFormat, context: dict[str, Any]) -> Any:
         """Render summary in specified format."""
         data = self.get_data()
         formatter = get_formatter(format, **context)

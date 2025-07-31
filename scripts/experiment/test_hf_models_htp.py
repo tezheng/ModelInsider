@@ -10,14 +10,15 @@ Using the HTP (Hierarchy-preserving Tensor Processing) strategy instead of FX
 to handle complex control flow and transformers models.
 """
 
-import sys
-import os
-import torch
-import torch.nn as nn
-from pathlib import Path
 import json
+import os
+import sys
 import tempfile
 import time
+from pathlib import Path
+
+import torch
+import torch.nn as nn
 
 # Add modelexport to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
@@ -30,6 +31,7 @@ def test_microsoft_resnet50_htp():
     
     try:
         from transformers import AutoImageProcessor, ResNetForImageClassification
+
         from modelexport.hierarchy_exporter import HierarchyExporter
         
         model_name = "microsoft/resnet-50"
@@ -64,13 +66,13 @@ def test_microsoft_resnet50_htp():
                 # Check for hierarchy file
                 hierarchy_file = tmp.name.replace('.onnx', '_hierarchy.json')
                 if os.path.exists(hierarchy_file):
-                    with open(hierarchy_file, 'r') as f:
+                    with open(hierarchy_file) as f:
                         hierarchy_data = json.load(f)
                     print(f"   Hierarchy entries: {len(hierarchy_data.get('hierarchy_mapping', {}))}")
                     
                     # Sample hierarchy entries
                     print(f"   Sample hierarchy paths:")
-                    for i, (node, path) in enumerate(list(hierarchy_data.get('hierarchy_mapping', {}).items())[:5]):
+                    for _i, (node, path) in enumerate(list(hierarchy_data.get('hierarchy_mapping', {}).items())[:5]):
                         print(f"     {node} -> {path}")
                 
                 # Cleanup
@@ -101,6 +103,7 @@ def test_facebook_sam_vit_htp():
     
     try:
         from transformers import SamModel, SamProcessor
+
         from modelexport.hierarchy_exporter import HierarchyExporter
         
         model_name = "facebook/sam-vit-base"
@@ -136,13 +139,13 @@ def test_facebook_sam_vit_htp():
                 # Check for hierarchy file
                 hierarchy_file = tmp.name.replace('.onnx', '_hierarchy.json')
                 if os.path.exists(hierarchy_file):
-                    with open(hierarchy_file, 'r') as f:
+                    with open(hierarchy_file) as f:
                         hierarchy_data = json.load(f)
                     print(f"   Hierarchy entries: {len(hierarchy_data.get('hierarchy_mapping', {}))}")
                     
                     # Sample hierarchy entries
                     print(f"   Sample hierarchy paths:")
-                    for i, (node, path) in enumerate(list(hierarchy_data.get('hierarchy_mapping', {}).items())[:5]):
+                    for _i, (node, path) in enumerate(list(hierarchy_data.get('hierarchy_mapping', {}).items())[:5]):
                         print(f"     {node} -> {path}")
                 
                 # Cleanup
@@ -217,7 +220,7 @@ def test_htp_vs_fx_comparison():
             # Check hierarchy file
             hierarchy_file = tmp.name.replace('.onnx', '_hierarchy.json')
             if os.path.exists(hierarchy_file):
-                with open(hierarchy_file, 'r') as f:
+                with open(hierarchy_file) as f:
                     hierarchy_data = json.load(f)
                 results['htp']['hierarchy_entries'] = len(hierarchy_data.get('hierarchy_mapping', {}))
                 print(f"     Hierarchy entries: {results['htp']['hierarchy_entries']}")

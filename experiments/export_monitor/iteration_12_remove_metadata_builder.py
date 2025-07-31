@@ -4,7 +4,6 @@ Iteration 12: Remove HTPMetadataBuilder from production htp_exporter.py
 Replace with export monitor completely.
 """
 
-import shutil
 from pathlib import Path
 
 
@@ -65,7 +64,7 @@ def create_production_fix():
     lines = content.split('\n')
     skip_next = False
     
-    for i, line in enumerate(lines):
+    for _i, line in enumerate(lines):
         # Skip the import
         if 'from .metadata_builder import HTPMetadataBuilder' in line:
             fixed_lines.append('# Removed: from .metadata_builder import HTPMetadataBuilder')

@@ -4,12 +4,12 @@ ONNX Tag Verification Script
 Verify that ONNX models contain the expected hierarchy tags and compare with static data
 """
 
-import onnx
-import json
-import os
-from pathlib import Path
-from typing import Dict, List, Any, Optional
 import argparse
+import json
+from pathlib import Path
+from typing import Any
+
+import onnx
 
 
 class ONNXTagVerifier:
@@ -20,7 +20,7 @@ class ONNXTagVerifier:
         self.test_outputs_dir = self.temp_dir / "test_outputs"
         self.onnx_models_dir = self.temp_dir / "onnx_models"
     
-    def verify_model_tags(self, model_name: str, verbose: bool = True) -> Dict[str, Any]:
+    def verify_model_tags(self, model_name: str, verbose: bool = True) -> dict[str, Any]:
         """Verify tags for a specific model"""
         if verbose:
             print(f"\n{'='*50}")
@@ -72,7 +72,7 @@ class ONNXTagVerifier:
                 'model_name': model_name
             }
     
-    def _extract_and_compare_tags(self, onnx_model, static_metadata: Dict, verbose: bool) -> Dict[str, Any]:
+    def _extract_and_compare_tags(self, onnx_model, static_metadata: dict, verbose: bool) -> dict[str, Any]:
         """Extract tags from ONNX and compare with static data"""
         
         # Extract tags from ONNX nodes
@@ -131,7 +131,7 @@ class ONNXTagVerifier:
         
         return results
     
-    def _compare_tags(self, onnx_tags: Dict, static_metadata: Dict, verbose: bool) -> Dict[str, Any]:
+    def _compare_tags(self, onnx_tags: dict, static_metadata: dict, verbose: bool) -> dict[str, Any]:
         """Compare ONNX tags with static metadata"""
         
         matching_operations = 0
@@ -189,7 +189,7 @@ class ONNXTagVerifier:
             'total_static_only': len(static_only_ops)
         }
     
-    def _print_verification_results(self, results: Dict):
+    def _print_verification_results(self, results: dict):
         """Print detailed verification results"""
         onnx_analysis = results['onnx_analysis']
         static_analysis = results['static_analysis']
@@ -236,7 +236,7 @@ class ONNXTagVerifier:
         else:
             print(f"\n❌ VERIFICATION FAILED (consistency: {comparison['consistency_rate']:.1%})")
     
-    def verify_all_models(self, verbose: bool = True) -> Dict[str, Any]:
+    def verify_all_models(self, verbose: bool = True) -> dict[str, Any]:
         """Verify all available models in the temp directory"""
         if verbose:
             print("VERIFYING ALL MODELS")

@@ -3,9 +3,10 @@
 Inspect Test Results - Show detailed analysis of extracted subgraphs
 """
 
-import onnx
 import json
 from pathlib import Path
+
+import onnx
 
 
 def inspect_extracted_models():

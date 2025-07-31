@@ -7,8 +7,11 @@ Shows the difference in module hierarchy size and efficiency.
 
 import torch
 from transformers import AutoModel
+
 from modelexport.core.tracing_hierarchy_builder import TracingHierarchyBuilder
-from modelexport.core.tracing_hierarchy_builder_optimized import OptimizedTracingHierarchyBuilder
+from modelexport.core.tracing_hierarchy_builder_optimized import (
+    OptimizedTracingHierarchyBuilder,
+)
 
 
 def compare_builders():

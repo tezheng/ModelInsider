@@ -7,13 +7,13 @@ messages were being printed multiple times.
 
 import io
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
+from modelexport.strategies.htp.base_writer import ExportData as HTPExportData
+from modelexport.strategies.htp.base_writer import ExportStep as HTPExportStep
 from modelexport.strategies.htp.export_monitor import HTPExportMonitor
-from modelexport.strategies.htp.base_writer import ExportStep as HTPExportStep, ExportData as HTPExportData
-from modelexport.strategies.htp.htp_exporter import HTPExporter
 
 
 class TestNoDuplicateOutput:
@@ -130,8 +130,9 @@ class TestNoDuplicateOutput:
         tmp_path
     ):
         """Test full export flow has no duplicate messages."""
-        from modelexport.strategies.htp.htp_exporter import HTPExporter
         import torch.nn as nn
+
+        from modelexport.strategies.htp.htp_exporter import HTPExporter
         
         # Create a simple model
         class SimpleModel(nn.Module):

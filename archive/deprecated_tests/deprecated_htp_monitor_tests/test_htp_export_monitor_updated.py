@@ -6,7 +6,6 @@ ensuring proper 7-step flow, correct formatting, and proper mocking.
 """
 
 import json
-import re
 from pathlib import Path
 from unittest.mock import MagicMock, Mock, patch
 
@@ -14,8 +13,9 @@ import pytest
 import torch
 import torch.nn as nn
 
+from modelexport.strategies.htp.base_writer import ExportData as HTPExportData
+from modelexport.strategies.htp.base_writer import ExportStep as HTPExportStep
 from modelexport.strategies.htp.export_monitor import HTPExportMonitor
-from modelexport.strategies.htp.base_writer import ExportData as HTPExportData, ExportStep as HTPExportStep
 from modelexport.strategies.htp.htp_exporter import HTPExporter
 
 

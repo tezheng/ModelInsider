@@ -6,14 +6,15 @@ This script creates a comprehensive experiment comparing function=True/False and
 whether export_modules_as_functions helps with hierarchy preservation requirements.
 """
 
-import torch
-import torch.nn as nn
+import json
+import warnings
+from pathlib import Path
+from typing import Any
+
 import onnx
 import onnxruntime as ort
-import json
-from pathlib import Path
-from typing import Dict, Any, Set
-import warnings
+import torch
+import torch.nn as nn
 
 # Suppress deprecation warnings for clarity
 warnings.filterwarnings("ignore", category=UserWarning)
@@ -107,7 +108,7 @@ class TestTransformer(nn.Module):
         return self.output_proj(x)
 
 
-def export_and_analyze(model, sample_input, export_modules_as_functions, suffix: str, output_dir: Path) -> Dict[str, Any]:
+def export_and_analyze(model, sample_input, export_modules_as_functions, suffix: str, output_dir: Path) -> dict[str, Any]:
     """Export model and analyze the resulting ONNX structure."""
     
     output_path = output_dir / f"test_model_{suffix}.onnx"

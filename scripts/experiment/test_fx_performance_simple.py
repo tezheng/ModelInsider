@@ -6,21 +6,21 @@ This script provides focused performance testing to identify bottlenecks
 and measure FX vs HTP performance.
 """
 
-import sys
 import os
-import torch
-import torch.nn as nn
-from pathlib import Path
-import json
+import statistics
+import sys
 import tempfile
 import time
-import statistics
-from typing import Dict, List, Any
+from pathlib import Path
+
+import torch
+import torch.nn as nn
 
 # Add modelexport to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from modelexport.fx_hierarchy_exporter import FXHierarchyExporter
+
 
 def benchmark_fx_performance():
     """Simple FX performance benchmark."""
@@ -43,7 +43,7 @@ def benchmark_fx_performance():
         times = []
         nodes = []
         
-        for i in range(3):  # 3 iterations for average
+        for _i in range(3):  # 3 iterations for average
             with tempfile.NamedTemporaryFile(suffix='.onnx', delete=False) as tmp:
                 try:
                     exporter = FXHierarchyExporter(auto_fallback=False)
@@ -96,7 +96,7 @@ def benchmark_fx_vs_htp():
     fx_times = []
     fx_nodes = 0
     
-    for i in range(3):
+    for _i in range(3):
         with tempfile.NamedTemporaryFile(suffix='.onnx', delete=False) as tmp:
             try:
                 exporter = FXHierarchyExporter(auto_fallback=False)
@@ -120,7 +120,7 @@ def benchmark_fx_vs_htp():
     htp_times = []
     htp_nodes = 0
     
-    for i in range(3):
+    for _i in range(3):
         with tempfile.NamedTemporaryFile(suffix='.onnx', delete=False) as tmp:
             try:
                 from modelexport.hierarchy_exporter import HierarchyExporter

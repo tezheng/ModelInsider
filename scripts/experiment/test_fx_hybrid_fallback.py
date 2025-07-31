@@ -6,18 +6,19 @@ This script tests the enhanced FX implementation that automatically detects
 model architecture compatibility and falls back to HTP when appropriate.
 """
 
-import sys
 import os
+import sys
+import tempfile
+from pathlib import Path
+
 import torch
 import torch.nn as nn
-from pathlib import Path
-import json
-import tempfile
 
 # Add modelexport to path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
 from modelexport.fx_hierarchy_exporter import FXHierarchyExporter
+
 
 def test_architecture_detection():
     """Test the architecture detection system."""

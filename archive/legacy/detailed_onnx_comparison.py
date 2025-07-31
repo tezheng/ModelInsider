@@ -4,11 +4,12 @@ Detailed ONNX Model Comparison
 Generate nodes/edges JSON and operator descriptions, then compare excluding inputs/outputs
 """
 
-import onnx
 import json
+from collections import Counter, defaultdict
 from pathlib import Path
-from typing import Dict, List, Any, Set
-from collections import defaultdict, Counter
+from typing import Any
+
+import onnx
 
 
 class ONNXModelAnalyzer:
@@ -19,7 +20,7 @@ class ONNXModelAnalyzer:
         self.model_name = model_name
         self.model = onnx.load(model_path)
         
-    def generate_nodes_edges_json(self) -> Dict[str, Any]:
+    def generate_nodes_edges_json(self) -> dict[str, Any]:
         """Generate nodes and edges representation as JSON"""
         nodes = []
         edges = []
@@ -77,7 +78,7 @@ class ONNXModelAnalyzer:
             }
         }
     
-    def generate_operator_descriptions(self) -> Dict[str, Any]:
+    def generate_operator_descriptions(self) -> dict[str, Any]:
         """Generate detailed operator descriptions"""
         operators = defaultdict(list)
         
@@ -139,7 +140,7 @@ class ONNXModelAnalyzer:
         else:
             return f"<{attr.type}>"
     
-    def _find_common_attributes(self, instances: List[Dict]) -> Dict[str, Any]:
+    def _find_common_attributes(self, instances: list[dict]) -> dict[str, Any]:
         """Find attributes that are common across all instances"""
         if not instances:
             return {}
@@ -162,7 +163,7 @@ class ONNXModelComparator:
         self.standalone_analyzer = ONNXModelAnalyzer(standalone_path, "standalone")
         self.extracted_analyzer = ONNXModelAnalyzer(extracted_path, "extracted")
     
-    def compare_models(self, output_dir: Path) -> Dict[str, Any]:
+    def compare_models(self, output_dir: Path) -> dict[str, Any]:
         """Perform detailed comparison and save results"""
         print("🔍 DETAILED ONNX MODEL COMPARISON")
         print("=" * 60)
@@ -231,7 +232,7 @@ class ONNXModelComparator:
         
         return comparison_report
     
-    def _compare_graphs(self, standalone_graph: Dict, extracted_graph: Dict) -> Dict[str, Any]:
+    def _compare_graphs(self, standalone_graph: dict, extracted_graph: dict) -> dict[str, Any]:
         """Compare graph structures (nodes and edges)"""
         standalone_nodes = standalone_graph["nodes"]
         extracted_nodes = extracted_graph["nodes"]
@@ -276,7 +277,7 @@ class ONNXModelComparator:
             "node_types_match": len(node_type_differences) == 0
         }
     
-    def _compare_operators(self, standalone_ops: Dict, extracted_ops: Dict) -> Dict[str, Any]:
+    def _compare_operators(self, standalone_ops: dict, extracted_ops: dict) -> dict[str, Any]:
         """Compare operator descriptions in detail"""
         standalone_op_counts = standalone_ops["statistics"]["operator_counts"]
         extracted_op_counts = extracted_ops["statistics"]["operator_counts"]
@@ -321,7 +322,7 @@ class ONNXModelComparator:
             }
         }
     
-    def _compare_operator_attributes(self, standalone_instances: List, extracted_instances: List) -> Dict[str, Any]:
+    def _compare_operator_attributes(self, standalone_instances: list, extracted_instances: list) -> dict[str, Any]:
         """Compare attributes across operator instances"""
         if not standalone_instances or not extracted_instances:
             return {"status": "no_instances_to_compare"}
@@ -347,7 +348,7 @@ class ONNXModelComparator:
             "attribute_sets_match": len(standalone_only) == 0 and len(extracted_only) == 0
         }
     
-    def _print_comparison_summary(self, graph_comparison: Dict, operator_comparison: Dict):
+    def _print_comparison_summary(self, graph_comparison: dict, operator_comparison: dict):
         """Print a human-readable comparison summary"""
         print("\n📈 GRAPH STRUCTURE COMPARISON:")
         print(f"   Nodes: Standalone {graph_comparison['node_count']['standalone']}, "

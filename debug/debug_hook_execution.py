@@ -5,7 +5,9 @@ Debug script to check what happens during hook execution.
 
 import torch
 from transformers import AutoModel, AutoTokenizer
+
 from modelexport.hierarchy_exporter import HierarchyExporter
+
 
 def debug_hook_execution():
     print("🔍 Debug: Hook Execution")

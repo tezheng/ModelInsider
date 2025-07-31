@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 """Investigate PyTorch module __annotations__ for potential tagging/naming uses."""
 
+import warnings
+
 import torch
 import torch.nn as nn
 from transformers import AutoModel
-import warnings
+
 warnings.filterwarnings("ignore")
 
 def investigate_annotations_mutability():
@@ -40,7 +42,7 @@ def investigate_annotations_mutability():
         
         print("\n✅ Successfully added custom annotations:")
         print(f"  Keys: {list(linear.__annotations__.keys())}")
-        print(f"  Custom entries: {[k for k in linear.__annotations__.keys() if k.startswith('custom') or k.startswith('hierarchy') or k.startswith('operation')]}")
+        print(f"  Custom entries: {[k for k in linear.__annotations__ if k.startswith('custom') or k.startswith('hierarchy') or k.startswith('operation')]}")
         
         # Set actual values
         linear.custom_tag = "attention.query"

@@ -15,24 +15,25 @@ Usage:
 """
 
 import argparse
-import torch
-from transformers import AutoModel, AutoTokenizer
-from pathlib import Path
-import tempfile
 import json
-from typing import Dict, List, Any, Tuple
-import onnx
-from collections import defaultdict, Counter
-from rich.tree import Tree
-from rich.console import Console
-from rich.text import Text
 
 # Add parent directory to path
 import sys
+from collections import Counter, defaultdict
+from pathlib import Path
+from typing import Any
+
+import onnx
+import torch
+from rich.console import Console
+from rich.text import Text
+from rich.tree import Tree
+from transformers import AutoModel, AutoTokenizer
+
 sys.path.append(str(Path(__file__).parent.parent))
 
-from modelexport.core.tracing_hierarchy_builder import TracingHierarchyBuilder
 from modelexport.core.onnx_node_tagger import create_node_tagger_from_hierarchy
+from modelexport.core.tracing_hierarchy_builder import TracingHierarchyBuilder
 
 
 def print_section_header(title: str):
@@ -42,7 +43,7 @@ def print_section_header(title: str):
     print(f"{'=' * 80}")
 
 
-def print_hf_class_hierarchy(hierarchy_data: Dict[str, Dict]):
+def print_hf_class_hierarchy(hierarchy_data: dict[str, dict]):
     """Print HuggingFace hierarchy with beautiful tree rendering using rich."""
     console = Console()
     
@@ -110,7 +111,7 @@ def print_hf_class_hierarchy(hierarchy_data: Dict[str, Dict]):
     console.print(tree)
 
 
-def print_full_hf_hierarchy(hierarchy_data: Dict[str, Dict]):
+def print_full_hf_hierarchy(hierarchy_data: dict[str, dict]):
     """Print complete HuggingFace hierarchy with all details."""
     print("\n📊 Complete HuggingFace Module Hierarchy (Detailed):")
     print("-" * 80)
@@ -135,7 +136,7 @@ def print_full_hf_hierarchy(hierarchy_data: Dict[str, Dict]):
         if i < len(sorted_modules) - 1:
             print()
 
-def print_hierarchy_tree(hierarchy_data: Dict[str, Dict], max_depth: int = 5):
+def print_hierarchy_tree(hierarchy_data: dict[str, dict], max_depth: int = 5):
     """Print hierarchy as a tree structure with increased depth."""
     print("\n📊 Module Hierarchy Tree (visual structure):")
     print("-" * 60)
@@ -162,7 +163,7 @@ def print_hierarchy_tree(hierarchy_data: Dict[str, Dict], max_depth: int = 5):
             current = current[part]["children"]
     
     # Print tree with module information
-    def print_tree(node: Dict, prefix: str = "", is_last: bool = True):
+    def print_tree(node: dict, prefix: str = "", is_last: bool = True):
         for i, (key, value) in enumerate(node.items()):
             is_last_item = i == len(node) - 1
             current_prefix = "└── " if is_last_item else "├── "
@@ -181,13 +182,13 @@ def print_hierarchy_tree(hierarchy_data: Dict[str, Dict], max_depth: int = 5):
     print_tree(tree)
 
 
-def analyze_tag_distribution(tagged_nodes: Dict[str, str]) -> Dict[str, int]:
+def analyze_tag_distribution(tagged_nodes: dict[str, str]) -> dict[str, int]:
     """Analyze distribution of tags."""
     tag_counter = Counter(tagged_nodes.values())
     return dict(tag_counter.most_common())
 
 
-def debug_scope_buckets(onnx_model: onnx.ModelProto, node_tagger) -> Dict[str, List[str]]:
+def debug_scope_buckets(onnx_model: onnx.ModelProto, node_tagger) -> dict[str, list[str]]:
     """Debug scope bucketization."""
     scope_buckets = node_tagger.bucketize_nodes_by_scope(onnx_model)
     
@@ -199,7 +200,7 @@ def debug_scope_buckets(onnx_model: onnx.ModelProto, node_tagger) -> Dict[str, L
     return simple_buckets
 
 
-def analyze_tagging_accuracy(onnx_model: onnx.ModelProto, node_tagger) -> Dict[str, Any]:
+def analyze_tagging_accuracy(onnx_model: onnx.ModelProto, node_tagger) -> dict[str, Any]:
     """Analyze tagging accuracy and statistics."""
     stats = node_tagger.get_tagging_statistics(onnx_model)
     
@@ -219,8 +220,8 @@ def analyze_tagging_accuracy(onnx_model: onnx.ModelProto, node_tagger) -> Dict[s
 
 
 def print_complete_hierarchy_with_nodes(
-    hierarchy_data: Dict[str, Dict], 
-    tagged_nodes: Dict[str, str], 
+    hierarchy_data: dict[str, dict], 
+    tagged_nodes: dict[str, str], 
     onnx_model: onnx.ModelProto,
     node_tagger
 ) -> None:
@@ -334,7 +335,7 @@ def print_complete_hierarchy_with_nodes(
                     op_group_node = current_node.add(group_text)
                     
                     # Show first few operations
-                    for i, node_name in enumerate(sorted(op_nodes)[:3]):
+                    for _i, node_name in enumerate(sorted(op_nodes)[:3]):
                         scope = node_info_map[node_name]['scope']
                         individual_op_text = Text()
                         individual_op_text.append(node_name, style="dim bright_cyan")
@@ -386,7 +387,7 @@ def print_complete_hierarchy_with_nodes(
     console.print(tree)
 
 
-def prepare_inputs(model_name: str) -> Tuple[Any, Dict[str, Any]]:
+def prepare_inputs(model_name: str) -> tuple[Any, dict[str, Any]]:
     """Prepare inputs based on model type."""
     # Simple heuristics for common model types
     if 'bert' in model_name.lower() or 'roberta' in model_name.lower():

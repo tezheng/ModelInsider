@@ -3,15 +3,16 @@
 Test V2 HTP Hierarchy Exporter with BERT-tiny
 """
 
-import torch
-from transformers import AutoModel, AutoTokenizer
 import sys
 from pathlib import Path
+
+from transformers import AutoModel, AutoTokenizer
 
 # Add current directory to path
 sys.path.append(str(Path(__file__).parent))
 
 from htp_hierarchy_exporter_v2 import HierarchyExporterV2
+
 
 def test_bert_tiny():
     print("🚀 Testing V2 HTP Hierarchy Exporter with BERT-tiny")
@@ -51,7 +52,7 @@ def test_bert_tiny():
         
         # Load and check the hierarchy metadata
         import json
-        with open("temp/bert_tiny_v2_hierarchy.json", 'r') as f:
+        with open("temp/bert_tiny_v2_hierarchy.json") as f:
             metadata = json.load(f)
         
         print(f"\n📊 V2 Export Statistics:")

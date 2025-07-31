@@ -6,10 +6,11 @@ This module implements cutting-edge approaches to resolve cross-layer contaminat
 by embracing multi-context reality and using tensor provenance analysis.
 """
 
-from typing import Dict, List, Any, Optional, Set, Tuple
-from dataclasses import dataclass
-from collections import defaultdict, deque
 import re
+from collections import defaultdict
+from dataclasses import dataclass
+from typing import Any
+
 import numpy as np
 
 
@@ -19,16 +20,16 @@ class TensorProvenance:
     tensor_id: str
     primary_creator: str
     creation_operation: str
-    creation_context_stack: List[str]
+    creation_context_stack: list[str]
     timestamp: int
-    dependencies: List[str]  # Input tensor IDs
+    dependencies: list[str]  # Input tensor IDs
 
 
 @dataclass
 class ContextAssignment:
     """Multi-context assignment with confidence scoring."""
     primary_context: str
-    auxiliary_contexts: List[str]
+    auxiliary_contexts: list[str]
     confidence: float
     assignment_type: str  # 'single', 'multi_context', 'residual', 'attention'
     reasoning: str
@@ -39,7 +40,7 @@ class ContaminationCase:
     """Represents a case of cross-layer contamination."""
     node_name: str
     expected_context: str
-    actual_contexts: List[str]
+    actual_contexts: list[str]
     operation_type: str
     confidence: float = 0.0
     is_resolved: bool = False
@@ -49,14 +50,14 @@ class TensorProvenanceTracker:
     """Tracks complete tensor creation and usage lineage."""
     
     def __init__(self):
-        self.tensor_lineage: Dict[str, TensorProvenance] = {}
-        self.operation_contexts: Dict[str, ContextAssignment] = {}
-        self.context_relationships: Dict[str, Set[str]] = defaultdict(set)
+        self.tensor_lineage: dict[str, TensorProvenance] = {}
+        self.operation_contexts: dict[str, ContextAssignment] = {}
+        self.context_relationships: dict[str, set[str]] = defaultdict(set)
         self.execution_timestamp = 0
     
     def track_tensor_creation(self, tensor_id: str, creating_module: str, 
-                             operation_type: str, context_stack: List[str],
-                             input_tensor_ids: List[str] = None):
+                             operation_type: str, context_stack: list[str],
+                             input_tensor_ids: list[str] = None):
         """Track tensor creation with complete provenance."""
         self.tensor_lineage[tensor_id] = TensorProvenance(
             tensor_id=tensor_id,
@@ -68,7 +69,7 @@ class TensorProvenanceTracker:
         )
         self.execution_timestamp += 1
     
-    def get_tensor_provenance_chain(self, tensor_id: str, max_depth: int = 5) -> List[str]:
+    def get_tensor_provenance_chain(self, tensor_id: str, max_depth: int = 5) -> list[str]:
         """Get complete provenance chain for a tensor."""
         if tensor_id not in self.tensor_lineage:
             return []
@@ -91,7 +92,7 @@ class TensorProvenanceTracker:
         return chain
     
     def analyze_tensor_contexts(self, operation_name: str, 
-                               input_tensors: List[str]) -> ContextAssignment:
+                               input_tensors: list[str]) -> ContextAssignment:
         """Analyze tensor contexts to determine operation assignment."""
         if not input_tensors:
             return ContextAssignment(
@@ -149,8 +150,8 @@ class TensorProvenanceTracker:
             )
     
     def _analyze_multi_context_operation(self, operation_name: str, 
-                                        unique_contexts: List[str],
-                                        all_contexts: List[str]) -> ContextAssignment:
+                                        unique_contexts: list[str],
+                                        all_contexts: list[str]) -> ContextAssignment:
         """Analyze operations with exactly two input contexts."""
         
         # Check for residual connection pattern
@@ -190,7 +191,7 @@ class TensorProvenanceTracker:
                 reasoning="multiple_input_contexts"
             )
     
-    def _is_residual_pattern(self, operation_name: str, contexts: List[str]) -> bool:
+    def _is_residual_pattern(self, operation_name: str, contexts: list[str]) -> bool:
         """Detect residual connection patterns."""
         # Look for Add operations between different layers
         if 'Add' not in operation_name and 'add' not in operation_name.lower():
@@ -210,14 +211,14 @@ class TensorProvenanceTracker:
         
         return False
     
-    def _is_attention_pattern(self, operation_name: str, contexts: List[str]) -> bool:
+    def _is_attention_pattern(self, operation_name: str, contexts: list[str]) -> bool:
         """Detect attention mechanism patterns."""
         attention_keywords = ['attention', 'self', 'query', 'key', 'value', 'softmax']
         operation_lower = operation_name.lower()
         
         return any(keyword in operation_lower for keyword in attention_keywords)
     
-    def _determine_residual_primary_context(self, contexts: List[str]) -> str:
+    def _determine_residual_primary_context(self, contexts: list[str]) -> str:
         """Determine primary context for residual connections."""
         # Extract layer numbers and assign to later layer
         layer_info = []
@@ -241,7 +242,7 @@ class ResidualConnectionDetector:
         self.detected_patterns = []
         self.pattern_confidence = {}
     
-    def detect_residual_patterns(self, onnx_model, contamination_cases) -> List[Dict]:
+    def detect_residual_patterns(self, onnx_model, contamination_cases) -> list[dict]:
         """Detect residual connection patterns in contamination cases."""
         residual_patterns = []
         
@@ -262,7 +263,7 @@ class ResidualConnectionDetector:
         
         return residual_patterns
     
-    def _analyze_add_operation_pattern(self, case: ContaminationCase, onnx_model) -> Dict:
+    def _analyze_add_operation_pattern(self, case: ContaminationCase, onnx_model) -> dict:
         """Analyze a specific Add operation for residual patterns."""
         node_name = case.node_name
         
@@ -298,7 +299,7 @@ class ResidualConnectionDetector:
             'reasoning': 'no_residual_pattern_detected'
         }
     
-    def _build_layer_context(self, layer_num: str, actual_contexts: List[str]) -> str:
+    def _build_layer_context(self, layer_num: str, actual_contexts: list[str]) -> str:
         """Build proper layer context for residual connection."""
         # Find context that matches the layer number
         for context in actual_contexts:
@@ -317,8 +318,8 @@ class AdvancedContextResolver:
         self.residual_detector = ResidualConnectionDetector()
         self.resolution_history = []
     
-    def resolve_contamination_cases(self, contamination_cases: List[ContaminationCase],
-                                   onnx_model, hierarchy_data) -> Dict[str, Any]:
+    def resolve_contamination_cases(self, contamination_cases: list[ContaminationCase],
+                                   onnx_model, hierarchy_data) -> dict[str, Any]:
         """Resolve contamination cases using advanced analysis."""
         
         print(f"🔬 Advanced Context Resolver: Analyzing {len(contamination_cases)} contamination cases")
@@ -441,7 +442,7 @@ class AdvancedContextResolver:
             reasoning='fallback_assignment'
         )
     
-    def _generate_resolution_analysis(self, results: Dict[str, Any]):
+    def _generate_resolution_analysis(self, results: dict[str, Any]):
         """Generate comprehensive analysis of resolution results."""
         
         print(f"\n📊 ADVANCED CONTEXT RESOLUTION ANALYSIS")
@@ -486,7 +487,7 @@ class AdvancedContextResolver:
                 print(f"  {assignment_type}: {count} cases")
 
 
-def create_test_contamination_cases() -> List[ContaminationCase]:
+def create_test_contamination_cases() -> list[ContaminationCase]:
     """Create test contamination cases for validation."""
     return [
         ContaminationCase(

@@ -6,13 +6,14 @@ This example compares different export strategies and demonstrates
 when to use enhanced auxiliary operations for optimal results.
 """
 
-import torch
-import torch.nn as nn
-from pathlib import Path
+import gc
 import sys
 import time
-import gc
-from typing import Dict, List, Tuple, Any
+from pathlib import Path
+from typing import Any
+
+import torch
+import torch.nn as nn
 
 # Add ModelExport to path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -21,7 +22,9 @@ from modelexport.strategies.htp.htp_hierarchy_exporter import HierarchyExporter
 
 # Try importing other strategies
 try:
-    from modelexport.strategies.usage_based.usage_based_exporter import UsageBasedExporter
+    from modelexport.strategies.usage_based.usage_based_exporter import (
+        UsageBasedExporter,
+    )
     usage_based_available = True
 except ImportError:
     print("⚠️ Usage-based strategy not available")
@@ -207,7 +210,7 @@ class StrategyBenchmark:
                 'available': True
             }
     
-    def benchmark_model(self, model_name: str, model: nn.Module, inputs: torch.Tensor) -> Dict[str, Any]:
+    def benchmark_model(self, model_name: str, model: nn.Module, inputs: torch.Tensor) -> dict[str, Any]:
         """Benchmark all available strategies on a single model."""
         
         print(f"\n📊 Benchmarking {model_name}")
@@ -286,7 +289,7 @@ class StrategyBenchmark:
         
         return model_results
     
-    def run_comprehensive_benchmark(self) -> Dict[str, Any]:
+    def run_comprehensive_benchmark(self) -> dict[str, Any]:
         """Run benchmark on all test models."""
         
         print("🚀 Comprehensive Strategy Benchmark")
@@ -311,7 +314,7 @@ class StrategyBenchmark:
         
         return all_results
     
-    def analyze_benchmark_results(self, results: Dict[str, Dict[str, Any]]):
+    def analyze_benchmark_results(self, results: dict[str, dict[str, Any]]):
         """Analyze and present benchmark results."""
         
         print("\n📈 Benchmark Analysis")
@@ -356,7 +359,7 @@ class StrategyBenchmark:
         # Strategy recommendations
         self.generate_strategy_recommendations(results)
     
-    def generate_strategy_recommendations(self, results: Dict[str, Dict[str, Any]]):
+    def generate_strategy_recommendations(self, results: dict[str, dict[str, Any]]):
         """Generate strategy recommendations based on benchmark results."""
         
         print(f"\n💡 Strategy Recommendations:")

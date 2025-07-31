@@ -6,11 +6,12 @@ This module implements FX graph export functionality without using TorchDynamo,
 providing an alternative approach to capture model execution graphs.
 """
 
+import json
+from pathlib import Path
+from typing import Any
+
 import torch
 import torch.fx as fx
-import json
-from typing import Dict, List, Any, Optional, Union, Tuple
-from pathlib import Path
 
 
 class FXGraphExporter:
@@ -28,11 +29,11 @@ class FXGraphExporter:
     def export_fx_graph(
         self,
         model: torch.nn.Module,
-        example_inputs: Union[torch.Tensor, Tuple, Dict],
+        example_inputs: torch.Tensor | tuple | dict,
         output_path: str,
         method: str = "symbolic_trace",
         **kwargs
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Export model to FX graph format.
         
@@ -100,7 +101,7 @@ class FXGraphExporter:
         example_inputs: Any, 
         output_path: Path,
         **kwargs
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Export using torch.fx.symbolic_trace."""
         
         results = {
@@ -153,7 +154,7 @@ class FXGraphExporter:
                     if isinstance(example_inputs, dict):
                         # Handle dict inputs (from tokenizer)
                         traced_output = traced_graph(**example_inputs)
-                    elif isinstance(example_inputs, (tuple, list)):
+                    elif isinstance(example_inputs, tuple | list):
                         traced_output = traced_graph(*example_inputs)
                     else:
                         traced_output = traced_graph(example_inputs)
@@ -177,7 +178,7 @@ class FXGraphExporter:
         example_inputs: Any, 
         output_path: Path,
         **kwargs
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Export using torch.export (PyTorch 2.0+)."""
         
         results = {
@@ -198,7 +199,7 @@ class FXGraphExporter:
             if isinstance(example_inputs, dict):
                 # Convert dict to args for export
                 args = tuple(example_inputs.values())
-            elif isinstance(example_inputs, (tuple, list)):
+            elif isinstance(example_inputs, tuple | list):
                 args = tuple(example_inputs)
             else:
                 args = (example_inputs,)
@@ -242,7 +243,7 @@ class FXGraphExporter:
         
         return results
     
-    def _analyze_fx_graph(self, graph: fx.Graph) -> Dict[str, Any]:
+    def _analyze_fx_graph(self, graph: fx.Graph) -> dict[str, Any]:
         """Analyze FX graph structure and extract information."""
         
         nodes = list(graph.nodes)
@@ -287,7 +288,7 @@ class FXGraphExporter:
         
         return {"fx_graph_analysis": analysis}
     
-    def _analyze_exported_program(self, exported_program) -> Dict[str, Any]:
+    def _analyze_exported_program(self, exported_program) -> dict[str, Any]:
         """Analyze torch.export ExportedProgram."""
         
         analysis = {
@@ -321,7 +322,7 @@ def export_fx_graph_cli(
     example_inputs: Any,
     output_path: str,
     method: str = "both"
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     CLI interface for FX graph export.
     

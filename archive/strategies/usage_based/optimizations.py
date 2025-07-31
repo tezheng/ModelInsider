@@ -5,14 +5,12 @@ Performance optimizations for the Usage-Based strategy, applying lessons
 learned from HTP optimization in Iteration 17.
 """
 
+import logging
+from typing import Any
+
+import onnx
 import torch
 import torch.onnx
-import onnx
-import json
-from typing import Dict, Any, List, Optional, Set, Tuple
-from collections import defaultdict, Counter
-from datetime import datetime
-import logging
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +79,7 @@ class UsageBasedOptimizedMethods:
                 hook.remove()
     
     @staticmethod
-    def _create_hierarchy_mapping_optimized(self) -> Dict[str, Dict[str, Any]]:
+    def _create_hierarchy_mapping_optimized(self) -> dict[str, dict[str, Any]]:
         """
         Optimized hierarchy mapping creation.
         
@@ -101,7 +99,7 @@ class UsageBasedOptimizedMethods:
         return hierarchy_mapping
     
     @staticmethod
-    def optimize_onnx_export_params(model: torch.nn.Module, example_inputs, **kwargs) -> Dict[str, Any]:
+    def optimize_onnx_export_params(model: torch.nn.Module, example_inputs, **kwargs) -> dict[str, Any]:
         """
         Optimize ONNX export parameters for faster export.
         
@@ -148,7 +146,7 @@ class BatchProcessingOptimizer:
     """Batch processing optimizations for Usage-Based strategy."""
     
     @staticmethod
-    def batch_module_filtering(model: torch.nn.Module, should_track_func) -> List[Tuple[str, torch.nn.Module]]:
+    def batch_module_filtering(model: torch.nn.Module, should_track_func) -> list[tuple[str, torch.nn.Module]]:
         """
         Batch process module filtering for efficiency.
         
@@ -164,7 +162,7 @@ class BatchProcessingOptimizer:
         return filtered_modules
     
     @staticmethod
-    def batch_hierarchy_generation(module_names: List[str], model_root) -> Dict[str, str]:
+    def batch_hierarchy_generation(module_names: list[str], model_root) -> dict[str, str]:
         """
         Generate hierarchies for multiple modules in batch.
         
@@ -258,7 +256,7 @@ def create_optimized_usage_based_export(
     example_inputs,
     output_path: str,
     **kwargs
-) -> Dict[str, Any]:
+) -> dict[str, Any]:
     """
     Complete optimized export pipeline for Usage-Based strategy.
     

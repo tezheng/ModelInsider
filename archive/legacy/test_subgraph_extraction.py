@@ -4,19 +4,18 @@ Test Subgraph Extraction
 Validate that extracted subgraphs produce equivalent results
 """
 
-import torch
-import torch.nn as nn
+import json
+import traceback
+from pathlib import Path
+from typing import Any
+
+import numpy as np
 import onnx
 import onnxruntime
-import numpy as np
-import json
-from pathlib import Path
-from typing import Dict, List, Any, Optional
-import traceback
-
+import torch.nn as nn
 from enhanced_dag_extractor import EnhancedDAGExtractor
-from onnx_subgraph_extractor import ONNXSubgraphExtractor
 from input_generator import UniversalInputGenerator
+from onnx_subgraph_extractor import ONNXSubgraphExtractor
 
 
 class SubgraphValidator:
@@ -90,7 +89,7 @@ class SubgraphValidator:
         print(f"✅ Enhanced ONNX model created: {enhanced_path}")
         return enhanced_path, model, inputs
     
-    def _extract_all_subgraphs(self, onnx_model_path: str) -> Dict[str, str]:
+    def _extract_all_subgraphs(self, onnx_model_path: str) -> dict[str, str]:
         """Extract subgraphs for all modules"""
         
         extractor = ONNXSubgraphExtractor(onnx_model_path)
@@ -114,8 +113,8 @@ class SubgraphValidator:
         print(f"✅ Successfully extracted {len(extracted_models)} subgraphs")
         return extracted_models
     
-    def _validate_extractions(self, extracted_models: Dict[str, str], 
-                            original_model: nn.Module, inputs: Dict) -> Dict[str, Any]:
+    def _validate_extractions(self, extracted_models: dict[str, str], 
+                            original_model: nn.Module, inputs: dict) -> dict[str, Any]:
         """Validate that extracted subgraphs are valid ONNX models"""
         
         validation_results = {
@@ -195,7 +194,7 @@ class SubgraphValidator:
         
         return validation_results
     
-    def _print_summary(self, model_name: str, validation_results: Dict[str, Any]):
+    def _print_summary(self, model_name: str, validation_results: dict[str, Any]):
         """Print validation summary"""
         
         print(f"\n{'='*80}")

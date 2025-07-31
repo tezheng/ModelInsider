@@ -1,5 +1,5 @@
-from transformers import AutoModel, AutoTokenizer
 import torch
+from transformers import AutoModel, AutoTokenizer
 
 # Configuration - set your model here
 MODEL_NAME = "prajjwal1/bert-tiny"  # Change this to test different models

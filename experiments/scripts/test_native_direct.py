@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """Direct test of native operation handling."""
 
+
+import onnx
 import torch
 import torch.nn.functional as F
-import onnx
-import json
+
 
 class DirectAttentionModel(torch.nn.Module):
     """Model that directly uses scaled_dot_product_attention."""

@@ -8,11 +8,10 @@ Based on user feedback that scopeName() returns rich information like:
 This investigates why my previous analysis showed empty strings.
 """
 
+
 import torch
 import torch.jit
 from transformers import AutoModel
-import json
-from typing import List, Dict, Any, Optional
 
 
 def detailed_scope_analysis():

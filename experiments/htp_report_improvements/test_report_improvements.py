@@ -9,10 +9,8 @@ This script tests:
 """
 
 import json
-import tempfile
-from pathlib import Path
 from io import StringIO
-from unittest.mock import patch, MagicMock
+
 
 # Test the proposed changes without modifying production code
 def test_full_report_generation():

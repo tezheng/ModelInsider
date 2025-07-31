@@ -4,9 +4,6 @@ Iteration 4: Clean, simplified export monitor that matches baseline exactly.
 Focus on simplicity, no over-engineering, just what's needed.
 """
 
-import io
-import json
-import sys
 from pathlib import Path
 
 

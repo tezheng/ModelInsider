@@ -4,20 +4,12 @@ Enhanced DAG Extractor with 100% Node Tagging
 Tag ALL operations to enable subgraph extraction
 """
 
-import torch
-import torch.nn as nn
-import onnx
-from onnx import helper, TensorProto
 import json
 import os
-import re
-from pathlib import Path
-from typing import Dict, List, Any, Set, Optional
-from transformers import AutoModel
-import numpy as np
 import traceback
-from collections import defaultdict, deque
+from collections import defaultdict
 
+import torch
 from dag_extractor import DAGExtractor
 
 
@@ -53,8 +45,8 @@ class EnhancedDAGExtractor(DAGExtractor):
                 if isinstance(output, torch.Tensor):
                     tensor_id = id(output)
                     self.tensor_to_module[tensor_id] = hierarchy_path
-                elif isinstance(output, (tuple, list)):
-                    for i, tensor in enumerate(output):
+                elif isinstance(output, tuple | list):
+                    for _i, tensor in enumerate(output):
                         if isinstance(tensor, torch.Tensor):
                             tensor_id = id(tensor)
                             self.tensor_to_module[tensor_id] = hierarchy_path
@@ -251,8 +243,8 @@ class EnhancedDAGExtractor(DAGExtractor):
         
         print(f"Created {created_parents} universal parent modules")
     
-    def get_enhanced_operation_tags(self, node, op_name: str, tensor_producers: Dict, 
-                                  model_inputs: Set, model_outputs: Set) -> List[str]:
+    def get_enhanced_operation_tags(self, node, op_name: str, tensor_producers: dict, 
+                                  model_inputs: set, model_outputs: set) -> list[str]:
         """Enhanced tagging strategy that assigns exactly ONE tag per operation"""
         
         # Strategy 1: Name-based tagging for attention operations (highest priority)
@@ -277,11 +269,10 @@ class EnhancedDAGExtractor(DAGExtractor):
                         candidate_tags.extend(producer_tags)
         
         # Strategy 4: Fallback to execution context
-        if not candidate_tags:
-            if self.operation_execution_order:
-                # Get the most recently executed module
-                recent_module = self.operation_execution_order[-1]['hierarchy_path']
-                candidate_tags.append(recent_module)
+        if not candidate_tags and self.operation_execution_order:
+            # Get the most recently executed module
+            recent_module = self.operation_execution_order[-1]['hierarchy_path']
+            candidate_tags.append(recent_module)
         
         # Apply CRITICAL TAGGING RULES:
         # 1. Select most specific transformers class (exclude torch.nn leaf classes)
@@ -331,7 +322,7 @@ class EnhancedDAGExtractor(DAGExtractor):
         op_name_lower = op_name.lower()
         return any(keyword in op_name_lower for keyword in attention_keywords)
     
-    def get_attention_module_from_name(self, op_name: str) -> Optional[str]:
+    def get_attention_module_from_name(self, op_name: str) -> str | None:
         """Determine if an operation belongs to a specific attention module based on its name"""
         op_name_lower = op_name.lower()
         
@@ -355,7 +346,7 @@ class EnhancedDAGExtractor(DAGExtractor):
         # Universal approach: rely on parameter-based and execution-based tagging
         return False
     
-    def get_fallback_tags(self, node, op_name: str, tensor_producers: Dict) -> List[str]:
+    def get_fallback_tags(self, node, op_name: str, tensor_producers: dict) -> list[str]:
         """Fallback tagging for operations that couldn't be tagged by other methods"""
         
         # Strategy 1: For activation functions, assign to the module whose output they process
@@ -451,7 +442,7 @@ class EnhancedDAGExtractor(DAGExtractor):
         return None
     
     
-    def select_best_transformers_tag(self, candidate_tags: List[str]) -> str:
+    def select_best_transformers_tag(self, candidate_tags: list[str]) -> str:
         """Select the best transformers class tag according to the new rules"""
         if not candidate_tags:
             return None
@@ -507,7 +498,7 @@ class EnhancedDAGExtractor(DAGExtractor):
         
         return tag
     
-    def find_common_ancestor_module(self, module_paths: List[str]) -> Optional[str]:
+    def find_common_ancestor_module(self, module_paths: list[str]) -> str | None:
         """Find the deepest common ancestor of multiple module paths"""
         if not module_paths:
             return None
@@ -546,8 +537,8 @@ def test_enhanced_tagging(model_name: str = "resnet18"):
             model = models.resnet18(pretrained=False)
             inputs = {'x': torch.randn(1, 3, 224, 224)}
         else:
-            from transformers import AutoModel
             from input_generator import UniversalInputGenerator
+            from transformers import AutoModel
             
             model = AutoModel.from_pretrained(model_name)
             generator = UniversalInputGenerator()

@@ -5,6 +5,7 @@ Deep analysis of cross-layer contamination patterns.
 
 import json
 
+
 def analyze_contamination_patterns():
     """Analyze the specific patterns of cross-layer contamination."""
     
@@ -12,14 +13,14 @@ def analyze_contamination_patterns():
     
     # Load both hierarchy files
     try:
-        with open('temp/real_bert_old_hierarchy.json', 'r') as f:
+        with open('temp/real_bert_old_hierarchy.json') as f:
             old_hierarchy = json.load(f)
     except FileNotFoundError:
         print("Old hierarchy file not found")
         return
         
     try:
-        with open('temp/real_bert_new_hierarchy.json', 'r') as f:
+        with open('temp/real_bert_new_hierarchy.json') as f:
             new_hierarchy = json.load(f)
     except FileNotFoundError:
         print("New hierarchy file not found")

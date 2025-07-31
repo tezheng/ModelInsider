@@ -7,12 +7,11 @@ Focus on ensuring exact output matching.
 import json
 import sys
 from pathlib import Path
-from difflib import unified_diff
 
 # Add parent to path
 sys.path.insert(0, str(Path(__file__).parent))
 
-from export_monitor_clean import HTPExportMonitor, Config
+from export_monitor_clean import HTPExportMonitor
 
 
 def load_baseline_data():

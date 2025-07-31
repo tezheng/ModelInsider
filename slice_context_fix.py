@@ -9,10 +9,8 @@ The fix: Implement context-aware slice tagging that uses both execution context
 and ONNX graph structure to correctly map slice operations to their source modules.
 """
 
+
 import torch
-import torch.nn as nn
-from typing import Dict, List, Any, Optional, Tuple
-from collections import defaultdict
 
 
 class SliceContextFixer:
@@ -115,7 +113,7 @@ class SliceContextFixer:
         # Pattern 1: 4D tensor slicing (typical for multi-head attention)
         if len(shape) == 4 and len(key) >= 3:
             # Check for sequence dimension slicing
-            for i, k in enumerate(key):
+            for _i, k in enumerate(key):
                 if isinstance(k, slice) and k.start is not None and k.stop is not None:
                     # Likely attention sequence slicing
                     return True
@@ -123,7 +121,7 @@ class SliceContextFixer:
         # Pattern 2: 3D tensor slicing with attention-like dimensions
         if len(shape) == 3 and len(key) >= 2:
             # Check for sequence dimension slicing
-            for i, k in enumerate(key):
+            for _i, k in enumerate(key):
                 if isinstance(k, slice) and k.start is not None:
                     return True
         
@@ -134,7 +132,7 @@ class SliceContextFixer:
         # Search through operation context for attention modules
         attention_contexts = []
         
-        for module_name, context_info in self.exporter._operation_context.items():
+        for _module_name, context_info in self.exporter._operation_context.items():
             if 'attention' in context_info['tag'].lower():
                 attention_contexts.append(context_info['tag'])
         
@@ -268,7 +266,6 @@ def apply_slice_context_fix(exporter):
 
 # Example usage with the hierarchy exporter
 if __name__ == "__main__":
-    from modelexport.hierarchy_exporter import HierarchyExporter
     
     print("Slice Context Fix - Root Cause and Solution")
     print("=" * 50)

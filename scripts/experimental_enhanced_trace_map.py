@@ -5,14 +5,14 @@ This demonstrates what we discovered in the notebook about PyTorch's
 internal _trace_module_map during ONNX export.
 """
 
-import torch
-import torch.nn as nn
-from transformers import AutoModel, AutoTokenizer
 import json
-from pathlib import Path
 import tempfile
-from typing import Dict, Any, List, Tuple
 from collections import defaultdict
+from pathlib import Path
+
+import torch
+from transformers import AutoModel, AutoTokenizer
+
 
 def establish_expected_results():
     """First, let's establish what the correct hierarchy should look like for bert-tiny."""
@@ -190,7 +190,7 @@ def analyze_and_verify_results(captured_maps, expected_hierarchy):
         
         # Group by module class
         by_class = defaultdict(list)
-        for key, data in entries.items():
+        for _key, data in entries.items():
             by_class[data['module_class']].append(data)
         
         print(f"\n   Module Class Distribution:")
@@ -204,7 +204,7 @@ def analyze_and_verify_results(captured_maps, expected_hierarchy):
         sorted_entries = sorted(entries.items(), key=lambda x: x[1]['scope_name'])
         
         # Show first 30 entries
-        for j, (key, data) in enumerate(sorted_entries[:30]):
+        for j, (_key, data) in enumerate(sorted_entries[:30]):
             scope_name = data['scope_name']
             module_class = data['module_class']
             
@@ -239,7 +239,7 @@ def analyze_and_verify_results(captured_maps, expected_hierarchy):
         for expected_class, expected_path in expected_patterns:
             # Look for this pattern in captured data
             found = False
-            for key, data in entries.items():
+            for _key, data in entries.items():
                 if data['module_class'] == expected_class:
                     scope = data['scope_name']
                     # Check if scope contains expected path

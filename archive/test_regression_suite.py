@@ -342,7 +342,7 @@ class TestCardinalRulesRegressionPrevention:
                 assert len(found_non_modules) == 0, f"MUST-002 VIOLATION: Non-nn.Module '{non_module}' incorrectly included in hierarchy"
             
             # Validate hierarchy structure follows nn.Module hierarchy
-            for module_path, module_info in hierarchy_data.items():
+            for _module_path, module_info in hierarchy_data.items():
                 if isinstance(module_info, dict) and "module_type" in module_info:
                     module_type = module_info["module_type"]
                     # Should only contain nn.Module types

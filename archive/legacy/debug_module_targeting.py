@@ -3,10 +3,9 @@
 Debug Module Targeting - Confirm exactly which nn.Module we're targeting
 """
 
-import torch
-from transformers import AutoModel
 from enhanced_dag_extractor import EnhancedDAGExtractor
 from input_generator import UniversalInputGenerator
+from transformers import AutoModel
 
 
 def debug_module_targeting():
@@ -69,8 +68,8 @@ def debug_module_targeting():
     extractor.create_parameter_mapping(model)
     
     # Create temporary ONNX to analyze tagging
-    import tempfile
     import os
+    import tempfile
     with tempfile.NamedTemporaryFile(suffix='.onnx', delete=False) as tmp:
         temp_path = tmp.name
     
@@ -102,7 +101,7 @@ def debug_module_targeting():
                     break
         
         print(f"Found {len(sdpa_ops)} operations with SdpaSelfAttention tags")
-        for i, (op_name, op_type, tag) in enumerate(sdpa_ops[:10]):
+        for _i, (op_name, op_type, tag) in enumerate(sdpa_ops[:10]):
             print(f"  {op_name}: {op_type} → {tag}")
         
         if len(sdpa_ops) > 10:

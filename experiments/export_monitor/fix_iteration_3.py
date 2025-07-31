@@ -6,6 +6,7 @@ Fix iteration 3 - Correct metadata and report issues
 import json
 from pathlib import Path
 
+
 def analyze_metadata_issues():
     """Analyze what's wrong with the metadata."""
     print("🔍 ANALYZING METADATA ISSUES")

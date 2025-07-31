@@ -3,9 +3,11 @@
 ONNX Model Parser - Parse and show tags of each node
 """
 
-import onnx
 import json
 from collections import defaultdict
+
+import onnx
+
 
 def parse_onnx_model(onnx_path):
     """Parse ONNX model and show tags of each node"""
@@ -28,9 +30,7 @@ def parse_onnx_model(onnx_path):
         if prop.key in ['module_hierarchy', 'parameter_mapping', 'execution_trace']:
             try:
                 data = json.loads(prop.value)
-                if isinstance(data, dict):
-                    print(f"  -> {len(data)} items")
-                elif isinstance(data, list):
+                if isinstance(data, dict | list):
                     print(f"  -> {len(data)} items")
             except:
                 print(f"  -> (not JSON)")

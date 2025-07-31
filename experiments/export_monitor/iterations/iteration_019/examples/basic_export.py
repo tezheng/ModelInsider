@@ -2,6 +2,7 @@
 """Basic HTP export example."""
 
 from transformers import AutoModel
+
 from modelexport.strategies.htp import HTPExporter
 
 # Load model

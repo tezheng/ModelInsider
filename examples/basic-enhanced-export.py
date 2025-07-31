@@ -6,10 +6,11 @@ This example demonstrates how to use enhanced auxiliary operations
 for 100% operation coverage in ONNX export.
 """
 
+import sys
+from pathlib import Path
+
 import torch
 import torch.nn as nn
-from pathlib import Path
-import sys
 
 # Add ModelExport to path
 sys.path.append(str(Path(__file__).parent.parent))
@@ -130,7 +131,9 @@ def compare_with_legacy():
     # Legacy approach (usage-based)
     print("\n📊 Legacy Export (Usage-Based):")
     try:
-        from modelexport.strategies.usage_based.usage_based_exporter import UsageBasedExporter
+        from modelexport.strategies.usage_based.usage_based_exporter import (
+            UsageBasedExporter,
+        )
         
         legacy_exporter = UsageBasedExporter()
         legacy_output = Path(__file__).parent / "outputs" / "legacy_model.onnx"

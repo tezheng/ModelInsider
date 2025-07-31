@@ -6,6 +6,7 @@ Analyze ONNX model structure to understand constants
 import json
 from pathlib import Path
 
+
 def analyze_model_structure():
     """Analyze the structure of both models"""
     
@@ -60,7 +61,7 @@ def analyze_model_structure():
     comparison_file = test_dir / "detailed_comparison/detailed_comparison_report.json"
     if comparison_file.exists():
         try:
-            with open(comparison_file, 'r') as f:
+            with open(comparison_file) as f:
                 comp = json.load(f)
             
             # Show key differences

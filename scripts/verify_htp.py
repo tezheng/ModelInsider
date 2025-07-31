@@ -6,19 +6,19 @@ This script verifies that the OptimizedTracingHierarchyBuilder integration
 with HTP strategy maintains quality while improving performance.
 """
 
-import time
 import json
-import subprocess
-import tempfile
-from pathlib import Path
-from typing import Dict, Any, Tuple
-import sys
 import os
+import subprocess
+import sys
+import tempfile
+import time
+from pathlib import Path
+from typing import Any
 
 # Add parent directory to path for imports
 sys.path.append(str(Path(__file__).parent.parent))
 
-def run_cli_command(args: list) -> Tuple[bool, str, float]:
+def run_cli_command(args: list) -> tuple[bool, str, float]:
     """Run CLI command and return success, output, and execution time."""
     start_time = time.time()
     try:
@@ -40,7 +40,7 @@ def run_cli_command(args: list) -> Tuple[bool, str, float]:
     except Exception as e:
         return False, f"Command failed: {e}", time.time() - start_time
 
-def verify_onnx_file(onnx_path: str) -> Dict[str, Any]:
+def verify_onnx_file(onnx_path: str) -> dict[str, Any]:
     """Verify ONNX file is valid and extract metrics."""
     try:
         import onnx
@@ -60,15 +60,15 @@ def verify_onnx_file(onnx_path: str) -> Dict[str, Any]:
             'error': str(e)
         }
 
-def load_hierarchy_metadata(onnx_path: str) -> Dict[str, Any]:
+def load_hierarchy_metadata(onnx_path: str) -> dict[str, Any]:
     """Load hierarchy metadata from sidecar file."""
     metadata_path = onnx_path.replace('.onnx', '_hierarchy.json')
     if os.path.exists(metadata_path):
-        with open(metadata_path, 'r') as f:
+        with open(metadata_path) as f:
             return json.load(f)
     return {}
 
-def run_baseline_test() -> Dict[str, Any]:
+def run_baseline_test() -> dict[str, Any]:
     """Run baseline HTP test before optimization."""
     print("🔄 Running baseline HTP test...")
     
@@ -97,7 +97,7 @@ def run_baseline_test() -> Dict[str, Any]:
             'output': output
         }
 
-def run_optimized_test() -> Dict[str, Any]:
+def run_optimized_test() -> dict[str, Any]:
     """Run optimized HTP test after integration."""
     print("🔄 Running optimized HTP test...")
     
@@ -126,7 +126,7 @@ def run_optimized_test() -> Dict[str, Any]:
             'output': output
         }
 
-def compare_results(baseline: Dict[str, Any], optimized: Dict[str, Any]) -> Dict[str, Any]:
+def compare_results(baseline: dict[str, Any], optimized: dict[str, Any]) -> dict[str, Any]:
     """Compare baseline vs optimized results."""
     
     comparison = {
@@ -173,7 +173,7 @@ def compare_results(baseline: Dict[str, Any], optimized: Dict[str, Any]) -> Dict
     
     return comparison
 
-def print_results(baseline: Dict[str, Any], optimized: Dict[str, Any], comparison: Dict[str, Any]):
+def print_results(baseline: dict[str, Any], optimized: dict[str, Any], comparison: dict[str, Any]):
     """Print verification results."""
     
     print("\n" + "="*60)

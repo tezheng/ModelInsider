@@ -5,17 +5,18 @@ Usage-Based Optimization Benchmarking Script for Iteration 18
 Tests the optimized Usage-Based methods against baseline to measure improvements.
 """
 
-import time
-import torch
-from pathlib import Path
-from transformers import AutoModel
 import json
+import time
+from pathlib import Path
+
+import torch
+from transformers import AutoModel
 
 from modelexport.strategies.usage_based import UsageBasedExporter
 from modelexport.strategies.usage_based.optimizations import (
-    apply_usage_based_optimizations,
     UsageBasedOptimizedMethods,
-    create_optimized_usage_based_export
+    apply_usage_based_optimizations,
+    create_optimized_usage_based_export,
 )
 
 

@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Solution for tagging native operations that decompose into multiple ONNX nodes."""
 
-import torch
-import torch.nn.functional as F
-import onnx
 import json
 from collections import OrderedDict
+
+import onnx
+import torch
+import torch.nn.functional as F
+
 
 class NativeOpAwareExporter:
     def __init__(self):

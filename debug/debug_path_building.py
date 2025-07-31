@@ -3,9 +3,10 @@
 Debug script specifically for hierarchical path building.
 """
 
-import torch
 from transformers import AutoModel
+
 from modelexport.hierarchy_exporter import HierarchyExporter
+
 
 def debug_path_building():
     print("🔍 Debug: Path Building Logic")

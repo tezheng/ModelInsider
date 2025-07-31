@@ -5,11 +5,15 @@ Visualize the difference between original and optimized hierarchy builders.
 Shows what modules are excluded and why the optimization is beneficial.
 """
 
+from collections import defaultdict
+
 import torch
 from transformers import AutoModel
+
 from modelexport.core.tracing_hierarchy_builder import TracingHierarchyBuilder
-from modelexport.core.tracing_hierarchy_builder_optimized import OptimizedTracingHierarchyBuilder
-from collections import defaultdict
+from modelexport.core.tracing_hierarchy_builder_optimized import (
+    OptimizedTracingHierarchyBuilder,
+)
 
 
 def visualize_optimization():
@@ -70,7 +74,7 @@ def visualize_optimization():
         """Print hierarchy as tree with limited depth."""
         items = [(p, m) for p, m in sorted(hierarchy.items()) if p.count('.') < max_depth]
         
-        for i, (path, metadata) in enumerate(items):
+        for _i, (path, metadata) in enumerate(items):
             if not path:  # Skip root in tree view
                 continue
                 
@@ -78,10 +82,7 @@ def visualize_optimization():
             indent = "  " * depth
             
             # Determine symbol
-            if metadata.get('traced'):
-                symbol = "✓"
-            else:
-                symbol = "○"
+            symbol = "✓" if metadata.get('traced') else "○"
             
             # Format output
             class_name = metadata['class_name']

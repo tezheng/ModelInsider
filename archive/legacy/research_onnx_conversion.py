@@ -4,15 +4,14 @@ Research script for HuggingFace to ONNX conversion methods
 Focus: Understanding current conversion approaches and their hierarchy preservation capabilities
 """
 
+import json
+import sys
+from pathlib import Path
+
+import onnx
 import torch
 import torch.nn as nn
-from transformers import AutoModel, AutoImageProcessor
-import onnx
-from typing import Dict, List, Any, Optional
-import json
-from pathlib import Path
-import sys
-import os
+from transformers import AutoImageProcessor, AutoModel
 
 # Add current directory to path for imports
 sys.path.append(str(Path(__file__).parent))
@@ -84,7 +83,7 @@ def test_torch_onnx_export(model, model_name: str = "google/vit-base-patch16-224
         
         # Show sample node names
         print("\nSample node names (first 10):")
-        for i, name in enumerate(node_names[:10]):
+        for _i, name in enumerate(node_names[:10]):
             print(f"  {name}")
         
         # Check for hierarchy information in node names
@@ -128,7 +127,7 @@ def test_optimum_export(model_name: str = "google/vit-base-patch16-224"):
         
         # Show sample node names
         print("\nSample node names (first 10):")
-        for i, name in enumerate(node_names[:10]):
+        for _i, name in enumerate(node_names[:10]):
             print(f"  {name}")
         
         return onnx_model, node_names
@@ -196,7 +195,7 @@ def analyze_onnx_metadata_capabilities():
                 attr = onnx.AttributeProto()
                 attr.name = "module_path"
                 attr.type = onnx.AttributeProto.STRING
-                attr.s = f"layer{i//2 + 1}".encode('utf-8')
+                attr.s = f"layer{i//2 + 1}".encode()
                 node.attribute.append(attr)
         
         # Save modified model
@@ -222,7 +221,6 @@ def research_torch_dynamo_onnx():
     print(f"\n=== Researching Torch Dynamo ONNX Export ===")
     
     try:
-        import torch._dynamo as dynamo
         
         # Simple test to see if dynamo is available
         print("Torch Dynamo is available")

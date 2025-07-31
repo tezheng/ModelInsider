@@ -3,10 +3,10 @@
 Analyze Untagged Nodes - Understand why tag coverage is not 100%
 """
 
-import onnx
 import json
 from collections import defaultdict
-from pathlib import Path
+
+import onnx
 
 
 def analyze_untagged_nodes(model_name: str):

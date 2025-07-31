@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Trace-aware ONNX export that captures module context."""
 
-import torch
-import torch.onnx
-import onnx
 import json
 from collections import OrderedDict
+
+import onnx
+import torch
+import torch.onnx
+
 
 class TraceAwareExporter:
     def __init__(self):

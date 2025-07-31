@@ -5,6 +5,7 @@ Test the built-in tracking approach with a simple model.
 
 import torch
 import torch.nn as nn
+
 from modelexport.hierarchy_exporter import HierarchyExporter
 
 print("Testing built-in tracking with simple model...")
@@ -35,7 +36,8 @@ print("Export completed!")
 # Check the hierarchy file
 hierarchy_file = 'temp/builtin_test_hierarchy.json'
 import json
-with open(hierarchy_file, 'r') as f:
+
+with open(hierarchy_file) as f:
     hierarchy = json.load(f)
 
 print(f"\nExporter strategy: {hierarchy['exporter']['strategy']}")

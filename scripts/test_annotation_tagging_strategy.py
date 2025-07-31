@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 """Test annotation-based tagging strategy for ModelExport."""
 
+from pathlib import Path
+
+import onnx
 import torch
 import torch.nn as nn
-import onnx
-import tempfile
-from pathlib import Path
+
 
 def test_annotation_tagging_potential():
     """Test if we can use annotations for ModelExport-style tagging."""
@@ -256,7 +257,7 @@ def test_annotation_injection_strategy():
         
         # Verify annotations persisted
         print("\n🔍 Verifying annotation persistence:")
-        for module_name in annotation_map.keys():
+        for module_name in annotation_map:
             module = model.get_submodule(module_name)
             if hasattr(module, 'modelexport_hierarchy'):
                 print(f"  {module_name}: {module.modelexport_hierarchy}")

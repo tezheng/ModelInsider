@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 """Test the notebook cells to ensure they work properly."""
 
-import torch
-import torch.nn as nn
-from transformers import AutoModel, AutoTokenizer
-import onnx
-import tempfile
-from pathlib import Path
-import json
 import warnings
+from pathlib import Path
+
+import onnx
+import torch
+from transformers import AutoModel, AutoTokenizer
 
 # Suppress warnings for cleaner output
 warnings.filterwarnings('ignore')
@@ -175,7 +173,7 @@ def test_scope_analysis(onnx_model):
         print(f"\n🎯 Attention Module Scopes ({len(attention_modules)} found):")
         for module_path, stats in list(attention_modules.items())[:5]:
             print(f"  Module: {module_path}")
-            print(f"    Operations: {sorted(list(stats['operations']))}")
+            print(f"    Operations: {sorted(stats['operations'])}")
             print(f"    Operation count: {stats['count']}")
         
         # Demonstrate hierarchical tag generation

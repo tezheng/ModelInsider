@@ -5,14 +5,14 @@ Test script to demonstrate how proper trace capture could improve HTP.
 This script shows the conceptual improvement without modifying the core implementation.
 """
 
+import json
+from pathlib import Path
+
 import torch
-import torch.nn as nn
-import torch.onnx
 import torch.jit
 import torch.jit._trace
-from pathlib import Path
-import json
-from typing import Dict, Any, Optional
+import torch.nn as nn
+import torch.onnx
 
 
 class SimpleModel(nn.Module):

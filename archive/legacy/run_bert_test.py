@@ -3,9 +3,9 @@
 Runner script to test constant handling fix
 """
 
-import sys
 import subprocess
-from pathlib import Path
+import sys
+
 
 def run_bert_test():
     """Try to run the BERT test with various Python environments"""

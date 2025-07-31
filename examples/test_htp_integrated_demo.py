@@ -8,10 +8,10 @@ This demonstrates the complete HTP integrated workflow:
 3. Clean integration following all CARDINAL RULES
 """
 
-import torch
-from transformers import AutoModel, AutoTokenizer
-from pathlib import Path
 import tempfile
+from pathlib import Path
+
+from transformers import AutoModel, AutoTokenizer
 
 from modelexport.strategies.htp.htp_integrated_exporter import export_with_htp
 

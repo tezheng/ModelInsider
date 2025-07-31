@@ -4,7 +4,6 @@ Test HTPExporter with various model architectures.
 """
 
 import subprocess
-import sys
 from pathlib import Path
 
 # Test models from different architectures

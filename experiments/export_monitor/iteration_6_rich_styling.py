@@ -4,9 +4,6 @@ Iteration 6: Add rich text styling support to match baseline console output.
 Replace print() with rich console for colored output.
 """
 
-import io
-import json
-import sys
 from pathlib import Path
 
 

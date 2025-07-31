@@ -5,9 +5,7 @@ Focus on perfect output matching.
 """
 
 import re
-import json
 from pathlib import Path
-from difflib import unified_diff
 
 
 def analyze_exact_differences():

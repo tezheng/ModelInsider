@@ -6,14 +6,15 @@ Analyzes HTP strategy performance bottlenecks specifically for HuggingFace model
 to identify optimization opportunities.
 """
 
-import time
 import cProfile
-import pstats
-import torch
-from pathlib import Path
-from typing import Dict, Any
-from transformers import AutoModel
 import json
+import pstats
+import time
+from pathlib import Path
+from typing import Any
+
+import torch
+from transformers import AutoModel
 
 from modelexport.strategies.htp import HTPHierarchyExporter
 
@@ -64,7 +65,7 @@ class HTPPerformanceAnalyzer:
         
         # Extract top function calls
         top_functions = []
-        for func_info, (cc, nc, tt, ct, callers) in stats.stats.items():
+        for func_info, (cc, _nc, _tt, ct, _callers) in stats.stats.items():
             if ct > 0.001:  # Only functions taking more than 1ms
                 filename, line, func_name = func_info
                 top_functions.append({
@@ -190,7 +191,7 @@ class HTPPerformanceAnalyzer:
         
         return phase_results
     
-    def analyze_bottlenecks(self, phase_results: Dict[str, Any]) -> Dict[str, Any]:
+    def analyze_bottlenecks(self, phase_results: dict[str, Any]) -> dict[str, Any]:
         """Analyze phase results to identify bottlenecks."""
         
         analysis = {
@@ -244,7 +245,7 @@ class HTPPerformanceAnalyzer:
         
         return analysis
     
-    def compare_with_baseline(self, phase_results: Dict[str, Any]) -> Dict[str, Any]:
+    def compare_with_baseline(self, phase_results: dict[str, Any]) -> dict[str, Any]:
         """Compare current HTP performance with baseline metrics."""
         
         # Baseline from Iteration 16
@@ -325,7 +326,7 @@ class HTPPerformanceAnalyzer:
         
         return report
     
-    def print_analysis_summary(self, report: Dict[str, Any]):
+    def print_analysis_summary(self, report: dict[str, Any]):
         """Print analysis summary."""
         
         print(f"\\n{'='*60}")

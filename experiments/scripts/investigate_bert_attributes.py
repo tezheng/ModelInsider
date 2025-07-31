@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
 """Investigate why export_modules_as_functions fails with BERT-tiny."""
 
-import torch
-from transformers import AutoModel
 import warnings
+
+from transformers import AutoModel
+
 warnings.filterwarnings("ignore")
 
 def investigate_module_attributes():

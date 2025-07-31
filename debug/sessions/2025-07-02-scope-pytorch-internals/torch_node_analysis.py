@@ -6,8 +6,8 @@ This helps understand how to extract detailed information from torch.Node
 objects during the PyTorch -> ONNX conversion process.
 """
 
-import torch
 import onnx
+import torch
 from transformers import AutoModel
 
 
@@ -116,7 +116,7 @@ def analyze_torch_node_properties():
                 torch_output_names.add(output.debugName())
     
     # Show patterns
-    torch_names = sorted(list(torch_output_names))[:10]
+    torch_names = sorted(torch_output_names)[:10]
     onnx_names = [node.name for node in onnx_model.graph.node[:10]]
     
     print(f"  Sample PyTorch output names: {torch_names}")

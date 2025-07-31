@@ -14,7 +14,7 @@ if Path(graphml_path).exists():
     ET.register_namespace('', 'http://graphml.graphdrawing.org/xmlns')
     ns = {'g': 'http://graphml.graphdrawing.org/xmlns'}
     
-    with open(graphml_path, 'r') as f:
+    with open(graphml_path) as f:
         content = f.read()
     
     root = ET.fromstring(content)

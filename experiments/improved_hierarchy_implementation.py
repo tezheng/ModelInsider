@@ -151,10 +151,7 @@ def print_hierarchy_tree_improved(hierarchy: dict, tagged_nodes: dict = None,
         lines.append(line)
         
         # Update prefix for children
-        if path:
-            new_prefix = prefix + ("    " if is_last else "│   ")
-        else:
-            new_prefix = ""
+        new_prefix = prefix + ("    " if is_last else "│   ") if path else ""
         
         # Get and print children
         children = find_immediate_children_improved(path, hierarchy)

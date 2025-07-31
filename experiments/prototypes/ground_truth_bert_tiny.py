@@ -13,12 +13,12 @@ ONNX export should produce for prajjwal1/bert-tiny, based on:
 This serves as the reference implementation to verify what we're actually chasing.
 """
 
-import torch
-from transformers import AutoModel, AutoTokenizer
 import json
-from pathlib import Path
-from typing import Dict, List, Tuple, Any
 from collections import defaultdict
+from pathlib import Path
+from typing import Any
+
+from transformers import AutoModel, AutoTokenizer
 
 
 class BertTinyGroundTruth:
@@ -37,7 +37,7 @@ class BertTinyGroundTruth:
         self.model = AutoModel.from_pretrained(self.model_name)
         print("✅ Model loaded successfully")
         
-    def analyze_model_hierarchy(self) -> Dict[str, Any]:
+    def analyze_model_hierarchy(self) -> dict[str, Any]:
         """Analyze the complete module hierarchy of BERT-tiny."""
         
         print("\n🔍 Analyzing model hierarchy...")
@@ -88,7 +88,7 @@ class BertTinyGroundTruth:
         
         return hierarchy_analysis
     
-    def _should_filter_module(self, module_info: Dict[str, Any]) -> bool:
+    def _should_filter_module(self, module_info: dict[str, Any]) -> bool:
         """Determine if a module should be filtered according to MUST-002."""
         
         # MUST-002: Filter most torch.nn modules except whitelist
@@ -100,7 +100,7 @@ class BertTinyGroundTruth:
         # Don't filter HuggingFace or other modules
         return False
     
-    def _generate_expected_tag(self, module_name: str, module_info: Dict[str, Any], should_filter: bool) -> str:
+    def _generate_expected_tag(self, module_name: str, module_info: dict[str, Any], should_filter: bool) -> str:
         """Generate the expected hierarchy tag for a module according to R12."""
         
         if should_filter:
@@ -152,7 +152,7 @@ class BertTinyGroundTruth:
         
         return tag
     
-    def analyze_expected_onnx_operations(self) -> Dict[str, Any]:
+    def analyze_expected_onnx_operations(self) -> dict[str, Any]:
         """Analyze what ONNX operations we expect and their tagging."""
         
         print("\n⚙️ Analyzing expected ONNX operations...")
@@ -201,7 +201,7 @@ class BertTinyGroundTruth:
             'attention_mask_shape': attention_mask.shape
         }
     
-    def create_verification_baseline(self) -> Dict[str, Any]:
+    def create_verification_baseline(self) -> dict[str, Any]:
         """Create the definitive baseline for what BERT-tiny export should produce."""
         
         print("\n📋 Creating verification baseline...")
@@ -293,7 +293,7 @@ class BertTinyGroundTruth:
         report.append("\n🏗️ EXPECTED HIERARCHY STRUCTURE:")
         
         # Show key modules and their expected tags
-        key_modules = [name for name in hierarchy['tag_mapping'].keys() 
+        key_modules = [name for name in hierarchy['tag_mapping'] 
                       if hierarchy['tag_mapping'][name] and 
                       not hierarchy['tag_mapping'][name].startswith('')]
         

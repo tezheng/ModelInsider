@@ -5,21 +5,15 @@ This module contains unit tests, smoke tests, sanity tests, and end-to-end tests
 for the HTP Export Monitor functionality, based on baseline data.
 """
 
-import io
 import json
 import re
-import tempfile
 from pathlib import Path
-from unittest.mock import Mock, patch, MagicMock
-from typing import Dict, Any, List
 
 import pytest
-import torch
-import torch.nn as nn
 
+from modelexport.strategies.htp.base_writer import ExportData as HTPExportData
+from modelexport.strategies.htp.base_writer import ExportStep as HTPExportStep
 from modelexport.strategies.htp.export_monitor import HTPExportMonitor
-from modelexport.strategies.htp.base_writer import ExportStep as HTPExportStep, ExportData as HTPExportData
-
 
 # ============================================================================
 # TEST FIXTURES

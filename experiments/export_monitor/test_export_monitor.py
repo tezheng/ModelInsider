@@ -3,12 +3,10 @@ Comprehensive test cases for ExportMonitor system.
 """
 
 import json
-import re
 import tempfile
 from pathlib import Path
 
 import pytest
-
 from export_monitor import (
     ConsoleWriter,
     ExportData,
@@ -21,7 +19,6 @@ from export_monitor import (
 )
 from fixtures import (
     create_bert_tiny_fixture,
-    create_minimal_fixture,
     create_step_timeline,
 )
 
@@ -148,7 +145,7 @@ class TestMetadataWriter:
             data = create_bert_tiny_fixture()
             
             # Process all steps
-            for step_type, step_data in create_step_timeline():
+            for step_type, _step_data in create_step_timeline():
                 writer.write(step_type, data)
             
             # Write to file

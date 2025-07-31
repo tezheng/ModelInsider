@@ -7,7 +7,10 @@ This version only builds hierarchy during execution, not during registration.
 
 import torch
 from transformers import AutoModel
-from modelexport.core.tracing_hierarchy_builder_optimized import OptimizedTracingHierarchyBuilder
+
+from modelexport.core.tracing_hierarchy_builder_optimized import (
+    OptimizedTracingHierarchyBuilder,
+)
 
 
 def test_maximum_lazy():

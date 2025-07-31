@@ -5,7 +5,6 @@ Test Migration Script for Iteration 15
 Categorizes and migrates existing tests to the new test structure.
 """
 
-import os
 import shutil
 from pathlib import Path
 

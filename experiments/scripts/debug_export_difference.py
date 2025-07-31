@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
 """Debug the difference between baseline and hierarchy export."""
 
+import onnx
 import torch
 import torch.onnx
-import onnx
 from transformers import AutoModel, AutoTokenizer
+
 from modelexport.hierarchy_exporter import HierarchyExporter
+
 
 def debug_export_difference():
     """Debug why hierarchy export differs from baseline."""

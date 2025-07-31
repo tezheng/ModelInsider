@@ -568,10 +568,7 @@ class HTPConsoleWriter(StepAwareWriter):
                 class_name = child_info.get("class_name", "Unknown")
                 
                 # Get display name - everything after the parent path
-                if path:
-                    display_name = child_path[len(path) + 1:]
-                else:
-                    display_name = child_path
+                display_name = child_path[len(path) + 1:] if path else child_path
                 
                 tag = child_info.get("traced_tag", "")
                 

@@ -5,7 +5,6 @@ Match baseline exactly with proper Rich Text objects.
 """
 
 from pathlib import Path
-from rich.text import Text
 
 
 def create_complete_styled_export_monitor():

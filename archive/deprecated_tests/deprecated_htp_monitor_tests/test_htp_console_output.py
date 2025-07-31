@@ -7,13 +7,13 @@ This tests the specific issue with duplicate console messages and ANSI formattin
 
 import io
 import re
-from pathlib import Path
 from unittest.mock import Mock, patch
 
 import pytest
 
+from modelexport.strategies.htp.base_writer import ExportData as HTPExportData
+from modelexport.strategies.htp.base_writer import ExportStep as HTPExportStep
 from modelexport.strategies.htp.export_monitor import HTPExportMonitor
-from modelexport.strategies.htp.base_writer import ExportStep as HTPExportStep, ExportData as HTPExportData
 
 
 class TestConsoleOutput:

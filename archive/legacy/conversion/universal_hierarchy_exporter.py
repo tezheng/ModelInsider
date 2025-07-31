@@ -5,17 +5,14 @@ Works with any Hugging Face model by leveraging nn.Module hierarchy
 Simple approach: hooks + module hierarchy + ONNX functions
 """
 
-import torch
-import torch.nn as nn
-import onnx
-from onnx import helper, TensorProto, FunctionProto, AttributeProto
-import json
-from typing import Dict, List, Any, Tuple, Optional
-from transformers import AutoModel, AutoTokenizer
-import numpy as np
-from pathlib import Path
-import copy
 import inspect
+import json
+
+import onnx
+import torch
+from onnx import AttributeProto
+from transformers import AutoModel
+
 
 class UniversalHierarchyExporter:
     """Universal hierarchy-preserving ONNX exporter for any nn.Module"""

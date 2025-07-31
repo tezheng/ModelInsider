@@ -3,18 +3,18 @@
 Test iteration 2 improvements - refactored export monitor with config class
 """
 
-import sys
-import subprocess
-from pathlib import Path
 import difflib
 import io
-from contextlib import redirect_stdout
+import sys
+from pathlib import Path
 
 # Add the project root to sys.path
 sys.path.insert(0, str(Path(__file__).parent.parent.parent))
 
-from experiments.export_monitor.export_monitor_v2 import HTPExportMonitor, HTPExportStep
 from rich.console import Console
+
+from experiments.export_monitor.export_monitor_v2 import HTPExportMonitor, HTPExportStep
+
 
 def capture_export_with_v2_monitor():
     """Run export with the refactored v2 monitor."""
@@ -142,10 +142,10 @@ def compare_with_baseline():
     iteration_2_path = capture_export_with_v2_monitor()
     
     # Read files
-    with open(baseline_path, 'r', encoding='utf-8') as f:
+    with open(baseline_path, encoding='utf-8') as f:
         baseline = f.read()
     
-    with open(iteration_2_path, 'r', encoding='utf-8') as f:
+    with open(iteration_2_path, encoding='utf-8') as f:
         iteration_2 = f.read()
     
     # Clean up paths and timestamps for comparison

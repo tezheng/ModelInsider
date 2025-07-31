@@ -3,9 +3,11 @@ Test to understand the timing issue with slice operations in BERT attention.
 This test attempts to reproduce the exact sequence that causes incorrect tagging.
 """
 
+import tempfile
+
 import torch
 import torch.nn as nn
-import tempfile
+
 from modelexport.hierarchy_exporter import HierarchyExporter
 
 
@@ -253,7 +255,7 @@ def test_bert_slice_timing_issue():
             # Check if it's an attention slice
             if 'MockBertSelfAttention' in context:
                 print(f"     ✅ Attention slice correctly captured")
-            elif 'MockBertModel' == context.strip('/'):
+            elif context.strip('/') == 'MockBertModel':
                 print(f"     ❌ Root-level context (likely pooler slice)")
             else:
                 print(f"     ? Other context: {context}")
@@ -280,7 +282,7 @@ def test_bert_slice_timing_issue():
         hierarchy_file = tmp.name.replace('.onnx', '_hierarchy.json')
         try:
             import json
-            with open(hierarchy_file, 'r') as f:
+            with open(hierarchy_file) as f:
                 hierarchy_data = json.load(f)
             
             print(f"\n=== METADATA VALIDATION ===")

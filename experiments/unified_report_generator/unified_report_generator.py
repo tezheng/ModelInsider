@@ -10,16 +10,15 @@ This module provides a single, consistent way to generate all report formats:
 from __future__ import annotations
 
 import io
-import json
 import time
-from dataclasses import dataclass, field, asdict
-from pathlib import Path
-from typing import Any, Dict, List, Optional, Tuple
 from collections import Counter
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Any
 
 from rich.console import Console
-from rich.tree import Tree
 from rich.text import Text
+from rich.tree import Tree
 
 
 @dataclass
@@ -29,7 +28,7 @@ class StepResult:
     status: str = "pending"
     start_time: float = 0.0
     end_time: float = 0.0
-    details: Dict[str, Any] = field(default_factory=dict)
+    details: dict[str, Any] = field(default_factory=dict)
     
     @property
     def duration(self) -> float:
@@ -58,12 +57,12 @@ class ExportSession:
     enable_reporting: bool = False
     
     # Steps
-    steps: Dict[str, StepResult] = field(default_factory=dict)
+    steps: dict[str, StepResult] = field(default_factory=dict)
     
     # Data collections
-    hierarchy_data: Dict[str, Dict[str, Any]] = field(default_factory=dict)
-    tagged_nodes: Dict[str, str] = field(default_factory=dict)
-    tagging_statistics: Dict[str, int] = field(default_factory=dict)
+    hierarchy_data: dict[str, dict[str, Any]] = field(default_factory=dict)
+    tagged_nodes: dict[str, str] = field(default_factory=dict)
+    tagging_statistics: dict[str, int] = field(default_factory=dict)
     
     # Overall statistics
     export_time: float = 0.0
@@ -79,8 +78,8 @@ class ExportSession:
     report_file_path: str = ""
     
     # Additional data
-    input_names: List[str] = field(default_factory=list)
-    output_names: List[str] = field(default_factory=list)
+    input_names: list[str] = field(default_factory=list)
+    output_names: list[str] = field(default_factory=list)
     opset_version: int = 17
     
     def add_step(self, name: str, status: str = "in_progress", **details) -> StepResult:
@@ -94,7 +93,7 @@ class ExportSession:
             step.end_time = time.time()
         return step
     
-    def get_top_hierarchies(self, limit: int = 20) -> List[Dict[str, Any]]:
+    def get_top_hierarchies(self, limit: int = 20) -> list[dict[str, Any]]:
         """Get top N hierarchies by node count."""
         if not self.tagged_nodes:
             return []
@@ -261,7 +260,7 @@ class UnifiedReportGenerator:
         
         return self.console_buffer.getvalue()
     
-    def generate_metadata(self) -> Dict[str, Any]:
+    def generate_metadata(self) -> dict[str, Any]:
         """Generate metadata dictionary."""
         # Get module types
         module_types = list(
@@ -510,7 +509,7 @@ class UnifiedReportGenerator:
         # For brevity, simplified here
         pass
     
-    def _generate_steps_report(self) -> Dict[str, Any]:
+    def _generate_steps_report(self) -> dict[str, Any]:
         """Generate steps section for metadata."""
         steps_report = {}
         

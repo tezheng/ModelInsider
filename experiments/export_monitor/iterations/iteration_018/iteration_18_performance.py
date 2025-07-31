@@ -4,16 +4,10 @@ Iteration 18: Performance optimization and profiling.
 Optimize string operations, reduce allocations, add caching.
 """
 
-import sys
-from pathlib import Path
-import time
 import json
-from typing import Dict, Any, List, Optional, Tuple
-import cProfile
-import pstats
-import io
-from functools import lru_cache
+import time
 import tracemalloc
+from pathlib import Path
 
 
 def profile_export_monitor():

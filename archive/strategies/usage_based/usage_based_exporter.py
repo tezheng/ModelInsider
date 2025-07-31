@@ -165,7 +165,7 @@ class UsageBasedExporter(BaseHierarchyExporter):
             with torch.no_grad():
                 if isinstance(example_inputs, dict):
                     model(**example_inputs)
-                elif isinstance(example_inputs, (list, tuple)):
+                elif isinstance(example_inputs, list | tuple):
                     model(*example_inputs)
                 else:
                     model(example_inputs)
