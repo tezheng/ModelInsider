@@ -35,6 +35,10 @@ class GraphMLConstants:
     META_SOURCE_HTP = "m1"
     META_FORMAT_VERSION = "m2"
     META_TIMESTAMP = "m3"
+    
+    # Graph I/O metadata keys (expected by TEZ-127 tests)
+    GRAPH_INPUTS = "g0"
+    GRAPH_OUTPUTS = "g1"
 
 
 class NodeType(Enum):

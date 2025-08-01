@@ -13,19 +13,17 @@ Validation Levels:
 Linear Task: TEZ-124
 """
 
-import json
-import time
 import tempfile
+import time
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple
-import hashlib
+from typing import Any
 
+import numpy as np
 import onnx
 import onnxruntime as ort
-import numpy as np
 
-from .enhanced_converter import EnhancedGraphMLConverter
 from .graphml_to_onnx_converter import GraphMLToONNXConverter
+from .onnx_to_graphml_converter import ONNXToGraphMLConverter
 
 
 class ValidationResult:
@@ -55,7 +53,7 @@ class ValidationResult:
         """Add detailed information."""
         self.details[name] = value
         
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Convert to dictionary format."""
         return {
             "passed": self.passed,
@@ -88,7 +86,7 @@ class RoundTripValidator:
         self, 
         original_onnx_path: str,
         htp_metadata_path: str,
-        temp_dir: Optional[str] = None
+        temp_dir: str | None = None
     ) -> ValidationResult:
         """
         Perform complete round-trip validation.
@@ -112,7 +110,8 @@ class RoundTripValidator:
         
         try:
             # Initialize GraphML converter
-            self.graphml_converter = EnhancedGraphMLConverter(
+            self.graphml_converter = ONNXToGraphMLConverter(
+                hierarchical=True,
                 htp_metadata_path=htp_metadata_path,
                 parameter_strategy=self.parameter_strategy
             )
@@ -285,7 +284,7 @@ class RoundTripValidator:
                 return
             
             # Check input compatibility
-            for orig_input, recon_input in zip(orig_inputs, recon_inputs):
+            for orig_input, recon_input in zip(orig_inputs, recon_inputs, strict=False):
                 if orig_input.name != recon_input.name:
                     result.add_warning(
                         f"Input name mismatch: {orig_input.name} vs {recon_input.name}",
@@ -340,7 +339,7 @@ class RoundTripValidator:
             mean_diff = 0.0
             total_elements = 0
             
-            for orig_out, recon_out in zip(orig_outputs, recon_outputs):
+            for orig_out, recon_out in zip(orig_outputs, recon_outputs, strict=False):
                 # Calculate differences
                 diff = np.abs(orig_out - recon_out)
                 max_diff = max(max_diff, np.max(diff))
@@ -363,7 +362,7 @@ class RoundTripValidator:
         except Exception as e:
             result.add_error(f"Numerical validation failed: {e}", "numerical")
     
-    def _generate_sample_inputs(self, session: ort.InferenceSession) -> Dict[str, np.ndarray]:
+    def _generate_sample_inputs(self, session: ort.InferenceSession) -> dict[str, np.ndarray]:
         """Generate sample inputs for testing."""
         
         inputs = {}
@@ -402,7 +401,7 @@ class RoundTripValidator:
     def _analyze_performance(
         self, 
         result: ValidationResult,
-        graphml_files: Dict[str, str]
+        graphml_files: dict[str, str]
     ):
         """Analyze performance metrics."""
         

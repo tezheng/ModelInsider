@@ -14,17 +14,21 @@ Key Features:
 Linear Task: TEZ-124
 """
 
+import base64
 import json
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Tuple
-import tempfile
-import base64
+from typing import Any
 
-import onnx
 import numpy as np
-from onnx import helper, TensorProto, GraphProto, ModelProto, ValueInfoProto
-from onnx import AttributeProto
+import onnx
+from onnx import (
+    AttributeProto,
+    ModelProto,
+    TensorProto,
+    ValueInfoProto,
+    helper,
+)
 
 from .parameter_manager import ParameterManager
 
@@ -72,7 +76,7 @@ class GraphMLToONNXConverter:
         
         return output_path
     
-    def _parse_graphml(self, graphml_path: str) -> Dict[str, Any]:
+    def _parse_graphml(self, graphml_path: str) -> dict[str, Any]:
         """Parse GraphML v1.1 file and extract all information."""
         
         if not Path(graphml_path).exists():
@@ -112,7 +116,7 @@ class GraphMLToONNXConverter:
             "keys": keys
         }
     
-    def _extract_key_definitions(self, root: ET.Element) -> Dict[str, Dict[str, str]]:
+    def _extract_key_definitions(self, root: ET.Element) -> dict[str, dict[str, str]]:
         """Extract GraphML key definitions."""
         
         keys = {}
@@ -129,8 +133,8 @@ class GraphMLToONNXConverter:
     def _extract_graph_metadata(
         self, 
         graph: ET.Element, 
-        keys: Dict[str, Dict[str, str]]
-    ) -> Dict[str, Any]:
+        keys: dict[str, dict[str, str]]
+    ) -> dict[str, Any]:
         """Extract graph-level metadata."""
         
         metadata = {"graph_id": graph.get("id", "")}
@@ -156,8 +160,8 @@ class GraphMLToONNXConverter:
     def _extract_nodes(
         self, 
         graph: ET.Element, 
-        keys: Dict[str, Dict[str, str]]
-    ) -> List[Dict[str, Any]]:
+        keys: dict[str, dict[str, str]]
+    ) -> list[dict[str, Any]]:
         """Extract all nodes with v1.1 attributes."""
         
         nodes = []
@@ -190,111 +194,17 @@ class GraphMLToONNXConverter:
                     else:
                         node_data[attr_name] = value
             
-            # Only include ONNX operation nodes (have valid ONNX op_type AND node structure)
-            if "op_type" in node_data and node_data["op_type"]:
-                if self._is_valid_onnx_op_type(node_data["op_type"]):
-                    if self._is_onnx_operation_node(node_data):
-                        nodes.append(node_data)
-                    else:
-                        pass  # Node filtered out
+            # Only include nodes with op_type (ONNX operations must have op_type)
+            if node_data.get("op_type"):
+                nodes.append(node_data)
         
         return nodes
-    
-    def _is_valid_onnx_op_type(self, op_type: str) -> bool:
-        """Check if op_type is a valid ONNX operation (not a PyTorch module)."""
-        
-        # Common ONNX operations (whitelist approach is more reliable)
-        onnx_operations = {
-            "Abs", "Acos", "Acosh", "Add", "And", "ArgMax", "ArgMin", "Asin", "Asinh", "Atan", "Atanh",
-            "AveragePool", "BatchNormalization", "Cast", "Ceil", "Clip", "Concat", "Constant", "ConstantOfShape",
-            "Conv", "ConvTranspose", "Cos", "Cosh", "CumSum", "DepthToSpace", "Div", "Dropout", "Elu", "Equal",
-            "Erf", "Exp", "Expand", "EyeLike", "Flatten", "Floor", "Gather", "GatherElements", "GatherND",
-            "Gemm", "GlobalAveragePool", "GlobalMaxPool", "Greater", "GreaterOrEqual", "HardSigmoid", "HardSwish",
-            "Identity", "If", "InstanceNormalization", "IsInf", "IsNaN", "LRN", "LSTM", "LayerNormalization",
-            "LeakyRelu", "Less", "LessOrEqual", "Log", "LogSoftmax", "Loop", "LpNormalization", "LpPool", 
-            "MatMul", "Max", "MaxPool", "Mean", "Min", "Mod", "Mul", "Neg", "NonMaxSuppression", "NonZero", 
-            "Not", "OneHot", "Or", "PRelu", "Pad", "Pow", "QLinearConv", "QLinearMatMul", "QuantizeLinear", 
-            "RNN", "RandomNormal", "RandomUniform", "Reciprocal", "ReduceMax", "ReduceMean", "ReduceMin", 
-            "ReduceProd", "ReduceSum", "Relu", "Reshape", "Resize", "ReverseSequence", "RoiAlign", "Round", 
-            "ScatterElements", "ScatterND", "Selu", "Shape", "Shrink", "Sigmoid", "Sign", "Sin", "Sinh", 
-            "Size", "Slice", "Softmax", "Softplus", "Softsign", "SpaceToDepth", "Split", "Sqrt", "Squeeze", 
-            "Sub", "Sum", "Tan", "Tanh", "ThresholdedRelu", "Tile", "TopK", "Transpose", "Trilu", "Unsqueeze", 
-            "Upsample", "Where", "Xor"
-        }
-        
-        # Check if it's a known ONNX operation
-        if op_type in onnx_operations:
-            return True
-        
-        # Common PyTorch module names and parameter types that should be excluded
-        pytorch_modules = {
-            "BertModel", "BertEmbeddings", "BertEncoder", "BertLayer", 
-            "BertAttention", "BertSdpaSelfAttention", "BertSelfOutput",
-            "BertIntermediate", "BertOutput", "BertPooler", "GELUActivation",
-            "Linear", "LayerNorm", "Embedding", "Module", "Sequential", 
-            "ModuleList", "ModuleDict", "ResNet", "TestModel", "LinearLayer",
-            # Compound node parameter types
-            "word_embeddings", "position_embeddings", "token_type_embeddings",
-            "dense", "query", "key", "value", "activation", "dropout",
-            "layer", "attention", "intermediate", "output"
-        }
-        
-        # If it's a known PyTorch module or parameter type, exclude it
-        if op_type in pytorch_modules:
-            return False
-            
-        # If it contains common PyTorch module patterns, exclude it
-        pytorch_patterns = ["Bert", "Layer", "Norm", "Embedding", "Activation"]
-        if any(pattern in op_type for pattern in pytorch_patterns):
-            return False
-            
-        # Check for compound node patterns (contain dots or underscores indicating hierarchical names)
-        if "." in op_type or "_" in op_type:
-            # These are likely compound node identifiers, not ONNX operations
-            return False
-            
-        # If it's not in the ONNX whitelist and looks like a class name, exclude it
-        if op_type[0].isupper() and len(op_type) > 3:
-            return False
-            
-        # Otherwise, assume it's a valid ONNX operation
-        return True
-    
-    def _is_onnx_operation_node(self, node_data: Dict[str, Any]) -> bool:
-        """Check if this is an actual ONNX operation node vs a compound/module node."""
-        
-        node_id = node_data.get("id", "")
-        
-        # ONNX operation nodes typically have paths with slashes (e.g., "/embeddings/Add")
-        # Compound nodes typically have dotted names (e.g., "embeddings.dropout")
-        if "." in node_id and "/" not in node_id:
-            # This is likely a compound node representing a PyTorch module
-            return False
-        
-        # ONNX nodes should have input/output information
-        inputs = node_data.get("input_names", [])
-        outputs = node_data.get("output_names", [])
-        
-        # If it has no inputs and no outputs, it's likely a compound node
-        if not inputs and not outputs:
-            return False
-        
-        # Additional check: compound nodes often have hierarchy_tag but no actual ONNX attributes
-        onnx_attrs = node_data.get("onnx_attributes", {})
-        hierarchy_tag = node_data.get("hierarchy_tag", "")
-        
-        # If it only has hierarchy info but no real ONNX attributes, it's a compound node
-        if hierarchy_tag and not onnx_attrs:
-            return False
-        
-        # If we get here, it's likely a real ONNX operation
-        return True
     
     def _extract_edges(
         self, 
         graph: ET.Element, 
-        keys: Dict[str, Dict[str, str]]
-    ) -> List[Dict[str, Any]]:
+        keys: dict[str, dict[str, str]]
+    ) -> list[dict[str, Any]]:
         """Extract all edges with v1.1 tensor information."""
         
         edges = []
@@ -327,9 +237,9 @@ class GraphMLToONNXConverter:
     
     def _load_parameters(
         self, 
-        graphml_data: Dict[str, Any], 
+        graphml_data: dict[str, Any], 
         graphml_path: str
-    ) -> Dict[str, np.ndarray]:
+    ) -> dict[str, np.ndarray]:
         """Load parameters based on storage strategy."""
         
         metadata = graphml_data["metadata"]
@@ -349,8 +259,8 @@ class GraphMLToONNXConverter:
             if initializers_ref:
                 try:
                     parameter_info["embedded_data"] = json.loads(initializers_ref)
-                except json.JSONDecodeError:
-                    raise ValueError("Invalid embedded parameter data")
+                except json.JSONDecodeError as err:
+                    raise ValueError("Invalid embedded parameter data") from err
         
         # Load parameters
         base_path = str(Path(graphml_path).parent)
@@ -358,8 +268,8 @@ class GraphMLToONNXConverter:
     
     def _reconstruct_onnx_model(
         self, 
-        graphml_data: Dict[str, Any], 
-        parameters: Dict[str, np.ndarray]
+        graphml_data: dict[str, Any], 
+        parameters: dict[str, np.ndarray]
     ) -> ModelProto:
         """Reconstruct complete ONNX model from GraphML data."""
         
@@ -370,6 +280,11 @@ class GraphMLToONNXConverter:
         # Create ONNX nodes and sort topologically
         onnx_nodes = []
         for node_data in nodes:
+            # Skip Input/Output nodes - these are handled by graph inputs/outputs, not as nodes
+            op_type = node_data.get("op_type", "")
+            if op_type in ("Input", "Output"):
+                continue
+                
             onnx_node = self._create_onnx_node(node_data)
             onnx_nodes.append(onnx_node)
         
@@ -462,7 +377,7 @@ class GraphMLToONNXConverter:
         
         return model
     
-    def _create_onnx_node(self, node_data: Dict[str, Any]) -> helper.NodeProto:
+    def _create_onnx_node(self, node_data: dict[str, Any]) -> helper.NodeProto:
         """Create ONNX node from GraphML node data."""
         
         # Get basic node info
@@ -505,7 +420,7 @@ class GraphMLToONNXConverter:
         }
         return attr_name in custom_attrs
     
-    def _create_onnx_attribute(self, name: str, value: Any) -> Optional[AttributeProto]:
+    def _create_onnx_attribute(self, name: str, value: Any) -> AttributeProto | None:
         """Create ONNX attribute from name and value."""
         
         if value is None:
@@ -518,26 +433,18 @@ class GraphMLToONNXConverter:
         # Determine attribute type and create accordingly
         if isinstance(value, bool):
             return helper.make_attribute(name, int(value))
-        elif isinstance(value, int):
-            return helper.make_attribute(name, value)
-        elif isinstance(value, float):
-            return helper.make_attribute(name, value)
-        elif isinstance(value, str):
+        elif isinstance(value, int | float | str):
             return helper.make_attribute(name, value)
         elif isinstance(value, list):
             if not value:
                 return None
-            elif isinstance(value[0], int):
-                return helper.make_attribute(name, value)
-            elif isinstance(value[0], float):
-                return helper.make_attribute(name, value)
-            elif isinstance(value[0], str):
+            elif isinstance(value[0], int | float | str):
                 return helper.make_attribute(name, value)
         
         # For complex types, try to convert to string
         return helper.make_attribute(name, str(value))
     
-    def _reconstruct_tensor_attribute(self, name: str, tensor_data: Dict[str, Any]) -> AttributeProto:
+    def _reconstruct_tensor_attribute(self, name: str, tensor_data: dict[str, Any]) -> AttributeProto:
         """Reconstruct ONNX tensor attribute from stored data."""
         
         # Decode base64 data back to bytes
@@ -575,7 +482,7 @@ class GraphMLToONNXConverter:
         else:
             return None
     
-    def _create_value_info(self, value_data: Dict[str, Any]) -> ValueInfoProto:
+    def _create_value_info(self, value_data: dict[str, Any]) -> ValueInfoProto:
         """Create ONNX ValueInfoProto from data."""
         
         name = value_data.get("name", "")
@@ -618,10 +525,10 @@ class GraphMLToONNXConverter:
     
     def _collect_intermediate_tensors(
         self, 
-        nodes: List, 
-        initializers: List,
-        inputs: List[Dict[str, Any]],
-        outputs: List[Dict[str, Any]]
+        nodes: list, 
+        initializers: list,
+        inputs: list[dict[str, Any]],
+        outputs: list[dict[str, Any]]
     ) -> set:
         """Collect all intermediate tensors that need value_info entries."""
         
@@ -653,7 +560,7 @@ class GraphMLToONNXConverter:
         
         return intermediate_tensors
     
-    def _sort_nodes_topologically(self, nodes: List, edges: List[Dict[str, Any]]) -> List:
+    def _sort_nodes_topologically(self, nodes: list, edges: list[dict[str, Any]]) -> list:
         """Sort ONNX nodes in topological order based on data dependencies."""
         
         from collections import defaultdict, deque
@@ -733,9 +640,9 @@ class GraphMLToONNXConverter:
         try:
             onnx.checker.check_model(model)
         except Exception as e:
-            raise ValueError(f"Reconstructed ONNX model validation failed: {e}")
+            raise ValueError(f"Reconstructed ONNX model validation failed: {e}") from e
     
-    def get_conversion_info(self, graphml_path: str) -> Dict[str, Any]:
+    def get_conversion_info(self, graphml_path: str) -> dict[str, Any]:
         """Get information about GraphML file for conversion."""
         
         graphml_data = self._parse_graphml(graphml_path)

@@ -9,15 +9,17 @@ Tests error conditions and edge cases including:
 - Edge cases (empty models, invalid formats)
 """
 
-import pytest
-import tempfile
+import builtins
+import contextlib
 import json
-from pathlib import Path
 import xml.etree.ElementTree as ET
 
-from modelexport.graphml.converter import ONNXToGraphMLConverter
-from modelexport.graphml.hierarchical_converter import HierarchicalGraphMLConverter
+import pytest
+
+from modelexport.graphml import ONNXToGraphMLConverter
 from modelexport.graphml.metadata_reader import MetadataReader
+
+from .test_utils import get_graphml_content
 
 
 class TestFileSystemErrors:
@@ -25,7 +27,7 @@ class TestFileSystemErrors:
     
     def test_missing_onnx_file(self):
         """Test error handling for non-existent ONNX file."""
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         
         with pytest.raises(FileNotFoundError) as exc_info:
             converter.convert("nonexistent_model.onnx")
@@ -36,13 +38,13 @@ class TestFileSystemErrors:
     def test_missing_metadata_file(self):
         """Test error handling for non-existent metadata file."""
         with pytest.raises(FileNotFoundError) as exc_info:
-            HierarchicalGraphMLConverter(htp_metadata_path="nonexistent_metadata.json")
+            ONNXToGraphMLConverter(hierarchical=True, htp_metadata_path="nonexistent_metadata.json")
         
         assert "HTP metadata file not found" in str(exc_info.value)
     
     def test_empty_file_path(self):
         """Test error handling for empty file paths."""
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         
         # Empty string gets converted to "." which is a directory, so expect different error
         with pytest.raises(Exception):  # Could be IsADirectoryError, PermissionError, or ONNX error
@@ -50,7 +52,7 @@ class TestFileSystemErrors:
     
     def test_directory_instead_of_file(self, tmp_path):
         """Test error handling when directory is passed instead of file."""
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         
         # Create a directory
         dir_path = tmp_path / "not_a_file"
@@ -65,7 +67,7 @@ class TestMalformedInputFiles:
     
     def test_malformed_onnx_file(self, malformed_onnx_file):
         """Test error handling for malformed ONNX files."""
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         
         # Should raise an ONNX-related error (don't be too specific about the message)
         with pytest.raises(Exception):
@@ -76,7 +78,7 @@ class TestMalformedInputFiles:
         empty_file = tmp_path / "empty.onnx"
         empty_file.touch()  # Create empty file
         
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         
         # Empty ONNX files may be handled gracefully by ONNX library
         # Either raises an exception or produces empty GraphML
@@ -99,7 +101,7 @@ class TestMalformedInputFiles:
             f.write("{ invalid json content }")
         
         with pytest.raises(json.JSONDecodeError):
-            HierarchicalGraphMLConverter(htp_metadata_path=str(metadata_file))
+            ONNXToGraphMLConverter(hierarchical=True, htp_metadata_path=str(metadata_file))
     
     def test_empty_json_metadata(self, tmp_path, simple_onnx_model):
         """Test error handling for empty JSON metadata."""
@@ -109,12 +111,12 @@ class TestMalformedInputFiles:
             f.write("{}")
         
         # Should not crash, but may not produce hierarchy
-        converter = HierarchicalGraphMLConverter(htp_metadata_path=str(metadata_file))
+        converter = ONNXToGraphMLConverter(hierarchical=True, htp_metadata_path=str(metadata_file))
         graphml_output = converter.convert(simple_onnx_model)
         
         # Should still produce valid GraphML
-        assert len(graphml_output) > 0
-        root = ET.fromstring(graphml_output)
+        content, root = get_graphml_content(graphml_output)
+        assert len(content) > 0
         assert root.tag.endswith("graphml")
     
     def test_invalid_metadata_structure(self, tmp_path, simple_onnx_model):
@@ -129,7 +131,7 @@ class TestMalformedInputFiles:
         
         # This should fail because tagged_nodes is expected to be a dict
         with pytest.raises(AttributeError):  # tagged_nodes must be a dictionary
-            converter = HierarchicalGraphMLConverter(htp_metadata_path=str(metadata_file))
+            converter = ONNXToGraphMLConverter(hierarchical=True, htp_metadata_path=str(metadata_file))
 
 
 class TestEdgeCases:
@@ -138,7 +140,6 @@ class TestEdgeCases:
     def test_very_small_model(self, tmp_path):
         """Test conversion of minimal ONNX model."""
         import torch
-        import onnx
         
         # Create minimal model - just identity
         class MinimalModel(torch.nn.Module):
@@ -155,7 +156,7 @@ class TestEdgeCases:
             opset_version=17
         )
         
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_output = converter.convert(str(onnx_path))
         
         # Should produce valid GraphML even for minimal model
@@ -192,7 +193,7 @@ class TestEdgeCases:
             opset_version=17
         )
         
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_output = converter.convert(str(onnx_path))
         
         # Should handle gracefully
@@ -215,12 +216,12 @@ class TestEdgeCases:
             }, f)
         
         # Should handle gracefully without crashing
-        converter = HierarchicalGraphMLConverter(htp_metadata_path=str(metadata_file))
+        converter = ONNXToGraphMLConverter(hierarchical=True, htp_metadata_path=str(metadata_file))
         graphml_output = converter.convert(simple_onnx_model)
         
         # Should produce valid GraphML
-        assert len(graphml_output) > 0
-        root = ET.fromstring(graphml_output)
+        content, root = get_graphml_content(graphml_output)
+        assert len(content) > 0
         assert root.tag.endswith("graphml")
 
 
@@ -229,8 +230,8 @@ class TestParameterValidation:
     
     def test_invalid_exclude_attributes_type(self):
         """Test error handling for invalid exclude_attributes parameter."""
-        # Should handle invalid types gracefully
-        converter = ONNXToGraphMLConverter(exclude_attributes="should_be_set_not_string")
+        # Should handle invalid types gracefully (use flat mode for parameter testing)
+        converter = ONNXToGraphMLConverter(hierarchical=False, exclude_attributes="should_be_set_not_string")
         
         # Should still work (convert to set internally or handle gracefully)
         assert converter.exclude_attributes is not None
@@ -240,23 +241,23 @@ class TestParameterValidation:
         # Create large set of attributes to exclude
         large_exclude_set = {f"attr_{i}" for i in range(1000)}
         
-        converter = ONNXToGraphMLConverter(exclude_attributes=large_exclude_set)
+        converter = ONNXToGraphMLConverter(hierarchical=False, exclude_attributes=large_exclude_set)
         graphml_output = converter.convert(simple_onnx_model)
         
         # Should still work
-        assert len(graphml_output) > 0
-        root = ET.fromstring(graphml_output)
+        content, root = get_graphml_content(graphml_output)
+        assert len(content) > 0
         assert root.tag.endswith("graphml")
     
     def test_boolean_parameter_edge_cases(self, simple_onnx_model):
         """Test boolean parameters with various values."""
         # Test with different boolean-like values
         for exclude_init in [True, False, 1, 0]:
-            converter = ONNXToGraphMLConverter(exclude_initializers=bool(exclude_init))
+            converter = ONNXToGraphMLConverter(hierarchical=False, exclude_initializers=bool(exclude_init))
             graphml_output = converter.convert(simple_onnx_model)
             
-            assert len(graphml_output) > 0
-            root = ET.fromstring(graphml_output)
+            content, root = get_graphml_content(graphml_output)
+            assert len(content) > 0
             assert root.tag.endswith("graphml")
 
 
@@ -265,7 +266,7 @@ class TestResourceConstraints:
     
     def test_save_to_readonly_directory(self, simple_onnx_model, tmp_path):
         """Test error handling when saving to read-only directory."""
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         
         # Create read-only directory (skip if we can't make it readonly)
         readonly_dir = tmp_path / "readonly"
@@ -282,14 +283,12 @@ class TestResourceConstraints:
             pytest.skip("Cannot create read-only directory on this system")
         finally:
             # Restore permissions for cleanup
-            try:
+            with contextlib.suppress(builtins.BaseException):
                 readonly_dir.chmod(0o755)
-            except:
-                pass
     
     def test_save_with_invalid_output_path(self, simple_onnx_model):
         """Test save with various invalid output paths."""
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         
         # Test with a path that definitely should fail
         invalid_path = "/nonexistent/deeply/nested/path/that/should/not/exist/output.graphml"
@@ -299,8 +298,8 @@ class TestResourceConstraints:
     
     def test_concurrent_conversion_safety(self, simple_onnx_model):
         """Test that converter can handle multiple instances safely."""
-        # Create multiple converter instances
-        converters = [ONNXToGraphMLConverter() for _ in range(3)]
+        # Create multiple converter instances (use flat mode for safety testing)
+        converters = [ONNXToGraphMLConverter(hierarchical=False) for _ in range(3)]
         
         # Convert with all instances
         results = []
@@ -310,13 +309,13 @@ class TestResourceConstraints:
         
         # All should succeed and produce valid GraphML
         for result in results:
-            assert len(result) > 0
-            root = ET.fromstring(result)
+            content, root = get_graphml_content(result)
+            assert len(content) > 0
             assert root.tag.endswith("graphml")
         
         # Results should have similar structure (may not be identical due to timestamps)
         # Just verify they all have similar node/edge counts
-        roots = [ET.fromstring(result) for result in results]
+        roots = [get_graphml_content(result)[1] for result in results]
         node_counts = [len(root.findall(".//{http://graphml.graphdrawing.org/xmlns}node")) for root in roots]
         edge_counts = [len(root.findall(".//{http://graphml.graphdrawing.org/xmlns}edge")) for root in roots]
         
@@ -364,7 +363,7 @@ class TestOutputValidation:
     
     def test_output_always_valid_xml(self, simple_onnx_model):
         """Test that GraphML output is always valid XML."""
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_output = converter.convert(simple_onnx_model)
         
         # Should be parseable XML
@@ -376,7 +375,7 @@ class TestOutputValidation:
     
     def test_output_has_required_graphml_structure(self, simple_onnx_model):
         """Test that output has required GraphML elements."""
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_output = converter.convert(simple_onnx_model)
         
         root = ET.fromstring(graphml_output)
@@ -391,7 +390,7 @@ class TestOutputValidation:
     
     def test_statistics_consistency(self, simple_onnx_model):
         """Test that conversion statistics are consistent with output."""
-        converter = ONNXToGraphMLConverter()
+        converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_output = converter.convert(simple_onnx_model)
         
         # Get statistics

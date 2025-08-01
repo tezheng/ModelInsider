@@ -10,18 +10,17 @@ tracing with complete structural module discovery.
 import json
 import xml.etree.ElementTree as ET
 from pathlib import Path
-from typing import Dict, Any
+from typing import Any
 
 import onnx
-import torch.nn as nn
 from transformers import AutoModel
 
+from ..core.structural_hierarchy_builder import StructuralHierarchyBuilder
 from .converter import ONNXToGraphMLConverter
 from .metadata_reader import MetadataReader
 from .onnx_parser import ONNXGraphParser
 from .utils import GraphData, NodeData
 from .utils import GraphMLConstants as GC
-from ..core.structural_hierarchy_builder import StructuralHierarchyBuilder
 
 
 class EnhancedHierarchicalConverter(ONNXToGraphMLConverter):
@@ -110,6 +109,12 @@ class EnhancedHierarchicalConverter(ONNXToGraphMLConverter):
         from datetime import datetime
         self._add_data(main_graph, GC.META_TIMESTAMP, datetime.now().isoformat())
         
+        # Add input/output metadata that tests expect (keys g0, g1)
+        self._add_input_output_metadata(main_graph, graph_data, onnx_model)
+        
+        # Initialize tracking for node placement to prevent duplication
+        self.placed_nodes = set()
+        
         # Build module hierarchy from metadata with optional hybrid enhancement
         modules_data = self.htp_data.get("modules", {})
         
@@ -120,8 +125,8 @@ class EnhancedHierarchicalConverter(ONNXToGraphMLConverter):
         else:
             self._create_module_hierarchy(main_graph, modules_data, graph_data)
         
-        # Add root-level ONNX nodes (e.g., /Constant_6 tagged with /BertModel)
-        self._add_root_level_onnx_nodes(main_graph, f"/{model_class}", graph_data)
+        # After building hierarchy, add remaining nodes that haven't been placed
+        self._add_remaining_onnx_nodes(main_graph, f"/{model_class}", graph_data)
         
         # Add input/output nodes at the main level
         self._add_io_nodes(main_graph, graph_data)
@@ -132,7 +137,7 @@ class EnhancedHierarchicalConverter(ONNXToGraphMLConverter):
         graphml.append(main_graph)
         return graphml
     
-    def _enhance_with_structural_hierarchy(self, traced_modules_data: Dict[str, Any]) -> Dict[str, Any]:
+    def _enhance_with_structural_hierarchy(self, traced_modules_data: dict[str, Any]) -> dict[str, Any]:
         """
         Enhance traced module hierarchy with structural discovery to achieve 44 compound nodes.
         
@@ -167,12 +172,12 @@ class EnhancedHierarchicalConverter(ONNXToGraphMLConverter):
             print("⚠️ Falling back to traced hierarchy only")
             return traced_modules_data
     
-    def _merge_hierarchies(self, traced: Dict[str, Any], structural: Dict[str, Any]) -> Dict[str, Any]:
+    def _merge_hierarchies(self, traced: dict[str, Any], structural: dict[str, Any]) -> dict[str, Any]:
         """
-        Merge traced and structural hierarchies.
+        Merge traced and structural hierarchies with conflict resolution.
         
         Priority: traced modules keep their execution order and details,
-        structural modules are added to fill gaps.
+        structural modules are added only if they don't create duplicates.
         """
         # Start with traced hierarchy as base
         merged = traced.copy()
@@ -184,6 +189,10 @@ class EnhancedHierarchicalConverter(ONNXToGraphMLConverter):
             
             for struct_key, struct_data in structural["children"].items():
                 if struct_key not in merged["children"]:
+                    # Check if this structural module would create duplicates
+                    if self._would_create_duplicates(struct_data, merged):
+                        print(f"⚠️ Skipping structural module '{struct_key}' to prevent duplication")
+                        continue
                     # Add missing structural module
                     merged["children"][struct_key] = struct_data
                 else:
@@ -195,7 +204,39 @@ class EnhancedHierarchicalConverter(ONNXToGraphMLConverter):
         
         return merged
     
-    def _flatten_hierarchy(self, hierarchy: Dict[str, Any]):
+    def _would_create_duplicates(self, struct_module: dict[str, Any], traced_hierarchy: dict[str, Any]) -> bool:
+        """
+        Check if adding a structural module would create duplicate compound nodes.
+        
+        Returns True if the structural module's children already exist in traced hierarchy.
+        """
+        if "children" not in struct_module:
+            return False
+        
+        # Get all node IDs that exist in traced hierarchy
+        traced_node_ids = set()
+        self._collect_node_ids(traced_hierarchy, traced_node_ids)
+        
+        # Check if structural module's children would conflict
+        for _child_key, child_data in struct_module["children"].items():
+            child_scope = child_data.get("scope", "").lstrip("/").replace("/", ".")
+            if child_scope in traced_node_ids:
+                return True
+        
+        return False
+    
+    def _collect_node_ids(self, hierarchy: dict[str, Any], node_ids: set):
+        """Recursively collect all node IDs from hierarchy."""
+        scope = hierarchy.get("scope", "")
+        if scope:
+            node_id = scope.lstrip("/").replace("/", ".")
+            node_ids.add(node_id)
+        
+        if "children" in hierarchy:
+            for child in hierarchy["children"].values():
+                self._collect_node_ids(child, node_ids)
+    
+    def _flatten_hierarchy(self, hierarchy: dict[str, Any]):
         """Flatten hierarchy to count total modules."""
         yield hierarchy
         if "children" in hierarchy:
@@ -206,7 +247,7 @@ class EnhancedHierarchicalConverter(ONNXToGraphMLConverter):
         """Recursively create module hierarchy matching baseline structure."""
         # Handle root module's children
         if "children" in modules_data:
-            for child_name, child_data in modules_data["children"].items():
+            for _child_name, child_data in modules_data["children"].items():
                 self._create_compound_node(parent_elem, child_data, graph_data)
     
     def _create_compound_node(self, parent_elem: ET.Element, module_data: dict, graph_data: GraphData):
@@ -259,7 +300,7 @@ class EnhancedHierarchicalConverter(ONNXToGraphMLConverter):
         
         # Recursively add children
         if "children" in module_data:
-            for child_name, child_data in module_data["children"].items():
+            for _child_name, child_data in module_data["children"].items():
                 self._create_compound_node(nested_graph, child_data, graph_data)
         
         compound_node.append(nested_graph)
@@ -274,6 +315,8 @@ class EnhancedHierarchicalConverter(ONNXToGraphMLConverter):
                 relative_path = node.hierarchy_tag[len(module_tag):].lstrip('/')
                 if '/' not in relative_path:  # Direct child
                     self._add_onnx_node(graph_elem, node)
+                    # Track that this node has been placed to prevent duplication
+                    self.placed_nodes.add(node.id)
     
     def _add_onnx_node(self, graph_elem: ET.Element, node: NodeData):
         """Add an ONNX operation node."""
@@ -287,13 +330,14 @@ class EnhancedHierarchicalConverter(ONNXToGraphMLConverter):
         
         graph_elem.append(node_elem)
     
-    def _add_root_level_onnx_nodes(self, graph_elem: ET.Element, root_tag: str, graph_data: GraphData):
-        """Add ONNX operation nodes that belong to the root model level."""
-        # Find nodes with root-level hierarchy tag (e.g., /BertModel)
+    def _add_remaining_onnx_nodes(self, graph_elem: ET.Element, root_tag: str, graph_data: GraphData):
+        """Add ONNX operation nodes that haven't been placed in subgraphs yet."""
+        # Find nodes that haven't been placed yet
         for node in graph_data.nodes:
-            if node.hierarchy_tag and node.hierarchy_tag == root_tag:
-                # These are root-level operations like /Constant_6
+            if node.id not in self.placed_nodes:
+                # This node hasn't been placed in any subgraph, add it to root
                 self._add_onnx_node(graph_elem, node)
+                self.placed_nodes.add(node.id)
     
     def _add_io_nodes(self, graph_elem: ET.Element, graph_data: GraphData):
         """Add input and output nodes."""
@@ -370,6 +414,10 @@ class EnhancedHierarchicalConverter(ONNXToGraphMLConverter):
         self._add_key(graphml, GC.META_SOURCE_HTP, "graph", "source_htp", "string")
         self._add_key(graphml, GC.META_FORMAT_VERSION, "graph", "format_version", "string")
         self._add_key(graphml, GC.META_TIMESTAMP, "graph", "export_timestamp", "string")
+        
+        # Graph I/O metadata (expected by TEZ-127 tests)
+        self._add_key(graphml, GC.GRAPH_INPUTS, "graph", "graph_inputs", "string")
+        self._add_key(graphml, GC.GRAPH_OUTPUTS, "graph", "graph_outputs", "string")
     
     def _add_key(self, parent: ET.Element, id: str, for_type: str, attr_name: str, attr_type: str):
         """Add a key definition."""
@@ -380,6 +428,72 @@ class EnhancedHierarchicalConverter(ONNXToGraphMLConverter):
             "attr.type": attr_type
         })
     
+    def _add_input_output_metadata(self, main_graph: ET.Element, graph_data: GraphData, onnx_model: onnx.ModelProto):
+        """Add input/output metadata that TEZ-127 tests expect (keys g0, g1)."""
+        import json
+        
+        # Extract input metadata from ONNX model
+        inputs_metadata = []
+        for input_info in onnx_model.graph.input:
+            # Skip initializers (weights/parameters)
+            if any(init.name == input_info.name for init in onnx_model.graph.initializer):
+                continue
+                
+            input_meta = {
+                "name": input_info.name,
+                "type": self._get_tensor_type_name(input_info.type.tensor_type.elem_type),
+                "shape": self._get_tensor_shape(input_info.type.tensor_type.shape)
+            }
+            inputs_metadata.append(input_meta)
+        
+        # Extract output metadata from ONNX model
+        outputs_metadata = []
+        for output_info in onnx_model.graph.output:
+            output_meta = {
+                "name": output_info.name,
+                "type": self._get_tensor_type_name(output_info.type.tensor_type.elem_type),
+                "shape": self._get_tensor_shape(output_info.type.tensor_type.shape)
+            }
+            outputs_metadata.append(output_meta)
+        
+        # Add as JSON metadata (keys g0, g1)
+        self._add_data(main_graph, GC.GRAPH_INPUTS, json.dumps(inputs_metadata))  # graph_inputs
+        self._add_data(main_graph, GC.GRAPH_OUTPUTS, json.dumps(outputs_metadata))  # graph_outputs
+    
+    def _get_tensor_type_name(self, elem_type: int) -> str:
+        """Convert ONNX tensor type to string name."""
+        type_map = {
+            1: "float32",   # FLOAT
+            2: "uint8",     # UINT8  
+            3: "int8",      # INT8
+            4: "uint16",    # UINT16
+            5: "int16",     # INT16
+            6: "int32",     # INT32
+            7: "int64",     # INT64
+            8: "string",    # STRING
+            9: "bool",      # BOOL
+            10: "float16",  # FLOAT16
+            11: "float64",  # DOUBLE
+            12: "uint32",   # UINT32
+            13: "uint64",   # UINT64
+        }
+        return type_map.get(elem_type, f"unknown_{elem_type}")
+    
+    def _get_tensor_shape(self, shape) -> list:
+        """Extract tensor shape as list of dimensions."""
+        if not shape or not shape.dim:
+            return []
+        
+        dims = []
+        for dim in shape.dim:
+            if dim.dim_value:
+                dims.append(dim.dim_value)
+            elif dim.dim_param:
+                dims.append(dim.dim_param)  # Dynamic dimension
+            else:
+                dims.append(-1)  # Unknown dimension
+        return dims
+
     def _add_data(self, parent: ET.Element, key: str, value: str):
         """Add a data element."""
         data = ET.SubElement(parent, "data", attrib={"key": key})

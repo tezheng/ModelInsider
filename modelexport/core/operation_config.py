@@ -17,6 +17,7 @@ Key Features:
 from __future__ import annotations
 
 from dataclasses import dataclass
+from typing import ClassVar
 
 
 @dataclass
@@ -30,7 +31,7 @@ class OperationConfig:
     """
     
     # Single source of truth for operation mappings
-    OPERATION_REGISTRY = {
+    OPERATION_REGISTRY: ClassVar[dict] = {
         # Core mathematical operations
         'matmul': {
             'patch_targets': [('torch', 'matmul')],

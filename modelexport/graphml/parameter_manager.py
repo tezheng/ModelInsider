@@ -12,16 +12,14 @@ Supports multiple storage strategies:
 Linear Task: TEZ-124
 """
 
-import json
-import hashlib
 import base64
+import hashlib
+import json
 from pathlib import Path
-from typing import Dict, Any, List, Optional, Union
-import tempfile
-import shutil
+from typing import Any
 
-import onnx
 import numpy as np
+import onnx
 from onnx import TensorProto
 
 
@@ -42,7 +40,7 @@ class ParameterManager:
         self, 
         onnx_model: onnx.ModelProto, 
         output_base: str
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Extract parameters from ONNX model according to storage strategy.
         
@@ -78,7 +76,7 @@ class ParameterManager:
         else:
             raise ValueError(f"Unknown strategy: {self.strategy}")
     
-    def _extract_tensor_data(self, tensor: TensorProto) -> Dict[str, Any]:
+    def _extract_tensor_data(self, tensor: TensorProto) -> dict[str, Any]:
         """Extract data from ONNX tensor."""
         
         # Convert to numpy array
@@ -96,10 +94,10 @@ class ParameterManager:
     
     def _store_sidecar(
         self, 
-        parameters: Dict[str, Any], 
+        parameters: dict[str, Any], 
         output_base: str, 
         total_size: int
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """Store parameters in separate .onnxdata file."""
         
         # Create parameter file path
@@ -132,7 +130,7 @@ class ParameterManager:
             }
         }
     
-    def _store_embedded(self, parameters: Dict[str, Any], total_size: int) -> Dict[str, Any]:
+    def _store_embedded(self, parameters: dict[str, Any], total_size: int) -> dict[str, Any]:
         """Store parameters embedded in GraphML metadata."""
         
         # For embedded storage, we return the parameters directly
@@ -158,7 +156,7 @@ class ParameterManager:
             "embedded_data": embedded_data
         }
     
-    def _store_reference(self, output_base: str, total_size: int) -> Dict[str, Any]:
+    def _store_reference(self, output_base: str, total_size: int) -> dict[str, Any]:
         """Store reference to original ONNX file for parameters."""
         
         # Assume original ONNX file exists
@@ -193,9 +191,9 @@ class ParameterManager:
     
     def load_parameters(
         self, 
-        parameter_info: Dict[str, Any], 
+        parameter_info: dict[str, Any], 
         base_path: str = ""
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Load parameters based on storage strategy and info.
         
@@ -218,7 +216,7 @@ class ParameterManager:
         else:
             raise ValueError(f"Unknown strategy: {strategy}")
     
-    def _load_sidecar(self, parameter_info: Dict[str, Any], base_path: str) -> Dict[str, Any]:
+    def _load_sidecar(self, parameter_info: dict[str, Any], base_path: str) -> dict[str, Any]:
         """Load parameters from sidecar .onnxdata file."""
         
         param_file = parameter_info.get("parameter_file", "")
@@ -226,10 +224,7 @@ class ParameterManager:
             raise ValueError("No parameter file specified for sidecar strategy")
         
         # Resolve file path
-        if base_path:
-            param_path = Path(base_path) / param_file
-        else:
-            param_path = Path(param_file)
+        param_path = Path(base_path) / param_file if base_path else Path(param_file)
         
         if not param_path.exists():
             raise FileNotFoundError(f"Parameter file not found: {param_path}")
@@ -257,7 +252,7 @@ class ParameterManager:
         
         return parameters
     
-    def _load_embedded(self, parameter_info: Dict[str, Any]) -> Dict[str, Any]:
+    def _load_embedded(self, parameter_info: dict[str, Any]) -> dict[str, Any]:
         """Load parameters from embedded data."""
         
         embedded_data = parameter_info.get("embedded_data")
@@ -270,7 +265,7 @@ class ParameterManager:
             param_json = json.dumps(embedded_data, sort_keys=True)
             actual_checksum = f"sha256:{hashlib.sha256(param_json.encode()).hexdigest()}"
             if actual_checksum != expected_checksum:
-                raise ValueError(f"Embedded parameter checksum mismatch")
+                raise ValueError("Embedded parameter checksum mismatch")
         
         # Convert back to numpy arrays
         parameters = {}
@@ -282,7 +277,7 @@ class ParameterManager:
         
         return parameters
     
-    def _load_reference(self, parameter_info: Dict[str, Any], base_path: str) -> Dict[str, Any]:
+    def _load_reference(self, parameter_info: dict[str, Any], base_path: str) -> dict[str, Any]:
         """Load parameters from referenced ONNX file."""
         
         onnx_file = parameter_info.get("parameter_file", "")
@@ -290,10 +285,7 @@ class ParameterManager:
             raise ValueError("No ONNX reference file specified")
         
         # Resolve file path
-        if base_path:
-            onnx_path = Path(base_path) / onnx_file
-        else:
-            onnx_path = Path(onnx_file)
+        onnx_path = Path(base_path) / onnx_file if base_path else Path(onnx_file)
         
         if not onnx_path.exists():
             raise FileNotFoundError(f"Referenced ONNX file not found: {onnx_path}")
@@ -303,7 +295,7 @@ class ParameterManager:
         if expected_checksum:
             actual_checksum = self._calculate_file_checksum(str(onnx_path))
             if actual_checksum != expected_checksum:
-                raise ValueError(f"Referenced ONNX file checksum mismatch")
+                raise ValueError("Referenced ONNX file checksum mismatch")
         
         # Load ONNX model and extract parameters
         onnx_model = onnx.load(str(onnx_path))
@@ -315,7 +307,7 @@ class ParameterManager:
         
         return parameters
     
-    def get_storage_info(self, parameter_info: Dict[str, Any]) -> Dict[str, Any]:
+    def get_storage_info(self, parameter_info: dict[str, Any]) -> dict[str, Any]:
         """Get human-readable storage information."""
         
         strategy = parameter_info.get("parameter_strategy", "unknown")

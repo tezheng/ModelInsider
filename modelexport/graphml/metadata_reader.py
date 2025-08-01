@@ -119,7 +119,7 @@ class MetadataReader:
         
         # Process children
         if "children" in module_dict:
-            for child_name, child_data in module_dict["children"].items():
+            for _child_name, child_data in module_dict["children"].items():
                 self._flatten_module_hierarchy(child_data, traced_tag, result)
     
     def get_node_hierarchy_tag(self, node_name: str) -> str | None:
@@ -154,7 +154,7 @@ class MetadataReader:
         hierarchy = {}
         
         # Build parent-child relationships
-        for module_path in self.module_info.keys():
+        for module_path in self.module_info:
             # Normalize path by removing leading slash
             normalized_path = module_path.lstrip("/")
             
@@ -163,10 +163,7 @@ class MetadataReader:
             
             # Find parent module
             parts = normalized_path.split('/')
-            if len(parts) > 1:
-                parent_path = '/'.join(parts[:-1])
-            else:
-                parent_path = ""
+            parent_path = '/'.join(parts[:-1]) if len(parts) > 1 else ""
             
             # Add to parent's children
             if parent_path not in hierarchy:
