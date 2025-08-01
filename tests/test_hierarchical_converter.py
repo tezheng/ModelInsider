@@ -204,8 +204,13 @@ class TestHierarchicalGraphMLConverter:
             exclude_initializers=True
         )
         
-        graphml_str = converter.convert(str(sample_onnx_model))
-        assert isinstance(graphml_str, str)
+        result = converter.convert(str(sample_onnx_model))
+        assert isinstance(result, dict)
+        assert "graphml" in result
+        
+        # Read the generated GraphML file
+        with open(result["graphml"], 'r') as f:
+            graphml_str = f.read()
         assert len(graphml_str) > 0
         
         # Parse generated GraphML
@@ -237,7 +242,12 @@ class TestHierarchicalGraphMLConverter:
         )
         
         # Convert to GraphML
-        graphml_str = converter.convert(str(sample_onnx_model))
+        result = converter.convert(str(sample_onnx_model))
+        
+        # Read the generated GraphML file
+        with open(result["graphml"], 'r') as f:
+            graphml_str = f.read()
+            
         root = ET.fromstring(graphml_str)
         
         # Find nodes with hierarchy tags
@@ -272,7 +282,11 @@ class TestHierarchicalGraphMLConverter:
         )
         
         # Convert to GraphML
-        graphml_str = converter.convert(str(sample_onnx_model))
+        result = converter.convert(str(sample_onnx_model))
+        
+        # Read the generated GraphML file
+        with open(result["graphml"], 'r') as f:
+            graphml_str = f.read()
         root = ET.fromstring(graphml_str)
         
         # Find compound nodes (nodes with nested graphs)
@@ -305,7 +319,11 @@ class TestHierarchicalGraphMLConverter:
             exclude_initializers=True
         )
         
-        graphml_str = converter.convert(str(sample_onnx_model))
+        result = converter.convert(str(sample_onnx_model))
+        
+        # Read the generated GraphML file
+        with open(result["graphml"], 'r') as f:
+            graphml_str = f.read()
         root = ET.fromstring(graphml_str)
         
         # Check deep compound nodes exist
@@ -327,7 +345,11 @@ class TestHierarchicalGraphMLConverter:
             exclude_initializers=True
         )
         
-        graphml_str = converter.convert(str(sample_onnx_model))
+        result = converter.convert(str(sample_onnx_model))
+        
+        # Read the generated GraphML file
+        with open(result["graphml"], 'r') as f:
+            graphml_str = f.read()
         root = ET.fromstring(graphml_str)
         
         # Find the main graph element (first graph is the main one)
@@ -357,7 +379,11 @@ class TestHierarchicalGraphMLConverter:
             exclude_initializers=True
         )
         
-        graphml_str = converter.convert(str(sample_onnx_model))
+        result = converter.convert(str(sample_onnx_model))
+        
+        # Read the generated GraphML file
+        with open(result["graphml"], 'r') as f:
+            graphml_str = f.read()
         root = ET.fromstring(graphml_str)
         
         # Find all compound nodes (nodes containing nested graphs)
@@ -385,7 +411,11 @@ class TestHierarchicalGraphMLConverter:
             exclude_initializers=True
         )
         
-        graphml_str = converter.convert(str(sample_onnx_model))
+        result = converter.convert(str(sample_onnx_model))
+        
+        # Read the generated GraphML file
+        with open(result["graphml"], 'r') as f:
+            graphml_str = f.read()
         root = ET.fromstring(graphml_str)
         
         # Find all edges
@@ -413,7 +443,11 @@ class TestHierarchicalGraphMLConverter:
             exclude_initializers=True
         )
         
-        graphml_str = converter.convert(str(sample_onnx_model))
+        result = converter.convert(str(sample_onnx_model))
+        
+        # Read the generated GraphML file
+        with open(result["graphml"], 'r') as f:
+            graphml_str = f.read()
         root = ET.fromstring(graphml_str)
         
         # Should still generate valid GraphML
@@ -439,7 +473,11 @@ class TestHierarchicalGraphMLConverter:
             exclude_initializers=True
         )
         
-        graphml_str = converter.convert(str(sample_onnx_model))
+        result = converter.convert(str(sample_onnx_model))
+        
+        # Read the generated GraphML file
+        with open(result["graphml"], 'r') as f:
+            graphml_str = f.read()
         root = ET.fromstring(graphml_str)
         
         # Find compound nodes

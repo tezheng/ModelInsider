@@ -803,7 +803,7 @@ class FXHierarchyExporter(BaseHierarchyExporter):
         execution_order = {}
         computational_nodes = []
         
-        for i, node in enumerate(fx_graph.graph.nodes):
+        for _i, node in enumerate(fx_graph.graph.nodes):
             if node.op in ['call_module', 'call_function']:
                 execution_order[node.name] = len(computational_nodes)
                 computational_nodes.append(node)

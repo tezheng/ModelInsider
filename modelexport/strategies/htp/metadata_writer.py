@@ -13,10 +13,10 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from ...core.time_utils import format_timestamp_iso
 from .base_writer import ExportData, ExportStep, StepAwareWriter, step
 from .metadata_builder import HTPMetadataBuilder
 from .step_data import ModuleInfo
-from ...core.time_utils import format_timestamp_iso
 
 
 class MetadataWriter(StepAwareWriter):
@@ -306,7 +306,7 @@ class MetadataWriter(StepAwareWriter):
             except (ImportError, jsonschema.ValidationError) as e:
                 # Log warning but don't fail - schema validation is optional
                 import warnings
-                warnings.warn(f"Schema validation skipped or failed: {e}")
+                warnings.warn(f"Schema validation skipped or failed: {e}", stacklevel=2)
             
             # Ensure output directory exists
             Path(self.metadata_path).parent.mkdir(parents=True, exist_ok=True)

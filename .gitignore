@@ -10,6 +10,8 @@ test_outputs/
 
 # Generated model files (exclude from version control)
 *.onnx
+*.onnxdata
+*.graphml
 *.pt
 *.pth
 *.safetensors
