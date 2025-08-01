@@ -15,6 +15,7 @@ We need to design a clean, maintainable architecture for converting ONNX models 
 - **Testability**: Components should be independently testable
 - **Performance**: Efficient handling of large models (10K+ nodes)
 - **No Coupling**: GraphML module must not depend on strategy implementations
+- **Custom Attributes**: Support for metadata beyond ONNX specification (hierarchy tags, module types, etc.)
 
 ## Architecture Design
 
@@ -113,6 +114,23 @@ ONNX Model → ONNXGraphParser → GraphData → GraphMLWriter → GraphML
 2. **Builder Pattern**: GraphML construction with incremental element addition
 3. **Adapter Pattern**: ONNX model to internal graph representation
 4. **Template Method**: Base converter with extension points
+
+### Custom Attributes Architecture
+
+GraphML v1.1 introduces custom attributes to preserve model metadata:
+
+1. **Attribute Categories**:
+   - Node attributes: hierarchy_tag, module_type, execution_order
+   - Graph attributes: class_name, traced_tag, inputs/outputs metadata
+   - Edge attributes: tensor metadata beyond ONNX spec
+
+2. **Filtering Mechanism**:
+   - GraphML→ONNX: Custom attributes filtered out via `_should_include_in_onnx()`
+   - ONNX→GraphML: All attributes preserved plus custom metadata added
+
+3. **Key Management**:
+   - Standardized key prefixes: 'n' (node), 'g' (graph), 'e' (edge), 'm' (metadata)
+   - Defined in GraphMLConstants for consistency
 
 ## Decision Outcome
 
