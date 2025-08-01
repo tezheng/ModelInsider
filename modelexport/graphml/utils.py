@@ -36,6 +36,8 @@ class GraphMLConstants:
     GRAPH_TRACED_TAG = "g3"
     GRAPH_INPUTS = "g4"
     GRAPH_OUTPUTS = "g5"
+    GRAPH_VALUE_INFO = "g2"  # Reusing g2 for value_info metadata (execution_order is for compound nodes)
+    GRAPH_INITIALIZERS_REF = "g3"  # Reusing g3 for initializers reference (traced_tag is for compound nodes)
     
     # Metadata keys
     META_SOURCE_FILE = "m0"

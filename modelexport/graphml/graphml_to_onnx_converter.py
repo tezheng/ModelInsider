@@ -532,6 +532,13 @@ class GraphMLToONNXConverter:
     def _create_value_info(self, value_data: dict[str, Any]) -> ValueInfoProto:
         """Create ONNX ValueInfoProto from data."""
         
+        # Handle both dict and string inputs
+        if isinstance(value_data, str):
+            # This might be a simple type string, create a minimal value_info
+            # This shouldn't happen in v1.1 format, but handle gracefully
+            print(f"⚠️ Unexpected string value_data: {value_data}")
+            return helper.make_tensor_value_info(value_data, TensorProto.FLOAT, None)
+        
         name = value_data.get("name", "")
         dtype = value_data.get("type", "float32")
         shape = value_data.get("shape", [])

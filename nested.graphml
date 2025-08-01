@@ -6,7 +6,7 @@
   <key id="d3" for="graph" attr.name="traced_tag" attr.type="string" />
   <key id="n0" for="node" attr.name="op_type" attr.type="string" />
   <key id="n1" for="node" attr.name="hierarchy_tag" attr.type="string" />
-  <key id="n2" for="node" attr.name="onnx_attributes" attr.type="string" />
+  <key id="n2" for="node" attr.name="node_attributes" attr.type="string" />
   <key id="n3" for="node" attr.name="name" attr.type="string" />
   <key id="n4" for="node" attr.name="input_names" attr.type="string" />
   <key id="n5" for="node" attr.name="output_names" attr.type="string" />
@@ -27,17 +27,20 @@
   <key id="p0" for="graph" attr.name="parameter_strategy" attr.type="string" />
   <key id="p1" for="graph" attr.name="parameter_file" attr.type="string" />
   <key id="p2" for="graph" attr.name="parameter_checksum" attr.type="string" />
-  <key id="g0" for="graph" attr.name="graph_inputs" attr.type="string" />
-  <key id="g1" for="graph" attr.name="graph_outputs" attr.type="string" />
-  <key id="g2" for="graph" attr.name="value_info" attr.type="string" />
-  <key id="g3" for="graph" attr.name="initializers_ref" attr.type="string" />
+  <key id="p3" for="graph" attr.name="parameter_count" attr.type="string" />
+  <key id="g0" for="graph" attr.name="class_name" attr.type="string" />
+  <key id="g1" for="graph" attr.name="module_type" attr.type="string" />
+  <key id="g2" for="graph" attr.name="execution_order" attr.type="int" />
+  <key id="g3" for="graph" attr.name="traced_tag" attr.type="string" />
+  <key id="g4" for="graph" attr.name="graph_inputs" attr.type="string" />
+  <key id="g5" for="graph" attr.name="graph_outputs" attr.type="string" />
   <graph id="NestedModel" edgedefault="directed">
     <data key="g0">NestedModel</data>
     <data key="g1">huggingface</data>
     <data key="g2">0</data>
     <data key="g3">/NestedModel</data>
     <data key="m2">1.1</data>
-    <data key="m3">2025-08-01T21:22:15.131746</data>
+    <data key="m3">2025-08-01T21:45:33.744582</data>
     <data key="m4">[{"domain": "", "version": 17}]</data>
     <data key="m5">pytorch</data>
     <data key="m6">2.7.1</data>
@@ -45,13 +48,13 @@
     <data key="m8" />
     <data key="p0">sidecar</data>
     <data key="p1">nested.onnxdata</data>
-    <data key="p2">sha256:0e33194004d1ccfd9e235af9bc4335caeb1d2606405005796803a4008c9b71e8</data>
+    <data key="p2">sha256:2c19c41e0df8a6319d24cd1ed0beedd18bea37cf115a61da2412655914c52bc3</data>
     <data key="g4">[{"name": "onnx::Gemm_0", "type": "float32", "shape": [1, 10]}]</data>
     <data key="g5">[{"name": "7", "type": "float32", "shape": [1, 10]}]</data>
     <data key="g2">[]</data>
     <data key="g3">nested.onnxdata</data>
     <node id="NestedModel.encoder">
-      <data key="d0">Sequential</data>
+      <data key="n0">Sequential</data>
       <data key="n1">/NestedModel/encoder</data>
       <data key="n2">{"module_type": "torch_module", "execution_order": 1}</data>
       <data key="n3">NestedModel.encoder</data>
@@ -61,7 +64,7 @@
         <data key="g2">1</data>
         <data key="g3">/NestedModel/encoder</data>
         <node id="NestedModel.encoder.0">
-          <data key="d0">Linear</data>
+          <data key="n0">Linear</data>
           <data key="n1">/NestedModel/encoder/0</data>
           <data key="n2">{"module_type": "torch_module", "execution_order": 2}</data>
           <data key="n3">NestedModel.encoder.0</data>
@@ -75,7 +78,7 @@
       </graph>
     </node>
     <node id="NestedModel.decoder">
-      <data key="d0">Linear</data>
+      <data key="n0">Linear</data>
       <data key="n1">/NestedModel/decoder</data>
       <data key="n2">{"module_type": "torch_module", "execution_order": 3}</data>
       <data key="n3">NestedModel.decoder</data>
@@ -87,7 +90,7 @@
       </graph>
     </node>
     <node id="_encoder_encoder_0_Gemm">
-      <data key="d0">Gemm</data>
+      <data key="n0">Gemm</data>
       <data key="n1" />
       <data key="n2">{"alpha": 1.0, "beta": 1.0, "transB": 1}</data>
       <data key="n3">/encoder/encoder.0/Gemm</data>
@@ -96,7 +99,7 @@
       <data key="n6" />
     </node>
     <node id="_encoder_encoder_1_Relu">
-      <data key="d0">Relu</data>
+      <data key="n0">Relu</data>
       <data key="n1" />
       <data key="n2">{}</data>
       <data key="n3">/encoder/encoder.1/Relu</data>
@@ -105,7 +108,7 @@
       <data key="n6" />
     </node>
     <node id="_decoder_Gemm">
-      <data key="d0">Gemm</data>
+      <data key="n0">Gemm</data>
       <data key="n1" />
       <data key="n2">{"alpha": 1.0, "beta": 1.0, "transB": 1}</data>
       <data key="n3">/decoder/Gemm</data>
@@ -114,39 +117,39 @@
       <data key="n6" />
     </node>
     <node id="input_onnx__Gemm_0">
-      <data key="d0">Input</data>
+      <data key="n0">Input</data>
       <data key="n1">/NestedModel</data>
       <data key="n2">{}</data>
       <data key="n3">onnx::Gemm_0</data>
       <!-- onnx::Gemm_0: [1, 10] -->
     </node>
     <node id="output_n_7">
-      <data key="d0">Output</data>
+      <data key="n0">Output</data>
       <data key="n1">/NestedModel</data>
       <data key="n2">{}</data>
       <data key="n3">7</data>
       <!-- 7: [1, 10] -->
     </node>
     <edge source="input_onnx__Gemm_0" target="_encoder_encoder_0_Gemm">
-      <data key="d4">onnx::Gemm_0</data>
+      <data key="e0">onnx::Gemm_0</data>
       <data key="t0">float32</data>
       <data key="t1">[1, 10]</data>
       <data key="t2" />
     </edge>
     <edge source="_encoder_encoder_0_Gemm" target="_encoder_encoder_1_Relu">
-      <data key="d4">/encoder/encoder.0/Gemm_output_0</data>
+      <data key="e0">/encoder/encoder.0/Gemm_output_0</data>
       <data key="t0" />
       <data key="t1">null</data>
       <data key="t2" />
     </edge>
     <edge source="_encoder_encoder_1_Relu" target="_decoder_Gemm">
-      <data key="d4">/encoder/encoder.1/Relu_output_0</data>
+      <data key="e0">/encoder/encoder.1/Relu_output_0</data>
       <data key="t0" />
       <data key="t1">null</data>
       <data key="t2" />
     </edge>
     <edge source="_decoder_Gemm" target="output_n_7">
-      <data key="d4">7</data>
+      <data key="e0">7</data>
       <data key="t0">float32</data>
       <data key="t1">[1, 10]</data>
       <data key="t2" />

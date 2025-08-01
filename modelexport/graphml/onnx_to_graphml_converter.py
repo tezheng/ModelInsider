@@ -772,11 +772,15 @@ class ONNXToGraphMLConverter:
             ("p2", "graph", "parameter_checksum", "string"),
             ("p3", "graph", "parameter_count", "string"),
             
+            # Graph attribute keys
+            ("g0", "graph", "class_name", "string"),
+            ("g1", "graph", "module_type", "string"),
+            ("g2", "graph", "execution_order", "int"),
+            ("g3", "graph", "traced_tag", "string"),
+            
             # Graph structure keys
-            ("g0", "graph", "graph_inputs", "string"),
-            ("g1", "graph", "graph_outputs", "string"),
-            ("g2", "graph", "value_info", "string"),
-            ("g3", "graph", "initializers_ref", "string"),
+            ("g4", "graph", "graph_inputs", "string"),
+            ("g5", "graph", "graph_outputs", "string"),
         ]
         
         for key_id, for_type, attr_name, attr_type in keys:
@@ -832,7 +836,7 @@ class ONNXToGraphMLConverter:
         self._add_input_output_metadata(graph, onnx_model)
         
         # Initializers reference
-        self._add_data(graph, "g3", parameter_info.get("parameter_file", ""))
+        self._add_data(graph, GC.GRAPH_INITIALIZERS_REF, parameter_info.get("parameter_file", ""))
     
     def _add_input_output_metadata(self, graph: ET.Element, onnx_model: onnx.ModelProto):
         """Add input/output metadata to graph."""
@@ -873,7 +877,7 @@ class ONNXToGraphMLConverter:
         # Add as JSON metadata
         self._add_data(graph, GC.GRAPH_INPUTS, json.dumps(inputs_metadata))
         self._add_data(graph, GC.GRAPH_OUTPUTS, json.dumps(outputs_metadata))
-        self._add_data(graph, "g2", json.dumps(value_info))
+        self._add_data(graph, GC.GRAPH_VALUE_INFO, json.dumps(value_info))
     
     def _extract_tensor_info(self, tensor_info) -> dict[str, Any]:
         """Extract tensor type and shape information."""
