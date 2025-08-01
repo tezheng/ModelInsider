@@ -15,18 +15,19 @@ class GraphMLConstants:
     GRAPHML_NS = "http://graphml.graphdrawing.org/xmlns"
     GRAPHML_NS_MAP = {"": GRAPHML_NS}
     
-    # Node attribute keys
-    NODE_OP_TYPE = "d0"
-    NODE_HIERARCHY_TAG = "n1"  # Changed to match test expectations
-    NODE_MODULE_TYPE = "d2"
-    NODE_EXECUTION_ORDER = "d3"
-    NODE_ATTRIBUTES_JSON = "n2"  # JSON attributes
+    # Standard attribute keys
+    NODE_OP_TYPE = "n0"
+    NODE_HIERARCHY_TAG = "n1"
+    NODE_ATTRIBUTES_JSON = "n2"
     NODE_NAME = "n3"
-    
-    # Edge attribute keys
-    EDGE_TENSOR_NAME = "d4"
-    EDGE_TENSOR_SHAPE = "d5"
-    EDGE_TENSOR_DTYPE = "d6"
+    NODE_INPUT_NAMES = "n4"
+    NODE_OUTPUT_NAMES = "n5"
+    NODE_DOMAIN = "n6"
+    NODE_MODULE_TYPE = "n7"  # Not used in v1.1, kept for compatibility
+    NODE_EXECUTION_ORDER = "n8"  # Not used in v1.1, kept for compatibility
+    EDGE_TENSOR_NAME = "e0"
+    EDGE_TENSOR_SHAPE = "t1"
+    EDGE_TENSOR_DTYPE = "t0"
     
     # Graph attribute keys
     GRAPH_CLASS_NAME = "g0"
@@ -41,6 +42,17 @@ class GraphMLConstants:
     META_HTP_FILE = "m1"
     META_FORMAT_VERSION = "m2"
     META_TIMESTAMP = "m3"
+    META_OPSET_IMPORTS = "m4"
+    META_PRODUCER_NAME = "m5"
+    META_PRODUCER_VERSION = "m6"
+    META_MODEL_VERSION = "m7"
+    META_DOC_STRING = "m8"
+    
+    # Parameter keys
+    PARAM_STRATEGY = "p0"
+    PARAM_FILE = "p1"
+    PARAM_CHECKSUM = "p2"
+    PARAM_COUNT = "p3"
 
 
 class NodeType(Enum):
@@ -64,6 +76,7 @@ class NodeData:
     hierarchy_tag: Optional[str] = None
     module_type: Optional[str] = None
     execution_order: Optional[int] = None
+    domain: Optional[str] = None
 
 
 @dataclass

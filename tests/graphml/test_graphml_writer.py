@@ -114,7 +114,7 @@ class TestGraphMLWriter:
         # Should have multiple keys defined
         assert len(keys) > 0
         
-        # Check for specific keys
+        # Check for specific keys  
         key_ids = [key.get("id") for key in keys]
-        assert "d0" in key_ids  # op_type
-        assert "d1" in key_ids  # hierarchy_tag
+        assert "n0" in key_ids  # op_type
+        assert "n1" in key_ids  # hierarchy_tag

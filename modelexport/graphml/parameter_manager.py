@@ -205,6 +205,12 @@ class ParameterManager:
             Dictionary of parameter name -> numpy array
         """
         
+        # If no parameters to load, return empty dict
+        param_count = parameter_info.get("parameter_count", 0)
+        # Handle both string and int values
+        if str(param_count) == "0":
+            return {}
+        
         strategy = parameter_info.get("parameter_strategy", "sidecar")
         
         if strategy == "sidecar":

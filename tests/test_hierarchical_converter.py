@@ -191,7 +191,7 @@ class TestONNXToGraphMLConverter:
             exclude_initializers=True
         )
         assert converter.htp_metadata_path == str(hierarchical_htp_metadata)
-        assert converter.metadata_reader is not None
+        assert converter.parser is not None
         assert converter.exclude_initializers is True
     
     @pytest.mark.smoke

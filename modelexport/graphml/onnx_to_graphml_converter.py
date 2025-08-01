@@ -27,9 +27,9 @@ import onnx
 from onnx import AttributeProto, TensorProto
 from transformers import AutoModel
 
-# from ..core.structural_hierarchy_builder import StructuralHierarchyBuilder  # Module not found, disabled for now
+from ..core.tracing_hierarchy_builder import TracingHierarchyBuilder as StructuralHierarchyBuilder
 from .graphml_writer import GraphMLWriter
-from .metadata_reader import MetadataReader
+# from .metadata_reader import MetadataReader  # Not needed, using direct JSON loading
 from .onnx_parser import ONNXGraphParser
 from .parameter_manager import ParameterManager
 from .utils import GraphData, NodeData
@@ -84,7 +84,6 @@ class ONNXToGraphMLConverter:
         
         # Load HTP metadata if provided
         if self.htp_metadata_path:
-            self.metadata_reader = MetadataReader(htp_metadata_path)
             with open(htp_metadata_path) as f:
                 self.htp_data = json.load(f)
             
@@ -92,14 +91,11 @@ class ONNXToGraphMLConverter:
             if self.use_hybrid_hierarchy:
                 # Universal approach: Use default MUST-002 compliant exceptions (empty list)
                 # This ensures no hardcoded patterns while maintaining universal design
-                # NOTE: StructuralHierarchyBuilder module not found, disabled for now
-                self.structural_builder = None
-                # self.structural_builder = StructuralHierarchyBuilder(
-                #     exceptions=None  # Uses MUST-002 compliant default: [] (no torch.nn modules)
-                # )
+                self.structural_builder = StructuralHierarchyBuilder(
+                    exceptions=None  # Uses MUST-002 compliant default: [] (no torch.nn modules)
+                )
         else:
             self.htp_data = None
-            self.metadata_reader = None
             self.structural_builder = None
     
     def convert(self, onnx_model_path: str, output_base: str | None = None) -> str | dict[str, str]:
@@ -129,15 +125,116 @@ class ONNXToGraphMLConverter:
     
     def _convert_flat(self, onnx_model: onnx.ModelProto, model_path: Path) -> str:
         """Convert to flat GraphML (visualization only)."""
+        # Create root GraphML element with v1.1 structure
+        graphml = ET.Element("graphml", xmlns=GC.GRAPHML_NS)
+        
+        # Define v1.1 keys even for flat mode
+        self._define_v11_keys(graphml)
+        
         # Parse ONNX model
         graph_data = self.parser.parse(onnx_model)
         
-        # Add source file metadata
-        graph_data.metadata["source_file"] = model_path.name
+        # Create single graph
+        graph = ET.SubElement(graphml, "graph", {
+            "id": "G",
+            "edgedefault": "directed"
+        })
         
-        # Generate GraphML
-        graphml_element = self.writer.write(graph_data)
-        return self.writer.to_string(graphml_element)
+        # Add basic metadata
+        self._add_data(graph, GC.META_SOURCE_FILE, model_path.name)
+        self._add_data(graph, GC.META_FORMAT_VERSION, self.format_version)
+        self._add_data(graph, GC.META_TIMESTAMP, datetime.now().isoformat())
+        
+        # Add graph structure metadata for v1.1 compatibility
+        # Extract graph inputs/outputs
+        graph_inputs = []
+        for inp in onnx_model.graph.input:
+            graph_inputs.append({
+                "name": inp.name,
+                "type": self._onnx_type_to_string(inp.type.tensor_type.elem_type),
+                "shape": [dim.dim_value if dim.HasField('dim_value') else dim.dim_param 
+                         for dim in inp.type.tensor_type.shape.dim]
+            })
+        self._add_data(graph, GC.GRAPH_INPUTS, json.dumps(graph_inputs))
+        
+        graph_outputs = []
+        for out in onnx_model.graph.output:
+            graph_outputs.append({
+                "name": out.name,
+                "type": self._onnx_type_to_string(out.type.tensor_type.elem_type),
+                "shape": [dim.dim_value if dim.HasField('dim_value') else dim.dim_param 
+                         for dim in out.type.tensor_type.shape.dim]
+            })
+        self._add_data(graph, GC.GRAPH_OUTPUTS, json.dumps(graph_outputs))
+        
+        # Add opset imports
+        opset_imports = []
+        for opset in onnx_model.opset_import:
+            opset_imports.append({
+                "domain": opset.domain,
+                "version": opset.version
+            })
+        self._add_data(graph, GC.META_OPSET_IMPORTS, json.dumps(opset_imports))
+        
+        # Add producer info
+        self._add_data(graph, GC.META_PRODUCER_NAME, onnx_model.producer_name)
+        self._add_data(graph, GC.META_PRODUCER_VERSION, onnx_model.producer_version)
+        self._add_data(graph, GC.META_MODEL_VERSION, str(onnx_model.model_version))
+        self._add_data(graph, GC.META_DOC_STRING, onnx_model.doc_string)
+        
+        # Add parameter metadata
+        self._add_data(graph, GC.PARAM_STRATEGY, "sidecar")
+        self._add_data(graph, GC.PARAM_COUNT, "0")  # No parameters in flat mode
+        
+        # Add nodes and edges
+        for node in graph_data.nodes:
+            self._add_flat_node(graph, node)
+        
+        for edge in graph_data.edges:
+            edge_elem = ET.SubElement(graph, "edge", {
+                "id": f"e_{edge.source_id}_{edge.target_id}",
+                "source": edge.source_id,
+                "target": edge.target_id
+            })
+            self._add_data(edge_elem, GC.EDGE_TENSOR_NAME, edge.tensor_name)
+            
+        # Add inputs/outputs
+        for input_node in graph_data.inputs:
+            node_elem = ET.SubElement(graph, "node", {"id": input_node.id})
+            self._add_data(node_elem, GC.NODE_OP_TYPE, "Input")
+            self._add_data(node_elem, GC.NODE_NAME, input_node.name)
+            
+        for output_node in graph_data.outputs:
+            node_elem = ET.SubElement(graph, "node", {"id": output_node.id})
+            self._add_data(node_elem, GC.NODE_OP_TYPE, "Output")
+            self._add_data(node_elem, GC.NODE_NAME, output_node.name)
+        
+        # Convert to string
+        ET.indent(graphml, space="  ")
+        return ET.tostring(graphml, encoding='unicode', xml_declaration=True)
+    
+    def _add_flat_node(self, graph: ET.Element, node: NodeData):
+        """Add a node in flat format."""
+        node_elem = ET.SubElement(graph, "node", {"id": node.id})
+        self._add_data(node_elem, GC.NODE_OP_TYPE, node.op_type)
+        self._add_data(node_elem, GC.NODE_HIERARCHY_TAG, getattr(node, 'hierarchy_tag', ''))
+        self._add_data(node_elem, GC.NODE_NAME, node.name)
+        
+        # Add input and output names
+        if hasattr(node, 'inputs') and node.inputs:
+            self._add_data(node_elem, GC.NODE_INPUT_NAMES, json.dumps(node.inputs))
+        if hasattr(node, 'outputs') and node.outputs:
+            self._add_data(node_elem, GC.NODE_OUTPUT_NAMES, json.dumps(node.outputs))
+        
+        # Add domain if present
+        if hasattr(node, 'domain') and node.domain:
+            self._add_data(node_elem, GC.NODE_DOMAIN, node.domain)
+        
+        # Add ONNX attributes as JSON
+        if node.attributes:
+            self._add_data(node_elem, GC.NODE_ATTRIBUTES_JSON, json.dumps(node.attributes))
+        else:
+            self._add_data(node_elem, GC.NODE_ATTRIBUTES_JSON, "{}")
     
     def _convert_hierarchical(
         self, 
@@ -313,11 +410,7 @@ class ONNXToGraphMLConverter:
             model = AutoModel.from_pretrained(model_name)
             
             # Build complete structural hierarchy
-            if self.structural_builder is not None:
-                structural_hierarchy = self.structural_builder.build_complete_hierarchy(model)
-            else:
-                # Structural builder not available, skip hybrid hierarchy
-                return traced_modules_data
+            structural_hierarchy = self.structural_builder.build_complete_hierarchy(model)
             
             print(f"📊 Structural discovery found: {len(list(self._flatten_hierarchy(structural_hierarchy)))} modules")
             print(f"📊 Traced hierarchy has: {len(list(self._flatten_hierarchy(traced_modules_data)))} modules")
@@ -650,7 +743,7 @@ class ONNXToGraphMLConverter:
             # Node keys (enhanced for v1.1)
             ("n0", "node", "op_type", "string"),
             ("n1", "node", "hierarchy_tag", "string"),
-            ("n2", "node", "onnx_attributes", "string"),
+            ("n2", "node", "node_attributes", "string"),
             ("n3", "node", "name", "string"),
             ("n4", "node", "input_names", "string"),
             ("n5", "node", "output_names", "string"),
@@ -677,6 +770,7 @@ class ONNXToGraphMLConverter:
             ("p0", "graph", "parameter_strategy", "string"),
             ("p1", "graph", "parameter_file", "string"),
             ("p2", "graph", "parameter_checksum", "string"),
+            ("p3", "graph", "parameter_count", "string"),
             
             # Graph structure keys
             ("g0", "graph", "graph_inputs", "string"),
@@ -861,6 +955,28 @@ class ONNXToGraphMLConverter:
         """Add a data element."""
         data = ET.SubElement(parent, "data", attrib={"key": key})
         data.text = str(value) if value is not None else ""
+    
+    def _onnx_type_to_string(self, onnx_type: int) -> str:
+        """Convert ONNX TensorProto type to string."""
+        from onnx import TensorProto
+        
+        type_map = {
+            TensorProto.FLOAT: "float32",
+            TensorProto.UINT8: "uint8",
+            TensorProto.INT8: "int8",
+            TensorProto.UINT16: "uint16",
+            TensorProto.INT16: "int16",
+            TensorProto.INT32: "int32",
+            TensorProto.INT64: "int64",
+            TensorProto.BOOL: "bool",
+            TensorProto.FLOAT16: "float16",
+            TensorProto.DOUBLE: "float64",
+            TensorProto.UINT32: "uint32",
+            TensorProto.UINT64: "uint64",
+            TensorProto.STRING: "string"
+        }
+        
+        return type_map.get(onnx_type, "float32")
     
     def save(self, onnx_model_path: str, output_path: str) -> None:
         """
