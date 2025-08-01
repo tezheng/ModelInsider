@@ -15,14 +15,18 @@ from modelexport.graphml.graphml_writer import GraphMLWriter
 from modelexport.graphml.utils import GraphData, NodeData, EdgeData, NodeType
 
 
+@pytest.mark.graphml
+@pytest.mark.unit
 class TestGraphMLWriter:
     """Test cases for GraphML XML generation."""
     
+    @pytest.mark.smoke
     def test_writer_initialization(self):
         """Test writer can be initialized."""
         writer = GraphMLWriter()
         assert writer is not None
     
+    @pytest.mark.smoke
     def test_empty_graph_generation(self):
         """Test generating GraphML for empty graph."""
         writer = GraphMLWriter()
@@ -40,6 +44,7 @@ class TestGraphMLWriter:
         assert len(graphs) == 1
         assert graphs[0].get("edgedefault") == "directed"
     
+    @pytest.mark.sanity
     def test_node_creation(self):
         """Test creating node elements."""
         writer = GraphMLWriter()
@@ -63,6 +68,7 @@ class TestGraphMLWriter:
         assert len(nodes) == 1
         assert nodes[0].get("id") == "test_node"
     
+    @pytest.mark.sanity
     def test_edge_creation(self):
         """Test creating edge elements."""
         writer = GraphMLWriter()
@@ -90,6 +96,7 @@ class TestGraphMLWriter:
         assert edges[0].get("source") == "n1"
         assert edges[0].get("target") == "n2"
     
+    @pytest.mark.sanity
     def test_attribute_keys_defined(self):
         """Test that attribute keys are properly defined."""
         writer = GraphMLWriter()
