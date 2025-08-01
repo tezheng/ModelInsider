@@ -114,10 +114,27 @@ class ONNXGraphParser:
         
         # Extract attributes (filtering excluded ones)
         attributes = {}
+        execution_order = None
+        module_type = None
+        hierarchy_tag = None
+        
         if node.attribute:
             for attr in node.attribute:
                 if attr.name not in self.exclude_attributes:
-                    attributes[attr.name] = self._extract_attribute_value(attr)
+                    attr_value = self._extract_attribute_value(attr)
+                    
+                    # Handle special metadata attributes
+                    if attr.name == "execution_order":
+                        execution_order = attr_value
+                        attributes[attr.name] = attr_value  # Also include in attributes dict
+                    elif attr.name == "module_type":
+                        module_type = attr_value
+                        attributes[attr.name] = attr_value  # Also include in attributes dict
+                    elif attr.name == "hierarchy_tag":
+                        hierarchy_tag = attr_value
+                        attributes[attr.name] = attr_value  # Also include in attributes dict
+                    else:
+                        attributes[attr.name] = attr_value
         
         return NodeData(
             id=node_id,
@@ -126,7 +143,11 @@ class ONNXGraphParser:
             node_type=NodeType.OPERATION,
             inputs=list(node.input),
             outputs=list(node.output),
-            attributes=attributes
+            attributes=attributes,
+            domain=node.domain if node.domain else None,
+            execution_order=execution_order,
+            module_type=module_type,
+            hierarchy_tag=hierarchy_tag
         )
     
     def _extract_input(self, input_proto: Any) -> NodeData:

@@ -14,6 +14,7 @@ from modelexport.graphml.onnx_parser import ONNXGraphParser
 from modelexport.graphml.utils import NodeType
 
 
+@pytest.mark.graphml
 class TestONNXGraphParser:
     """Test cases for ONNX graph parsing."""
     

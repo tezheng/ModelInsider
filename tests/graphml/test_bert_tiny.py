@@ -10,6 +10,7 @@ from pathlib import Path
 from modelexport.graphml.converter import ONNXToGraphMLConverter
 
 
+@pytest.mark.graphml
 @pytest.mark.skipif(
     not Path("temp/bert-tiny/model.onnx").exists(),
     reason="bert-tiny ONNX model not available"
@@ -33,6 +34,7 @@ def test_bert_tiny_conversion():
     print(f"Conversion successful: {stats}")
 
 
+@pytest.mark.graphml
 def test_bert_tiny_mock():
     """Test with mock data when bert-tiny is not available."""
     from modelexport.graphml.utils import GraphData, NodeData, EdgeData
