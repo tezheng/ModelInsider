@@ -15,15 +15,19 @@ import xml.etree.ElementTree as ET
 from modelexport.graphml.converter import ONNXToGraphMLConverter
 
 
+@pytest.mark.graphml
+@pytest.mark.unit
 class TestONNXToGraphMLConverter:
     """Test cases for the base ONNX to GraphML converter."""
     
+    @pytest.mark.smoke
     def test_converter_initialization(self):
         """Test converter can be initialized with default settings."""
         converter = ONNXToGraphMLConverter()
         assert converter.exclude_initializers is True
         assert converter.exclude_attributes == set()
     
+    @pytest.mark.smoke
     def test_converter_with_options(self):
         """Test converter initialization with custom options."""
         converter = ONNXToGraphMLConverter(
@@ -34,6 +38,8 @@ class TestONNXToGraphMLConverter:
         assert "custom_attr" in converter.exclude_attributes
     
     @pytest.mark.skip(reason="Requires ONNX model fixture")
+    @pytest.mark.sanity
+    @pytest.mark.integration
     def test_convert_simple_model(self, simple_onnx_model):
         """Test conversion of a simple ONNX model."""
         converter = ONNXToGraphMLConverter()
@@ -47,6 +53,7 @@ class TestONNXToGraphMLConverter:
         graphs = root.findall(".//{http://graphml.graphdrawing.org/xmlns}graph")
         assert len(graphs) == 1
     
+    @pytest.mark.error_recovery
     def test_missing_file_error(self):
         """Test error handling for missing ONNX file."""
         converter = ONNXToGraphMLConverter()
@@ -55,13 +62,15 @@ class TestONNXToGraphMLConverter:
             converter.convert("nonexistent_model.onnx")
     
     @pytest.mark.skip(reason="Requires implementation")
-    def test_save_to_file(self, tmp_path):
+    @pytest.mark.integration
+    def test_save_to_file(self, simple_onnx_model, tmp_path):
         """Test saving GraphML to file."""
         # TODO: Implement when we have model fixtures
         pass
     
     @pytest.mark.skip(reason="Requires implementation")
-    def test_statistics_tracking(self):
+    @pytest.mark.integration
+    def test_statistics_tracking(self, simple_onnx_model):
         """Test that conversion statistics are tracked correctly."""
         # TODO: Implement when we have model fixtures
         pass
