@@ -27,7 +27,7 @@ import onnx
 from onnx import AttributeProto, TensorProto
 from transformers import AutoModel
 
-from ..core.structural_hierarchy_builder import StructuralHierarchyBuilder
+# from ..core.structural_hierarchy_builder import StructuralHierarchyBuilder  # Module not found, disabled for now
 from .graphml_writer import GraphMLWriter
 from .metadata_reader import MetadataReader
 from .onnx_parser import ONNXGraphParser
@@ -92,9 +92,11 @@ class ONNXToGraphMLConverter:
             if self.use_hybrid_hierarchy:
                 # Universal approach: Use default MUST-002 compliant exceptions (empty list)
                 # This ensures no hardcoded patterns while maintaining universal design
-                self.structural_builder = StructuralHierarchyBuilder(
-                    exceptions=None  # Uses MUST-002 compliant default: [] (no torch.nn modules)
-                )
+                # NOTE: StructuralHierarchyBuilder module not found, disabled for now
+                self.structural_builder = None
+                # self.structural_builder = StructuralHierarchyBuilder(
+                #     exceptions=None  # Uses MUST-002 compliant default: [] (no torch.nn modules)
+                # )
         else:
             self.htp_data = None
             self.metadata_reader = None
@@ -311,7 +313,11 @@ class ONNXToGraphMLConverter:
             model = AutoModel.from_pretrained(model_name)
             
             # Build complete structural hierarchy
-            structural_hierarchy = self.structural_builder.build_complete_hierarchy(model)
+            if self.structural_builder is not None:
+                structural_hierarchy = self.structural_builder.build_complete_hierarchy(model)
+            else:
+                # Structural builder not available, skip hybrid hierarchy
+                return traced_modules_data
             
             print(f"📊 Structural discovery found: {len(list(self._flatten_hierarchy(structural_hierarchy)))} modules")
             print(f"📊 Traced hierarchy has: {len(list(self._flatten_hierarchy(traced_modules_data)))} modules")

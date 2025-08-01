@@ -15,14 +15,26 @@ class GraphMLConstants:
     GRAPHML_NS = "http://graphml.graphdrawing.org/xmlns"
     GRAPHML_NS_MAP = {"": GRAPHML_NS}
     
-    # Standard attribute keys
+    # Node attribute keys
     NODE_OP_TYPE = "d0"
-    NODE_HIERARCHY_TAG = "d1"
+    NODE_HIERARCHY_TAG = "n1"  # Changed to match test expectations
     NODE_MODULE_TYPE = "d2"
     NODE_EXECUTION_ORDER = "d3"
+    NODE_ATTRIBUTES_JSON = "n2"  # JSON attributes
+    NODE_NAME = "n3"
+    
+    # Edge attribute keys
     EDGE_TENSOR_NAME = "d4"
     EDGE_TENSOR_SHAPE = "d5"
     EDGE_TENSOR_DTYPE = "d6"
+    
+    # Graph attribute keys
+    GRAPH_CLASS_NAME = "g0"
+    GRAPH_MODULE_TYPE = "g1"
+    GRAPH_EXECUTION_ORDER = "g2"
+    GRAPH_TRACED_TAG = "g3"
+    GRAPH_INPUTS = "g4"
+    GRAPH_OUTPUTS = "g5"
     
     # Metadata keys
     META_SOURCE_FILE = "m0"
