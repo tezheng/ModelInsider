@@ -147,6 +147,54 @@ class TestCLIExport:
         assert result.exit_code != 0
         assert 'not a local folder and is not a valid model identifier' in result.output
         assert not output_path.exists()
+    
+    def test_export_with_graphml(self, cli_runner, temp_workspace):
+        """Test export with --with-graphml flag to generate both ONNX and GraphML."""
+        output_path = temp_workspace['exports'] / 'bert_with_graphml.onnx'
+        
+        result = cli_runner.invoke(cli, [
+            'export',
+            '--model', 'prajjwal1/bert-tiny',
+            '--output', str(output_path),
+            '--with-graphml',
+            '--verbose'
+        ])
+        
+        # Check command succeeded
+        assert result.exit_code == 0, f"CLI failed with: {result.output}"
+        assert 'EXPORT COMPLETE' in result.output or '✅ Export completed successfully!' in result.output
+        assert '✅ GraphML export completed!' in result.output
+        
+        # Verify ONNX file was created
+        assert output_path.exists(), "ONNX file was not created"
+        
+        # Verify GraphML file was created
+        graphml_path = output_path.parent / (output_path.stem + '.graphml')
+        assert graphml_path.exists(), "GraphML file was not created"
+        
+        # Verify GraphML parameter sidecar file was created
+        graphml_params_path = output_path.parent / (output_path.stem + '.onnxdata')
+        assert graphml_params_path.exists(), "GraphML parameter sidecar was not created"
+        
+        # Verify HTP metadata was created
+        metadata_path = output_path.parent / (output_path.stem + '_htp_metadata.json')
+        assert metadata_path.exists(), "HTP metadata was not created"
+        
+        # Validate GraphML structure
+        import xml.etree.ElementTree as ET
+        tree = ET.parse(str(graphml_path))
+        root = tree.getroot()
+        
+        # Check it's a valid GraphML file
+        assert root.tag.endswith('graphml'), "Not a valid GraphML file"
+        
+        # Check for graph element
+        graphs = root.findall('.//{http://graphml.graphdrawing.org/xmlns}graph')
+        assert len(graphs) > 0, "GraphML has no graph element"
+        
+        # Check for nodes
+        nodes = root.findall('.//{http://graphml.graphdrawing.org/xmlns}node')
+        assert len(nodes) > 0, "GraphML has no nodes"
 
 
 class TestCLIAnalyze:
