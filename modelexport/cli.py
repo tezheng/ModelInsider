@@ -42,9 +42,11 @@ def cli(ctx, verbose):
               help='Disable hierarchy_tag attributes (cleaner but loses traceability)')
 @click.option('--torch-module', is_flag=True,
               help='Include torch.nn modules in hierarchy (e.g., LayerNorm, Embedding)')
+@click.option('--with-graphml', is_flag=True,
+              help='Also export to GraphML format after ONNX export')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
 @click.pass_context
-def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_config, with_report, no_hierarchy_attrs, torch_module, verbose):
+def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_config, with_report, no_hierarchy_attrs, torch_module, with_graphml, verbose):
     """
     Export a PyTorch model to ONNX with hierarchy preservation.
     
@@ -78,6 +80,46 @@ def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_c
         
         # HTPExporter automatically creates metadata files
         
+        # If --with-graphml flag is set, also export to GraphML
+        if with_graphml:
+            try:
+                from .graphml.onnx_to_graphml_converter import ONNXToGraphMLConverter
+                
+                # Determine metadata path
+                metadata_path = result.get('metadata_path', output_path.replace('.onnx', '_htp_metadata.json'))
+                
+                if verbose:
+                    click.echo("\n🔄 Converting to GraphML v1.1...")
+                
+                # Create converter with HTP metadata
+                converter = ONNXToGraphMLConverter(
+                    htp_metadata_path=metadata_path,
+                    parameter_strategy='sidecar',  # Default to sidecar for CLI
+                    hierarchical=True  # Use hierarchical mode for better organization
+                )
+                
+                # Generate GraphML output path
+                graphml_base = output_path.replace('.onnx', '')
+                
+                # Convert to GraphML
+                graphml_result = converter.convert(output_path, graphml_base)
+                
+                # Store GraphML result in main result
+                result['graphml_path'] = graphml_result.get('graphml', f"{graphml_base}.graphml")
+                result['graphml_parameters'] = graphml_result.get('parameters')
+                
+                if verbose:
+                    click.echo("✅ GraphML export completed!")
+                    click.echo(f"   GraphML: {result['graphml_path']}")
+                    if result.get('graphml_parameters'):
+                        click.echo(f"   Parameters: {result['graphml_parameters']}")
+                        
+            except Exception as e:
+                if verbose:
+                    click.echo(f"⚠️ GraphML export failed: {e}", err=True)
+                # Don't fail the whole export if GraphML fails
+                result['graphml_error'] = str(e)
+        
         # Output results only when verbose is off
         # (When verbose is on, HTPExporter already prints detailed summary)
         if not verbose:
@@ -91,6 +133,14 @@ def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_c
             if 'coverage_percentage' in result:
                 click.echo(f"   Coverage: {result['coverage_percentage']}%")
             click.echo(f"   Strategy: {result['strategy']}")
+            
+            # Show GraphML output if it was created
+            if 'graphml_path' in result:
+                click.echo(f"   GraphML: {result['graphml_path']}")
+                if result.get('graphml_parameters'):
+                    click.echo(f"   GraphML Parameters: {result['graphml_parameters']}")
+            elif 'graphml_error' in result:
+                click.echo(f"   GraphML: Failed ({result['graphml_error']})")
             
             # Show report file if reporting was enabled
             if with_report:
