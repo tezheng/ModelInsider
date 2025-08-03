@@ -319,17 +319,17 @@ class HTPMetadataBuilder:
             "export_context": asdict(self._export_context),
             "model": self._model_info.to_dict(),
             "tracing": asdict(self._tracing_info),  # Moved after model
-            "modules": self._modules,
-            "nodes": self._tagging_info.tagged_nodes,  # Nodes at root level per schema
+            "modules": self._modules if self._modules is not None else {},
+            "nodes": self._tagging_info.tagged_nodes if self._tagging_info else {},  # Also fix nodes to handle None
             "outputs": {
                 "onnx_model": asdict(self._output_files.onnx_model),
                 "metadata": self._output_files.metadata,
                 "report": self._output_files.report if self._output_files.report else None
             },
             "report": {
-                "steps": self._export_report.steps
+                "steps": self._export_report.steps if self._export_report else []
             },
-            "statistics": asdict(self._statistics)
+            "statistics": asdict(self._statistics) if self._statistics else {}
         }
         
         # Clean up None values
