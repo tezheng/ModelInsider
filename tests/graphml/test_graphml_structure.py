@@ -48,17 +48,24 @@ class TestGraphMLStructure:
             key_map[key_id] = (for_type, attr_name)
         
         # Verify graph keys (for compound nodes)
-        assert 'd0' in key_map, "Missing graph class_name key (d0)"
-        assert key_map['d0'] == ('graph', 'class_name'), "Wrong definition for d0"
+        assert 'g0' in key_map, "Missing graph class_name key (g0)"
+        assert key_map['g0'] == ('graph', 'class_name'), "Wrong definition for g0"
         
-        assert 'd1' in key_map, "Missing graph module_type key (d1)"
-        assert key_map['d1'] == ('graph', 'module_type'), "Wrong definition for d1"
+        assert 'g1' in key_map, "Missing graph module_type key (g1)"
+        assert key_map['g1'] == ('graph', 'module_type'), "Wrong definition for g1"
         
-        assert 'd2' in key_map, "Missing graph execution_order key (d2)"
-        assert key_map['d2'] == ('graph', 'execution_order'), "Wrong definition for d2"
+        assert 'g2' in key_map, "Missing graph execution_order key (g2)"
+        assert key_map['g2'] == ('graph', 'execution_order'), "Wrong definition for g2"
         
-        assert 'd3' in key_map, "Missing graph traced_tag key (d3)"
-        assert key_map['d3'] == ('graph', 'traced_tag'), "Wrong definition for d3"
+        assert 'g3' in key_map, "Missing graph traced_tag key (g3)"
+        assert key_map['g3'] == ('graph', 'traced_tag'), "Wrong definition for g3"
+        
+        # Also verify graph structure keys
+        assert 'g4' in key_map, "Missing graph graph_inputs key (g4)"
+        assert key_map['g4'] == ('graph', 'graph_inputs'), "Wrong definition for g4"
+        
+        assert 'g5' in key_map, "Missing graph graph_outputs key (g5)"
+        assert key_map['g5'] == ('graph', 'graph_outputs'), "Wrong definition for g5"
         
         # Verify node keys
         assert 'n0' in key_map, "Missing node op_type key (n0)"
@@ -602,7 +609,7 @@ class TestQAPerspective:
         invalid_path = tmp_path / "invalid.onnx"
         invalid_path.write_text("This is not an ONNX file")
         
-        with pytest.raises(Exception):  # Could be various exceptions
+        with pytest.raises(Exception):  # Could be various exceptions  # noqa: B017
             converter.convert(str(invalid_path))
         
         # Should still work after errors

@@ -1,15 +1,16 @@
 #!/usr/bin/env python3
 """Test custom attribute handling in GraphML conversion."""
 
-import pytest
-import tempfile
 import json
-from pathlib import Path
+import tempfile
 import xml.etree.ElementTree as ET
-import onnx
+from pathlib import Path
 
-from modelexport.graphml.onnx_to_graphml_converter import ONNXToGraphMLConverter
+import onnx
+import pytest
+
 from modelexport.graphml.graphml_to_onnx_converter import GraphMLToONNXConverter
+from modelexport.graphml.onnx_to_graphml_converter import ONNXToGraphMLConverter
 
 
 @pytest.mark.graphml
@@ -177,7 +178,7 @@ class TestCustomAttributeHandling:
             preserved_count = 0
             for node_name, attrs in original_attrs.items():
                 if node_name in reconstructed_attrs:
-                    for attr_name in attrs.keys():
+                    for attr_name in attrs:
                         if attr_name in reconstructed_attrs[node_name]:
                             preserved_count += 1
             
@@ -233,8 +234,10 @@ class TestCustomAttributeHandling:
 def sample_htp_data():
     """Provide sample HTP metadata and ONNX model for testing."""
     import tempfile
-    from modelexport.cli import cli
+
     from click.testing import CliRunner
+
+    from modelexport.cli import cli
     
     with tempfile.TemporaryDirectory() as temp_dir:
         temp_path = Path(temp_dir)
@@ -254,7 +257,7 @@ def sample_htp_data():
         metadata_path = temp_path / f"{onnx_path.stem}_htp_metadata.json"
         assert metadata_path.exists(), "HTP metadata file not created"
         
-        with open(metadata_path, 'r') as f:
+        with open(metadata_path) as f:
             htp_data = json.load(f)
         
         yield htp_data, str(onnx_path)

@@ -5,12 +5,18 @@ This module extracts graph structure from ONNX models, focusing on the
 computational graph while optionally excluding parameter tensors.
 """
 
-from typing import Dict, List, Set, Optional, Any
+from typing import Any
+
 import onnx
 
 from .utils import (
-    NodeData, EdgeData, GraphData, NodeType,
-    sanitize_node_id, get_tensor_dtype_name, format_tensor_shape
+    EdgeData,
+    GraphData,
+    NodeData,
+    NodeType,
+    format_tensor_shape,
+    get_tensor_dtype_name,
+    sanitize_node_id,
 )
 
 
@@ -26,7 +32,7 @@ class ONNXGraphParser:
     def __init__(
         self,
         exclude_initializers: bool = True,
-        exclude_attributes: Optional[Set[str]] = None
+        exclude_attributes: set[str] | None = None
     ):
         self.exclude_initializers = exclude_initializers
         self.exclude_attributes = exclude_attributes or set()
@@ -85,7 +91,7 @@ class ONNXGraphParser:
         
         return graph_data
     
-    def _extract_metadata(self, model: onnx.ModelProto) -> Dict[str, Any]:
+    def _extract_metadata(self, model: onnx.ModelProto) -> dict[str, Any]:
         """Extract model metadata."""
         metadata = {
             "model_version": model.model_version if hasattr(model, 'model_version') else 0,
@@ -161,7 +167,7 @@ class ONNXGraphParser:
             type_info["dtype"] = get_tensor_dtype_name(tensor_type.elem_type)
             if tensor_type.shape:
                 type_info["shape"] = format_tensor_shape(
-                    [dim for dim in tensor_type.shape.dim]
+                    list(tensor_type.shape.dim)
                 )
         
         return NodeData(
@@ -184,7 +190,7 @@ class ONNXGraphParser:
             type_info["dtype"] = get_tensor_dtype_name(tensor_type.elem_type)
             if tensor_type.shape:
                 type_info["shape"] = format_tensor_shape(
-                    [dim for dim in tensor_type.shape.dim]
+                    list(tensor_type.shape.dim)
                 )
         
         return NodeData(
@@ -199,9 +205,9 @@ class ONNXGraphParser:
     def _extract_edges(
         self,
         graph: Any,
-        node_map: Dict[str, NodeData],
-        initializer_names: Set[str]
-    ) -> List[EdgeData]:
+        node_map: dict[str, NodeData],
+        initializer_names: set[str]
+    ) -> list[EdgeData]:
         """Extract edges (tensor connections) from the graph."""
         edges = []
         

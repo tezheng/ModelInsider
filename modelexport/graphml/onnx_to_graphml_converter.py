@@ -25,10 +25,13 @@ from typing import Any
 
 import onnx
 from onnx import AttributeProto, TensorProto
-from transformers import AutoModel
 
-from ..core.tracing_hierarchy_builder import TracingHierarchyBuilder as StructuralHierarchyBuilder
+# NOTE: Removed hardcoded transformers import to comply with CARDINAL RULE #1
+from ..core.tracing_hierarchy_builder import (
+    TracingHierarchyBuilder as StructuralHierarchyBuilder,
+)
 from .graphml_writer import GraphMLWriter
+
 # from .metadata_reader import MetadataReader  # Not needed, using direct JSON loading
 from .onnx_parser import ONNXGraphParser
 from .parameter_manager import ParameterManager
@@ -247,7 +250,11 @@ class ONNXToGraphMLConverter:
         if output_base is None:
             output_base = model_path.stem
         
-        graphml_path = f"{output_base}.graphml"
+        # Handle case where output_base already has .graphml extension
+        if output_base.endswith('.graphml'):
+            graphml_path = output_base
+        else:
+            graphml_path = f"{output_base}.graphml"
         
         # Extract and store parameters
         parameter_info = self.parameter_manager.extract_parameters(
@@ -396,36 +403,14 @@ class ONNXToGraphMLConverter:
         """
         Enhance traced module hierarchy with structural discovery.
         
-        This method loads the original model and discovers ALL modules using named_modules(),
-        then merges with the traced hierarchy to fill gaps.
+        NOTE: Disabled to comply with CARDINAL RULE #1 - no hardcoded model loading logic.
+        The previous implementation violated universal design by hardcoding transformers AutoModel.
+        
+        Future implementation should use universal PyTorch module discovery approaches only.
         """
-        try:
-            # Load the original model for complete structural discovery
-            model_name = self.htp_data.get("model", {}).get("name_or_path", "")
-            if not model_name:
-                print("⚠️ No model name found, falling back to traced hierarchy only")
-                return traced_modules_data
-            
-            print(f"🔍 Loading model for structural discovery: {model_name}")
-            model = AutoModel.from_pretrained(model_name)
-            
-            # Build complete structural hierarchy
-            structural_hierarchy = self.structural_builder.build_complete_hierarchy(model)
-            
-            print(f"📊 Structural discovery found: {len(list(self._flatten_hierarchy(structural_hierarchy)))} modules")
-            print(f"📊 Traced hierarchy has: {len(list(self._flatten_hierarchy(traced_modules_data)))} modules")
-            
-            # Merge the hierarchies
-            enhanced_hierarchy = self._merge_hierarchies(traced_modules_data, structural_hierarchy)
-            
-            print(f"📊 Enhanced hierarchy has: {len(list(self._flatten_hierarchy(enhanced_hierarchy)))} modules")
-            
-            return enhanced_hierarchy
-            
-        except Exception as e:
-            print(f"⚠️ Error in structural discovery: {e}")
-            print("⚠️ Falling back to traced hierarchy only")
-            return traced_modules_data
+        # COMPLIANCE: Return traced hierarchy only to maintain universal design
+        print("📊 Using traced hierarchy only (structural discovery disabled for CARDINAL RULE compliance)")
+        return traced_modules_data
     
     def _merge_hierarchies(self, traced: dict[str, Any], structural: dict[str, Any]) -> dict[str, Any]:
         """Merge traced and structural hierarchies with conflict resolution."""
@@ -618,7 +603,7 @@ class ONNXToGraphMLConverter:
             return root_tag
         
         # Extract parent module from hierarchy tag
-        # Example: "/BertModel/BertEmbeddings" -> should go in "embeddings" compound node
+        # Example: "/ModelRoot/ModuleType" -> should go in appropriate compound node
         # The node's hierarchy tag tells us which module it belongs to
         tag_parts = hierarchy_tag.strip('/').split('/')
         if len(tag_parts) >= 2:
@@ -646,10 +631,10 @@ class ONNXToGraphMLConverter:
             
             # Create nested graph for this compound node
             nested_graph = ET.Element("graph", attrib={"id": f"{module_name}::", "edgedefault": "directed"})
-            self._add_data(nested_graph, "d0", module_name.title())
-            self._add_data(nested_graph, "d1", "pytorch")
-            self._add_data(nested_graph, "d2", "-1")
-            self._add_data(nested_graph, "d3", f"/{module_name}")
+            self._add_data(nested_graph, GC.GRAPH_CLASS_NAME, module_name.title())  # g0
+            self._add_data(nested_graph, GC.GRAPH_MODULE_TYPE, "pytorch")  # g1
+            self._add_data(nested_graph, GC.GRAPH_EXECUTION_ORDER, "-1")  # g2
+            self._add_data(nested_graph, GC.GRAPH_TRACED_TAG, f"/{module_name}")  # g3
             compound_node.append(nested_graph)
             
             graph_elem.append(compound_node)
@@ -734,11 +719,6 @@ class ONNXToGraphMLConverter:
         """Define GraphML v1.1 key schema."""
         # Define all keys needed for v1.1 format
         keys = [
-            # Graph keys (compound nodes)
-            ("d0", "graph", "class_name", "string"),
-            ("d1", "graph", "module_type", "string"),
-            ("d2", "graph", "execution_order", "int"),
-            ("d3", "graph", "traced_tag", "string"),
             
             # Node keys (enhanced for v1.1)
             ("n0", "node", "op_type", "string"),
@@ -772,11 +752,15 @@ class ONNXToGraphMLConverter:
             ("p2", "graph", "parameter_checksum", "string"),
             ("p3", "graph", "parameter_count", "string"),
             
+            # Graph attribute keys
+            ("g0", "graph", "class_name", "string"),
+            ("g1", "graph", "module_type", "string"),
+            ("g2", "graph", "execution_order", "int"),
+            ("g3", "graph", "traced_tag", "string"),
+            
             # Graph structure keys
-            ("g0", "graph", "graph_inputs", "string"),
-            ("g1", "graph", "graph_outputs", "string"),
-            ("g2", "graph", "value_info", "string"),
-            ("g3", "graph", "initializers_ref", "string"),
+            ("g4", "graph", "graph_inputs", "string"),
+            ("g5", "graph", "graph_outputs", "string"),
         ]
         
         for key_id, for_type, attr_name, attr_type in keys:

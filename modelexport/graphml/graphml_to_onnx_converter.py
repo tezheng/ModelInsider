@@ -329,6 +329,9 @@ class GraphMLToONNXConverter:
         # Create value info
         value_info = []
         value_info_data = metadata.get("value_info", [])
+        # Handle case where value_info might not be a list
+        if not isinstance(value_info_data, list):
+            value_info_data = []
         for vi_data in value_info_data:
             value_info.append(self._create_value_info(vi_data))
         
@@ -461,11 +464,7 @@ class GraphMLToONNXConverter:
         }
         
         # If it's GraphML metadata, don't include it
-        if attr_name in graphml_metadata_attrs:
-            return False
-            
-        # Everything else (including custom ONNX attributes) should be preserved
-        return True
+        return attr_name not in graphml_metadata_attrs
     
     def _create_onnx_attribute(self, name: str, value: Any) -> AttributeProto | None:
         """Create ONNX attribute from name and value."""
@@ -531,6 +530,13 @@ class GraphMLToONNXConverter:
     
     def _create_value_info(self, value_data: dict[str, Any]) -> ValueInfoProto:
         """Create ONNX ValueInfoProto from data."""
+        
+        # Handle both dict and string inputs
+        if isinstance(value_data, str):
+            # This might be a simple type string, create a minimal value_info
+            # This shouldn't happen in v1.1 format, but handle gracefully
+            print(f"⚠️ Unexpected string value_data: {value_data}")
+            return helper.make_tensor_value_info(value_data, TensorProto.FLOAT, None)
         
         name = value_data.get("name", "")
         dtype = value_data.get("type", "float32")

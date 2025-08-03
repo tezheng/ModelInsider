@@ -8,11 +8,12 @@ Tests the GraphML generation functionality including:
 - Metadata handling
 """
 
-import pytest
 import xml.etree.ElementTree as ET
 
+import pytest
+
 from modelexport.graphml.graphml_writer import GraphMLWriter
-from modelexport.graphml.utils import GraphData, NodeData, EdgeData, NodeType
+from modelexport.graphml.utils import EdgeData, GraphData, NodeData, NodeType
 
 
 @pytest.mark.graphml

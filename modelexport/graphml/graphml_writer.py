@@ -6,13 +6,10 @@ following the GraphML specification for compatibility with visualization tools.
 """
 
 import xml.etree.ElementTree as ET
-from typing import List, Dict, Optional
 from datetime import datetime
 
-from .utils import (
-    GraphData, NodeData, EdgeData, NodeType,
-    GraphMLConstants as GC
-)
+from .utils import EdgeData, GraphData, NodeData, NodeType
+from .utils import GraphMLConstants as GC
 
 
 class GraphMLWriter:
@@ -113,7 +110,7 @@ class GraphMLWriter:
         for_type: str,
         attr_name: str,
         attr_type: str,
-        desc: Optional[str] = None
+        desc: str | None = None
     ) -> None:
         """Add a key definition to GraphML."""
         key = ET.SubElement(parent, "key", attrib={

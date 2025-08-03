@@ -10,9 +10,11 @@ Main components:
 - GraphMLWriter: Low-level GraphML XML generation
 """
 
-from .converter import ONNXToGraphMLConverter
+from .graphml_to_onnx_converter import GraphMLToONNXConverter
+from .onnx_to_graphml_converter import ONNXToGraphMLConverter
 
 __all__ = [
+    "GraphMLToONNXConverter",
     "ONNXToGraphMLConverter",
 ]
 

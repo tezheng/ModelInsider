@@ -1,7 +1,7 @@
 """
 Command Line Interface for modelexport.
 
-This module provides a simple CLI for HTP (Hierarchical Trace-and-Project) 
+This module provides a simple CLI for HTP (Hierarchical Trace-and-Project)
 ONNX export with hierarchy preservation.
 """
 
@@ -32,12 +32,16 @@ def cli(ctx, verbose):
               help='Path where to save the ONNX model')
 @click.option('--strategy', default='htp', type=click.Choice(['htp']),
               help='Export strategy (only HTP supported)')
-@click.option('--input-specs', type=click.Path(exists=True), help='JSON file with input specifications (optional, auto-generates if not provided)')
+@click.option('--input-specs', type=click.Path(exists=True),
+              help='JSON file with input specifications (auto-generates if not provided)')
 @click.option('--export-config', type=click.Path(exists=True),
-              help='ONNX export configuration file (JSON) - opset_version, do_constant_folding, etc.')
-@click.option('--with-report', is_flag=True, help='Enable detailed HTP export reporting')
-@click.option('--no-hierarchy-attrs', '--clean-onnx', is_flag=True, help='Disable hierarchy_tag attributes in ONNX nodes (cleaner but loses traceability)')
-@click.option('--torch-module', is_flag=True, help='Include torch.nn modules in hierarchy (e.g., LayerNorm, Embedding for models like ResNet)')
+              help='ONNX export config file (JSON) - opset, folding, etc.')
+@click.option('--with-report', is_flag=True,
+              help='Enable detailed HTP export reporting')
+@click.option('--no-hierarchy-attrs', '--clean-onnx', is_flag=True,
+              help='Disable hierarchy_tag attributes (cleaner but loses traceability)')
+@click.option('--torch-module', is_flag=True,
+              help='Include torch.nn modules in hierarchy (e.g., LayerNorm, Embedding)')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
 @click.pass_context
 def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_config, with_report, no_hierarchy_attrs, torch_module, verbose):
@@ -68,7 +72,7 @@ def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_c
         result = exporter.export(
             model_name_or_path=model_name_or_path,
             output_path=output_path,
-            input_specs=json.load(open(input_specs)) if input_specs else None,
+            input_specs=json.load(open(input_specs)) if input_specs else None,  # noqa: SIM115
             export_config=export_config_dict
         )
         
@@ -316,6 +320,81 @@ def compare(model1_path, model2_path, output_file, verbose):
                 
     except Exception as e:
         click.echo(f"Error during comparison: {e}", err=True)
+        sys.exit(1)
+
+
+@cli.command('export-graphml')
+@click.argument('onnx_path')
+@click.argument('htp_metadata_path') 
+@click.option('--output', '-o', 'output_path', required=True,
+              help='Output path for GraphML file')
+@click.option('--strategy', default='sidecar',
+              type=click.Choice(['sidecar', 'embedded']),
+              help='Parameter storage strategy')
+@click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
+def export_graphml(onnx_path, htp_metadata_path, output_path, strategy, verbose):
+    """Export ONNX to GraphML v1.1 format with complete model interchange."""
+    try:
+        from .graphml.onnx_to_graphml_converter import ONNXToGraphMLConverter
+        
+        if verbose:
+            click.echo("🔄 Converting ONNX to GraphML v1.1...")
+            click.echo(f"   ONNX: {onnx_path}")
+            click.echo(f"   Metadata: {htp_metadata_path}")
+            click.echo(f"   Strategy: {strategy}")
+        
+        converter = ONNXToGraphMLConverter(
+            htp_metadata_path=htp_metadata_path,
+            parameter_strategy=strategy
+        )
+        
+        result = converter.convert(onnx_path, output_path)
+        
+        click.echo("✅ GraphML export completed successfully!")
+        click.echo(f"   GraphML: {result.get('graphml', output_path)}")
+        if result.get('parameters'):
+            click.echo(f"   Parameters: {result['parameters']}")
+        click.echo(f"   Format: {result.get('format_version', '1.1')}")
+        
+    except Exception as e:
+        click.echo(f"Error during GraphML export: {e}", err=True)
+        if verbose:
+            import traceback
+            click.echo(traceback.format_exc(), err=True)
+        sys.exit(1)
+
+
+@cli.command('import-onnx')
+@click.argument('graphml_path')
+@click.argument('output_path')
+@click.option('--validate', is_flag=True,
+              help='Validate the reconstructed ONNX model')
+@click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
+def import_onnx(graphml_path, output_path, validate, verbose):
+    """Convert GraphML v1.1 back to ONNX model."""
+    try:
+        from .graphml.graphml_to_onnx_converter import GraphMLToONNXConverter
+        
+        if verbose:
+            click.echo("🔄 Converting GraphML to ONNX...")
+            click.echo(f"   GraphML: {graphml_path}")
+            click.echo(f"   Output: {output_path}")
+            click.echo(f"   Validate: {validate}")
+        
+        converter = GraphMLToONNXConverter()
+        result_path = converter.convert(graphml_path, output_path, validate=validate)
+        
+        click.echo("✅ ONNX import completed successfully!")
+        click.echo(f"   ONNX Model: {result_path}")
+        
+        if validate:
+            click.echo("✅ Model validation passed")
+        
+    except Exception as e:
+        click.echo(f"Error during ONNX import: {e}", err=True)
+        if verbose:
+            import traceback
+            click.echo(traceback.format_exc(), err=True)
         sys.exit(1)
 
 
