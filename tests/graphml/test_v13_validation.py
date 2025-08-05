@@ -358,7 +358,6 @@ class TestRoundTripValidation:
         
         # Convert to GraphML (without validation to test validator separately)
         converter = ONNXToGraphMLConverter(
-            hierarchical=True,
             htp_metadata_path=str(htp_file),
             validate_output=False
         )
@@ -400,7 +399,6 @@ class TestRoundTripValidation:
         
         # Convert to GraphML
         converter = ONNXToGraphMLConverter(
-            hierarchical=True,
             htp_metadata_path=str(htp_file),
             validate_output=False
         )
@@ -437,7 +435,6 @@ class TestCompleteValidation:
         
         # Convert to GraphML with validation
         converter = ONNXToGraphMLConverter(
-            hierarchical=True,
             htp_metadata_path=str(htp_file),
             validate_output=True  # Enable validation
         )

@@ -384,7 +384,7 @@ class TestStressAndScale:
         htp_path.write_text(json.dumps(htp_metadata))
         
         # Convert with hierarchical converter
-        converter = ONNXToGraphMLConverter(hierarchical=True, htp_metadata_path=str(htp_path))
+        converter = ONNXToGraphMLConverter(htp_metadata_path=str(htp_path))
         start_time = time.time()
         graphml_str = converter.convert(str(onnx_path))
         duration = time.time() - start_time

@@ -184,7 +184,7 @@ class TestGraphMLStructure:
         htp_path.write_text(json.dumps(htp_metadata))
         
         # Convert with hierarchical converter
-        converter = ONNXToGraphMLConverter(hierarchical=True, htp_metadata_path=str(htp_path))
+        converter = ONNXToGraphMLConverter(htp_metadata_path=str(htp_path))
         result = converter.convert(str(onnx_path))
         
         # Hierarchical mode returns a dict with file paths
