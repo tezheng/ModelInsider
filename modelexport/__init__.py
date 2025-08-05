@@ -43,30 +43,19 @@ from .unified_export import UnifiedExporter, export_model
 # Backward compatibility
 HierarchyExporter = HTPExporter
 
-__version__ = "0.1.0"
+from .version import __version__
 __all__ = [
-    # Main interface (recommended)
-    "export_model",
-    "UnifiedExporter",
-    
-    # Strategy selection
-    "ExportStrategy", 
-    "StrategySelector",
-    "select_best_strategy",
-    
-    # Optimization framework
-    "UnifiedOptimizer",
-    "create_optimized_exporter",
-    
-    # Individual strategies
-    "HTPExporter",
-    
-    # Utilities
     "BaseHierarchyExporter",
-    "should_include_in_hierarchy",
-    "ONNXUtils",
-    "tag_utils",
-    
-    # Backward compatibility
+    "create_optimized_exporter",
+    "ExportStrategy",
+    "export_model",
     "HierarchyExporter",
+    "HTPExporter",
+    "ONNXUtils",
+    "select_best_strategy",
+    "should_include_in_hierarchy",
+    "StrategySelector",
+    "tag_utils",
+    "UnifiedExporter",
+    "UnifiedOptimizer",
 ]

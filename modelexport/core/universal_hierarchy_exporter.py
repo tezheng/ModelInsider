@@ -378,7 +378,7 @@ class UniversalHierarchyExporter:
             
             # Find corresponding hierarchy metadata
             hierarchy_data = None
-            for path, data in self._module_hierarchy.items():
+            for _path, data in self._module_hierarchy.items():
                 if id(module) == module_id:
                     hierarchy_data = data
                     break
@@ -560,7 +560,7 @@ class UniversalHierarchyExporter:
                 torch_nn_modules.append((full_path, module_data))
         
         if self.verbose:
-            logger.info(f"Registering selective dynamic hooks:")
+            logger.info("Registering selective dynamic hooks:")
             logger.info(f"  - HuggingFace modules: {len(hf_modules)}")
             logger.info(f"  - torch.nn modules: {len(torch_nn_modules)} (limited hooks)")
         
@@ -820,7 +820,8 @@ def export_bert_tiny_with_validation() -> dict[str, Any]:
     from transformers import AutoModel, AutoTokenizer
     
     # Load model (CARDINAL RULE: NO HARDCODED LOGIC - this works with any HF model)
-    model_name = "prajjwal1/bert-tiny"
+    from ..constants import DEFAULT_TEST_MODEL
+    model_name = DEFAULT_TEST_MODEL
     model = AutoModel.from_pretrained(model_name)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
     
@@ -866,7 +867,7 @@ if __name__ == "__main__":
     
     result = export_bert_tiny_with_validation()
     
-    print(f"✅ Export completed successfully!")
+    print("✅ Export completed successfully!")
     print(f"📁 Output: {result['output_path']}")
     print(f"📊 Statistics: {result['export_result']}")
     print(f"🏷️ Hierarchy metadata: {len(result['hierarchy_metadata']['module_hierarchy'])} modules")

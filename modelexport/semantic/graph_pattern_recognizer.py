@@ -287,12 +287,11 @@ class GraphPatternRecognizer:
             visited.add(current_node.name)
             
             # Check constraints if any
-            if 'constraints' in pattern_def:
-                if not self._check_constraints(
-                    current_node, node_map, output_to_producer, 
-                    input_to_consumers, pattern_def['constraints']
-                ):
-                    return None
+            if 'constraints' in pattern_def and not self._check_constraints(
+                current_node, node_map, output_to_producer, 
+                input_to_consumers, pattern_def['constraints']
+            ):
+                return None
             
             # Move to next node in sequence
             if i < len(sequence) - 1:

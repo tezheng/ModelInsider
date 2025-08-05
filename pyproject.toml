@@ -22,6 +22,7 @@ dependencies = [
     "pytest-cov>=6.2.1",
     "pydantic>=2.11.7",
     "snakemd>=2.3.0",
+    "psutil>=7.0.0",
 ]
 
 [project.scripts]
@@ -141,4 +142,5 @@ dev = [
     "graphviz>=0.21",
     "jupyter>=1.1.1",
     "ruff>=0.12.0",
+    "pytest-timeout>=2.4.0",
 ]

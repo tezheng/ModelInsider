@@ -627,12 +627,12 @@ def demonstrate_semantic_mapping():
     
     # Show module hierarchy
     print("\n📊 Module Hierarchy (first 10):")
-    for i, (name, info) in enumerate(list(mapper.get_module_hierarchy().items())[:10]):
+    for _i, (name, info) in enumerate(list(mapper.get_module_hierarchy().items())[:10]):
         print(f"  {name or '[root]'}: {info['class_name']} ({info['module_path']})")
     
     # Test mapping on some nodes
     onnx_model = onnx.load(str(onnx_path))
-    print(f"\n🔍 Sample Node Mappings:")
+    print("\n🔍 Sample Node Mappings:")
     
     sample_nodes = [n for n in onnx_model.graph.node if n.name.startswith('/')][:5]
     for node in sample_nodes:
@@ -646,7 +646,7 @@ def demonstrate_semantic_mapping():
     
     # Show statistics
     stats = mapper.get_coverage_statistics()
-    print(f"\n📈 Coverage Statistics:")
+    print("\n📈 Coverage Statistics:")
     print(f"  Total ONNX nodes: {stats['total_nodes']}")
     print(f"  Nodes with scope: {stats['nodes_with_scope']}")
     print(f"  Nodes with module mapping: {stats['nodes_with_module_mapping']}")

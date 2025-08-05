@@ -4,10 +4,11 @@ Integration test with bert-tiny model.
 This test verifies that the GraphML converter works with a real model.
 """
 
-import pytest
 from pathlib import Path
 
-from modelexport.graphml.converter import ONNXToGraphMLConverter
+import pytest
+
+from modelexport.graphml import ONNXToGraphMLConverter
 
 
 @pytest.mark.skipif(
@@ -19,7 +20,7 @@ def test_bert_tiny_conversion():
     model_path = "temp/bert-tiny/model.onnx"
     output_path = "temp/bert-tiny/model.graphml"
     
-    converter = ONNXToGraphMLConverter()
+    converter = ONNXToGraphMLConverter(hierarchical=False)
     converter.save(model_path, output_path)
     
     # Verify output file exists
@@ -35,8 +36,8 @@ def test_bert_tiny_conversion():
 
 def test_bert_tiny_mock():
     """Test with mock data when bert-tiny is not available."""
-    from modelexport.graphml.utils import GraphData, NodeData, EdgeData
     from modelexport.graphml.graphml_writer import GraphMLWriter
+    from modelexport.graphml.utils import EdgeData, GraphData, NodeData
     
     # Create mock graph data
     graph_data = GraphData()
