@@ -2,7 +2,7 @@
 Command Line Interface for modelexport.
 
 This module provides a simple CLI for HTP (Hierarchical Trace-and-Project) 
-ONNX export with hierarchy preservation and GraphML v1.1 bidirectional conversion.
+ONNX export with hierarchy preservation and GraphML v1.3 bidirectional conversion.
 """
 
 import json
@@ -13,6 +13,7 @@ import click
 
 from .core import tag_utils
 from .strategies import HTPExporter
+from .version import get_all_graphml_versions, GRAPHML_VERSION
 
 
 @click.group()
@@ -38,7 +39,7 @@ def cli(ctx, verbose):
 @click.option('--with-report', is_flag=True, help='Enable detailed HTP export reporting')
 @click.option('--no-hierarchy-attrs', '--clean-onnx', is_flag=True, help='Disable hierarchy_tag attributes in ONNX nodes (cleaner but loses traceability)')
 @click.option('--torch-module', is_flag=True, help='Include torch.nn modules in hierarchy (e.g., LayerNorm, Embedding for models like ResNet)')
-@click.option('--with-graphml', '--graphml', is_flag=True, help='Export hierarchical GraphML v1.1 alongside ONNX (Phase 1: sidecar parameters, creates model_hierarchical_graph.graphml + .onnxdata)')
+@click.option('--with-graphml', '--graphml', is_flag=True, help='Export hierarchical GraphML v1.3 alongside ONNX (Schema-driven with validation, creates model_hierarchical_graph.graphml + .onnxdata)')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
 @click.pass_context
 def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_config, with_report, no_hierarchy_attrs, torch_module, with_graphml, verbose):
@@ -53,7 +54,7 @@ def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_c
         # Basic export
         modelexport export --model prajjwal1/bert-tiny --output bert.onnx
         
-        # Export with GraphML v1.1 for visualization and round-trip conversion
+        # Export with GraphML v1.3 for visualization and round-trip conversion
         modelexport export --model prajjwal1/bert-tiny --output bert.onnx --with-graphml
         
         # Export with all features enabled
@@ -64,6 +65,7 @@ def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_c
     - Creates model_hierarchical_graph.graphml (hierarchical visualization)
     - Creates model_hierarchical_graph.onnxdata (parameter storage)
     - Supports bidirectional conversion (GraphML → ONNX)
+    - Includes schema validation (XSD) and three-layer validation system
     """
     try:
         # Export with HTP strategy using simplified API
@@ -153,11 +155,13 @@ def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_c
                         if 'parameters' in result_paths:
                             click.echo(f"   Parameters: {result_paths['parameters']}")
                     else:
+                        from modelexport.graphml.constants import GRAPHML_FORMAT_VERSION
+                        format_version = result_paths.get('format_version', GRAPHML_FORMAT_VERSION)
                         click.echo("✅ GraphML export completed:")
                         click.echo(f"   GraphML: {result_paths['graphml']}")
                         if 'parameters' in result_paths:
                             click.echo(f"   Parameters: {result_paths['parameters']}")
-                        click.echo("   Format: GraphML v1.1 (bidirectional)")
+                        click.echo(f"   Format: GraphML v{format_version} (bidirectional)")
                     
             except Exception as e:
                 click.echo(f"Warning: GraphML export failed: {e}", err=True)
@@ -396,15 +400,16 @@ def compare(model1_path, model2_path, output_file, verbose):
 @click.option('--output', '-o', 'output_base', help='Output base path (without extension)')
 @click.option('--strategy', default='sidecar', type=click.Choice(['sidecar', 'embedded', 'reference']),
               help='Parameter storage strategy')
-@click.option('--format', default='v1.1', type=click.Choice(['v1.1']),
+@click.option('--format', default=f'v{GRAPHML_VERSION}', 
+              type=click.Choice([f'v{v}' for v in get_all_graphml_versions()]),
               help='GraphML format version')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
 @click.pass_context
 def export_graphml(ctx, onnx_path, htp_metadata, output_base, strategy, format, verbose):
     """
-    Export ONNX to GraphML v1.1 format with complete model interchange capability.
+    Export ONNX to GraphML format with complete model interchange capability.
     
-    This creates GraphML v1.1 format capable of perfect ONNX reconstruction.
+    This creates GraphML format capable of perfect ONNX reconstruction.
     Requires HTP metadata for hierarchy information.
     
     ONNX_PATH: Path to ONNX model file
@@ -414,28 +419,32 @@ def export_graphml(ctx, onnx_path, htp_metadata, output_base, strategy, format, 
         from .graphml import ONNXToGraphMLConverter
         
         if verbose:
-            click.echo("🚀 Converting ONNX to GraphML v1.1 (Complete Model Interchange Format)")
+            click.echo("🚀 Converting ONNX to GraphML v1.3 (Schema-Driven Model Interchange Format)")
             click.echo(f"   ONNX Model: {onnx_path}")
             click.echo(f"   HTP Metadata: {htp_metadata}")
             click.echo(f"   Parameter Strategy: {strategy}")
         
         # Initialize unified converter with hierarchical mode
+        # Disable validation for embedded strategy to avoid XML size limits
         converter = ONNXToGraphMLConverter(
             hierarchical=True,
             htp_metadata_path=htp_metadata,
-            parameter_strategy=strategy
+            parameter_strategy=strategy,
+            validate_output=(strategy != 'embedded')
         )
         
-        # Convert to GraphML v1.1
+        # Convert to GraphML v1.3
         if not output_base:
             output_base = Path(onnx_path).stem
             
         result = converter.convert(onnx_path, output_base)
         
         # Display results
-        click.echo("✅ GraphML v1.1 export completed successfully!")
+        from modelexport.graphml.constants import GRAPHML_FORMAT_VERSION
+        format_version = result.get('format_version', GRAPHML_FORMAT_VERSION)
+        click.echo(f"✅ GraphML v{format_version} export completed successfully!")
         click.echo(f"   GraphML: {result['graphml']}")
-        click.echo(f"   Format Version: {result['format_version']}")
+        click.echo(f"   Format Version: {format_version}")
         
         # Display parameter file info
         if strategy != 'embedded' and 'parameters' in result:
@@ -443,7 +452,9 @@ def export_graphml(ctx, onnx_path, htp_metadata, output_base, strategy, format, 
             click.echo(f"   Parameters: {result['parameters']} ({param_size:.1f} MB)")
         
         if verbose:
-            click.echo("\n💡 GraphML v1.1 Features:")
+            click.echo(f"\n💡 GraphML v{format_version} Features:")
+            click.echo("   ✅ Schema-driven validation (XSD)")
+            click.echo("   ✅ Three-layer validation system")
             click.echo("   ✅ Complete ONNX node attributes")
             click.echo("   ✅ Tensor type and shape information")
             click.echo("   ✅ Model metadata preservation")
@@ -451,7 +462,7 @@ def export_graphml(ctx, onnx_path, htp_metadata, output_base, strategy, format, 
             click.echo("   ✅ Bidirectional conversion ready")
             
     except Exception as e:
-        click.echo(f"Error during GraphML v1.1 export: {e}", err=True)
+        click.echo(f"Error during GraphML export: {e}", err=True)
         if verbose:
             import traceback
             click.echo(traceback.format_exc(), err=True)
@@ -466,16 +477,16 @@ def export_graphml(ctx, onnx_path, htp_metadata, output_base, strategy, format, 
 @click.pass_context
 def import_onnx(ctx, graphml_path, output_path, validate, verbose):
     """
-    Convert GraphML v1.1 back to ONNX model (reverse conversion).
+    Convert GraphML v1.3 back to ONNX model (reverse conversion).
     
-    GRAPHML_PATH: Path to GraphML v1.1 file
+    GRAPHML_PATH: Path to GraphML v1.3 file
     OUTPUT_PATH: Path for output ONNX file
     """
     try:
         from .graphml.graphml_to_onnx_converter import GraphMLToONNXConverter
         
         if verbose:
-            click.echo("🔄 Converting GraphML v1.1 to ONNX (Reverse Conversion)")
+            click.echo("🔄 Converting GraphML v1.3 to ONNX (Reverse Conversion)")
             click.echo(f"   GraphML: {graphml_path}")
             click.echo(f"   Output: {output_path}")
             if validate:

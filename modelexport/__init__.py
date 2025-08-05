@@ -43,7 +43,7 @@ from .unified_export import UnifiedExporter, export_model
 # Backward compatibility
 HierarchyExporter = HTPExporter
 
-__version__ = "0.1.0"
+from .version import __version__
 __all__ = [
     "BaseHierarchyExporter",
     "create_optimized_exporter",

@@ -61,7 +61,7 @@ uv run modelexport export [OPTIONS] MODEL_NAME_OR_PATH OUTPUT_PATH
 #   --strategy STRATEGY     Tagging strategy [default: usage_based]
 #   --opset-version INT     ONNX opset version [default: 14]
 #   --temp-dir PATH         Temporary directory for intermediate files
-#   --with-graphml         Export hierarchical GraphML v1.1 alongside ONNX
+#   --with-graphml         Export hierarchical GraphML v1.3 alongside ONNX
 #   -v, --verbose          Enable verbose output
 ```
 
@@ -85,9 +85,10 @@ uv run modelexport export gpt2 gpt2_model.onnx \
 uv run modelexport export ./my_local_model model.onnx \
   --temp-dir ./temp_exports
 
-# Export with GraphML for visualization and round-trip conversion
+# Export with GraphML v1.3 for visualization and round-trip conversion
 uv run modelexport export prajjwal1/bert-tiny bert.onnx --with-graphml
 # Creates: bert.onnx, bert_hierarchical_graph.graphml, bert_hierarchical_graph.onnxdata
+# GraphML uses v1.3 format with schema-driven specification
 
 # Export with all features including GraphML
 uv run modelexport export gpt2 gpt2_full.onnx \
