@@ -184,7 +184,7 @@ class TestHierarchicalGraphMLConverter:
     def test_init_with_valid_metadata(self, hierarchical_htp_metadata):
         """Test initialization with valid metadata file."""
         converter = HierarchicalGraphMLConverter(
-            str(hierarchical_htp_metadata),
+            htp_metadata_path=str(hierarchical_htp_metadata),
             exclude_initializers=True
         )
         assert converter.htp_metadata_path == str(hierarchical_htp_metadata)
@@ -195,12 +195,14 @@ class TestHierarchicalGraphMLConverter:
         """Test initialization with non-existent metadata file."""
         missing_path = tmp_path / "missing.json"
         with pytest.raises(FileNotFoundError):
-            HierarchicalGraphMLConverter(str(missing_path))
+            HierarchicalGraphMLConverter(
+                htp_metadata_path=str(missing_path)
+            )
     
     def test_convert_basic_hierarchy(self, sample_onnx_model, hierarchical_htp_metadata):
         """Test basic hierarchical conversion."""
         converter = HierarchicalGraphMLConverter(
-            str(hierarchical_htp_metadata),
+            htp_metadata_path=str(hierarchical_htp_metadata),
             exclude_initializers=True
         )
         
@@ -237,7 +239,7 @@ class TestHierarchicalGraphMLConverter:
     def test_hierarchy_tag_assignment(self, sample_onnx_model, hierarchical_htp_metadata):
         """Test that hierarchy tags are properly assigned to nodes in GraphML output."""
         converter = HierarchicalGraphMLConverter(
-            str(hierarchical_htp_metadata),
+            htp_metadata_path=str(hierarchical_htp_metadata),
             exclude_initializers=True
         )
         
@@ -277,7 +279,7 @@ class TestHierarchicalGraphMLConverter:
     def test_compound_node_structure(self, sample_onnx_model, hierarchical_htp_metadata):
         """Test compound node hierarchy is properly built in GraphML output."""
         converter = HierarchicalGraphMLConverter(
-            str(hierarchical_htp_metadata),
+            htp_metadata_path=str(hierarchical_htp_metadata),
             exclude_initializers=True
         )
         
@@ -315,7 +317,7 @@ class TestHierarchicalGraphMLConverter:
     def test_deep_hierarchy(self, sample_onnx_model, deep_hierarchy_metadata):
         """Test deep nested hierarchy conversion."""
         converter = HierarchicalGraphMLConverter(
-            str(deep_hierarchy_metadata),
+            htp_metadata_path=str(deep_hierarchy_metadata),
             exclude_initializers=True
         )
         
@@ -341,7 +343,7 @@ class TestHierarchicalGraphMLConverter:
     def test_graphml_metadata_inclusion(self, sample_onnx_model, hierarchical_htp_metadata):
         """Test that metadata is included in GraphML output."""
         converter = HierarchicalGraphMLConverter(
-            str(hierarchical_htp_metadata),
+            htp_metadata_path=str(hierarchical_htp_metadata),
             exclude_initializers=True
         )
         
@@ -375,7 +377,7 @@ class TestHierarchicalGraphMLConverter:
     def test_nested_subgraphs(self, sample_onnx_model, hierarchical_htp_metadata):
         """Test that nested subgraphs are created for compound nodes."""
         converter = HierarchicalGraphMLConverter(
-            str(hierarchical_htp_metadata),
+            htp_metadata_path=str(hierarchical_htp_metadata),
             exclude_initializers=True
         )
         
@@ -407,7 +409,7 @@ class TestHierarchicalGraphMLConverter:
     def test_edge_preservation(self, sample_onnx_model, hierarchical_htp_metadata):
         """Test that edges are preserved in hierarchical structure."""
         converter = HierarchicalGraphMLConverter(
-            str(hierarchical_htp_metadata),
+            htp_metadata_path=str(hierarchical_htp_metadata),
             exclude_initializers=True
         )
         
@@ -439,7 +441,7 @@ class TestHierarchicalGraphMLConverter:
             json.dump(minimal_metadata, f)
         
         converter = HierarchicalGraphMLConverter(
-            str(metadata_path),
+            htp_metadata_path=str(metadata_path),
             exclude_initializers=True
         )
         
@@ -469,7 +471,7 @@ class TestHierarchicalGraphMLConverter:
     def test_module_class_name_in_compounds(self, sample_onnx_model, hierarchical_htp_metadata):
         """Test that compound nodes include module class names."""
         converter = HierarchicalGraphMLConverter(
-            str(hierarchical_htp_metadata),
+            htp_metadata_path=str(hierarchical_htp_metadata),
             exclude_initializers=True
         )
         

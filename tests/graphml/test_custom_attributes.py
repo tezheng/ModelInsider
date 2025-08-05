@@ -32,8 +32,7 @@ class TestCustomAttributeHandling:
             
             # Convert ONNX to GraphML with custom attributes
             converter = ONNXToGraphMLConverter(
-                htp_metadata_path=str(metadata_path),
-                hierarchical=True
+                htp_metadata_path=str(metadata_path)
             )
             
             # Convert to GraphML
@@ -87,8 +86,7 @@ class TestCustomAttributeHandling:
             
             # Step 1: Convert ONNX to GraphML (includes custom attributes)
             onnx_to_graphml = ONNXToGraphMLConverter(
-                htp_metadata_path=str(metadata_path),
-                hierarchical=True
+                htp_metadata_path=str(metadata_path)
             )
             
             # Convert to GraphML
@@ -152,8 +150,7 @@ class TestCustomAttributeHandling:
             
             # Step 1: ONNX → GraphML
             onnx_to_graphml = ONNXToGraphMLConverter(
-                htp_metadata_path=str(metadata_path),
-                hierarchical=True
+                htp_metadata_path=str(metadata_path)
             )
             
             result = onnx_to_graphml.convert(str(sample_onnx_path), str(temp_path / "test"))

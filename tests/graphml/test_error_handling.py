@@ -38,7 +38,7 @@ class TestFileSystemErrors:
     def test_missing_metadata_file(self):
         """Test error handling for non-existent metadata file."""
         with pytest.raises(FileNotFoundError) as exc_info:
-            ONNXToGraphMLConverter(hierarchical=True, htp_metadata_path="nonexistent_metadata.json")
+            ONNXToGraphMLConverter(htp_metadata_path="nonexistent_metadata.json")
         
         assert "HTP metadata file not found" in str(exc_info.value)
     
@@ -101,7 +101,7 @@ class TestMalformedInputFiles:
             f.write("{ invalid json content }")
         
         with pytest.raises(json.JSONDecodeError):
-            ONNXToGraphMLConverter(hierarchical=True, htp_metadata_path=str(metadata_file))
+            ONNXToGraphMLConverter(htp_metadata_path=str(metadata_file))
     
     def test_empty_json_metadata(self, tmp_path, simple_onnx_model):
         """Test error handling for empty JSON metadata."""
@@ -111,7 +111,7 @@ class TestMalformedInputFiles:
             f.write("{}")
         
         # Should not crash, but may not produce hierarchy
-        converter = ONNXToGraphMLConverter(hierarchical=True, htp_metadata_path=str(metadata_file))
+        converter = ONNXToGraphMLConverter(htp_metadata_path=str(metadata_file))
         graphml_output = converter.convert(simple_onnx_model)
         
         # Should still produce valid GraphML
@@ -131,7 +131,7 @@ class TestMalformedInputFiles:
         
         # This should fail because tagged_nodes is expected to be a dict
         with pytest.raises(AttributeError):  # tagged_nodes must be a dictionary
-            converter = ONNXToGraphMLConverter(hierarchical=True, htp_metadata_path=str(metadata_file))
+            converter = ONNXToGraphMLConverter(htp_metadata_path=str(metadata_file))
 
 
 class TestEdgeCases:
@@ -216,7 +216,7 @@ class TestEdgeCases:
             }, f)
         
         # Should handle gracefully without crashing
-        converter = ONNXToGraphMLConverter(hierarchical=True, htp_metadata_path=str(metadata_file))
+        converter = ONNXToGraphMLConverter(htp_metadata_path=str(metadata_file))
         graphml_output = converter.convert(simple_onnx_model)
         
         # Should produce valid GraphML

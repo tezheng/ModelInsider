@@ -68,7 +68,7 @@ class TestGraphMLIntegration:
     def test_hierarchical_conversion_with_bert_tiny(self, bert_tiny_model, bert_tiny_htp_metadata):
         """Test hierarchical GraphML conversion with bert-tiny model and HTP metadata."""
         converter = ONNXToGraphMLConverter(
-            str(bert_tiny_htp_metadata),
+            htp_metadata_path=str(bert_tiny_htp_metadata),
             exclude_initializers=True
         )
         
@@ -147,7 +147,7 @@ class TestGraphMLIntegration:
         
         # Now convert and validate
         converter = ONNXToGraphMLConverter(
-            str(bert_tiny_htp_metadata),
+            htp_metadata_path=str(bert_tiny_htp_metadata),
             exclude_initializers=True
         )
         
@@ -179,7 +179,7 @@ class TestGraphMLIntegration:
     def test_node_tagging_validation(self, bert_tiny_model, bert_tiny_htp_metadata):
         """Validate that nodes are properly tagged with hierarchy information."""
         converter = ONNXToGraphMLConverter(
-            str(bert_tiny_htp_metadata),
+            htp_metadata_path=str(bert_tiny_htp_metadata),
             exclude_initializers=True
         )
         
