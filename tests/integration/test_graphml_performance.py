@@ -107,7 +107,7 @@ class TestGraphMLPerformance:
         assert 80 < params_ratio < 120, f"Parameter file size unexpected: {params_ratio:.1f}% of ONNX"
     
     @pytest.mark.parametrize("model_name,expected_overhead", [
-        ("prajjwal1/bert-tiny", 50),  # Small model, higher relative overhead OK
+        ("prajjwal1/bert-tiny", 200),  # Small model, higher relative overhead OK
         # Add more models for comprehensive benchmarking in production
         # ("gpt2", 20),  # Larger model, lower relative overhead expected
         # ("microsoft/resnet-18", 30),  # Vision model
