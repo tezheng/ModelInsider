@@ -22,6 +22,7 @@ import numpy as np
 import onnx
 import onnxruntime as ort
 
+from .constants import GRAPHML_CONST
 from .graphml_to_onnx_converter import GraphMLToONNXConverter
 from .onnx_to_graphml_converter import ONNXToGraphMLConverter
 
@@ -72,7 +73,7 @@ class RoundTripValidator:
     def __init__(
         self, 
         numerical_tolerance: float = 1e-6,
-        parameter_strategy: str = "sidecar"
+        parameter_strategy: str = GRAPHML_CONST.PARAM_STRATEGY_SIDECAR
     ):
         """Initialize validator with configuration."""
         self.numerical_tolerance = numerical_tolerance
@@ -432,8 +433,8 @@ class RoundTripValidator:
         total_time = forward_time + reverse_time
         
         if total_time > 0:
-            forward_speed = original_size / (forward_time * 1024 * 1024)  # MB/s
-            reverse_speed = reconstructed_size / (reverse_time * 1024 * 1024)  # MB/s
+            forward_speed = original_size / (forward_time * GRAPHML_CONST.BYTES_PER_MB)  # MB/s
+            reverse_speed = reconstructed_size / (reverse_time * GRAPHML_CONST.BYTES_PER_MB)  # MB/s
             
             result.add_metric("forward_speed", forward_speed, "MB/s")
             result.add_metric("reverse_speed", reverse_speed, "MB/s")
@@ -442,7 +443,7 @@ class RoundTripValidator:
         if "parameters" in graphml_files:
             param_size = Path(graphml_files["parameters"]).stat().st_size
             result.add_metric("parameter_file_size", param_size, "bytes")
-            result.add_metric("parameter_file_size_mb", param_size / (1024 * 1024), "MB")
+            result.add_metric("parameter_file_size_mb", param_size / GRAPHML_CONST.BYTES_PER_MB, "MB")
     
     def generate_report(self, result: ValidationResult) -> str:
         """Generate human-readable validation report."""

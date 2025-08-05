@@ -1,5 +1,5 @@
 """
-Parameter Manager for GraphML v1.1
+Parameter Manager for GraphML
 
 Handles extraction, storage, and management of ONNX model parameters
 to enable complete model reconstruction from GraphML format.
@@ -22,13 +22,19 @@ import numpy as np
 import onnx
 from onnx import TensorProto
 
+from .constants import GRAPHML_FORMAT_VERSION, GRAPHML_CONST
+
 
 class ParameterManager:
-    """Manages parameter storage and retrieval for GraphML v1.1 format."""
+    """Manages parameter storage and retrieval for GraphML format."""
     
-    SUPPORTED_STRATEGIES = ["sidecar", "embedded", "reference"]
+    SUPPORTED_STRATEGIES = [
+        GRAPHML_CONST.PARAM_STRATEGY_SIDECAR,
+        GRAPHML_CONST.PARAM_STRATEGY_EMBEDDED,
+        GRAPHML_CONST.PARAM_STRATEGY_REFERENCE
+    ]
     
-    def __init__(self, strategy: str = "sidecar"):
+    def __init__(self, strategy: str = GRAPHML_CONST.PARAM_STRATEGY_SIDECAR):
         """Initialize parameter manager with storage strategy."""
         if strategy not in self.SUPPORTED_STRATEGIES:
             raise ValueError(f"Unsupported strategy: {strategy}. "
@@ -67,11 +73,11 @@ class ParameterManager:
             total_size += param_data["size_bytes"]
         
         # Store parameters according to strategy
-        if self.strategy == "sidecar":
+        if self.strategy == GRAPHML_CONST.PARAM_STRATEGY_SIDECAR:
             return self._store_sidecar(parameters, output_base, total_size)
-        elif self.strategy == "embedded":
+        elif self.strategy == GRAPHML_CONST.PARAM_STRATEGY_EMBEDDED:
             return self._store_embedded(parameters, total_size)
-        elif self.strategy == "reference":
+        elif self.strategy == GRAPHML_CONST.PARAM_STRATEGY_REFERENCE:
             return self._store_reference(output_base, total_size)
         else:
             raise ValueError(f"Unknown strategy: {self.strategy}")
@@ -105,7 +111,7 @@ class ParameterManager:
         
         # Prepare parameter data
         param_data = {
-            "format_version": "1.1",
+            "format_version": GRAPHML_FORMAT_VERSION,
             "total_size_bytes": total_size,
             "parameter_count": len(parameters),
             "parameters": parameters
@@ -137,7 +143,7 @@ class ParameterManager:
         # They will be embedded in the GraphML g3 key
         
         embedded_data = {
-            "format_version": "1.1",
+            "format_version": GRAPHML_FORMAT_VERSION,
             "total_size_bytes": total_size,
             "parameter_count": len(parameters),
             "parameters": parameters
@@ -205,13 +211,13 @@ class ParameterManager:
             Dictionary of parameter name -> numpy array
         """
         
-        strategy = parameter_info.get("parameter_strategy", "sidecar")
+        strategy = parameter_info.get("parameter_strategy", GRAPHML_CONST.PARAM_STRATEGY_SIDECAR)
         
-        if strategy == "sidecar":
+        if strategy == GRAPHML_CONST.PARAM_STRATEGY_SIDECAR:
             return self._load_sidecar(parameter_info, base_path)
-        elif strategy == "embedded":
+        elif strategy == GRAPHML_CONST.PARAM_STRATEGY_EMBEDDED:
             return self._load_embedded(parameter_info)
-        elif strategy == "reference":
+        elif strategy == GRAPHML_CONST.PARAM_STRATEGY_REFERENCE:
             return self._load_reference(parameter_info, base_path)
         else:
             raise ValueError(f"Unknown strategy: {strategy}")
@@ -312,7 +318,7 @@ class ParameterManager:
         
         strategy = parameter_info.get("parameter_strategy", "unknown")
         size_bytes = parameter_info.get("total_size_bytes", 0)
-        size_mb = size_bytes / (1024 * 1024)
+        size_mb = size_bytes / GRAPHML_CONST.BYTES_PER_MB
         param_count = parameter_info.get("parameter_count", 0)
         
         return {

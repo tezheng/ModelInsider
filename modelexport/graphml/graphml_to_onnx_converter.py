@@ -30,15 +30,23 @@ from onnx import (
     helper,
 )
 
+from .constants import GRAPHML_FORMAT_VERSION, GRAPHML_V13_KEY_MAPPINGS
 from .parameter_manager import ParameterManager
 
 
 class GraphMLToONNXConverter:
-    """Converts GraphML v1.1 back to ONNX format."""
+    """Converts GraphML v1.3 to ONNX format (NO backward compatibility)."""
     
     def __init__(self):
-        """Initialize the converter."""
+        """Initialize the converter for GraphML v1.3 ONLY."""
         self.parameter_manager = ParameterManager()
+        
+        # Use centralized key mappings from constants
+        self.key_mappings = {
+            k: v for k, v in GRAPHML_V13_KEY_MAPPINGS.items()
+            if k.startswith(('meta', 'param', 'io', 'e'))
+        }
+        self.format_version = GRAPHML_FORMAT_VERSION
         
     def convert(
         self, 
@@ -97,11 +105,11 @@ class GraphMLToONNXConverter:
         # Extract graph metadata
         metadata = self._extract_graph_metadata(main_graph, keys)
         
-        # Verify v1.1 format
-        format_version = metadata.get("format_version", "1.1")
-        if not format_version.startswith("1.1"):  
+        # Verify correct format version ONLY
+        format_version = metadata.get("format_version", "")
+        if format_version != self.format_version:
             raise ValueError(f"Unsupported GraphML format version: {format_version}. "
-                           f"This converter requires v1.1+")
+                           f"This converter supports ONLY v{self.format_version}")
         
         # Extract nodes
         nodes = self._extract_nodes(main_graph, keys)
@@ -139,21 +147,34 @@ class GraphMLToONNXConverter:
         
         metadata = {"graph_id": graph.get("id", "")}
         
-        for data_elem in graph.findall(".//{http://graphml.graphdrawing.org/xmlns}data"):
+        # Only process direct children data elements (not nested in nodes/edges)
+        for data_elem in graph.findall("{http://graphml.graphdrawing.org/xmlns}data"):
             key_id = data_elem.get("key")
+            
+            # Skip non-graph keys
+            if key_id in keys and keys[key_id]["for"] != "graph":
+                continue
+            
+            # Get attribute name from key definitions (v1.3 ONLY)
             if key_id in keys and keys[key_id]["for"] == "graph":
                 attr_name = keys[key_id]["attr_name"]
-                value = data_elem.text or ""
+            elif key_id in self.key_mappings:
+                attr_name = self.key_mappings[key_id]
+            else:
+                # Unknown key - this is an error in v1.3
+                raise ValueError(f"Unknown key '{key_id}' - not a valid v1.3 key")
                 
-                # Parse JSON values
-                if attr_name in ["opset_imports", "graph_inputs", "graph_outputs", 
-                               "value_info", "initializers_ref"]:
-                    try:
-                        metadata[attr_name] = json.loads(value)
-                    except json.JSONDecodeError:
-                        metadata[attr_name] = value
-                else:
+            value = data_elem.text or ""
+            
+            # Parse JSON values
+            if attr_name in ["opset_imports", "graph_inputs", "graph_outputs", 
+                           "value_info", "initializers_ref"]:
+                try:
+                    metadata[attr_name] = json.loads(value)
+                except json.JSONDecodeError:
                     metadata[attr_name] = value
+            else:
+                metadata[attr_name] = value
         
         return metadata
     
@@ -196,6 +217,11 @@ class GraphMLToONNXConverter:
             
             # Only include nodes with op_type (ONNX operations must have op_type)
             if node_data.get("op_type"):
+                # Skip compound nodes (nodes that contain nested graphs - these are module containers)
+                nested_graph = node_elem.find("{http://graphml.graphdrawing.org/xmlns}graph")
+                if nested_graph is not None:
+                    continue  # This is a compound node, skip it
+                
                 nodes.append(node_data)
         
         return nodes
@@ -257,10 +283,15 @@ class GraphMLToONNXConverter:
         if parameter_info["parameter_strategy"] == "embedded":
             initializers_ref = metadata.get("initializers_ref", "")
             if initializers_ref:
-                try:
-                    parameter_info["embedded_data"] = json.loads(initializers_ref)
-                except json.JSONDecodeError as err:
-                    raise ValueError("Invalid embedded parameter data") from err
+                # initializers_ref is already a dict (parsed during metadata extraction)
+                if isinstance(initializers_ref, dict):
+                    parameter_info["embedded_data"] = initializers_ref
+                else:
+                    # Fallback for string data (shouldn't happen with v1.3)
+                    try:
+                        parameter_info["embedded_data"] = json.loads(initializers_ref)
+                    except json.JSONDecodeError as err:
+                        raise ValueError("Invalid embedded parameter data") from err
         
         # Load parameters
         base_path = str(Path(graphml_path).parent)
@@ -283,6 +314,12 @@ class GraphMLToONNXConverter:
             # Skip Input/Output nodes - these are handled by graph inputs/outputs, not as nodes
             op_type = node_data.get("op_type", "")
             if op_type in ("Input", "Output"):
+                continue
+            
+            # Skip PyTorch module nodes - these are hierarchy containers, not ONNX operations
+            # But keep custom domain operators
+            domain = node_data.get("domain", "")
+            if self._is_module_node(op_type) and not domain:
                 continue
                 
             onnx_node = self._create_onnx_node(node_data)
@@ -410,6 +447,20 @@ class GraphMLToONNXConverter:
             node.domain = domain
         
         return node
+    
+    def _is_module_node(self, op_type: str) -> bool:
+        """Check if this is a PyTorch module node rather than an ONNX operation.
+        
+        Universal approach: Use ONNX's own schema validation to determine
+        if something is a valid ONNX operator. No hardcoded patterns.
+        """
+        try:
+            # Use ONNX's authoritative schema check
+            onnx.defs.get_schema(op_type)
+            return False  # It's a valid ONNX operator, not a module node
+        except Exception:
+            # If ONNX doesn't recognize it, it's likely a PyTorch module
+            return True
     
     def _is_custom_attribute(self, attr_name: str) -> bool:
         """Check if attribute is a custom attribute (not a valid ONNX attribute)."""

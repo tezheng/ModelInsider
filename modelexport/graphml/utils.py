@@ -11,7 +11,7 @@ from typing import Any, ClassVar
 
 
 class GraphMLConstants:
-    """GraphML namespace and attribute constants."""
+    """GraphML namespace and attribute constants (v1.3)."""
     GRAPHML_NS = "http://graphml.graphdrawing.org/xmlns"
     GRAPHML_NS_MAP: ClassVar[dict[str, str]] = {"": GRAPHML_NS}
     
@@ -26,19 +26,37 @@ class GraphMLConstants:
     NODE_HIERARCHY_TAG = "n1"
     NODE_ATTRIBUTES_JSON = "n2"
     NODE_NAME = "n3"
+    NODE_INPUT_NAMES = "n4"  # v1.3
+    NODE_OUTPUT_NAMES = "n5"  # v1.3
+    NODE_DOMAIN = "n6"  # v1.3
     
-    # Edge attributes
+    # Edge attributes (v1.3 naming)
     EDGE_TENSOR_NAME = "e0"
+    EDGE_TENSOR_TYPE = "e1"  # v1.3 (was t0)
+    EDGE_TENSOR_SHAPE = "e2"  # v1.3 (was t1)
+    EDGE_TENSOR_DATA_REF = "e3"  # v1.3 (was t2)
     
-    # Metadata keys
-    META_SOURCE_ONNX = "m0"
-    META_SOURCE_HTP = "m1"
-    META_FORMAT_VERSION = "m2"
-    META_TIMESTAMP = "m3"
+    # Metadata keys (v1.3 naming - resolves conflicts)
+    META_SOURCE_ONNX = "meta0"  # v1.3 (was m0)
+    META_SOURCE_HTP = "meta1"  # v1.3 (was m1)
+    META_FORMAT_VERSION = "meta2"  # v1.3 (was m2)
+    META_TIMESTAMP = "meta3"  # v1.3 (was m3)
+    META_OPSET_IMPORTS = "meta4"  # v1.3
+    META_PRODUCER_NAME = "meta5"  # v1.3 (was m5 - conflict resolved)
+    META_PRODUCER_VERSION = "meta6"  # v1.3 (was m6 - conflict resolved)
+    META_MODEL_VERSION = "meta7"  # v1.3 (was m7 - conflict resolved)
+    META_DOC_STRING = "meta8"  # v1.3 (was m8 - conflict resolved)
     
-    # Graph I/O metadata keys (expected by TEZ-127 tests)
-    GRAPH_INPUTS = "g0"
-    GRAPH_OUTPUTS = "g1"
+    # Parameter keys (v1.3 naming)
+    PARAM_STRATEGY = "param0"  # v1.3 (was p0)
+    PARAM_FILE = "param1"  # v1.3 (was p1)
+    PARAM_CHECKSUM = "param2"  # v1.3 (was p2)
+    
+    # Graph I/O metadata keys (v1.3 naming)
+    GRAPH_INPUTS = "io0"  # v1.3 (was g0)
+    GRAPH_OUTPUTS = "io1"  # v1.3 (was g1)
+    GRAPH_VALUE_INFO = "io2"  # v1.3 (was g2)
+    GRAPH_INITIALIZERS_REF = "io3"  # v1.3 (was g3)
 
 
 class NodeType(Enum):
