@@ -1,0 +1,157 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xs:schema xmlns:xs="http://www.w3.org/2001/XMLSchema"
+           xmlns:gml="http://graphml.graphdrawing.org/xmlns"
+           targetNamespace="http://graphml.graphdrawing.org/xmlns"
+           elementFormDefault="qualified">
+
+  <!-- Root GraphML Element -->
+  <xs:element name="graphml" type="gml:GraphMLType"/>
+  
+  <xs:complexType name="GraphMLType">
+    <xs:sequence>
+      <!-- Key Definitions (Required) - 31 keys in v1.3 -->
+      <xs:element name="key" type="gml:KeyType" minOccurs="31" maxOccurs="31"/>
+      <!-- Main Graph (Required) -->
+      <xs:element name="graph" type="gml:GraphType"/>
+    </xs:sequence>
+  </xs:complexType>
+
+  <!-- Key Definition Type -->
+  <xs:complexType name="KeyType">
+    <xs:sequence>
+      <xs:element name="desc" type="xs:string" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="gml:KeyIdType" use="required"/>
+    <xs:attribute name="for" type="gml:KeyForType" use="required"/>
+    <xs:attribute name="attr.name" type="xs:string" use="required"/>
+    <xs:attribute name="attr.type" type="gml:AttributeTypeType" use="required"/>
+  </xs:complexType>
+
+  <!-- Valid Key IDs for v1.3 (NO OLD KEYS ALLOWED) -->
+  <xs:simpleType name="KeyIdType">
+    <xs:restriction base="xs:string">
+      <!-- Graph Keys (Compound Nodes) -->
+      <xs:enumeration value="d0"/><!-- class_name -->
+      <xs:enumeration value="d1"/><!-- module_type -->
+      <xs:enumeration value="d2"/><!-- execution_order -->
+      <xs:enumeration value="d3"/><!-- traced_tag -->
+      
+      <!-- Node Keys -->
+      <xs:enumeration value="n0"/><!-- op_type -->
+      <xs:enumeration value="n1"/><!-- hierarchy_tag -->
+      <xs:enumeration value="n2"/><!-- onnx_attributes -->
+      <xs:enumeration value="n3"/><!-- name -->
+      <xs:enumeration value="n4"/><!-- input_names -->
+      <xs:enumeration value="n5"/><!-- output_names -->
+      <xs:enumeration value="n6"/><!-- domain -->
+      
+      <!-- Edge Keys (v1.3 ONLY) -->
+      <xs:enumeration value="e0"/><!-- tensor_name -->
+      <xs:enumeration value="e1"/><!-- tensor_type (NOT t0) -->
+      <xs:enumeration value="e2"/><!-- tensor_shape (NOT t1) -->
+      <xs:enumeration value="e3"/><!-- tensor_data_ref (NOT t2) -->
+      
+      <!-- Model Metadata Keys (v1.3 ONLY) -->
+      <xs:enumeration value="meta0"/><!-- source_onnx_file -->
+      <xs:enumeration value="meta1"/><!-- source_htp_file -->
+      <xs:enumeration value="meta2"/><!-- format_version -->
+      <xs:enumeration value="meta3"/><!-- export_timestamp -->
+      <xs:enumeration value="meta4"/><!-- opset_imports -->
+      <xs:enumeration value="meta5"/><!-- producer_name (NOT m5) -->
+      <xs:enumeration value="meta6"/><!-- producer_version (NOT m6) -->
+      <xs:enumeration value="meta7"/><!-- model_version (NOT m7) -->
+      <xs:enumeration value="meta8"/><!-- doc_string (NOT m8) -->
+      
+      <!-- Parameter Storage Keys (v1.3 ONLY) -->
+      <xs:enumeration value="param0"/><!-- parameter_strategy (NOT p0) -->
+      <xs:enumeration value="param1"/><!-- parameter_file (NOT p1) -->
+      <xs:enumeration value="param2"/><!-- parameter_checksum (NOT p2) -->
+      
+      <!-- Graph I/O Keys (v1.3 ONLY) -->
+      <xs:enumeration value="io0"/><!-- graph_inputs (NOT g0) -->
+      <xs:enumeration value="io1"/><!-- graph_outputs (NOT g1) -->
+      <xs:enumeration value="io2"/><!-- value_info (NOT g2) -->
+      <xs:enumeration value="io3"/><!-- initializers_ref (NOT g3) -->
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Key Target Types -->
+  <xs:simpleType name="KeyForType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="node"/>
+      <xs:enumeration value="edge"/>
+      <xs:enumeration value="graph"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Attribute Data Types -->
+  <xs:simpleType name="AttributeTypeType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="string"/>
+      <xs:enumeration value="int"/>
+      <xs:enumeration value="long"/>
+      <xs:enumeration value="float"/>
+      <xs:enumeration value="double"/>
+      <xs:enumeration value="boolean"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <!-- Graph Type -->
+  <xs:complexType name="GraphType">
+    <xs:sequence>
+      <!-- Graph Metadata (at least format_version required) -->
+      <xs:element name="data" type="gml:DataType" minOccurs="1" maxOccurs="unbounded"/>
+      <!-- Nodes and Edges -->
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="node" type="gml:NodeType"/>
+        <xs:element name="edge" type="gml:EdgeType"/>
+      </xs:choice>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:string" use="required"/>
+    <xs:attribute name="edgedefault" use="required">
+      <xs:simpleType>
+        <xs:restriction base="xs:string">
+          <xs:enumeration value="directed"/>
+        </xs:restriction>
+      </xs:simpleType>
+    </xs:attribute>
+  </xs:complexType>
+
+  <!-- Node Type -->
+  <xs:complexType name="NodeType">
+    <xs:sequence>
+      <!-- Node must have at least op_type (n0) -->
+      <xs:element name="data" type="gml:DataType" minOccurs="1" maxOccurs="7"/>
+      <!-- Compound nodes can have nested graphs -->
+      <xs:element name="graph" type="gml:GraphType" minOccurs="0"/>
+    </xs:sequence>
+    <xs:attribute name="id" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <!-- Edge Type -->
+  <xs:complexType name="EdgeType">
+    <xs:sequence>
+      <!-- Edge must have at least tensor_name (e0) -->
+      <xs:element name="data" type="gml:DataType" minOccurs="1" maxOccurs="4"/>
+    </xs:sequence>
+    <xs:attribute name="source" type="xs:string" use="required"/>
+    <xs:attribute name="target" type="xs:string" use="required"/>
+  </xs:complexType>
+
+  <!-- Data Element Type -->
+  <xs:complexType name="DataType">
+    <xs:simpleContent>
+      <xs:extension base="xs:string">
+        <xs:attribute name="key" type="gml:KeyIdType" use="required"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+
+  <!-- Format Version Constraint -->
+  <xs:simpleType name="FormatVersionType">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="1\.3"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+</xs:schema>
