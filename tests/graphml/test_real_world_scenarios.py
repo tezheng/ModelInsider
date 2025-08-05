@@ -16,6 +16,7 @@ import torch
 import torch.nn as nn
 
 from modelexport.graphml import ONNXToGraphMLConverter
+from modelexport.version import GRAPHML_VERSION
 
 
 class TestProductionScenarios:
@@ -255,17 +256,17 @@ class TestProductionScenarios:
         converter = ONNXToGraphMLConverter(hierarchical=False)
         graphml_str = converter.convert(str(onnx_path))
         
-        # Node-level custom attributes should be excluded by default
-        # (not part of the standard attributes we extract)
-        assert 'original_layer_name' not in graphml_str
+        # Node-level custom attributes are included in onnx_attributes
+        # In v1.3, all ONNX attributes are preserved in the JSON
+        assert 'original_layer_name' in graphml_str
         
         # But basic GraphML structure should be valid
         root = ET.fromstring(graphml_str)
         assert root is not None
         
-        # And we should have the standard metadata
+        # And we should have the standard metadata - v1.3 uses meta0
         ns = {'': 'http://graphml.graphdrawing.org/xmlns'}
-        source_file = root.find(".//data[@key='m0']", ns)
+        source_file = root.find(".//data[@key='meta0']", ns)
         assert source_file is not None
         assert source_file.text == "model_with_metadata.onnx"
 

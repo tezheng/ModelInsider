@@ -2,8 +2,8 @@
 Test suite for bidirectional conversion CLI commands.
 
 Tests the CLI interface for:
-- export-graphml: ONNX → GraphML v1.1
-- import-onnx: GraphML v1.1 → ONNX  
+- export-graphml: ONNX → GraphML
+- import-onnx: GraphML → ONNX  
 - validate-roundtrip: Complete validation
 """
 
@@ -16,6 +16,7 @@ import pytest
 from click.testing import CliRunner
 
 from modelexport.cli import cli
+from modelexport.version import GRAPHML_VERSION
 
 
 @pytest.fixture
@@ -153,7 +154,7 @@ class TestExportGraphMLV2CLI:
     """Test export-graphml CLI command."""
     
     def test_export_graphml_v2_basic(self, bert_tiny_artifacts, tmp_path):
-        """Test basic GraphML v1.1 export."""
+        """Test basic GraphML v1.3 export."""
         model_path, metadata_path = bert_tiny_artifacts
         
         runner = CliRunner()
@@ -168,8 +169,8 @@ class TestExportGraphMLV2CLI:
         ])
         
         assert result.exit_code == 0
-        assert 'GraphML v1.1 export completed successfully' in result.output
-        assert 'Format Version: 1.1' in result.output
+        assert f'GraphML v{GRAPHML_VERSION} export completed successfully' in result.output
+        assert f'Format Version: {GRAPHML_VERSION}' in result.output
         
         # Verify files created
         graphml_file = Path(f"{output_base}.graphml")
@@ -181,7 +182,7 @@ class TestExportGraphMLV2CLI:
         assert param_file.stat().st_size > 0
     
     def test_export_graphml_v2_verbose(self, bert_tiny_artifacts, tmp_path):
-        """Test verbose output for GraphML v1.1 export."""
+        """Test verbose output for GraphML v1.3 export."""
         model_path, metadata_path = bert_tiny_artifacts
         
         runner = CliRunner()
@@ -197,13 +198,13 @@ class TestExportGraphMLV2CLI:
         ])
         
         assert result.exit_code == 0
-        assert 'Converting ONNX to GraphML v1.1 (Complete Model Interchange Format)' in result.output
-        assert 'GraphML v1.1 Features:' in result.output
+        assert f'Converting ONNX to GraphML v{GRAPHML_VERSION} (Schema-Driven Model Interchange Format)' in result.output
+        assert f'GraphML v{GRAPHML_VERSION} Features:' in result.output
         assert 'Complete ONNX node attributes' in result.output
         assert 'Bidirectional conversion ready' in result.output
     
     def test_export_graphml_v2_embedded_strategy(self, bert_tiny_artifacts, tmp_path):
-        """Test GraphML v1.1 export with embedded strategy."""
+        """Test GraphML v1.3 export with embedded strategy."""
         model_path, metadata_path = bert_tiny_artifacts
         
         runner = CliRunner()
@@ -268,12 +269,12 @@ class TestImportONNXCLI:
     """Test import-onnx CLI command."""
     
     def test_import_onnx_basic(self, bert_tiny_artifacts, tmp_path):
-        """Test basic ONNX import from GraphML v1.1."""
+        """Test basic ONNX import from GraphML v1.3."""
         model_path, metadata_path = bert_tiny_artifacts
         
         runner = CliRunner()
         
-        # First export to GraphML v1.1
+        # First export to GraphML v1.3
         export_base = str(tmp_path / "for_import")
         export_result = runner.invoke(cli, [
             'export-graphml',
@@ -330,9 +331,9 @@ class TestImportONNXCLI:
         ])
         
         assert result.exit_code == 0
-        assert 'Converting GraphML v1.1 to ONNX' in result.output
+        assert f'Converting GraphML v{GRAPHML_VERSION} to ONNX' in result.output
         assert 'GraphML Analysis:' in result.output
-        assert 'Format Version: 1.1' in result.output
+        assert f'Format Version: {GRAPHML_VERSION}' in result.output
         assert 'Parameter Strategy:' in result.output
     
     def test_import_onnx_with_validation_success(self, bert_tiny_artifacts, tmp_path):
@@ -468,7 +469,7 @@ class TestCLIIntegration:
         
         runner = CliRunner()
         
-        # Step 1: Export to GraphML v1.1
+        # Step 1: Export to GraphML v1.3
         export_base = str(tmp_path / "workflow_export")
         export_result = runner.invoke(cli, [
             'export-graphml',
@@ -480,7 +481,7 @@ class TestCLIIntegration:
         ])
         
         assert export_result.exit_code == 0
-        assert 'Format Version: 1.1' in export_result.output
+        assert f'Format Version: {GRAPHML_VERSION}' in export_result.output
         
         # Step 2: Import back to ONNX
         import_path = str(tmp_path / "workflow_import.onnx")
@@ -556,6 +557,9 @@ class TestParameterStrategiesCLI:
                 '--strategy', strategy
             ])
             
+            if result.exit_code != 0:
+                print(f"Error with {strategy} strategy:")
+                print(result.output)
             assert result.exit_code == 0
             assert f'Parameter Strategy: {strategy}' in result.output or 'export completed successfully' in result.output
             

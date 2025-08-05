@@ -12,7 +12,7 @@ import onnx
 import pytest
 from onnx import TensorProto, helper
 
-from modelexport.graphml.hierarchical_converter import HierarchicalGraphMLConverter
+from modelexport.graphml.onnx_to_graphml_converter import ONNXToGraphMLConverter as HierarchicalGraphMLConverter
 
 
 @pytest.fixture

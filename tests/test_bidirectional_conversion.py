@@ -1,9 +1,9 @@
 """
-Test suite for bidirectional ONNX ↔ GraphML v1.1 conversion.
+Test suite for bidirectional ONNX ↔ GraphML v1.3 conversion.
 
 Tests the complete round-trip conversion functionality:
-- ONNX → GraphML v1.1 export  
-- GraphML v1.1 → ONNX import
+- ONNX → GraphML v1.3 export  
+- GraphML v1.3 → ONNX import
 - Round-trip validation
 - CLI commands
 - Parameter storage strategies
@@ -21,9 +21,11 @@ import pytest
 from click.testing import CliRunner
 
 from modelexport.cli import cli
-from modelexport.graphml.enhanced_converter import EnhancedGraphMLConverter
+from modelexport.graphml.onnx_to_graphml_converter import ONNXToGraphMLConverter
 from modelexport.graphml.graphml_to_onnx_converter import GraphMLToONNXConverter
 from modelexport.graphml.round_trip_validator import RoundTripValidator
+from modelexport.version import GRAPHML_VERSION
+from modelexport.graphml.constants import GRAPHML_FORMAT_VERSION
 
 
 @pytest.fixture
@@ -126,26 +128,26 @@ def sample_onnx_model_with_metadata(tmp_path):
 
 
 class TestGraphMLV2Export:
-    """Test GraphML v1.1 export functionality."""
+    """Test GraphML v1.3 export functionality."""
     
     def test_enhanced_converter_initialization(self, sample_onnx_model_with_metadata):
-        """Test v1.1 converter initialization."""
+        """Test v1.3 converter initialization."""
         model_path, metadata_path = sample_onnx_model_with_metadata
         
-        converter = EnhancedGraphMLConverter(
+        converter = ONNXToGraphMLConverter(
             htp_metadata_path=str(metadata_path),
             parameter_strategy="sidecar"
         )
         
         assert converter.parameter_strategy == "sidecar"
-        assert converter.format_version == "1.1"
+        assert converter.format_version == GRAPHML_VERSION
         assert converter.parameter_manager is not None
     
     def test_export_graphml_v2_sidecar(self, sample_onnx_model_with_metadata, tmp_path):
-        """Test GraphML v1.1 export with sidecar parameter storage."""
+        """Test GraphML v1.3 export with sidecar parameter storage."""
         model_path, metadata_path = sample_onnx_model_with_metadata
         
-        converter = EnhancedGraphMLConverter(
+        converter = ONNXToGraphMLConverter(
             htp_metadata_path=str(metadata_path),
             parameter_strategy="sidecar"
         )
@@ -156,33 +158,33 @@ class TestGraphMLV2Export:
         # Verify files are created
         assert "graphml" in result
         assert "format_version" in result
-        assert result["format_version"] == "1.1"
+        assert result["format_version"] == GRAPHML_VERSION
         
         graphml_path = Path(result["graphml"])
         assert graphml_path.exists()
         
-        # Verify GraphML v1.1 schema
+        # Verify GraphML v1.3 schema
         tree = ET.parse(str(graphml_path))
         root = tree.getroot()
         
-        # Check v1.1 specific keys
+        # Check v1.3 specific keys
         keys = root.findall("{http://graphml.graphdrawing.org/xmlns}key")
         key_ids = [k.get("id") for k in keys]
         
-        # Verify enhanced v1.1 keys exist
+        # Verify enhanced v1.3 keys exist
         assert "n4" in key_ids  # input_names
         assert "n5" in key_ids  # output_names
         assert "n6" in key_ids  # domain
-        assert "t0" in key_ids  # tensor_type
-        assert "t1" in key_ids  # tensor_shape
-        assert "p0" in key_ids  # parameter_strategy
-        assert "m4" in key_ids  # opset_imports
+        assert "e1" in key_ids  # tensor_type (v1.3 uses e1, not t0)
+        assert "e2" in key_ids  # tensor_shape (v1.3 uses e2, not t1)
+        assert "param0" in key_ids  # parameter_strategy (v1.3 uses param0, not p0)
+        assert "meta4" in key_ids  # opset_imports (v1.3 uses meta4, not m4)
     
     def test_export_graphml_v2_embedded(self, sample_onnx_model_with_metadata, tmp_path):
-        """Test GraphML v1.1 export with embedded parameter storage."""
+        """Test GraphML v1.3 export with embedded parameter storage."""
         model_path, metadata_path = sample_onnx_model_with_metadata
         
-        converter = EnhancedGraphMLConverter(
+        converter = ONNXToGraphMLConverter(
             htp_metadata_path=str(metadata_path),
             parameter_strategy="embedded"
         )
@@ -190,13 +192,13 @@ class TestGraphMLV2Export:
         output_base = str(tmp_path / "test_embedded")
         result = converter.convert(str(model_path), output_base)
         
-        assert result["format_version"] == "1.1"
+        assert result["format_version"] == GRAPHML_VERSION
         graphml_path = Path(result["graphml"])
         assert graphml_path.exists()
 
 
 class TestGraphMLToONNXImport:
-    """Test GraphML v1.1 to ONNX import functionality."""
+    """Test GraphML v1.3 to ONNX import functionality."""
     
     def test_graphml_to_onnx_converter_initialization(self):
         """Test GraphML to ONNX converter initialization."""
@@ -204,11 +206,11 @@ class TestGraphMLToONNXImport:
         assert converter is not None
     
     def test_import_basic_conversion(self, sample_onnx_model_with_metadata, tmp_path):
-        """Test basic GraphML v1.1 to ONNX conversion."""
+        """Test basic GraphML v1.3 to ONNX conversion."""
         model_path, metadata_path = sample_onnx_model_with_metadata
         
-        # First export to GraphML v1.1
-        export_converter = EnhancedGraphMLConverter(
+        # First export to GraphML v1.3
+        export_converter = ONNXToGraphMLConverter(
             htp_metadata_path=str(metadata_path),
             parameter_strategy="sidecar"
         )
@@ -242,8 +244,8 @@ class TestGraphMLToONNXImport:
         """Test extraction of conversion info from GraphML."""
         model_path, metadata_path = sample_onnx_model_with_metadata
         
-        # Export to GraphML v1.1
-        export_converter = EnhancedGraphMLConverter(
+        # Export to GraphML v1.3
+        export_converter = ONNXToGraphMLConverter(
             htp_metadata_path=str(metadata_path),
             parameter_strategy="sidecar"
         )
@@ -263,7 +265,7 @@ class TestGraphMLToONNXImport:
         assert "parameter_strategy" in info
         assert "estimated_size_mb" in info
         
-        assert info["format_version"] == "1.1"
+        assert info["format_version"] == GRAPHML_VERSION
         assert info["parameter_strategy"] == "sidecar"
         assert info["node_count"] > 0
         assert info["edge_count"] > 0
@@ -328,7 +330,7 @@ class TestCLICommands:
         runner = CliRunner()
         result = runner.invoke(cli, ['export-graphml', '--help'])
         assert result.exit_code == 0
-        assert 'Export ONNX to GraphML v1.1 format with complete model interchange' in result.output
+        assert 'Export ONNX to GraphML format with complete model interchange' in result.output
         assert '--strategy' in result.output
         assert 'sidecar' in result.output
     
@@ -337,7 +339,7 @@ class TestCLICommands:
         runner = CliRunner()
         result = runner.invoke(cli, ['import-onnx', '--help'])
         assert result.exit_code == 0
-        assert 'Convert GraphML v1.1 back to ONNX model' in result.output
+        assert f'Convert GraphML v{GRAPHML_VERSION} back to ONNX model' in result.output
         assert '--validate' in result.output
     
     def test_validate_roundtrip_help(self):
@@ -362,8 +364,8 @@ class TestCLICommands:
         ])
         
         assert result.exit_code == 0
-        assert 'GraphML v1.1 export completed successfully' in result.output
-        assert 'Format Version: 1.1' in result.output
+        assert f'GraphML v{GRAPHML_VERSION} export completed successfully' in result.output
+        assert f'Format Version: {GRAPHML_VERSION}' in result.output
         
         # Verify files created
         assert Path(f"{output_base}.graphml").exists()
@@ -408,7 +410,7 @@ class TestParameterStrategies:
         """Test sidecar parameter storage strategy."""
         model_path, metadata_path = sample_onnx_model_with_metadata
         
-        converter = EnhancedGraphMLConverter(
+        converter = ONNXToGraphMLConverter(
             htp_metadata_path=str(metadata_path),
             parameter_strategy="sidecar"
         )
@@ -426,7 +428,7 @@ class TestParameterStrategies:
         """Test embedded parameter storage strategy."""
         model_path, metadata_path = sample_onnx_model_with_metadata
         
-        converter = EnhancedGraphMLConverter(
+        converter = ONNXToGraphMLConverter(
             htp_metadata_path=str(metadata_path),
             parameter_strategy="embedded"
         )
@@ -445,7 +447,7 @@ class TestErrorHandling:
     def test_missing_metadata_file(self, tmp_path):
         """Test error handling for missing metadata file."""
         with pytest.raises(FileNotFoundError):
-            EnhancedGraphMLConverter(
+            ONNXToGraphMLConverter(
                 htp_metadata_path="/nonexistent/metadata.json"
             )
     
@@ -454,7 +456,7 @@ class TestErrorHandling:
         model_path, metadata_path = sample_onnx_model_with_metadata
         
         with pytest.raises((ValueError, AssertionError)):
-            EnhancedGraphMLConverter(
+            ONNXToGraphMLConverter(
                 htp_metadata_path=str(metadata_path),
                 parameter_strategy="invalid_strategy"
             )
@@ -494,7 +496,7 @@ class TestFileIntegrity:
         """Test parameter file checksum generation and validation."""
         model_path, metadata_path = sample_onnx_model_with_metadata
         
-        converter = EnhancedGraphMLConverter(
+        converter = ONNXToGraphMLConverter(
             htp_metadata_path=str(metadata_path),
             parameter_strategy="sidecar"
         )
@@ -529,8 +531,8 @@ class TestFileIntegrity:
         # Get original size
         original_size = Path(model_path).stat().st_size
         
-        # Export to GraphML v1.1
-        export_converter = EnhancedGraphMLConverter(
+        # Export to GraphML v1.3
+        export_converter = ONNXToGraphMLConverter(
             htp_metadata_path=str(metadata_path),
             parameter_strategy="sidecar"
         )
