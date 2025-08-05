@@ -1,7 +1,7 @@
 """
-Test cases for GraphML structural compliance and missing features.
+Test cases for GraphML v1.3 structural compliance.
 
-This test suite verifies GraphML output structure matches expected format
+This test suite verifies GraphML output structure matches v1.3 format
 with proper key definitions, nested graphs, and metadata.
 """
 
@@ -14,6 +14,12 @@ import torch
 import torch.nn as nn
 
 from modelexport.graphml import ONNXToGraphMLConverter
+from modelexport.version import GRAPHML_VERSION
+from modelexport.graphml.constants import (
+    GRAPHML_V13_KEYS,
+    GRAPHML_FORMAT_VERSION,
+    GRAPHML_V13_KEY_MAPPINGS
+)
 
 
 class TestGraphMLStructure:
@@ -64,8 +70,8 @@ class TestGraphMLStructure:
         assert 'n1' in key_map, "Missing node hierarchy_tag key (n1)"
         assert key_map['n1'] == ('node', 'hierarchy_tag'), "Wrong definition for n1"
         
-        assert 'n2' in key_map, "Missing node node_attributes key (n2)"
-        assert key_map['n2'] == ('node', 'node_attributes'), "Wrong definition for n2"
+        assert 'n2' in key_map, "Missing node onnx_attributes key (n2)"
+        assert key_map['n2'] == ('node', 'onnx_attributes'), "Wrong definition for n2"
         
         assert 'n3' in key_map, "Missing node name key (n3)"
         assert key_map['n3'] == ('node', 'name'), "Wrong definition for n3"
@@ -75,14 +81,14 @@ class TestGraphMLStructure:
         assert key_map['e0'] == ('edge', 'tensor_name'), "Wrong definition for e0"
         
         # Verify metadata keys
-        assert 'm0' in key_map, "Missing graph source_onnx_text key (m0)"
-        assert key_map['m0'] == ('graph', 'source_onnx_text'), "Wrong definition for m0"
+        assert 'meta0' in key_map, "Missing graph source_onnx_file key (meta0)"
+        assert key_map['meta0'] == ('graph', 'source_onnx_file'), "Wrong definition for meta0"
         
-        assert 'm2' in key_map, "Missing graph format_version key (m2)"
-        assert key_map['m2'] == ('graph', 'format_version'), "Wrong definition for m2"
+        assert 'meta2' in key_map, "Missing graph format_version key (meta2)"
+        assert key_map['meta2'] == ('graph', 'format_version'), "Wrong definition for meta2"
         
-        assert 'm3' in key_map, "Missing graph export_timestamp key (m3)"
-        assert key_map['m3'] == ('graph', 'export_timestamp'), "Wrong definition for m3"
+        assert 'meta3' in key_map, "Missing graph export_timestamp key (meta3)"
+        assert key_map['meta3'] == ('graph', 'export_timestamp'), "Wrong definition for meta3"
     
     def test_node_name_attribute(self, tmp_path):
         """Test that nodes have a name attribute in addition to id."""
@@ -215,17 +221,17 @@ class TestGraphMLStructure:
         assert main_graph is not None, "No main graph found"
         
         # Check for metadata elements
-        source_file = main_graph.find("./data[@key='m0']", ns)
+        source_file = main_graph.find("./data[@key='meta0']", ns)
         assert source_file is not None, "Missing source_file metadata"
         assert source_file.text == "test.onnx", f"Wrong source file: {source_file.text}"
         
         # Check for format version
-        format_version = main_graph.find("./data[@key='m2']", ns)
+        format_version = main_graph.find("./data[@key='meta2']", ns)
         assert format_version is not None, "Missing format_version metadata"
-        assert format_version.text == "1.1", f"Wrong format version: {format_version.text}"
+        assert format_version.text == GRAPHML_VERSION, f"Wrong format version: {format_version.text}"
         
         # Check for timestamp
-        timestamp = main_graph.find("./data[@key='m3']", ns)
+        timestamp = main_graph.find("./data[@key='meta3']", ns)
         assert timestamp is not None, "Missing export_timestamp metadata"
         assert timestamp.text is not None, "Empty timestamp"
 

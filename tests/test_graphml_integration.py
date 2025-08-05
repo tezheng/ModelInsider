@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pytest
 
-from modelexport.graphml import HierarchicalGraphMLConverter, ONNXToGraphMLConverter
+from modelexport.graphml import ONNXToGraphMLConverter
 
 
 @pytest.fixture
@@ -67,7 +67,7 @@ class TestGraphMLIntegration:
     
     def test_hierarchical_conversion_with_bert_tiny(self, bert_tiny_model, bert_tiny_htp_metadata):
         """Test hierarchical GraphML conversion with bert-tiny model and HTP metadata."""
-        converter = HierarchicalGraphMLConverter(
+        converter = ONNXToGraphMLConverter(
             str(bert_tiny_htp_metadata),
             exclude_initializers=True
         )
@@ -146,7 +146,7 @@ class TestGraphMLIntegration:
             print(f"  {path or '[root]'}: {module_info.get('class_name', 'Unknown')}")
         
         # Now convert and validate
-        converter = HierarchicalGraphMLConverter(
+        converter = ONNXToGraphMLConverter(
             str(bert_tiny_htp_metadata),
             exclude_initializers=True
         )
@@ -178,7 +178,7 @@ class TestGraphMLIntegration:
     
     def test_node_tagging_validation(self, bert_tiny_model, bert_tiny_htp_metadata):
         """Validate that nodes are properly tagged with hierarchy information."""
-        converter = HierarchicalGraphMLConverter(
+        converter = ONNXToGraphMLConverter(
             str(bert_tiny_htp_metadata),
             exclude_initializers=True
         )

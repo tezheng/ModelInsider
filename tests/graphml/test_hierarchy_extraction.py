@@ -166,7 +166,7 @@ class TestHierarchyExtraction:
             # Node attributes
             'n0': 'op_type',
             'n1': 'hierarchy_tag',
-            'n2': 'node_attributes',
+            'n2': 'onnx_attributes',
             'n3': 'name',
             # Edge attributes
             'e0': 'tensor_name',
