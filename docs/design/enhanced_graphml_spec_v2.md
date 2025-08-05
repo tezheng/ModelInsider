@@ -1,8 +1,16 @@
 # Enhanced GraphML Specification v2.0 for Bidirectional ONNX Conversion
 
-**Status**: REQUIRED REDESIGN  
-**Reason**: Current spec insufficient for ONNX reconstruction  
-**Linear Task**: [TEZ-124](https://linear.app/tezheng/issue/TEZ-124)
+> ⚠️ **DEPRECATED**: This document has been superseded by the authoritative [GraphML Format Specification v1.2](/docs/specs/graphml-format-specification-v1.2.md).
+> 
+> **Status**: ARCHIVED - Future proposal, never implemented
+> **Archived**: 2025-08-04
+> **Reason**: Consolidated into v1.2 specification (TEZ-134)
+> 
+> This document contains proposals for a v2.0 redesign that were evaluated but not adopted. The v1.2 specification incorporates the useful ideas while maintaining backward compatibility.
+
+**Original Status**: REQUIRED REDESIGN  
+**Original Reason**: Current spec insufficient for ONNX reconstruction  
+**Original Linear Task**: [TEZ-124](https://linear.app/tezheng/issue/TEZ-124)
 
 ## Critical Analysis Summary
 
