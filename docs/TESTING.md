@@ -108,26 +108,69 @@ uv run pytest tests/ --cov=modelexport --cov-report=html
 ```
 
 #### Test Markers
-Our tests use markers to categorize different types of tests:
 
+Following pytest best practices (2025), our tests use a comprehensive marker strategy to categorize and filter tests efficiently:
+
+**Test Categories:**
 ```bash
-# Run only MUST tests (CARDINAL RULES validation)
-uv run pytest tests/ -m "must"
+# Core functionality validation
+uv run pytest -m "smoke"                    # Critical tests that must always pass
+uv run pytest -m "unit"                     # Fast, isolated unit tests
+uv run pytest -m "integration"              # Tests with external dependencies
+uv run pytest -m "e2e"                      # End-to-end workflow tests
 
-# Run only security tests
-uv run pytest tests/ -m "security"
+# Run regression suite (comprehensive validation)
+uv run pytest -m "regression"
+```
 
-# Run only resource management tests
-uv run pytest tests/ -m "resource"
+**Feature-Specific Markers:**
+```bash
+# Version management tests
+uv run pytest -m "version"
 
-# Run only error recovery tests
-uv run pytest tests/ -m "error_recovery"
+# CLI functionality tests
+uv run pytest -m "cli"
 
-# Skip slow tests
-uv run pytest tests/ -m "not slow"
+# GraphML format and validation tests
+uv run pytest -m "graphml"
 
-# Run comprehensive E2E tests
-uv run pytest tests/test_comprehensive_e2e.py -v
+# HTP strategy-specific tests
+uv run pytest -m "htp"
+
+# Security and resource management
+uv run pytest -m "security"
+uv run pytest -m "resource"
+uv run pytest -m "error_recovery"
+```
+
+**Test Attributes:**
+```bash
+# Performance-based filtering
+uv run pytest -m "not slow"                 # Skip slow tests (>1 second)
+uv run pytest -m "slow"                     # Run only slow tests
+
+# Skip flaky or network-dependent tests
+uv run pytest -m "not flaky"
+uv run pytest -m "not requires_network"
+
+# Environment-specific tests
+uv run pytest -m "requires_transformers"    # Tests needing transformers package
+uv run pytest -m "requires_gpu"             # GPU/CUDA-dependent tests
+```
+
+**Advanced Filtering (Combined Markers):**
+```bash
+# Fast smoke tests for development
+uv run pytest -m "smoke and not slow"
+
+# Integration tests without network dependencies
+uv run pytest -m "integration and not requires_network"
+
+# All version tests except slow ones
+uv run pytest -m "version and not slow"
+
+# CLI tests that require transformers
+uv run pytest -m "cli and requires_transformers"
 ```
 
 #### Parallel Test Execution
@@ -141,32 +184,55 @@ uv run pytest tests/ -n 4
 
 ### Test Configuration
 
-#### pytest.ini Configuration
-```ini
-[tool:pytest]
-markers =
-    must: CARDINAL RULES validation tests
-    security: Security and vulnerability tests
-    resource: Resource management tests
-    error_recovery: Error recovery and resilience tests
-    slow: Tests that take longer to execute
-    integration: Integration workflow tests
-    e2e: End-to-end comprehensive tests
+#### pyproject.toml Configuration (Best Practice 2025)
+
+Following modern Python standards, all pytest configuration is centralized in `pyproject.toml`:
+
+```toml
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = "test_*.py"
+python_functions = "test_*"
+addopts = [
+    "-v",
+    "--tb=short", 
+    "--strict-markers",
+    "--disable-warnings",
+    "--color=yes",
+    "--durations=10"
+]
+minversion = "6.0"
+
+markers = [
+    # Test Categories
+    "smoke: Core functionality tests that must always pass",
+    "unit: Unit tests (fast, isolated)", 
+    "integration: Integration tests (may require external services)",
+    "e2e: End-to-end tests (slower, full workflows)",
     
-testpaths = tests
-python_files = test_*.py
-python_classes = Test*
-python_functions = test_*
+    # Feature-Specific Markers
+    "version: Tests related to version management and detection",
+    "cli: Command-line interface tests",
+    "graphml: GraphML format and validation tests",
+    "htp: HTP strategy-specific tests",
+    "security: Security and vulnerability tests",
+    
+    # Test Attributes
+    "slow: Tests that take > 1 second to run",
+    "requires_transformers: Tests that require transformers library"
+]
 
-# Timeout for individual tests (10 minutes)
-timeout = 600
-
-# Show local variables on failure
-showlocals = true
-
-# Capture stdout/stderr
-capture = sys
+filterwarnings = [
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning"
+]
 ```
+
+**Key Benefits of pyproject.toml approach:**
+- ✅ Single source of truth for all project configuration
+- ✅ Modern Python standard (PEP 518)
+- ✅ Better IDE and tool integration
+- ✅ Centralized configuration management
 
 ## Test Data and Fixtures
 

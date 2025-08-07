@@ -24,7 +24,7 @@ from modelexport.cli import cli
 from modelexport.graphml.onnx_to_graphml_converter import ONNXToGraphMLConverter
 from modelexport.graphml.graphml_to_onnx_converter import GraphMLToONNXConverter
 from modelexport.graphml.round_trip_validator import RoundTripValidator
-from modelexport.version import GRAPHML_VERSION
+from modelexport.graphml.constants import GRAPHML_FORMAT_VERSION as GRAPHML_VERSION
 from modelexport.graphml.constants import GRAPHML_FORMAT_VERSION
 
 

@@ -20,7 +20,7 @@ import pytest
 from onnx import helper
 
 from modelexport.graphml.constants import GRAPHML_FORMAT_VERSION, GRAPHML_V13_KEYS
-from modelexport.version import GRAPHML_VERSION
+from modelexport.graphml.constants import GRAPHML_FORMAT_VERSION as GRAPHML_VERSION
 from modelexport.graphml.graphml_to_onnx_converter import GraphMLToONNXConverter
 from modelexport.graphml.onnx_to_graphml_converter import ONNXToGraphMLConverter
 from modelexport.graphml.validators import (
@@ -234,6 +234,9 @@ class TestSchemaValidation:
 class TestSemanticValidation:
     """Test Layer 2: Semantic Consistency."""
     
+    @pytest.mark.version
+    @pytest.mark.graphml
+    @pytest.mark.unit
     def test_format_version_required(self, valid_v13_graphml, tmp_path):
         """Test that format version must be exactly 1.3."""
         # Remove format version
@@ -253,6 +256,9 @@ class TestSemanticValidation:
         assert result.status == ValidationStatus.FAIL
         assert "Missing format version" in result.message
     
+    @pytest.mark.version
+    @pytest.mark.graphml  
+    @pytest.mark.unit
     def test_wrong_format_version(self, valid_v13_graphml, tmp_path):
         """Test that wrong format version fails."""
         # Change format version to 1.2

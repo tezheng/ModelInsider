@@ -14,6 +14,7 @@ from pathlib import Path
 from typing import Any
 
 from ...core.time_utils import format_timestamp_iso
+from . import __spec_version__ as HTP_VERSION
 from .base_writer import ExportData, ExportStep, StepAwareWriter, step
 from .metadata_builder import HTPMetadataBuilder
 from .step_data import ModuleInfo
@@ -321,7 +322,7 @@ class MetadataWriter(StepAwareWriter):
                 "export_context": {
                     "timestamp": self._steps_data.get("model_preparation", {}).get("timestamp", format_timestamp_iso(time.time())),
                     "strategy": "htp",
-                    "version": "1.0",
+                    "version": HTP_VERSION,
                 },
                 "error": str(e),
             }

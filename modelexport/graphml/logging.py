@@ -20,7 +20,7 @@ try:
 except ImportError:
     STRUCTLOG_AVAILABLE = False
     
-from ..version import GRAPHML_VERSION
+from .constants import GRAPHML_FORMAT_VERSION
 
 
 # Default log level from environment or INFO
@@ -95,7 +95,7 @@ def get_logger(name: str) -> Any:
     if STRUCTLOG_AVAILABLE:
         return structlog.get_logger(name).bind(
             module="graphml",
-            version=GRAPHML_VERSION
+            version=GRAPHML_FORMAT_VERSION
         )
     else:
         return logging.getLogger(name)
@@ -276,9 +276,15 @@ logger = get_logger(__name__)
 
 
 # Log GraphML module initialization
-logger.info(
-    "graphml_module_initialized",
-    version=GRAPHML_VERSION,
-    structured_logging=STRUCTLOG_AVAILABLE,
-    log_level=DEFAULT_LOG_LEVEL
-)
+if STRUCTLOG_AVAILABLE:
+    logger.info(
+        "graphml_module_initialized",
+        version=GRAPHML_FORMAT_VERSION,
+        structured_logging=STRUCTLOG_AVAILABLE,
+        log_level=DEFAULT_LOG_LEVEL
+    )
+else:
+    logger.info(
+        f"GraphML module initialized (version={GRAPHML_FORMAT_VERSION}, "
+        f"structured_logging={STRUCTLOG_AVAILABLE}, log_level={DEFAULT_LOG_LEVEL})"
+    )

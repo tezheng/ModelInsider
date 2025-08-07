@@ -11,7 +11,7 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
-from modelexport.version import HTP_VERSION
+from . import __spec_version__ as HTP_VERSION
 
 
 @dataclass

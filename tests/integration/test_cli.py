@@ -754,6 +754,9 @@ class TestCLIGeneral:
         assert 'validate' in result.output
         assert 'compare' in result.output
     
+    @pytest.mark.version
+    @pytest.mark.cli
+    @pytest.mark.unit
     def test_cli_version(self, cli_runner):
         """Test CLI version."""
         result = cli_runner.invoke(cli, ['--version'])

@@ -16,7 +16,7 @@ import pytest
 from click.testing import CliRunner
 
 from modelexport.cli import cli
-from modelexport.version import GRAPHML_VERSION
+from modelexport.graphml.constants import GRAPHML_FORMAT_VERSION as GRAPHML_VERSION
 
 
 @pytest.fixture

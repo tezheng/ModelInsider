@@ -22,6 +22,10 @@ In the future, consider organizing into:
 - writers/: All output writers (console_writer.py, metadata_writer.py, markdown_report_writer.py, report_writer.py)
 """
 
+# HTP strategy version (defined before imports to avoid circular dependencies)
+__version__ = "1.0.0"  # HTP strategy version
+__spec_version__ = ".".join(__version__.split(".")[:2])  # "1.0"
+
 from .base_writer import ExportStep
 from .export_monitor import HTPExportMonitor
 from .htp_exporter import HTPExporter, export_with_htp, export_with_htp_reporting
@@ -32,4 +36,6 @@ __all__ = [
     "HTPExporter",
     "export_with_htp",
     "export_with_htp_reporting",
+    "__version__",
+    "__spec_version__",
 ]

@@ -14,7 +14,7 @@ import torch
 import torch.nn as nn
 
 from modelexport.graphml import ONNXToGraphMLConverter
-from modelexport.version import GRAPHML_VERSION
+from modelexport.graphml.constants import GRAPHML_FORMAT_VERSION as GRAPHML_VERSION
 from modelexport.graphml.constants import (
     GRAPHML_V13_KEYS,
     GRAPHML_FORMAT_VERSION,

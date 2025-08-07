@@ -43,7 +43,65 @@ from .unified_export import UnifiedExporter, export_model
 # Backward compatibility
 HierarchyExporter = HTPExporter
 
-from .version import __version__
+# Package version management with hybrid approach
+import os
+from pathlib import Path
+
+
+def _get_version() -> str:
+    """
+    Get package version using hybrid approach.
+    
+    Priority:
+    1. Try importlib.metadata (installed package)
+    2. Try pyproject.toml (development/editable install)  
+    3. Fallback to "unknown"
+    
+    Returns:
+        str: Package version string
+    """
+    # Check for verbose mode
+    verbose = os.environ.get("MODELEXPORT_VERBOSE", "").lower() in ("1", "true", "yes")
+    
+    # Try importlib.metadata first (works for installed packages)
+    try:
+        from importlib.metadata import version, PackageNotFoundError
+        pkg_version = version("modelexport")
+        if verbose:
+            print(f"[modelexport] Version {pkg_version} from package metadata")
+        return pkg_version
+    except PackageNotFoundError:
+        if verbose:
+            print("[modelexport] Package not installed, checking development mode")
+    except ImportError:
+        if verbose:
+            print("[modelexport] importlib.metadata not available")
+    
+    # Development mode: read from pyproject.toml
+    try:
+        import tomllib  # Python 3.11+
+        root = Path(__file__).resolve().parent.parent
+        pyproject = root / "pyproject.toml"
+        
+        if pyproject.exists():
+            with open(pyproject, "rb") as f:
+                data = tomllib.load(f)
+                version_str = data["project"]["version"]
+                dev_version = f"{version_str}.dev0"
+                if verbose:
+                    print(f"[modelexport] Development version {dev_version} from pyproject.toml")
+                return dev_version
+    except Exception as e:
+        if verbose:
+            print(f"[modelexport] Could not read pyproject.toml: {e}")
+    
+    # Final fallback
+    if verbose:
+        print("[modelexport] Using fallback version 'unknown'")
+    return "unknown"
+
+
+__version__ = _get_version()
 __all__ = [
     "BaseHierarchyExporter",
     "create_optimized_exporter",

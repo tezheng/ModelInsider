@@ -15,7 +15,7 @@ GRAPHML_NAMESPACE = "http://graphml.graphdrawing.org/xmlns"
 GRAPHML_SCHEMA_LOCATION = "http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd"
 
 # Version information
-from .version import GRAPHML_VERSION
+from .graphml.constants import GRAPHML_FORMAT_VERSION
 SUPPORTED_ONNX_OPSET = 17
 
 # Default configuration values
