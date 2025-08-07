@@ -8,6 +8,14 @@ generation via Optimum's TasksManager.
 
 from __future__ import annotations
 
+# CRITICAL: Import ONNX module at module level to register model configurations
+# This ensures TasksManager has proper ONNX model registrations available
+try:
+    import optimum.exporters.onnx  # noqa: F401
+except ImportError:
+    # Silently handle if Optimum is not installed
+    pass
+
 import logging
 from typing import Any
 
