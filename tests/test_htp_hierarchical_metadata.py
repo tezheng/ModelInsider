@@ -142,6 +142,9 @@ class TestHierarchicalMetadata:
             }
             assert set(types) == expected_types
     
+    @pytest.mark.version
+    @pytest.mark.htp
+    @pytest.mark.unit
     def test_schema_validation(self, schema, sample_flat_hierarchy):
         """Test that generated metadata validates against schema."""
         builder = HTPMetadataBuilder()

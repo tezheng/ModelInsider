@@ -13,7 +13,11 @@ import click
 
 from .core import tag_utils
 from .strategies import HTPExporter
-from .version import get_all_graphml_versions, GRAPHML_VERSION
+from .graphml.constants import GRAPHML_FORMAT_VERSION
+
+def get_all_graphml_versions():
+    """Get all supported GraphML versions."""
+    return ["1.3", "1.2", "1.1"]  # Current and legacy versions
 
 
 @click.group()
@@ -400,7 +404,7 @@ def compare(model1_path, model2_path, output_file, verbose):
 @click.option('--output', '-o', 'output_base', help='Output base path (without extension)')
 @click.option('--strategy', default='sidecar', type=click.Choice(['sidecar', 'embedded', 'reference']),
               help='Parameter storage strategy')
-@click.option('--format', default=f'v{GRAPHML_VERSION}', 
+@click.option('--format', default=f'v{GRAPHML_FORMAT_VERSION}', 
               type=click.Choice([f'v{v}' for v in get_all_graphml_versions()]),
               help='GraphML format version')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')

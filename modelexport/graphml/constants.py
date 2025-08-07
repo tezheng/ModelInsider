@@ -11,10 +11,10 @@ Linear Tasks:
 """
 
 from dataclasses import dataclass
-from ..version import GRAPHML_VERSION
+# Import from parent __init__.py
+from . import __spec_version__ as GRAPHML_FORMAT_VERSION
 
-# GraphML Format Version
-GRAPHML_FORMAT_VERSION = GRAPHML_VERSION
+# GraphML format description
 GRAPHML_FORMAT_DESCRIPTION = "Schema-Driven Specification"
 
 # GraphML v1.3 Key Definitions

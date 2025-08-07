@@ -10,6 +10,10 @@ Main components:
 - RoundTripValidator: Validates bidirectional conversion integrity
 """
 
+# GraphML format version (defined before imports to avoid circular dependencies)
+__version__ = "1.3.0"  # GraphML format/schema version
+__spec_version__ = ".".join(__version__.split(".")[:2])  # "1.3"
+
 # Primary exports
 from .graphml_to_onnx_converter import GraphMLToONNXConverter
 from .onnx_to_graphml_converter import ONNXToGraphMLConverter
@@ -19,6 +23,6 @@ __all__ = [
     "GraphMLToONNXConverter",
     "ONNXToGraphMLConverter",
     "RoundTripValidator",
+    "__version__",
+    "__spec_version__",
 ]
-
-__version__ = "0.1.0"

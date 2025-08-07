@@ -23,6 +23,7 @@ dependencies = [
     "pydantic>=2.11.7",
     "snakemd>=2.3.0",
     "psutil>=7.0.0",
+    "lxml>=5.0.0",
 ]
 
 [project.scripts]
@@ -42,9 +43,58 @@ exclude = ["temp*", "data*", "external*", "tests*"]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
-python_files = "test_*.py"
+python_files = "test_*.py" 
 python_functions = "test_*"
-addopts = "-v --tb=short"
+addopts = [
+    "-v",
+    "--tb=short", 
+    "--strict-markers",
+    "--disable-warnings",
+    "--color=yes",
+    "--durations=10"
+]
+minversion = "6.0"
+
+# Markers for test categorization (following pytest best practices 2025)
+markers = [
+    # Test Categories
+    "smoke: Core functionality tests that must always pass",
+    "regression: Full regression test suite", 
+    "unit: Unit tests (fast, isolated)",
+    "integration: Integration tests (may require external services)",
+    "e2e: End-to-end tests (slower, full workflows)",
+    
+    # Test Attributes
+    "slow: Tests that take > 1 second to run",
+    "flaky: Tests known to be intermittently failing", 
+    "requires_network: Tests requiring network access",
+    
+    # Feature-Specific Markers
+    "version: Tests related to version management and detection",
+    "cli: Command-line interface tests",
+    "graphml: GraphML format and validation tests", 
+    "htp: HTP strategy-specific tests",
+    "security: Security and vulnerability tests",
+    "resource: Resource management tests",
+    "error_recovery: Error recovery and resilience tests",
+    
+    # Legacy/Compatibility Markers
+    "strategy: Strategy-specific tests (HTP)",
+    "requires_transformers: Tests that require transformers library",
+    "requires_onnx: Tests that require ONNX runtime", 
+    "must: CARDINAL RULES validation tests",
+    "sanity: Sanity check tests for basic functionality",
+    
+    # Environment Markers
+    "requires_gpu: Tests requiring GPU/CUDA"
+]
+
+# Warning filters
+filterwarnings = [
+    "ignore::UserWarning",
+    "ignore::DeprecationWarning", 
+    "ignore::PendingDeprecationWarning"
+]
 
 [tool.black]
 line-length = 88

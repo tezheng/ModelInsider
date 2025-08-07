@@ -65,6 +65,9 @@ class TestCLIIntegration:
             result = self.runner.invoke(cli, [command, '--help'])
             assert result.exit_code == 0, f"Help failed for {command}"
     
+    @pytest.mark.version
+    @pytest.mark.cli
+    @pytest.mark.unit
     def test_cli_version(self):
         """Test CLI version command."""
         result = self.runner.invoke(cli, ['--version'])
