@@ -11,6 +11,7 @@ from pathlib import Path
 
 import click
 
+from . import __version__
 from .core import tag_utils
 from .strategies import HTPExporter
 from .graphml.constants import GRAPHML_FORMAT_VERSION
@@ -21,7 +22,7 @@ def get_all_graphml_versions():
 
 
 @click.group()
-@click.version_option()
+@click.version_option(version=__version__, package_name='modelexport')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
 @click.pass_context
 def cli(ctx, verbose):
@@ -89,15 +90,15 @@ def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_c
                 export_config_dict = json.load(f)
         
         # Use HTPExporter's auto-loading capability
-        input_specs_data = None
+        input_specs_dict = None
         if input_specs:
             with open(input_specs) as f:
-                input_specs_data = json.load(f)
+                input_specs_dict = json.load(f)
         
         result = exporter.export(
             model_name_or_path=model_name_or_path,
             output_path=output_path,
-            input_specs=input_specs_data,
+            input_specs=input_specs_dict,
             export_config=export_config_dict
         )
         

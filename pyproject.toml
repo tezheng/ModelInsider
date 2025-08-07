@@ -86,6 +86,7 @@ markers = [
     "sanity: Sanity check tests for basic functionality",
     
     # Environment Markers
+    "environment: Environment portability and cross-platform tests",
     "requires_gpu: Tests requiring GPU/CUDA"
 ]
 
