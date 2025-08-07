@@ -7,6 +7,7 @@ Tests for the command-line interface across all strategies.
 import json
 import shutil
 import subprocess
+import sys
 import tempfile
 from pathlib import Path
 
@@ -302,8 +303,8 @@ class TestCLIProcessIntegration:
         """Test running CLI as a module."""
         # Test help command
         result = subprocess.run([
-            'python', '-m', 'modelexport', '--help'
-        ], capture_output=True, text=True, cwd='/mnt/d/BYOM/modelexport')
+            sys.executable, '-m', 'modelexport', '--help'
+        ], capture_output=True, text=True)
         
         assert result.returncode == 0
         assert 'export' in result.stdout
@@ -314,7 +315,7 @@ class TestCLIProcessIntegration:
         # Test help command
         result = subprocess.run([
             'uv', 'run', 'modelexport', '--help'
-        ], capture_output=True, text=True, cwd='/mnt/d/BYOM/modelexport')
+        ], capture_output=True, text=True)
         
         assert result.returncode == 0
         assert 'export' in result.stdout
@@ -323,7 +324,7 @@ class TestCLIProcessIntegration:
         """Test that all strategies are listed in help."""
         result = subprocess.run([
             'uv', 'run', 'modelexport', 'export', '--help'
-        ], capture_output=True, text=True, cwd='/mnt/d/BYOM/modelexport')
+        ], capture_output=True, text=True)
         
         assert result.returncode == 0
         assert 'htp' in result.stdout.lower() or 'hierarchy' in result.stdout.lower()
