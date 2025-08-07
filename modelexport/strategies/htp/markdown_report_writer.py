@@ -325,6 +325,23 @@ class MarkdownReportWriter(StepAwareWriter):
             
             self.doc.add_table(headers, rows, [snakemd.Table.Align.LEFT] * 3)
             
+            # Add Top 20 Nodes by Hierarchy section (matching console output)
+            if data.node_tagging and data.node_tagging.tagged_nodes:
+                from collections import Counter
+                
+                self.doc.add_heading("Top 20 Nodes by Hierarchy", level=4)
+                self.doc.add_raw("")  # Empty line
+                
+                # Count nodes by hierarchy tag
+                tag_counts = Counter(data.node_tagging.tagged_nodes.values())
+                sorted_tags = tag_counts.most_common(20)
+                
+                # Create numbered list as raw text to match expected format
+                for i, (tag, count) in enumerate(sorted_tags, 1):
+                    self.doc.add_raw(f" {i}. {tag}: {count} nodes")
+                
+                self.doc.add_raw("")  # Empty line after the list
+            
             # Add complete hierarchy with node counts
             if data.hierarchy:
                 self.doc.add_heading("Complete HF Hierarchy with ONNX Nodes", level=4)
