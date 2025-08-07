@@ -18,6 +18,9 @@ from modelexport.cli import cli
 from modelexport import __version__
 
 
+@pytest.mark.cli
+@pytest.mark.integration
+@pytest.mark.environment
 class TestCLIEnvironmentPortability:
     """Test CLI functionality across different environments."""
 
@@ -45,6 +48,7 @@ class TestCLIEnvironmentPortability:
         result = runner.invoke(cli, ['-V'])
         # May fail if Click doesn't support -V, that's expected
 
+    @pytest.mark.slow
     def test_cli_module_execution_current_interpreter(self):
         """Test CLI execution uses current Python interpreter."""
         # Test that sys.executable is used correctly
@@ -55,6 +59,7 @@ class TestCLIEnvironmentPortability:
         assert result.returncode == 0
         assert __version__ in result.stdout
         
+    @pytest.mark.slow
     def test_cli_without_hardcoded_paths(self):
         """Test CLI operations don't depend on hardcoded paths."""
         with tempfile.TemporaryDirectory() as temp_dir:
@@ -79,6 +84,7 @@ class TestCLIEnvironmentPortability:
             finally:
                 os.chdir(original_cwd)
 
+    @pytest.mark.slow
     def test_cli_subcommand_help_portability(self):
         """Test that all subcommand help works in any environment."""
         subcommands = ['export', 'analyze', 'validate', 'compare']
@@ -91,6 +97,7 @@ class TestCLIEnvironmentPortability:
             assert result.returncode == 0, f"Help for {subcommand} subcommand failed"
             assert '--help' in result.stdout
             
+    @pytest.mark.slow
     def test_uv_run_command_portability(self):
         """Test uv run command works without environment dependencies."""
         # Test basic help
@@ -117,6 +124,7 @@ class TestCLIEnvironmentPortability:
         assert 'C:\\' not in result.stderr
         assert result.stderr  # Should have error message
 
+    @pytest.mark.slow
     def test_python_path_independence(self):
         """Test CLI works regardless of Python path configuration."""
         # Set minimal environment
@@ -133,6 +141,9 @@ class TestCLIEnvironmentPortability:
         assert __version__ in result.stdout
 
 
+@pytest.mark.cli
+@pytest.mark.version
+@pytest.mark.unit
 class TestCLIVersionHandling:
     """Specific tests for CLI version handling functionality."""
 
@@ -178,6 +189,9 @@ class TestCLIVersionHandling:
         assert result.exit_code == 0
 
 
+@pytest.mark.cli
+@pytest.mark.regression
+@pytest.mark.environment
 class TestCLIRegressionPrevention:
     """Tests to prevent regression of fixed issues."""
 
