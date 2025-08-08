@@ -193,7 +193,7 @@ class UnifiedExporter:
                     except Exception as e2:
                         strategies_tried.append(("usage_based", f"failed: {str(e2)}"))
                         report["errors"].append(f"All strategies failed: {strategies_tried}")
-                        raise RuntimeError(f"Export failed with all strategies: {strategies_tried}")
+                        raise RuntimeError(f"Export failed with all strategies: {strategies_tried}") from e2
                 else:
                     report["errors"].append(f"Export failed: {str(e)}")
                     raise

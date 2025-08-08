@@ -1,21 +1,28 @@
 """
-GraphML Export Module for ModelExport
+GraphML Bidirectional Conversion Module
 
-This module provides functionality to export ONNX models to GraphML format
-with optional hierarchical structure preservation from HTP metadata.
+This module provides bidirectional conversion between ONNX and GraphML formats
+with full parameter support and round-trip validation.
 
 Main components:
-- ONNXToGraphMLConverter: Base converter for ONNX to GraphML
-- HierarchicalGraphMLConverter: Extended converter with HTP integration
-- GraphMLWriter: Low-level GraphML XML generation
+- ONNXToGraphMLConverter: Unified ONNX → GraphML conversion (flat or hierarchical)
+- GraphMLToONNXConverter: GraphML → ONNX reconstruction  
+- RoundTripValidator: Validates bidirectional conversion integrity
 """
 
-from .converter import ONNXToGraphMLConverter
+# GraphML format version (defined before imports to avoid circular dependencies)
+__version__ = "1.3.0"  # GraphML format/schema version
+__spec_version__ = ".".join(__version__.split(".")[:2])  # "1.3"
+
+# Primary exports
+from .graphml_to_onnx_converter import GraphMLToONNXConverter
+from .onnx_to_graphml_converter import ONNXToGraphMLConverter
+from .round_trip_validator import RoundTripValidator
 
 __all__ = [
+    "GraphMLToONNXConverter",
     "ONNXToGraphMLConverter",
+    "RoundTripValidator",
+    "__version__",
+    "__spec_version__",
 ]
-
-# HierarchicalGraphMLConverter will be added in Phase 4
-
-__version__ = "0.1.0"

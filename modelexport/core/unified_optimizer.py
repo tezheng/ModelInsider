@@ -363,7 +363,7 @@ class OptimizationBenchmark:
         }
         
         # Test original
-        for i in range(num_runs):
+        for _i in range(num_runs):
             # Create unoptimized exporter
             if strategy == "usage_based":
                 from ..strategies.usage_based import UsageBasedExporter
@@ -382,7 +382,7 @@ class OptimizationBenchmark:
                 os.unlink(tmp.name)
         
         # Test optimized
-        for i in range(num_runs):
+        for _i in range(num_runs):
             exporter = create_optimized_exporter(strategy)
             
             with tempfile.NamedTemporaryFile(suffix='.onnx', delete=False) as tmp:

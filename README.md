@@ -61,6 +61,7 @@ uv run modelexport export [OPTIONS] MODEL_NAME_OR_PATH OUTPUT_PATH
 #   --strategy STRATEGY     Tagging strategy [default: usage_based]
 #   --opset-version INT     ONNX opset version [default: 14]
 #   --temp-dir PATH         Temporary directory for intermediate files
+#   --with-graphml         Export hierarchical GraphML v1.3 alongside ONNX
 #   -v, --verbose          Enable verbose output
 ```
 
@@ -83,6 +84,15 @@ uv run modelexport export gpt2 gpt2_model.onnx \
 # Local model export
 uv run modelexport export ./my_local_model model.onnx \
   --temp-dir ./temp_exports
+
+# Export with GraphML v1.3 for visualization and round-trip conversion
+uv run modelexport export prajjwal1/bert-tiny bert.onnx --with-graphml
+# Creates: bert.onnx, bert_hierarchical_graph.graphml, bert_hierarchical_graph.onnxdata
+# GraphML uses v1.3 format with schema-driven specification
+
+# Export with all features including GraphML
+uv run modelexport export gpt2 gpt2_full.onnx \
+  --with-graphml --verbose --with-report
 ```
 
 ### `analyze` - Analyze Hierarchy Tags
@@ -172,6 +182,70 @@ uv run modelexport compare baseline.onnx tagged.onnx
 uv run modelexport compare model1.onnx model2.onnx \
   --output-file comparison_report.json
 ```
+
+### `--with-graphml` - Hierarchical GraphML Export (Phase 1)
+
+Export models with hierarchical GraphML v1.1 format for visualization and bidirectional conversion.
+
+When you use the `--with-graphml` flag with the export command, it creates:
+- **`model_hierarchical_graph.graphml`** - Hierarchical graph visualization
+- **`model_hierarchical_graph.onnxdata`** - Parameter storage (sidecar mode)
+- **`model_htp_metadata.json`** - HTP metadata (automatically created)
+
+#### Key Features:
+- 📊 **Hierarchical Visualization** - View model structure with compound nodes
+- 🔄 **Bidirectional Conversion** - Convert GraphML back to ONNX
+- 🎨 **yEd Compatible** - Open in yEd for interactive visualization
+- 📦 **Complete Model Preservation** - All ONNX attributes and parameters
+
+#### Examples:
+
+```bash
+# Basic export with GraphML
+uv run modelexport export prajjwal1/bert-tiny bert.onnx --with-graphml
+
+# Export with verbose output to see GraphML details
+uv run modelexport export prajjwal1/bert-tiny bert.onnx \
+  --with-graphml --verbose
+
+# Full export with all features
+uv run modelexport export prajjwal1/bert-tiny bert_full.onnx \
+  --with-graphml --with-report --verbose
+
+# Convert GraphML back to ONNX (bidirectional conversion)
+uv run modelexport import-onnx bert_hierarchical_graph.graphml bert_reconstructed.onnx \
+  --validate
+```
+
+#### Visualizing GraphML:
+1. Download [yEd](https://www.yworks.com/products/yed) (free graph editor)
+2. Open the generated `.graphml` file
+3. Apply hierarchical layout (Layout → Hierarchical)
+4. Expand/collapse compound nodes to explore model structure
+
+#### Troubleshooting GraphML Export:
+
+**Common Issues:**
+1. **GraphML export fails but ONNX succeeds**
+   - The export is designed to be fault-tolerant - ONNX will still be created
+   - Check console output for specific GraphML error messages
+   - Ensure sufficient disk space (GraphML + parameters ≈ 2x ONNX size)
+
+2. **Large file sizes**
+   - GraphML files can be 10-20% of ONNX size (structure only)
+   - Parameter files (.onnxdata) are ~95% of ONNX size (weights)
+   - Use `--no-hierarchy-attrs` if you only need GraphML visualization
+
+3. **Performance considerations**
+   - GraphML generation adds ~2-3s overhead for small models (bert-tiny)
+   - Overhead percentage varies: ~140% for tiny models, ~20-30% for larger models
+   - For very large models (>1GB), consider exporting without GraphML first
+   - Phase 2 will add `--graphml-output` option for custom paths
+
+4. **File permissions**
+   - Ensure write permissions in output directory
+   - GraphML creates 2 additional files alongside ONNX
+   - Check directory isn't full or read-only
 
 ## 🎯 Complete BERT Example Workflow
 

@@ -1,0 +1,44 @@
+<?xml version='1.0' encoding='utf-8'?>
+<graphml xmlns="http://graphml.graphdrawing.org/xmlns" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://graphml.graphdrawing.org/xmlns http://graphml.graphdrawing.org/xmlns/1.0/graphml.xsd">
+  <key id="d0" for="graph" attr.name="class_name" attr.type="string" />
+  <key id="d1" for="graph" attr.name="module_type" attr.type="string" />
+  <key id="d2" for="graph" attr.name="execution_order" attr.type="int" />
+  <key id="d3" for="graph" attr.name="traced_tag" attr.type="string" />
+  <key id="n0" for="node" attr.name="op_type" attr.type="string" />
+  <key id="n1" for="node" attr.name="hierarchy_tag" attr.type="string" />
+  <key id="n2" for="node" attr.name="node_attributes" attr.type="string" />
+  <key id="n3" for="node" attr.name="name" attr.type="string" />
+  <key id="e0" for="edge" attr.name="tensor_name" attr.type="string" />
+  <key id="m0" for="graph" attr.name="source_onnx_text" attr.type="string" />
+  <key id="m1" for="graph" attr.name="source_htp" attr.type="string" />
+  <key id="m2" for="graph" attr.name="format_version" attr.type="string" />
+  <key id="m3" for="graph" attr.name="export_timestamp" attr.type="string" />
+  <graph id="G" edgedefault="directed">
+    <data key="m0">test_model.onnx</data>
+    <data key="m2">1.1</data>
+    <data key="m3">2025-07-30T14:15:10.887024</data>
+    <node id="input_input">
+      <data key="n0">Input</data>
+      <data key="n2">{}</data>
+      <data key="n3">input</data>
+      <!-- input: [1, 3] -->
+    </node>
+    <node id="Add_1">
+      <data key="n0">Add</data>
+      <data key="n2">{}</data>
+      <data key="n3">Add_1</data>
+    </node>
+    <node id="output_output">
+      <data key="n0">Output</data>
+      <data key="n2">{}</data>
+      <data key="n3">output</data>
+      <!-- output: [1, 3] -->
+    </node>
+    <edge source="input_input" target="Add_1">
+      <data key="e0">input</data>
+    </edge>
+    <edge source="Add_1" target="output_output">
+      <data key="e0">output</data>
+    </edge>
+  </graph>
+</graphml>

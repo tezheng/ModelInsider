@@ -222,7 +222,7 @@ def get_tag_statistics(onnx_path: str, use_sidecar: bool = True) -> dict[str, an
             if "tagged_nodes" in sidecar_data:
                 tagged_nodes = sidecar_data["tagged_nodes"]
                 tag_counts = {}
-                for node_name, tag in tagged_nodes.items():
+                for _node_name, tag in tagged_nodes.items():
                     if tag:  # Skip empty tags
                         tag_counts[tag] = tag_counts.get(tag, 0) + 1
                 return tag_counts

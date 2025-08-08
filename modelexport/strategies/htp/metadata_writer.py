@@ -13,10 +13,11 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from ...core.time_utils import format_timestamp_iso
+from . import __spec_version__ as HTP_VERSION
 from .base_writer import ExportData, ExportStep, StepAwareWriter, step
 from .metadata_builder import HTPMetadataBuilder
 from .step_data import ModuleInfo
-from ...core.time_utils import format_timestamp_iso
 
 
 class MetadataWriter(StepAwareWriter):
@@ -306,7 +307,7 @@ class MetadataWriter(StepAwareWriter):
             except (ImportError, jsonschema.ValidationError) as e:
                 # Log warning but don't fail - schema validation is optional
                 import warnings
-                warnings.warn(f"Schema validation skipped or failed: {e}")
+                warnings.warn(f"Schema validation skipped or failed: {e}", stacklevel=2)
             
             # Ensure output directory exists
             Path(self.metadata_path).parent.mkdir(parents=True, exist_ok=True)
@@ -321,7 +322,7 @@ class MetadataWriter(StepAwareWriter):
                 "export_context": {
                     "timestamp": self._steps_data.get("model_preparation", {}).get("timestamp", format_timestamp_iso(time.time())),
                     "strategy": "htp",
-                    "version": "1.0",
+                    "version": HTP_VERSION,
                 },
                 "error": str(e),
             }
@@ -430,7 +431,8 @@ class MetadataWriter(StepAwareWriter):
                 index = child_name.split(".")[-1]
                 key = f"{module_info.class_name}.{index}"
             else:
-                # Regular module, use class name
+                # Use class_name as key for consistency with expected structure
+                # This ensures tests expecting BertEmbeddings, BertEncoder keys work correctly
                 key = module_info.class_name
             
             # Build child structure

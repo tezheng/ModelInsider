@@ -221,8 +221,8 @@ class ONNXUtils:
             "statistics": {
                 "total_nodes": len(node_tags),
                 "tagged_nodes": len([n for n in node_tags.values() if n.get('tags')]),
-                "unique_tags": len(set(tag for node in node_tags.values() 
-                                      for tag in node.get('tags', [])))
+                "unique_tags": len({tag for node in node_tags.values() 
+                                      for tag in node.get('tags', [])})
             },
             "metadata": metadata
         }
@@ -316,8 +316,8 @@ class ONNXUtils:
             hierarchy2 = ONNXUtils.extract_hierarchy_metadata(model2)
             
             # Extract unique tags from each model
-            tags1 = set(tag for node in hierarchy1.values() for tag in node.get('tags', []))
-            tags2 = set(tag for node in hierarchy2.values() for tag in node.get('tags', []))
+            tags1 = {tag for node in hierarchy1.values() for tag in node.get('tags', [])}
+            tags2 = {tag for node in hierarchy2.values() for tag in node.get('tags', [])}
             
             return {
                 "model1_path": onnx_path1,
