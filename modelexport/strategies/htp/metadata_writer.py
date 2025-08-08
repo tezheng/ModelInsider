@@ -14,7 +14,6 @@ from pathlib import Path
 from typing import Any
 
 from ...core.time_utils import format_timestamp_iso
-from . import __spec_version__ as HTP_VERSION
 from .base_writer import ExportData, ExportStep, StepAwareWriter, step
 from .metadata_builder import HTPMetadataBuilder
 from .step_data import ModuleInfo
@@ -317,17 +316,13 @@ class MetadataWriter(StepAwareWriter):
                 json.dump(metadata, f, indent=2)
                 
         except ValueError as e:
-            # If builder validation fails, write minimal metadata
-            minimal_metadata = {
-                "export_context": {
-                    "timestamp": self._steps_data.get("model_preparation", {}).get("timestamp", format_timestamp_iso(time.time())),
-                    "strategy": "htp",
-                    "version": HTP_VERSION,
-                },
-                "error": str(e),
-            }
+            # Let builder create minimal metadata - don't construct it here
+            minimal_metadata = self.builder.build_minimal(error=str(e))
+            
             # Ensure output directory exists
             Path(self.metadata_path).parent.mkdir(parents=True, exist_ok=True)
+            
+            # Write minimal metadata
             with open(self.metadata_path, 'w') as f:
                 json.dump(minimal_metadata, f, indent=2)
     

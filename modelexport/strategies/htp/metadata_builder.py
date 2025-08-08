@@ -337,6 +337,39 @@ class HTPMetadataBuilder:
         # Clean up None values
         return self._clean_dict(metadata)
     
+    def build_minimal(self, error: str | None = None) -> dict[str, Any]:
+        """
+        Build minimal valid metadata for error cases.
+        
+        This method creates a minimal metadata structure that can be used
+        when the full build() method fails. It ensures there's always valid
+        metadata output even in error scenarios.
+        
+        Args:
+            error: Optional error message to include in metadata
+            
+        Returns:
+            Minimal metadata dictionary with export context and optional error
+        """
+        import time
+        from ...core.time_utils import format_timestamp_iso
+        
+        # Create minimal export context with defaults
+        minimal_context = ExportContext(
+            timestamp=format_timestamp_iso(time.time()),
+            strategy="htp"
+            # version will use the default HTP_VERSION from the dataclass
+        )
+        
+        result = {
+            "export_context": asdict(minimal_context)
+        }
+        
+        if error:
+            result["error"] = error
+            
+        return result
+    
     def _clean_dict(self, d: dict[str, Any]) -> dict[str, Any]:
         """Remove None values from dictionary recursively."""
         cleaned = {}
