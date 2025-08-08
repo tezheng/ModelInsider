@@ -191,7 +191,7 @@ class TestHTPExportMonitor:
         
         # Report should contain markdown sections
         assert "# HTP ONNX Export Report" in report
-        assert "## Export Process Steps" in report
+        assert "## Export Process" in report
         assert "## Module Hierarchy" in report
         assert "## Complete Node Mappings" in report
     
