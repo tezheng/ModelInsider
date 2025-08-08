@@ -15,6 +15,7 @@ CARDINAL RULES:
 from __future__ import annotations
 
 from collections import defaultdict
+from typing import ClassVar
 
 import onnx
 
@@ -28,7 +29,7 @@ class ONNXNodeTagger:
     
     # Whitelisted operation types that can be added to tags
     # These are fundamental ONNX operations that provide semantic value
-    WHITELISTED_OPERATIONS: set[str] = {
+    WHITELISTED_OPERATIONS: ClassVar[set[str]] = {
         'MatMul', 'Gemm',           # Matrix operations
         'LayerNormalization',        # Normalization
         'Softmax', 'Gelu', 'Relu',  # Activations

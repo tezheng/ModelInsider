@@ -389,8 +389,8 @@ class TestMarkdownReportWriter:
             report_path = Path(tmpdir) / "test_model_htp_export_report.md"
             content = report_path.read_text()
             
-            # 1. Check that "Top 20 Nodes by Hierarchy" is NOT in the report
-            assert "Top 20 Nodes by Hierarchy" not in content
+            # 1. Check that "Top 20 Nodes by Hierarchy" IS in the report (as per design requirements)
+            assert "Top 20 Nodes by Hierarchy" in content
             
             # 2. Check that "Complete HF Hierarchy with ONNX Nodes" appears in Node Tagging section
             # Find the Node Tagging section

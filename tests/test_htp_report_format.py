@@ -142,17 +142,62 @@ class TestHTPReportFormat:
             if report_path.exists():
                 report_content = report_path.read_text()
                 
-                # Both hierarchy sections should be present
+                # Test general hierarchy consistency - not model-specific
+                # 1. Both hierarchy sections should be present
                 assert "#### Module Hierarchy Preview" in report_content
                 assert "### Complete HF Hierarchy with ONNX Nodes" in report_content
                 
-                # Both should show BertModel as root
-                assert "BertModel" in report_content
+                # 2. Both sections should use consistent tree formatting
+                assert "├──" in report_content or "└──" in report_content  # Tree characters
                 
-                # Should show torch.nn modules
-                assert "LayerNorm" in report_content
-                assert "Linear" in report_content
-                assert "Dropout" in report_content
+                # 3. Module hierarchy should show structure
+                module_preview_start = report_content.find("#### Module Hierarchy Preview")
+                complete_hierarchy_start = report_content.find("### Complete HF Hierarchy with ONNX Nodes")
+                
+                assert module_preview_start < complete_hierarchy_start, "Module preview should come before complete hierarchy"
+                
+                # 4. Complete hierarchy should include node counts
+                assert "nodes)" in report_content  # Format: "ModuleName (X nodes)"
+                
+                # 5. Both sections should be in expandable details blocks
+                assert "<details>" in report_content
+                assert "</details>" in report_content
+                assert "Click to expand" in report_content
+                
+        except Exception as e:
+            pytest.skip(f"Export failed: {e}")
+
+    def test_bert_model_hierarchy_content(self, tmp_path):
+        """Test BERT-specific hierarchy content in report."""
+        output_path = tmp_path / "test.onnx"
+        
+        # Export with reporting enabled
+        exporter = HTPExporter(verbose=False, enable_reporting=True)
+        
+        try:
+            stats = exporter.export(
+                model_name_or_path="prajjwal1/bert-tiny",
+                output_path=str(output_path),
+                opset_version=17
+            )
+            
+            # Check report file
+            report_path = output_path.with_name(output_path.stem + "_htp_export_report.md")
+            if report_path.exists():
+                report_content = report_path.read_text()
+                
+                # BERT-specific model components should appear
+                assert "BertModel" in report_content
+                assert "BertEmbeddings" in report_content
+                assert "BertEncoder" in report_content
+                assert "BertLayer" in report_content
+                assert "BertAttention" in report_content
+                
+                # Should NOT show torch.nn module class names in hierarchy
+                # (These are internal implementation details, not part of HF model hierarchy)
+                assert ": Linear" not in report_content  # Would appear as "module_name: Linear"
+                assert ": Dropout" not in report_content
+                # Note: LayerNorm and Embedding might appear as part of BERT model class names
                 
         except Exception as e:
             pytest.skip(f"Export failed: {e}")

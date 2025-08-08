@@ -269,3 +269,6 @@ The HTP strategy now uses PyTorch's built-in `torch.jit._trace._trace_module_map
 
 ### Git Commit Guidelines
 - Never add `Co-Authored-By: Claude mailto:noreply@anthropic.com` when doing git commit
+
+### Task Tracking
+- Always include Linear task link in the conversion response

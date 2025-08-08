@@ -70,8 +70,22 @@ class TracingHierarchyBuilder:
             class_name = module.__class__.__name__
             name_parts = module_name.split(".") if module_name else []
 
-            # Handle indexed modules (e.g., layer.0)
-            if name_parts and name_parts[-1].isdigit():
+            # For modules with common names that need disambiguation,
+            # use the last part of their path
+            if class_name in ['Embedding', 'Linear', 'LayerNorm', 'Dropout', 'Tanh'] and name_parts:
+                last_part = name_parts[-1]
+                
+                # Use descriptive name for embeddings and other named modules
+                if last_part in ['word_embeddings', 'token_type_embeddings', 'position_embeddings',
+                                 'dense', 'activation', 'query', 'key', 'value']:
+                    current_class_name = last_part
+                elif last_part.isdigit() and len(name_parts) > 1:
+                    # For indexed items, use Class.index format
+                    current_class_name = f"{class_name}.{last_part}"
+                else:
+                    current_class_name = class_name
+            elif name_parts and name_parts[-1].isdigit():
+                # Handle indexed modules (e.g., layer.0)
                 current_class_name = f"{class_name}.{name_parts[-1]}"
             else:
                 current_class_name = class_name

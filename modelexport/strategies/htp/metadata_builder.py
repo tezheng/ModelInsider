@@ -11,13 +11,15 @@ from dataclasses import asdict, dataclass, field
 from pathlib import Path
 from typing import Any
 
+from . import __spec_version__ as HTP_VERSION
+
 
 @dataclass
 class ExportContext:
     """Export session context information."""
     timestamp: str = ""  # Will be set from ExportData
     strategy: str = "htp"
-    version: str = "1.0"
+    version: str = HTP_VERSION
     exporter: str = "HTPExporter"
     embed_hierarchy_attributes: bool = True
     export_time_seconds: float = 0.0
@@ -149,7 +151,7 @@ class HTPMetadataBuilder:
     def with_export_context(
         self,
         strategy: str = "htp",
-        version: str = "1.0",
+        version: str = None,
         exporter: str = "HTPExporter",
         embed_hierarchy_attributes: bool = True,
         export_time_seconds: float = 0.0
@@ -157,7 +159,7 @@ class HTPMetadataBuilder:
         """Set export context information."""
         self._export_context = ExportContext(
             strategy=strategy,
-            version=version,
+            version=version if version is not None else HTP_VERSION,
             exporter=exporter,
             embed_hierarchy_attributes=embed_hierarchy_attributes,
             export_time_seconds=export_time_seconds
