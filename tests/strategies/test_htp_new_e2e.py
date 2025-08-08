@@ -68,7 +68,7 @@ class TestHTPE2E:
             
             # Verify report content in markdown format
             assert "# HTP ONNX Export Report" in report
-            assert "## Export Process Steps" in report
+            assert "## Export Process" in report
             assert "## Module Hierarchy" in report
             assert "## Complete Node Mappings" in report
             

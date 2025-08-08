@@ -80,7 +80,9 @@ def build_ascii_tree(
     max_depth: int | None = None, 
     max_lines: int | None = None,
     show_counts: bool = False,
-    node_counts: dict[str, int] | None = None
+    node_counts: dict[str, int] | None = None,
+    tagged_nodes: dict[str, str] | None = None,
+    show_nodes_as_leaves: bool = False
 ) -> list[str]:
     """
     Generate ASCII tree representation of module hierarchy.
@@ -91,6 +93,8 @@ def build_ascii_tree(
         max_lines: Maximum output lines (None for unlimited)
         show_counts: Whether to show node counts
         node_counts: Dictionary mapping hierarchy tags to node counts
+        tagged_nodes: Dictionary mapping ONNX node names to hierarchy tags
+        show_nodes_as_leaves: Whether to show individual ONNX nodes as leaf nodes
         
     Returns:
         List of tree lines (can be joined with newlines)
@@ -165,6 +169,55 @@ def build_ascii_tree(
             else:
                 line = f"{line_prefix}{class_name}: {display_name}"
             lines.append(line)
+            
+            # Add ONNX nodes as leaf nodes if requested
+            if show_nodes_as_leaves and tagged_nodes and child_tag:
+                # Find all ONNX nodes that belong to this module
+                module_nodes = [
+                    (node_name, tag) for node_name, tag in tagged_nodes.items() 
+                    if tag == child_tag
+                ]
+                
+                # Check if this module has children - if not, it's a leaf module
+                module_children = find_immediate_children(child_path, hierarchy)
+                
+                # Only show nodes for leaf modules (no children) to avoid clutter
+                if not module_children and module_nodes:
+                    # Sort nodes by name for consistent output
+                    module_nodes.sort(key=lambda x: x[0])
+                    
+                    # Group nodes by operation type
+                    from collections import defaultdict
+                    ops_by_type = defaultdict(list)
+                    for node_name, _ in module_nodes:
+                        # Extract operation type from node name
+                        # e.g., "/encoder/layer.0/attention/self/MatMul" -> "MatMul"
+                        parts = node_name.split("/")
+                        if parts:
+                            last_part = parts[-1]
+                            # Remove any numeric suffix (e.g., "MatMul_0" -> "MatMul")
+                            op_type = last_part.split("_")[0] if "_" in last_part else last_part
+                            ops_by_type[op_type].append(node_name)
+                    
+                    # Add nodes to tree
+                    op_types = list(ops_by_type.keys())
+                    for j, op_type in enumerate(sorted(op_types)):
+                        nodes = ops_by_type[op_type]
+                        is_last_op = j == len(op_types) - 1
+                        
+                        if len(nodes) == 1:
+                            # Single node - show full path
+                            node_prefix = continuation + ("    " if is_last_child else "│   ")
+                            node_line_prefix = node_prefix + ("└── " if is_last_op else "├── ")
+                            # Show simplified name with full path
+                            node_name = nodes[0]
+                            simple_name = node_name.split("/")[-1]
+                            lines.append(f"{node_line_prefix}{simple_name}: {node_name}")
+                        else:
+                            # Multiple nodes of same type - group them
+                            node_prefix = continuation + ("    " if is_last_child else "│   ")
+                            node_line_prefix = node_prefix + ("└── " if is_last_op else "├── ")
+                            lines.append(f"{node_line_prefix}{op_type} ({len(nodes)} ops)")
             
             # Recursively add children
             add_children(child_path, continuation, is_last_child, depth + 1)

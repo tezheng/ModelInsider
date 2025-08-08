@@ -340,13 +340,23 @@ The report is generated as a **Markdown file (.md)** with structured sections us
 | Root Fallbacks | {ROOT} | {ROOT_PCT}% |
 | Empty Tags | {EMPTY} | {EMPTY_PCT}% |
 
+#### Top 20 Nodes by Hierarchy
+
+```
+ 1. {TAG_1}: {COUNT_1} nodes
+ 2. {TAG_2}: {COUNT_2} nodes
+ 3. {TAG_3}: {COUNT_3} nodes
+...
+20. {TAG_20}: {COUNT_20} nodes
+```
+
 #### Complete HF Hierarchy with ONNX Nodes
 
 <details>
 <summary>Click to expand complete hierarchy with node counts</summary>
 
 ```
-{ASCII_TREE_WITH_NODE_COUNTS}
+{ASCII_TREE_WITH_NODE_COUNTS_AND_NODES_AS_LEAFS}
 ```
 
 </details>
@@ -423,7 +433,6 @@ The report is generated as a **Markdown file (.md)** with structured sections us
    - Example: `8/8` for leaf modules, `19/136` for BertModel root
 
 4. **Removed Sections**:
-   - "Top 20 Nodes by Hierarchy" (duplicated Module Node Distribution)
    - "Node Distribution" section (information consolidated elsewhere)
    - "Top Operations by Count" (not implemented)
 

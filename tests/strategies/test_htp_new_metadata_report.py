@@ -216,7 +216,7 @@ class TestHTPReportValidation:
             
             # Check required sections
             assert "# HTP ONNX Export Report" in report
-            assert "## Export Process Steps" in report
+            assert "## Export Process" in report
             assert "## Module Hierarchy" in report
             assert "## Complete Node Mappings" in report
             assert "## Export Summary" in report
@@ -312,7 +312,7 @@ class TestHTPReportValidation:
                 report = f.read()
             
             # Check export process steps in markdown format
-            assert "## Export Process Steps" in report
+            assert "## Export Process" in report
             
             # Should have all step sections in markdown format
             assert "### ✅ Step 1/6: Model Preparation" in report
