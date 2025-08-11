@@ -1,7 +1,27 @@
 # UniversalOnnxConfig Implementation Progress
 
-## Overview
-Successfully implemented a comprehensive UniversalOnnxConfig system for automatic ONNX configuration generation for any HuggingFace model, addressing TEZ-145 (subtask of TEZ-144).
+## ⚠️ IMPORTANT: This Implementation is Now Largely Superseded by ADR-012
+
+> **Formal Decision**: See [ADR-013: ONNX Config for Optimum Compatibility](../../../docs/adr/ADR-013-onnx-config-for-optimum-compatibility.md) - Section "Decision on UniversalOnnxConfig"
+
+### Current Status
+UniversalOnnxConfig was implemented as TEZ-145 (subtask of TEZ-144) before ADR-012 was finalized. **Per ADR-013, UniversalOnnxConfig is NO LONGER NEEDED for 99% of use cases.**
+
+### Do We Need UniversalOnnxConfig?
+**Short Answer: NO** - For almost all practical purposes, you don't need UniversalOnnxConfig.
+
+### Why Not?
+**ADR-012 provides a simpler, better solution:**
+- **HuggingFace Hub Models**: Config.json is automatically loaded from Hub at inference time
+- **Local Models with config.json**: Config.json is automatically copied during export
+- **No manual configuration needed**: Everything works automatically
+
+### When Might You Need It?
+**Only in these rare edge cases:**
+- Custom models with NO config.json at all (very rare)
+- Non-standard architectures not following HF conventions
+- Research/experimental models
+- Legacy model migration
 
 ## What Was Implemented
 
@@ -166,6 +186,57 @@ model = AutoModelForONNX.from_pretrained(model_path)
 - **TEZ-144**: ONNX model inference with Optimum (parent task)
 - **TEZ-145**: UniversalOnnxConfig generation (this subtask - COMPLETED)
 
+## Integration with ADR-012 (ONNX Config Strategy)
+
+Following ADR-012 architectural decisions, the UniversalOnnxConfig serves specific use cases:
+
+### Primary Use Cases
+1. **Custom/Local Models**: Models not on HuggingFace Hub that need config generation
+2. **Edge Cases**: Models with non-standard architectures not covered by standard patterns
+3. **Development/Testing**: Rapid prototyping and experimentation with new model types
+4. **Fallback Mechanism**: When automatic Hub-based config loading fails
+
+### ADR-012 Integration
+- **Hub Models**: Use ADR-012's metadata approach (config loaded from Hub automatically)
+- **Local Models**: Can use either ADR-012's config copying OR UniversalConfig generation
+- **Hybrid Approach**: UniversalConfig can supplement ADR-012 for edge cases
+
+### Recommended Usage Pattern
+```python
+# Preferred for Hub models (ADR-012)
+modelexport export bert-base-uncased model.onnx  # Automatic config handling
+
+# For custom models - choose approach:
+# Option 1: ADR-012 config copying (if model has config.json)
+modelexport export ./my_custom_model model.onnx  
+
+# Option 2: UniversalConfig generation (if no config.json available)
+from onnx_config import UniversalOnnxConfig
+config = UniversalOnnxConfig.from_model_path('./my_custom_model')
+# Use config for export
+```
+
 ## Conclusion
 
-The UniversalOnnxConfig implementation provides a robust, universal solution for ONNX configuration generation that eliminates the need for model-specific configuration classes. This makes ONNX export accessible for any HuggingFace model, not just the ~100 models explicitly supported by Optimum.
+### Should You Use UniversalOnnxConfig?
+**NO** - Use ADR-012's automatic config handling instead:
+
+```bash
+# For HuggingFace Hub models - just export, config handled automatically
+modelexport export bert-base-uncased model.onnx
+
+# For local models with config.json - also automatic
+modelexport export ./my_model_dir model.onnx
+```
+
+### ADR-012 vs UniversalOnnxConfig
+- **ADR-012**: Handles 99% of use cases automatically (RECOMMENDED)
+- **UniversalOnnxConfig**: Only for rare edge cases without any config.json
+
+### Migration Recommendation
+**If you're using UniversalOnnxConfig, migrate to ADR-012's approach:**
+1. For Hub models: Just use model name, config loads automatically
+2. For local models: Ensure config.json exists, it will be copied automatically
+3. Delete UniversalOnnxConfig code unless you have a specific edge case
+
+The ADR-012 approach is simpler, more maintainable, and covers virtually all real-world scenarios.
