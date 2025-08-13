@@ -5,13 +5,13 @@ This is the main class that provides automatic OnnxConfig generation for any mod
 eliminating the need for model-specific configuration classes.
 """
 
-import torch
-from typing import Dict, List, Optional, Any, Tuple, Union
-from collections import OrderedDict
+from typing import Any
 
-from .task_detector import TaskDetector
+import torch
+
 from .input_generator import InputSpecGenerator
 from .shape_inference import ShapeInferencer
+from .task_detector import TaskDetector
 
 
 class UniversalOnnxConfig:
@@ -33,11 +33,11 @@ class UniversalOnnxConfig:
     
     def __init__(
         self,
-        config: Union[Dict[str, Any], Any],
-        task: Optional[str] = None,
-        use_past: Optional[bool] = None,
-        use_past_in_inputs: Optional[bool] = None,
-        preprocessors: Optional[Dict[str, Any]] = None
+        config: dict[str, Any] | Any,
+        task: str | None = None,
+        use_past: bool | None = None,
+        use_past_in_inputs: bool | None = None,
+        preprocessors: dict[str, Any] | None = None
     ):
         """
         Initialize UniversalOnnxConfig.
@@ -91,7 +91,7 @@ class UniversalOnnxConfig:
         self._dynamic_axes_cache = None
     
     @property
-    def inputs(self) -> Dict[str, Dict[int, str]]:
+    def inputs(self) -> dict[str, dict[int, str]]:
         """
         Get input specifications with dynamic axes.
         
@@ -109,7 +109,7 @@ class UniversalOnnxConfig:
         return dynamic_axes
     
     @property
-    def outputs(self) -> Dict[str, Dict[int, str]]:
+    def outputs(self) -> dict[str, dict[int, str]]:
         """
         Get output specifications with dynamic axes.
         
@@ -126,7 +126,7 @@ class UniversalOnnxConfig:
         
         return dynamic_axes
     
-    def get_input_names(self) -> List[str]:
+    def get_input_names(self) -> list[str]:
         """
         Get list of input names for the model.
         
@@ -150,7 +150,7 @@ class UniversalOnnxConfig:
         self._input_names_cache = input_names
         return input_names
     
-    def get_output_names(self) -> List[str]:
+    def get_output_names(self) -> list[str]:
         """
         Get list of output names for the model.
         
@@ -175,7 +175,7 @@ class UniversalOnnxConfig:
         self._output_names_cache = output_names
         return output_names
     
-    def get_dynamic_axes(self) -> Dict[str, Dict[int, str]]:
+    def get_dynamic_axes(self) -> dict[str, dict[int, str]]:
         """
         Get combined dynamic axes for inputs and outputs.
         
@@ -194,12 +194,12 @@ class UniversalOnnxConfig:
     
     def generate_dummy_inputs(
         self,
-        preprocessor: Optional[Any] = None,
+        preprocessor: Any | None = None,
         batch_size: int = 1,
         seq_length: int = 128,
         framework: str = "pt",
         **kwargs
-    ) -> Dict[str, torch.Tensor]:
+    ) -> dict[str, torch.Tensor]:
         """
         Generate dummy inputs for model tracing.
         
@@ -242,7 +242,6 @@ class UniversalOnnxConfig:
         
         # Convert to numpy if requested
         if framework == "np":
-            import numpy as np
             dummy_inputs = {
                 name: tensor.numpy() if isinstance(tensor, torch.Tensor) else tensor
                 for name, tensor in dummy_inputs.items()
@@ -257,7 +256,7 @@ class UniversalOnnxConfig:
         seq_length: int,
         framework: str,
         **kwargs
-    ) -> Optional[Dict[str, torch.Tensor]]:
+    ) -> dict[str, torch.Tensor] | None:
         """Generate dummy inputs using preprocessor."""
         try:
             # Determine preprocessor type
@@ -320,12 +319,10 @@ class UniversalOnnxConfig:
             # Fall back to manual generation
             return None
     
-    def _get_dynamic_axes_for_input(self, input_name: str) -> Dict[int, str]:
+    def _get_dynamic_axes_for_input(self, input_name: str) -> dict[int, str]:
         """Get dynamic axes for a specific input."""
         # Common patterns
-        if "input_ids" in input_name or "attention_mask" in input_name:
-            return {0: "batch_size", 1: "sequence_length"}
-        elif "token_type_ids" in input_name or "position_ids" in input_name:
+        if "input_ids" in input_name or "attention_mask" in input_name or "token_type_ids" in input_name or "position_ids" in input_name:
             return {0: "batch_size", 1: "sequence_length"}
         elif "decoder_input_ids" in input_name:
             return {0: "batch_size", 1: "decoder_sequence_length"}
@@ -344,7 +341,7 @@ class UniversalOnnxConfig:
             # Default for unknown inputs
             return {0: "batch_size"}
     
-    def _get_dynamic_axes_for_output(self, output_name: str) -> Dict[int, str]:
+    def _get_dynamic_axes_for_output(self, output_name: str) -> dict[int, str]:
         """Get dynamic axes for a specific output."""
         if output_name == "logits":
             if "classification" in self.task:
@@ -358,23 +355,17 @@ class UniversalOnnxConfig:
             return {0: "batch_size", 1: "sequence_length"}
         elif output_name == "pooler_output":
             return {0: "batch_size"}
-        elif output_name in ["start_logits", "end_logits"]:
-            return {0: "batch_size", 1: "sequence_length"}
-        elif output_name == "encoder_last_hidden_state":
+        elif output_name in ["start_logits", "end_logits"] or output_name == "encoder_last_hidden_state":
             return {0: "batch_size", 1: "sequence_length"}
         elif "past_key_values" in output_name:
             return {0: "batch_size", 2: "sequence_length"}
-        elif output_name in ["text_embeds", "image_embeds", "sentence_embedding"]:
-            return {0: "batch_size"}
-        elif output_name == "pred_boxes":
-            return {0: "batch_size"}
-        elif output_name == "pred_masks":
+        elif output_name in ["text_embeds", "image_embeds", "sentence_embedding"] or output_name == "pred_boxes" or output_name == "pred_masks":
             return {0: "batch_size"}
         else:
             # Default
             return {0: "batch_size"}
     
-    def _get_past_key_value_names(self, is_input: bool = True) -> List[str]:
+    def _get_past_key_value_names(self, is_input: bool = True) -> list[str]:
         """Get past key value tensor names."""
         num_layers = self.config_dict.get(
             "num_hidden_layers",
@@ -394,7 +385,7 @@ class UniversalOnnxConfig:
         self,
         batch_size: int,
         past_seq_length: int = 10
-    ) -> Dict[str, torch.Tensor]:
+    ) -> dict[str, torch.Tensor]:
         """Generate dummy past key values."""
         num_layers = self.config_dict.get(
             "num_hidden_layers",
@@ -448,7 +439,7 @@ class UniversalOnnxConfig:
         # Default
         return 224
     
-    def flatten_output_collection_property(self, name: str, field: str) -> Dict[str, Any]:
+    def flatten_output_collection_property(self, name: str, field: str) -> dict[str, Any]:
         """
         Flatten nested output specifications.
         

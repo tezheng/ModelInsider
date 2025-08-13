@@ -4,7 +4,8 @@ Shape inference for model outputs.
 This module infers output shapes and names based on model task and architecture.
 """
 
-from typing import Dict, List, Optional, Any
+from typing import Any
+
 from .patterns import TASK_TO_OUTPUTS
 
 
@@ -78,7 +79,7 @@ class ShapeInferencer:
     }
     
     @classmethod
-    def get_output_names(cls, task: str, model_type: str, config: Dict[str, Any]) -> List[str]:
+    def get_output_names(cls, task: str, model_type: str, config: dict[str, Any]) -> list[str]:
         """
         Get output names for a model.
         
@@ -111,10 +112,10 @@ class ShapeInferencer:
     @classmethod
     def _filter_outputs_by_config(
         cls,
-        outputs: List[str],
+        outputs: list[str],
         model_type: str,
-        config: Dict[str, Any]
-    ) -> List[str]:
+        config: dict[str, Any]
+    ) -> list[str]:
         """Filter outputs based on model configuration."""
         filtered = []
         model_type_lower = model_type.lower()
@@ -172,11 +173,11 @@ class ShapeInferencer:
     @classmethod
     def _add_model_specific_outputs(
         cls,
-        outputs: List[str],
+        outputs: list[str],
         model_type: str,
-        config: Dict[str, Any],
+        config: dict[str, Any],
         task: str
-    ) -> List[str]:
+    ) -> list[str]:
         """Add model-specific outputs."""
         model_type_lower = model_type.lower()
         
@@ -221,12 +222,12 @@ class ShapeInferencer:
     @classmethod
     def get_output_shapes(
         cls,
-        output_names: List[str],
+        output_names: list[str],
         batch_size: int,
         seq_length: int,
-        config: Dict[str, Any],
+        config: dict[str, Any],
         task: str
-    ) -> Dict[str, tuple]:
+    ) -> dict[str, tuple]:
         """
         Get expected output shapes.
         

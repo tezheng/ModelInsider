@@ -206,6 +206,23 @@ def _detect_processor_type(processor: Any) -> str:
     # Check by class inheritance (most reliable)
     processor_class_name = processor.__class__.__name__
 
+    # Check for ONNXAutoProcessor (our universal processor)
+    if processor_class_name == "ONNXAutoProcessor":
+        # Check modality type if available
+        if hasattr(processor, "modality_type"):
+            modality = str(processor.modality_type)
+            if "TEXT" in modality:
+                return "tokenizer"
+            elif "IMAGE" in modality:
+                return "image_processor"
+            elif "AUDIO" in modality:
+                return "feature_extractor"
+            elif "MULTIMODAL" in modality:
+                return "processor"
+        # Fallback to checking for tokenizer attribute
+        if hasattr(processor, "tokenizer"):
+            return "tokenizer"
+
     # Check for tokenizer types
     if any(name in processor_class_name for name in ["Tokenizer", "TokenizerFast"]):
         return "tokenizer"

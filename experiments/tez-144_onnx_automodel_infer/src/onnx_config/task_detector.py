@@ -5,8 +5,9 @@ This module automatically detects the appropriate task for a model based on its
 architecture and configuration.
 """
 
-from typing import Optional, List, Dict, Any
-from .patterns import ARCHITECTURE_TO_TASK, SPECIAL_MODEL_FAMILIES
+from typing import Any
+
+from .patterns import ARCHITECTURE_TO_TASK
 
 
 class TaskDetector:
@@ -173,7 +174,7 @@ class TaskDetector:
     }
     
     @classmethod
-    def detect_from_config(cls, config: Dict[str, Any]) -> str:
+    def detect_from_config(cls, config: dict[str, Any]) -> str:
         """
         Detect task from model configuration.
         
@@ -204,7 +205,7 @@ class TaskDetector:
         return "feature-extraction"
     
     @classmethod
-    def _detect_from_architecture(cls, architectures: List[str]) -> Optional[str]:
+    def _detect_from_architecture(cls, architectures: list[str]) -> str | None:
         """Detect task from architecture names."""
         if not architectures:
             return None
@@ -225,7 +226,7 @@ class TaskDetector:
         return None
     
     @classmethod
-    def _detect_from_model_type(cls, model_type: str) -> Optional[str]:
+    def _detect_from_model_type(cls, model_type: str) -> str | None:
         """Detect task from model type."""
         model_type_lower = model_type.lower()
         
@@ -241,7 +242,7 @@ class TaskDetector:
         return None
     
     @classmethod
-    def _detect_from_config_hints(cls, config: Dict[str, Any]) -> Optional[str]:
+    def _detect_from_config_hints(cls, config: dict[str, Any]) -> str | None:
         """Detect task from configuration hints."""
         
         # Check for task-specific parameters
@@ -335,7 +336,7 @@ class TaskDetector:
         return "unknown"
     
     @classmethod
-    def requires_past_key_values(cls, task: str, model_type: Optional[str] = None) -> bool:
+    def requires_past_key_values(cls, task: str, model_type: str | None = None) -> bool:
         """
         Check if a task/model requires past key values for generation.
         
