@@ -5,13 +5,15 @@ This module handles the generation of input specifications and dummy inputs
 for various model architectures and modalities.
 """
 
+from typing import Any
+
 import torch
-from typing import Dict, List, Optional, Any, Tuple
+
 from .patterns import (
-    MODEL_TYPE_TO_INPUTS,
     DEFAULT_SHAPES,
     DYNAMIC_AXES_PATTERNS,
-    get_model_family
+    MODEL_TYPE_TO_INPUTS,
+    get_model_family,
 )
 
 
@@ -19,7 +21,7 @@ class InputSpecGenerator:
     """Generate input specifications for ONNX export."""
     
     @classmethod
-    def get_input_names(cls, model_type: str, task: str, config: Dict[str, Any]) -> List[str]:
+    def get_input_names(cls, model_type: str, task: str, config: dict[str, Any]) -> list[str]:
         """
         Get input names for a model.
         
@@ -64,7 +66,7 @@ class InputSpecGenerator:
             return cls._get_text_inputs(model_type_lower, config)
     
     @classmethod
-    def _get_text_inputs(cls, model_type: str, config: Dict[str, Any]) -> List[str]:
+    def _get_text_inputs(cls, model_type: str, config: dict[str, Any]) -> list[str]:
         """Get text model inputs based on configuration."""
         inputs = ["input_ids", "attention_mask"]
         
@@ -92,7 +94,7 @@ class InputSpecGenerator:
         return inputs
     
     @classmethod
-    def _get_document_inputs(cls, model_type: str, config: Dict[str, Any]) -> List[str]:
+    def _get_document_inputs(cls, model_type: str, config: dict[str, Any]) -> list[str]:
         """Get document model inputs."""
         inputs = ["input_ids", "attention_mask"]
         
@@ -120,11 +122,11 @@ class InputSpecGenerator:
     @classmethod
     def get_dynamic_axes(
         cls,
-        input_names: List[str],
-        output_names: List[str],
+        input_names: list[str],
+        output_names: list[str],
         task: str,
-        config: Dict[str, Any]
-    ) -> Dict[str, Dict[int, str]]:
+        config: dict[str, Any]
+    ) -> dict[str, dict[int, str]]:
         """
         Get dynamic axes for inputs and outputs.
         
@@ -179,11 +181,11 @@ class InputSpecGenerator:
         cls,
         model_type: str,
         task: str,
-        config: Dict[str, Any],
+        config: dict[str, Any],
         batch_size: int = 1,
         seq_length: int = 128,
         **kwargs
-    ) -> Dict[str, torch.Tensor]:
+    ) -> dict[str, torch.Tensor]:
         """
         Generate dummy inputs for model tracing.
         
@@ -258,7 +260,7 @@ class InputSpecGenerator:
         return dummy_inputs
     
     @classmethod
-    def _get_image_size(cls, config: Dict[str, Any]) -> int:
+    def _get_image_size(cls, config: dict[str, Any]) -> int:
         """Get image size from config."""
         # Try different config keys
         for key in ["image_size", "vision_config.image_size", "img_size", "input_size"]:
@@ -282,8 +284,8 @@ class InputSpecGenerator:
     def _generate_tensor_for_input(
         cls,
         input_name: str,
-        shape: Tuple[int, ...],
-        config: Dict[str, Any]
+        shape: tuple[int, ...],
+        config: dict[str, Any]
     ) -> torch.Tensor:
         """Generate appropriate tensor for input type."""
         

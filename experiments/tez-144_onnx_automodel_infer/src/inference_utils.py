@@ -9,21 +9,21 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import Any, Optional, Union
+from typing import Any
 
 from transformers import (
-    AutoTokenizer,
-    AutoProcessor,
-    AutoImageProcessor,
-    AutoFeatureExtractor,
     AutoConfig,
+    AutoFeatureExtractor,
+    AutoImageProcessor,
+    AutoProcessor,
+    AutoTokenizer,
     pipeline,
 )
 
 logger = logging.getLogger(__name__)
 
 
-def detect_model_task(model_path: Union[str, Path]) -> str:
+def detect_model_task(model_path: str | Path) -> str:
     """
     Detect the task for a model based on its configuration.
     
@@ -79,8 +79,8 @@ def get_ort_model_class(task: str) -> type:
 
 
 def load_preprocessor(
-    model_path: Union[str, Path],
-    preprocessor_type: Optional[str] = None
+    model_path: str | Path,
+    preprocessor_type: str | None = None
 ) -> Any:
     """
     Load the appropriate preprocessor for a model.
@@ -150,8 +150,8 @@ def load_preprocessor(
 
 
 def create_inference_pipeline(
-    model_path: Union[str, Path],
-    task: Optional[str] = None,
+    model_path: str | Path,
+    task: str | None = None,
     device: int = -1,
     batch_size: int = 1,
     **kwargs
@@ -257,6 +257,7 @@ def benchmark_inference(
         - throughput: Inferences per second
     """
     import time
+
     import numpy as np
     
     # Warmup runs
@@ -286,10 +287,10 @@ def benchmark_inference(
 
 
 def compare_with_pytorch(
-    onnx_model_path: Union[str, Path],
+    onnx_model_path: str | Path,
     pytorch_model_name: str,
     test_inputs: list[str],
-    task: Optional[str] = None
+    task: str | None = None
 ) -> dict:
     """
     Compare ONNX model performance with PyTorch model.
@@ -303,9 +304,9 @@ def compare_with_pytorch(
     Returns:
         Dictionary with comparison results
     """
-    from transformers import AutoModel, AutoTokenizer
     import torch
-    
+    from transformers import AutoModel, AutoTokenizer
+
     # Load ONNX model
     from .auto_model_loader import AutoModelForONNX
     

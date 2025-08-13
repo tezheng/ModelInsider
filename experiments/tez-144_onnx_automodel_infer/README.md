@@ -43,6 +43,22 @@ tez-144_onnx_automodel_infer/
 
 ## 🚀 Quick Start
 
+### Simple Example (<50 lines)
+
+```bash
+# Run the simple pipeline example
+python examples/simple_pipeline.py
+```
+
+See [`examples/simple_pipeline.py`](./examples/simple_pipeline.py) for a clean, minimal implementation.
+
+### Key Features Demonstrated
+
+- ✅ **ONNXTokenizer** with fixed-shape optimization
+- ✅ **Enhanced Pipeline** with universal data_processor parameter  
+- ✅ **Significant performance improvement** with ONNX Runtime optimization
+- ✅ **Drop-in replacement** for HuggingFace pipelines
+
 ### Installation
 
 ```bash
@@ -54,6 +70,27 @@ pip install onnxruntime-gpu
 ```
 
 ### Basic Usage
+
+#### NEW: ONNXAutoProcessor (Recommended)
+
+```python
+from src.onnx_auto_processor import ONNXAutoProcessor
+from optimum.onnxruntime import ORTModelForFeatureExtraction
+
+# Universal processor with automatic detection (ONNX-first design)
+processor = ONNXAutoProcessor.from_model("model.onnx")
+# Note: We use from_model(), NOT from_pretrained(), to avoid HF pattern confusion
+
+# Use with any input type - text, image, audio, or multimodal
+result = processor("Hello world!")
+
+# Works with Optimum models
+model = ORTModelForFeatureExtraction.from_pretrained("models/bert-tiny")
+processor = ONNXAutoProcessor.from_model("models/bert-tiny/model.onnx")
+outputs = model(**processor("Your text here"))
+```
+
+#### Legacy: AutoModelForONNX
 
 ```python
 from src.auto_model_loader import AutoModelForONNX

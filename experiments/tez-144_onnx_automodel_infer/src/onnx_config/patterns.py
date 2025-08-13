@@ -5,7 +5,6 @@ This module contains patterns and mappings used to identify model architectures,
 tasks, and input/output specifications.
 """
 
-from typing import Dict, List, Set
 
 # Architecture to task mapping based on class name patterns
 ARCHITECTURE_TO_TASK = {
