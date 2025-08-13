@@ -26,7 +26,6 @@ class TestDirectoryCreation:
     @pytest.fixture
     def simple_model(self):
         """Create a simple PyTorch model for testing."""
-        import torch
         import torch.nn as nn
 
         class SimpleModel(nn.Module):
@@ -87,7 +86,7 @@ class TestDirectoryCreation:
         output_dir = Path(temp_dir) / "existing_dir"
         output_dir.mkdir()
         output_path = output_dir / "model.onnx"
-        
+
         assert output_dir.exists()
         assert not output_path.exists()
 
@@ -108,8 +107,10 @@ class TestDirectoryCreation:
         """Test that metadata file directory is also created."""
         # Create path with non-existent directory
         output_path = Path(temp_dir) / "metadata_test" / "model.onnx"
-        metadata_path = output_path.with_suffix("").with_name(f"{output_path.stem}_htp_metadata.json")
-        
+        metadata_path = output_path.with_suffix("").with_name(
+            f"{output_path.stem}_htp_metadata.json"
+        )
+
         assert not output_path.parent.exists()
 
         # Export with metadata enabled
@@ -129,8 +130,10 @@ class TestDirectoryCreation:
         """Test that report file directory is also created."""
         # Create path with non-existent directory
         output_path = Path(temp_dir) / "report_test" / "model.onnx"
-        report_path = output_path.with_suffix("").with_name(f"{output_path.stem}_htp_export_report.md")
-        
+        report_path = output_path.with_suffix("").with_name(
+            f"{output_path.stem}_htp_export_report.md"
+        )
+
         assert not output_path.parent.exists()
 
         # Export with reporting enabled
@@ -148,7 +151,7 @@ class TestDirectoryCreation:
 
     def test_permission_error_handling(self, temp_dir, simple_model):
         """Test handling of permission errors when creating directories."""
-        if os.name == 'nt':  # Windows
+        if os.name == "nt":  # Windows
             pytest.skip("Permission testing is platform-specific")
 
         # Create a read-only directory
@@ -175,9 +178,10 @@ class TestDirectoryCreation:
         """Test creating directories with relative paths."""
         # Use a relative path
         output_path = "temp/relative_test/model.onnx"
-        
+
         # Clean up any existing directory
         import shutil
+
         if Path("temp/relative_test").exists():
             shutil.rmtree("temp/relative_test")
 
@@ -219,6 +223,7 @@ class TestDirectoryCreation:
     def test_cli_integration_directory_creation(self, temp_dir, monkeypatch):
         """Test directory creation through CLI interface."""
         from click.testing import CliRunner
+
         from modelexport.cli import cli
 
         # Use a non-existent directory path
@@ -226,30 +231,37 @@ class TestDirectoryCreation:
         assert not output_path.parent.exists()
 
         runner = CliRunner()
-        result = runner.invoke(cli, [
-            'export',
-            '--model', 'prajjwal1/bert-tiny',
-            '--output', str(output_path),
-            '--verbose'
-        ])
+        result = runner.invoke(
+            cli,
+            [
+                "export",
+                "--model",
+                "prajjwal1/bert-tiny",
+                "--output",
+                str(output_path),
+                "--verbose",
+            ],
+        )
 
         # Check CLI execution succeeded
         assert result.exit_code == 0, f"CLI failed with: {result.output}"
-        
+
         # Verify directory and file were created
         assert output_path.parent.exists()
         assert output_path.exists()
 
-    @pytest.mark.skip(reason="PyTorch ONNX export is not thread-safe (uses GLOBALS.in_onnx_export)")
+    @pytest.mark.skip(
+        reason="PyTorch ONNX export is not thread-safe (uses GLOBALS.in_onnx_export)"
+    )
     def test_concurrent_directory_creation(self, temp_dir, simple_model):
         """Test that concurrent directory creation doesn't cause race conditions.
-        
+
         Note: This test is skipped because PyTorch's ONNX export uses a global
         state variable (GLOBALS.in_onnx_export) that prevents concurrent exports.
         The directory creation itself works correctly.
         """
         import threading
-        
+
         output_dir = Path(temp_dir) / "concurrent_test"
         results = []
         errors = []
@@ -267,6 +279,7 @@ class TestDirectoryCreation:
                 results.append((index, result))
             except Exception as e:
                 import traceback
+
                 errors.append((index, e, traceback.format_exc()))
 
         # Create multiple threads trying to create the same directory
@@ -288,7 +301,7 @@ class TestDirectoryCreation:
                 print(tb)
         assert len(errors) == 0, f"Errors occurred in {len(errors)} threads"
         assert len(results) == 5
-        
+
         # Verify all files were created
         for i in range(5):
             assert (output_dir / f"model_{i}.onnx").exists()
