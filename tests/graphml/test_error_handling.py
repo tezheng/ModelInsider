@@ -47,7 +47,7 @@ class TestFileSystemErrors:
         converter = ONNXToGraphMLConverter(hierarchical=False)
         
         # Empty string gets converted to "." which is a directory, so expect different error
-        with pytest.raises(Exception):  # Could be IsADirectoryError, PermissionError, or ONNX error
+        with pytest.raises((IsADirectoryError, PermissionError, OSError)):  # Directory-related errors
             converter.convert("")
     
     def test_directory_instead_of_file(self, tmp_path):
@@ -70,7 +70,7 @@ class TestMalformedInputFiles:
         converter = ONNXToGraphMLConverter(hierarchical=False)
         
         # Should raise an ONNX-related error (don't be too specific about the message)
-        with pytest.raises(Exception):
+        with pytest.raises((onnx.onnx_cpp2py_export.checker.ValidationError, ValueError)):
             converter.convert(malformed_onnx_file)
     
     def test_empty_onnx_file(self, tmp_path):
@@ -110,9 +110,7 @@ class TestMalformedInputFiles:
         with open(metadata_file, 'w') as f:
             f.write("{}")
         
-        # Should not crash, but may not produce hierarchy
-        converter = ONNXToGraphMLConverter(htp_metadata_path=str(metadata_file))
-        graphml_output = converter.convert(simple_onnx_model)
+        # Should not crash, but may not produce hierarchy        graphml_output = converter.convert(simple_onnx_model)
         
         # Should still produce valid GraphML
         content, root = get_graphml_content(graphml_output)
@@ -131,8 +129,6 @@ class TestMalformedInputFiles:
         
         # This should fail because tagged_nodes is expected to be a dict
         with pytest.raises(AttributeError):  # tagged_nodes must be a dictionary
-            converter = ONNXToGraphMLConverter(htp_metadata_path=str(metadata_file))
-
 
 class TestEdgeCases:
     """Test edge cases and boundary conditions."""
@@ -215,9 +211,7 @@ class TestEdgeCases:
                 }
             }, f)
         
-        # Should handle gracefully without crashing
-        converter = ONNXToGraphMLConverter(htp_metadata_path=str(metadata_file))
-        graphml_output = converter.convert(simple_onnx_model)
+        # Should handle gracefully without crashing        graphml_output = converter.convert(simple_onnx_model)
         
         # Should produce valid GraphML
         content, root = get_graphml_content(graphml_output)
@@ -398,9 +392,7 @@ class TestOutputValidation:
         
         # Parse output to count nodes and edges
         root = ET.fromstring(graphml_output)
-        actual_nodes = len(root.findall(".//{http://graphml.graphdrawing.org/xmlns}node"))
-        actual_edges = len(root.findall(".//{http://graphml.graphdrawing.org/xmlns}edge"))
-        
+        actual_nodes = len(root.findall(".//{http://graphml.graphdrawing.org/xmlns}node"))        
         # Statistics should match (allowing for some flexibility in counting)
         assert stats['nodes'] >= 0
         assert stats['edges'] >= 0

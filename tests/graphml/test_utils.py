@@ -8,10 +8,10 @@ import xml.etree.ElementTree as ET
 def get_graphml_content(converter_output):
     """
     Helper function to get GraphML content from converter output.
-    
+
     Args:
         converter_output: Output from converter.convert() - either string (flat) or dict (hierarchical)
-    
+
     Returns:
         tuple: (graphml_content_as_string, root_element)
     """
