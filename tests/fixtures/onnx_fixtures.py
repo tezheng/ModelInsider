@@ -11,16 +11,18 @@ import torch.nn as nn
 
 class SimpleModel(nn.Module):
     """Simple model for testing."""
+
     def __init__(self):
         super().__init__()
         self.linear = nn.Linear(10, 5)
-        
+
     def forward(self, x):
         return self.linear(x)
 
 
 class MediumModel(nn.Module):
     """Medium complexity model for testing."""
+
     def __init__(self):
         super().__init__()
         self.conv1 = nn.Conv2d(3, 16, 3)
@@ -28,7 +30,7 @@ class MediumModel(nn.Module):
         self.conv2 = nn.Conv2d(16, 32, 3)
         self.pool = nn.MaxPool2d(2)
         self.fc = nn.Linear(32 * 6 * 6, 10)
-        
+
     def forward(self, x):
         x = self.relu(self.conv1(x))
         x = self.pool(self.relu(self.conv2(x)))
@@ -38,6 +40,7 @@ class MediumModel(nn.Module):
 
 class LargeModel(nn.Module):
     """Large model with multiple layers for testing."""
+
     def __init__(self):
         super().__init__()
         self.layers = nn.Sequential(
@@ -49,9 +52,9 @@ class LargeModel(nn.Module):
             nn.Dropout(0.5),
             nn.Linear(512, 256),
             nn.ReLU(),
-            nn.Linear(256, 10)
+            nn.Linear(256, 10),
         )
-        
+
     def forward(self, x):
         return self.layers(x)
 
@@ -63,10 +66,10 @@ def create_onnx_model(model, input_shape, output_path):
         model,
         dummy_input,
         output_path,
-        input_names=['input'],
-        output_names=['output'],
-        dynamic_axes={'input': {0: 'batch'}, 'output': {0: 'batch'}},
-        opset_version=17
+        input_names=["input"],
+        output_names=["output"],
+        dynamic_axes={"input": {0: "batch"}, "output": {0: "batch"}},
+        opset_version=17,
     )
     return output_path
 
@@ -102,8 +105,8 @@ def large_onnx_model(tmp_path):
 def malformed_onnx_file(tmp_path):
     """Create a malformed ONNX file for error testing."""
     malformed_path = tmp_path / "malformed.onnx"
-    with open(malformed_path, 'wb') as f:
-        f.write(b'This is not a valid ONNX file')
+    with open(malformed_path, "wb") as f:
+        f.write(b"This is not a valid ONNX file")
     return str(malformed_path)
 
 
@@ -122,10 +125,7 @@ def bert_tiny_onnx_path(tmp_path):
 def bert_tiny_metadata_path(tmp_path):
     """Create HTP metadata for BERT tiny model."""
     metadata = {
-        "model": {
-            "name_or_path": "prajjwal1/bert-tiny",
-            "class_name": "BertModel"
-        },
+        "model": {"name_or_path": "prajjwal1/bert-tiny", "class_name": "BertModel"},
         "modules": {
             "scope": "/BertModel",
             "class_name": "BertModel",
@@ -142,9 +142,9 @@ def bert_tiny_metadata_path(tmp_path):
                             "scope": "/BertModel/embeddings/word_embeddings",
                             "class_name": "Embedding",
                             "traced_tag": "/BertModel/BertEmbeddings/Embedding",
-                            "execution_order": 2
+                            "execution_order": 2,
                         }
-                    }
+                    },
                 },
                 "encoder": {
                     "scope": "/BertModel/encoder",
@@ -156,16 +156,16 @@ def bert_tiny_metadata_path(tmp_path):
                             "scope": "/BertModel/encoder/layer",
                             "class_name": "ModuleList",
                             "traced_tag": "/BertModel/BertEncoder/ModuleList",
-                            "execution_order": 4
+                            "execution_order": 4,
                         }
-                    }
-                }
-            }
-        }
+                    },
+                },
+            },
+        },
     }
-    
+
     metadata_path = tmp_path / "bert_tiny_htp_metadata.json"
-    with open(metadata_path, 'w') as f:
+    with open(metadata_path, "w") as f:
         json.dump(metadata, f, indent=2)
-    
+
     return str(metadata_path)
