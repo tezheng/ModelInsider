@@ -24,6 +24,7 @@ dependencies = [
     "snakemd>=2.3.0",
     "psutil>=7.0.0",
     "lxml>=5.0.0",
+    "scikit-learn>=1.7.1",
 ]
 
 [project.scripts]
@@ -77,6 +78,11 @@ markers = [
     "security: Security and vulnerability tests",
     "resource: Resource management tests",
     "error_recovery: Error recovery and resilience tests",
+    
+    # ONNX Auto Processor Markers
+    "performance: Speed and memory benchmark tests (20 min)",
+    "multimodal: Tests specifically for multimodal models",
+    "requires_models: Tests that need pre-downloaded models",
     
     # Legacy/Compatibility Markers
     "strategy: Strategy-specific tests (HTP)",
