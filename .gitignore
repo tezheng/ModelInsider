@@ -87,6 +87,7 @@ external/
 data/models/
 data/checkpoints/
 datasets/
+models/  # ONNX model files and test models
 
 # Temporary research artifacts
 experiments/temp/
