@@ -272,3 +272,4 @@ The HTP strategy now uses PyTorch's built-in `torch.jit._trace._trace_module_map
 
 ### Task Tracking
 - Always include Linear task link in the conversion response
+- use mermaid instead of ansi to do flowchart, sequence flow, etc. as much as possible in markdown files, AVOID ansi!
