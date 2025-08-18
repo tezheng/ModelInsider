@@ -2,6 +2,9 @@
 # ModelExport .gitignore
 # =============================================================================
 
+# Windows Zone.Identifier files (alternate data streams)
+*:Zone.Identifier
+
 # Temporary outputs and test data
 temp/
 outputs/
