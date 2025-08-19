@@ -66,6 +66,9 @@
       "Bash(/dev/null)",
       "Bash(ruff check:*)"
     ],
-    "deny": []
+    "deny": [],
+    "additionalDirectories": [
+      "/mnt/c/Qualcomm/AIStack/qairt/2.34.0.250424/"
+    ]
   }
 }
