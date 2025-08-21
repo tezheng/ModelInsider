@@ -68,7 +68,8 @@
     ],
     "deny": [],
     "additionalDirectories": [
-      "/mnt/c/Qualcomm/AIStack/qairt/2.34.0.250424/"
+      "/mnt/c/Qualcomm/AIStack/qairt/2.34.0.250424/",
+      "C:\\Qualcomm\\AIStack\\qairt\\2.34.0.250424\\"
     ]
   }
 }
