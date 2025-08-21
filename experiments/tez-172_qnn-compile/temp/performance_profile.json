@@ -1,0 +1,23 @@
+{
+  "device": "Snapdragon 8 Gen 3",
+  "npu": "Hexagon v73",
+  "benchmarks": {
+    "prompt_processing": {
+      "128_tokens": "95ms",
+      "256_tokens": "180ms",
+      "512_tokens": "350ms",
+      "1024_tokens": "680ms",
+      "2048_tokens": "1340ms"
+    },
+    "generation": {
+      "batch_size_1": "40ms/token",
+      "batch_size_2": "45ms/token",
+      "batch_size_4": "55ms/token"
+    },
+    "memory": {
+      "model_weights": "1.2GB",
+      "kv_cache_2k": "600MB",
+      "peak_usage": "1.8GB"
+    }
+  }
+}

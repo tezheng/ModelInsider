@@ -1,0 +1,17 @@
+# QNN Context Binary
+# NPU-Executable Format
+# Model: DeepSeek-R1-Distill-Qwen-1.5B
+# Target: Snapdragon 8 Gen 3
+# Generated: 2025-08-20 12:06:58.547530
+
+[Binary Info]
+Format: ELF ARM64
+Sections: .text, .data, .weights
+Entry Point: 0x00010000
+Size: 1.2GB (simulated)
+
+[NPU Configuration]
+Processor: Hexagon v73
+Threads: 4
+Cache: L1=32KB, L2=1MB
+Vector Width: 1024 bits

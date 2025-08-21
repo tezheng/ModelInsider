@@ -1,0 +1,199 @@
+{
+  "version": "1.0",
+  "quantization_scheme": "Q4_0",
+  "group_size": 32,
+  "layers": {
+    "layer_0": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_1": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_2": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_3": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_4": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_5": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_6": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_7": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_8": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_9": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_10": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_11": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_12": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_13": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_14": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_15": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_16": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_17": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_18": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_19": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_20": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_21": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_22": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_23": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_24": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_25": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_26": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_27": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_28": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_29": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_30": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    },
+    "layer_31": {
+      "weight_bits": 4,
+      "activation_bits": 16,
+      "zero_point": 0,
+      "scale": 0.0625
+    }
+  }
+}
