@@ -120,3 +120,5 @@ docs/site/
 *.swo
 *~
 .vscode/launch.json.bak
+# Large model files (>100MB)
+experiments/tez-172_qnn-compile/models/*.gguf
