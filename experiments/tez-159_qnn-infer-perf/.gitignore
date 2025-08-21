@@ -1,0 +1,44 @@
+# QNN/SNPE DLL files (SDK components)
+*.dll
+*.pyd
+*.so
+
+# Model artifacts
+*.dlc
+*.onnx
+*.tflite
+*.pb
+models/
+
+# Output directories
+*_output/
+output/
+temp/
+profiling_output/
+
+# Raw data files
+*.raw
+*.bin
+
+# Platform validator outputs
+platformValidator/
+Result.csv
+
+# Input lists
+input_list*.txt
+*_list.txt
+
+# Profiling results (keep JSON for documentation)
+chrome_trace.json
+qhas_summary.json
+*.trace
+*.profile
+
+# Large binary files
+*.exe
+
+# Keep Python scripts and documentation
+!*.py
+!*.md
+!*.json
+!*.html
