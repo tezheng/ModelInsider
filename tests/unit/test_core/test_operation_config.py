@@ -265,7 +265,8 @@ class TestOperationConfig:
         torch_functions = {op[1] for op in torch_ops}
         functional_functions = {op[1] for op in functional_ops}
 
-        # Common operations that exist in both        expected_common = {'relu', 'tanh', 'sigmoid'}  # These exist in both torch and F
+        # Common operations that exist in both
+        expected_common = {'relu', 'tanh', 'sigmoid'}  # These exist in both torch and F
 
         for op in expected_common:
             if op in torch_functions or op in functional_functions:

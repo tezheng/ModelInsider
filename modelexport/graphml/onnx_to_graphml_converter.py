@@ -576,7 +576,16 @@ class ONNXToGraphMLConverter:
         
         class_name = module_data.get("class_name", "")
         traced_tag = module_data.get("traced_tag", "")
-        execution_order = module_data.get("execution_order", 0)
+        execution_order = module_data.get("execution_order", -1)
+        
+        # Skip non-executable modules (those that were never traced)
+        # These are typically parameter holders like nn.Embedding
+        if execution_order == -1:
+            # Still process children in case they have executable modules
+            if "children" in module_data:
+                for _child_name, child_data in module_data["children"].items():
+                    self._create_compound_node(parent_elem, child_data, graph_data)
+            return
         
         # Determine module type
         module_type = "pytorch" if class_name in ["Linear", "LayerNorm", "Embedding", "Dropout"] else "huggingface"

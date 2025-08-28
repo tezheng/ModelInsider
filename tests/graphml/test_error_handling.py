@@ -14,6 +14,7 @@ import contextlib
 import json
 import xml.etree.ElementTree as ET
 
+import onnx
 import pytest
 
 from modelexport.graphml import ONNXToGraphMLConverter
@@ -70,7 +71,8 @@ class TestMalformedInputFiles:
         converter = ONNXToGraphMLConverter(hierarchical=False)
         
         # Should raise an ONNX-related error (don't be too specific about the message)
-        with pytest.raises((onnx.onnx_cpp2py_export.checker.ValidationError, ValueError)):
+        from google.protobuf.message import DecodeError
+        with pytest.raises((onnx.onnx_cpp2py_export.checker.ValidationError, ValueError, DecodeError)):
             converter.convert(malformed_onnx_file)
     
     def test_empty_onnx_file(self, tmp_path):
@@ -110,7 +112,9 @@ class TestMalformedInputFiles:
         with open(metadata_file, 'w') as f:
             f.write("{}")
         
-        # Should not crash, but may not produce hierarchy        graphml_output = converter.convert(simple_onnx_model)
+        # Should not crash, but may not produce hierarchy
+        converter = ONNXToGraphMLConverter(hierarchical=True, htp_metadata_path=str(metadata_file))
+        graphml_output = converter.convert(simple_onnx_model)
         
         # Should still produce valid GraphML
         content, root = get_graphml_content(graphml_output)
@@ -129,6 +133,9 @@ class TestMalformedInputFiles:
         
         # This should fail because tagged_nodes is expected to be a dict
         with pytest.raises(AttributeError):  # tagged_nodes must be a dictionary
+            converter = ONNXToGraphMLConverter(hierarchical=True, htp_metadata_path=str(metadata_file))
+            converter.convert(simple_onnx_model, str(tmp_path / "output"))
+
 
 class TestEdgeCases:
     """Test edge cases and boundary conditions."""
@@ -211,7 +218,9 @@ class TestEdgeCases:
                 }
             }, f)
         
-        # Should handle gracefully without crashing        graphml_output = converter.convert(simple_onnx_model)
+        # Should handle gracefully without crashing
+        converter = ONNXToGraphMLConverter(hierarchical=True, htp_metadata_path=str(metadata_file))
+        graphml_output = converter.convert(simple_onnx_model)
         
         # Should produce valid GraphML
         content, root = get_graphml_content(graphml_output)

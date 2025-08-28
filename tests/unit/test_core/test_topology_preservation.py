@@ -69,8 +69,7 @@ class TestTopologyPreservation:
                 )
         
         assert not mismatches, (
-            "Operation type count mismatches:
-" + "\n".join(mismatches)
+            "Operation type count mismatches:\n" + "\n".join(mismatches)
         )
     
     def test_input_output_structure_identical(self, baseline_model, hierarchy_model):
@@ -131,8 +130,7 @@ class TestTopologyPreservation:
                 )
         
         assert not mismatches, (
-            "Node structure mismatches:
-" + "\n".join(mismatches[:10])  # Show first 10
+            "Node structure mismatches:\n" + "\n".join(mismatches[:10])  # Show first 10
         )
     
     def test_topology_summary(self, baseline_model, hierarchy_model):

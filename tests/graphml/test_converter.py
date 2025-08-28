@@ -60,7 +60,7 @@ class TestONNXToGraphMLConverter:
         output_path = tmp_path / "output.graphml"
 
         # Convert and save
-        converter.convert(simple_onnx_model)
+        graphml_str = converter.convert(simple_onnx_model)
         with open(output_path, "w") as f:
             f.write(graphml_str)
 
