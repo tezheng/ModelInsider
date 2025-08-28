@@ -169,7 +169,7 @@ class TestCLIVersionHandling:
         """Test that version import doesn't fail."""
         from modelexport import __version__
 
-        assert __version__ == "0.1.0"
+        assert __version__ == "0.1.0.dev0"
 
     @pytest.mark.cli
     @pytest.mark.version
