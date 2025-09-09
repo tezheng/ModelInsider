@@ -64,7 +64,8 @@
       "Bash(git log:*)",
       "Bash(diff:*)",
       "Bash(/dev/null)",
-      "Bash(ruff check:*)"
+      "Bash(ruff check:*)",
+      "Bash(true)"
     ],
     "deny": []
   },

@@ -40,7 +40,7 @@
 
 ## Design Goals
 
-### Unified Report Generator Should:
+### Unified Report Generator Should
 1. Single source of truth for all report data
 2. Consistent data structure across all formats
 3. Shared formatting and rendering logic
@@ -48,7 +48,7 @@
 5. No data loss between formats
 6. Extensible for future formats
 
-### Key Principles:
+### Key Principles
 - **Data First**: Collect all data in a unified structure
 - **Format Later**: Apply formatting based on output type
 - **Consistency**: Same data appears consistently across formats

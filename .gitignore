@@ -76,6 +76,7 @@ coverage.xml
 ehthumbs.db
 Thumbs.db
 *~
+*:Zone.Identifier
 
 # Process and log files
 nohup.out
