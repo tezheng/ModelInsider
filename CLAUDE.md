@@ -160,8 +160,8 @@ uv pip install -e .
 
 # CLI Commands (primary interface)
 uv run modelexport export MODEL_NAME OUTPUT.onnx    # Export with hierarchy preservation
-uv run modelexport export MODEL_NAME OUTPUT.onnx --clean-onnx  # Export without hierarchy_tag attributes (cleaner ONNX)
-# Alternative: --no-hierarchy-attrs (same functionality)
+uv run modelexport export MODEL_NAME OUTPUT.onnx                 # Export clean ONNX by default (no hierarchy metadata)
+uv run modelexport export MODEL_NAME OUTPUT.onnx --embed-hierarchy # Export with hierarchy metadata embedded (adds traceability)
 uv run modelexport analyze OUTPUT.onnx              # Analyze hierarchy tags  
 uv run modelexport validate OUTPUT.onnx             # Validate ONNX and tags
 uv run modelexport compare model1.onnx model2.onnx  # Compare tag distributions
@@ -175,7 +175,7 @@ uv run pytest tests/test_tag_propagation.py -v      # Test tag propagation
 
 # Examples
 uv run modelexport export prajjwal1/bert-tiny bert.onnx --input-text "Hello world"
-uv run modelexport export prajjwal1/bert-tiny bert-clean.onnx --clean-onnx  # Clean ONNX without metadata
+uv run modelexport export prajjwal1/bert-tiny bert-clean.onnx  # Clean ONNX by default (no embedded metadata)
 uv run modelexport --verbose analyze bert.onnx --output-format summary
 uv run modelexport validate bert.onnx --check-consistency
 ```

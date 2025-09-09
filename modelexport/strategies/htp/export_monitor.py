@@ -278,13 +278,15 @@ class HTPExportMonitor:
         console.print(f"🔄 Loading model and exporting: [bold magenta]{self.model_name}[/bold magenta]")
         
         # Strategy info
+        console.print(
+            "🎯 Strategy: [bold cyan]HTP[/bold cyan] (Hierarchical Tracing and Projection)"
+        )
         if self.embed_hierarchy:
             console.print(
-                "🎯 Strategy: [bold cyan]HTP[/bold cyan] (Hierarchical Tracing and Projection)"
+                "   Hierarchy Embedding: [bold green]ENABLED[/bold green] (--embed-hierarchy)"
             )
         else:
             console.print(
-                "🎯 Strategy: [bold cyan]HTP[/bold cyan] (Hierarchical Tracing and Projection) - "
-                "[bold red]DISABLED[/bold red] (--clean-onnx)"
+                "   Hierarchy Embedding: [dim]DISABLED[/dim] (clean ONNX by default)"
             )
         console.print("=" * ConsoleWriter.SEPARATOR_LENGTH)

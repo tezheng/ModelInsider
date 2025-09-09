@@ -200,7 +200,7 @@ class TestConsoleWriter:
         output = self.get_plain_output()
 
         assert "STEP 6/6: TAG INJECTION" in output
-        assert "Hierarchy tag injection skipped (--clean-onnx mode)" in output
+        assert "Hierarchy tag injection skipped (clean ONNX by default)" in output
 
     def test_verbose_false(self):
         """Test that non-verbose writer produces no output."""

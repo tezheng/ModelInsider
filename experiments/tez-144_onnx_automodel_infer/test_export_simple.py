@@ -24,8 +24,8 @@ print(f"Current directory: {Path.cwd()}")
 # Test command
 cmd = ["uv", "run", "modelexport", "export",
        "--model", model_name,
-       "--output", str(onnx_path),
-       "--clean-onnx"]
+       "--output", str(onnx_path)]
+       # Clean ONNX is now the default, no flag needed
 
 print(f"\n📤 Running: {' '.join(cmd)}")
 

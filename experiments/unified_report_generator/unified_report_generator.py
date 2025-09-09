@@ -232,7 +232,7 @@ class UnifiedReportGenerator:
                 console.print("🏷️ Hierarchy tag attributes: enabled")
                 console.print("✅ Tags injected into ONNX model successfully")
             else:
-                console.print("🏷️ Hierarchy tag attributes: disabled (--clean-onnx)")
+                console.print("🏷️ Hierarchy tag attributes: disabled (clean ONNX by default)")
                 console.print("⚠️ Tags not injected into ONNX model")
             console.print(f"📄 Updated ONNX file: {self.session.output_path}")
         

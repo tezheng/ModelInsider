@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Test the complete workflow:
-1. Export BERT-tiny with --clean-onnx (no HTP metadata)
+1. Export BERT-tiny with clean ONNX (default, no HTP metadata)
 2. Add config files using AutoConfig
 3. Test with Optimum ORTModel
 """
@@ -21,7 +21,7 @@ def export_clean_onnx(model_id: str, output_path: Path):
         "uv", "run", "modelexport", "export",
         "--model", model_id,
         "--output", str(output_path),
-        "--clean-onnx"  # This removes HTP metadata
+        # Clean ONNX is now the default, no flag needed
     ]
     
     print(f"🔧 Exporting clean ONNX: {' '.join(cmd[-4:])}")
@@ -193,7 +193,7 @@ if __name__ == "__main__":
     success = test_complete_workflow()
     if success:
         print(f"\n🚀 PRODUCTION READY:")
-        print(f"   1. Use --clean-onnx for Optimum compatibility")
+        print(f"   1. Clean ONNX is now default for Optimum compatibility")
         print(f"   2. Add configs with AutoConfig.from_pretrained()")
         print(f"   3. Result works perfectly with Optimum")
         print(f"\n📝 Implementation:")

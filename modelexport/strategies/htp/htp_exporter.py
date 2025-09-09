@@ -100,8 +100,8 @@ class HTPExporter:
         Args:
             verbose: Enable verbose console output (8-step format)
             enable_reporting: Enable report file generation
-            embed_hierarchy_attributes: Whether to embed hierarchy_tag attributes in ONNX
-                                       (disabled by --clean-onnx or --no-hierarchy-attrs)
+            embed_hierarchy_attributes: Whether to embed hierarchy metadata in ONNX
+                                       (enabled only when --embed-hierarchy is used, disabled by default)
             torch_module: Include torch.nn modules in hierarchy for proper operation
                          attribution (e.g., ResNet).
                          Can be:

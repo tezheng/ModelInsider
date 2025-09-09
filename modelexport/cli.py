@@ -42,12 +42,12 @@ def cli(ctx, verbose):
 @click.option('--export-config', type=click.Path(exists=True),
               help='ONNX export configuration file (JSON) - opset_version, do_constant_folding, etc.')
 @click.option('--with-report', is_flag=True, help='Enable detailed HTP export reporting')
-@click.option('--no-hierarchy-attrs', '--clean-onnx', is_flag=True, help='Disable hierarchy_tag attributes in ONNX nodes (cleaner but loses traceability)')
+@click.option('--embed-hierarchy', is_flag=True, help='Embed hierarchy metadata in ONNX nodes (adds traceability but increases file size)')
 @click.option('--torch-module', is_flag=True, help='Include torch.nn modules in hierarchy (e.g., LayerNorm, Embedding for models like ResNet)')
 @click.option('--with-graphml', '--graphml', is_flag=True, help='Export hierarchical GraphML v1.3 alongside ONNX (Schema-driven with validation, creates model_hierarchical_graph.graphml + .onnxdata)')
 @click.option('--verbose', '-v', is_flag=True, help='Enable verbose output')
 @click.pass_context
-def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_config, with_report, no_hierarchy_attrs, torch_module, with_graphml, verbose):
+def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_config, with_report, embed_hierarchy, torch_module, with_graphml, verbose):
     """
     Export a PyTorch model to ONNX with hierarchy preservation.
     
@@ -69,7 +69,7 @@ def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_c
     When --with-graphml is used:
     - Creates model_hierarchical_graph.graphml (hierarchical visualization)
     - Creates model_hierarchical_graph.onnxdata (parameter storage)
-    - Supports bidirectional conversion (GraphML → ONNX)
+    - Supports bidirectional conversion (GraphML to ONNX)
     - Includes schema validation (XSD) and three-layer validation system
     """
     try:
@@ -79,7 +79,7 @@ def export(ctx, model_name_or_path, output_path, strategy, input_specs, export_c
         exporter = HTPExporter(
             verbose=verbose, 
             enable_reporting=with_report,
-            embed_hierarchy_attributes=not no_hierarchy_attrs,
+            embed_hierarchy_attributes=embed_hierarchy,  # Now defaults to False (clean ONNX), True only when --embed-hierarchy is used
             torch_module=torch_module
         )
         

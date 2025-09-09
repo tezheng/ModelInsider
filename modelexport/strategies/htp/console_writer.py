@@ -252,7 +252,7 @@ class ConsoleWriter(StepAwareWriter):
             self.console.print("🏷️ Injecting hierarchy tags into ONNX model...")
             self.console.print("✅ Tags successfully embedded as node attributes")
         else:
-            self.console.print("⚠️ Hierarchy tag injection skipped (--clean-onnx mode)")
+            self.console.print("ℹ️ Hierarchy tag injection skipped (clean ONNX by default)")
         
         self.console.print(f"💾 Model saved to: {self._bright_magenta(data.output_path)}")
         
