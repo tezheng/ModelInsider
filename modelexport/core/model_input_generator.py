@@ -371,7 +371,20 @@ def generate_dummy_inputs_from_model_path(
 
     shapes = DEFAULT_DUMMY_SHAPES.copy()
     
-    # Update shapes with user-provided values
+    # Import the hacky optimization function
+    # FIXME: This import uses a temporary hacky module that violates universal design principles
+    # TODO: Refactor to remove hardcoded model type lists and implement proper feature detection
+    from .input_shape_optimizer_hack import optimize_input_shapes_for_model_hack
+
+    # Apply intelligent shape optimization before user overrides
+    shapes = optimize_input_shapes_for_model_hack(
+        shapes=shapes,
+        model_name_or_path=model_name_or_path,
+        export_config=export_config,
+        task=task
+    )
+    
+    # Update shapes with user-provided values (user values take precedence)
     shapes.update(shape_kwargs)
 
     # Apply model-specific patches if needed
